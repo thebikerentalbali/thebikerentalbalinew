@@ -3,7 +3,7 @@ import Link from "next/link"
 
 export default function AdminDashboard() {
   return (
-    <div className="min-h-screen bg-[#F5F7FA] md:flex pb-20 md:pb-0">
+    <div className="min-h-screen bg-[#F5F7FA] md:flex pb-28 md:pb-0">
       {/* 
         ========================================================================
         DESKTOP SIDEBAR
@@ -260,8 +260,8 @@ export default function AdminDashboard() {
         MOBILE BOTTOM NAVBAR
         ========================================================================
       */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 pb-safe z-50 rounded-t-[32px] shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
-        <div className="flex justify-around items-center h-20 px-4">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-50 rounded-t-[32px] shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+        <div className="flex justify-around items-center pt-3 pb-8 px-4">
           <Link href="/admindashboard" className="flex flex-col items-center gap-1.5 p-2 text-blue-600 transition-colors w-16">
             <div className="bg-blue-50 p-1.5 rounded-full">
               <Home className="w-6 h-6" />
