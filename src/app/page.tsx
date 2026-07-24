@@ -1,65 +1,252 @@
-import Image from "next/image";
+"use client"
+
+import { useState } from "react"
+import { Bell, Search, SlidersHorizontal, Star, Bike, MapPin, ChevronDown, Menu, X } from "lucide-react"
+import Link from "next/link"
+
+const topVendors = [
+  { id: 1, name: "Putu Rentals", rating: 4.9, location: "Jl. Raya Ubud", initials: "PR" },
+  { id: 2, name: "Wayan Bikes", rating: 4.8, location: "Batu Bolong", initials: "WB" },
+  { id: 3, name: "Made Scooter", rating: 4.7, location: "Legian St", initials: "MS" },
+  { id: 4, name: "Nyoman Rides", rating: 4.9, location: "Seminyak", initials: "NR" },
+]
+
+const brands = [
+  { name: "Honda", icon: Bike },
+  { name: "Vespa", icon: Bike },
+  { name: "Yamaha", icon: Bike },
+  { name: "Suzuki", icon: Bike },
+]
+
+const popularScooters = [
+  { id: 1, name: "Vespa Primavera", price: "350,000", rating: 4.9, img: "/images/scooter.png" },
+  { id: 2, name: "Yamaha NMAX", price: "200,000", rating: 4.8, img: "/images/scooter.png" },
+  { id: 3, name: "Honda PCX", price: "200,000", rating: 4.7, img: "/images/scooter.png" },
+]
+
+const recommendedScooters = [
+  { id: 4, name: "Honda Scoopy", price: "150,000", rating: 4.8, img: "/images/scooter.png" },
+  { id: 5, name: "Vespa Sprint", price: "350,000", rating: 4.9, img: "/images/scooter.png" },
+  { id: 6, name: "Yamaha Lexi", price: "150,000", rating: 4.6, img: "/images/scooter.png" },
+  { id: 7, name: "Honda Vario", price: "120,000", rating: 4.5, img: "/images/scooter.png" },
+]
 
 export default function Home() {
+  const [activeBrand, setActiveBrand] = useState("")
+  const [durationFilter, setDurationFilter] = useState("Daily")
+  const [isNavOpen, setIsNavOpen] = useState(false)
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="flex flex-col min-h-screen bg-[#F0F2F5] px-6 pb-24 md:px-12 md:pb-32">
+      {/* Floating Navbar (Apple Glass) - Always Visible */}
+      <div className="fixed top-4 left-4 right-4 md:left-12 md:right-12 z-50 pointer-events-none">
+        <div className="w-full max-w-7xl mx-auto relative pointer-events-auto">
+          <div className="bg-white/70 backdrop-blur-xl border border-white/50 shadow-sm rounded-3xl p-3 px-4 flex justify-between items-center transition-all duration-300">
+            {/* Location Selector (Street level) */}
+            <button className="flex items-center gap-2.5 text-left hover:bg-black/5 p-1.5 pr-3 rounded-full transition-colors">
+              <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center shrink-0">
+                <MapPin className="w-4 h-4 text-white" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Location</span>
+                <div className="flex items-center gap-1">
+                  <span className="text-[13px] font-bold text-gray-900 leading-tight">Ubud Main Street</span>
+                  <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
+                </div>
+              </div>
+            </button>
+            
+            <button 
+              onClick={() => setIsNavOpen(!isNavOpen)}
+              className="w-10 h-10 rounded-full bg-white/80 border border-gray-100 flex items-center justify-center text-gray-800 hover:bg-white transition-colors shadow-sm"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+              {isNavOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
+
+          {/* Dropdown Menu */}
+          {isNavOpen && (
+            <div className="absolute top-[80px] left-0 right-0 bg-white/90 backdrop-blur-xl border border-white/50 shadow-lg rounded-3xl p-5 flex flex-col gap-4 animate-in slide-in-from-top-4 fade-in">
+              <Link href="/about" className="text-[16px] font-semibold text-gray-800 p-2 hover:text-black transition-colors">About Us</Link>
+              <div className="h-[1px] bg-gray-100"></div>
+              <Link href="/admin/login" className="text-[16px] font-semibold text-gray-800 p-2 hover:text-black transition-colors">Vendor Dashboard (Sign In / Sign Up)</Link>
+            </div>
+          )}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+      </div>
+
+      <div className="w-full max-w-7xl mx-auto mt-28 md:mt-32">
+        {/* Header - Back to normal on mobile, without "Hi welcome" */}
+        <header className="flex justify-between items-start mb-8 md:mb-12">
+          <div>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-medium leading-[1.1] text-gray-900 tracking-tight">
+              Find Your <br className="md:hidden" /> Perfect Ride
+            </h1>
+          </div>
+          <button className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 shrink-0">
+            <Bell className="w-5 h-5 text-gray-800" />
+          </button>
+        </header>
+
+        {/* Search and Filter */}
+        <div className="flex gap-3 mb-8 md:mb-12 md:max-w-2xl md:mx-auto">
+          <div className="relative flex-1">
+            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search nearby rentals..."
+              className="w-full pl-12 pr-4 h-14 md:h-16 bg-white border-none rounded-full focus:ring-0 outline-none text-[15px] md:text-[16px] placeholder:text-gray-400 text-gray-800 shadow-sm"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </div>
+          <button className="w-14 h-14 md:w-16 md:h-16 bg-white rounded-full flex items-center justify-center shadow-sm shrink-0 border border-gray-100 transition-transform hover:scale-105">
+            <SlidersHorizontal className="w-5 h-5 md:w-6 md:h-6 text-gray-800" />
+          </button>
         </div>
-      </main>
+
+        {/* Top Vendors (Story Layout) */}
+        <div className="mb-10 md:mb-12">
+          <div className="flex justify-between items-end mb-4 md:mb-6">
+            <h2 className="text-xl md:text-2xl font-bold text-gray-900">Nearby Vendors</h2>
+            <button className="text-sm md:text-base text-gray-500 font-medium hover:text-black transition-colors">See All</button>
+          </div>
+          <div className="flex gap-4 md:gap-8 overflow-x-auto md:overflow-visible pb-2 scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0">
+            {topVendors.map((vendor) => (
+              <Link key={vendor.id} href={`/vendor/${vendor.id}`} className="flex flex-col items-center gap-2 md:gap-3 min-w-[80px] md:min-w-[100px] transition-transform hover:scale-105">
+                {/* Instagram-style Ring */}
+                <div className="p-[2px] md:p-[3px] rounded-full bg-gradient-to-tr from-yellow-400 to-orange-500">
+                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white p-[2px] md:p-[3px]">
+                    <div className="w-full h-full rounded-full bg-gray-100 flex items-center justify-center border border-gray-200 overflow-hidden">
+                      <span className="text-lg md:text-xl font-bold text-gray-600">{vendor.initials}</span>
+                    </div>
+                  </div>
+                </div>
+                {/* Details */}
+                <div className="text-center flex flex-col items-center">
+                  <h3 className="font-semibold text-gray-900 text-[13px] md:text-[15px] leading-tight truncate w-[85px] md:w-[100px]">{vendor.name}</h3>
+                  <div className="flex items-center gap-0.5 md:gap-1 text-[11px] md:text-[13px] text-gray-500 mt-0.5 md:mt-1">
+                    <Star className="w-3 h-3 md:w-3.5 md:h-3.5 fill-yellow-400 text-yellow-400" />
+                    <span className="font-semibold text-gray-700">{vendor.rating}</span>
+                  </div>
+                  <div className="flex items-center gap-0.5 md:gap-1 text-[10px] md:text-[12px] text-gray-400 mt-0.5 md:mt-1">
+                    <MapPin className="w-3 h-3 md:w-3.5 md:h-3.5" />
+                    <span className="truncate max-w-[80px] md:max-w-[100px]">{vendor.location}</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Filter and Brands */}
+        <div className="mb-10 md:mb-12">
+          <div className="flex justify-between items-end mb-4 md:mb-6">
+            <h2 className="text-xl md:text-2xl font-bold text-gray-900">Brand</h2>
+            <button className="text-sm md:text-base text-gray-500 font-medium hover:text-black transition-colors">See All</button>
+          </div>
+          <div className="flex gap-3 overflow-x-auto md:flex-wrap md:justify-center md:overflow-visible pb-2 scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0 items-center">
+            
+            {/* Duration Dropdown replaces "All Scooter" */}
+            <div className="relative shrink-0">
+              <select 
+                value={durationFilter}
+                onChange={(e) => setDurationFilter(e.target.value)}
+                className="appearance-none bg-black text-white pl-5 pr-10 h-12 md:h-14 md:text-[16px] rounded-full font-medium text-[15px] outline-none border-none shadow-sm flex items-center cursor-pointer focus:ring-0 transition-transform hover:scale-105"
+              >
+                <option value="Daily">Daily</option>
+                <option value="Weekly">Weekly</option>
+                <option value="Monthly">Monthly</option>
+              </select>
+              <ChevronDown className="w-4 h-4 text-white absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+
+            {/* Brand Chips */}
+            {brands.map((brand) => {
+              const isActive = activeBrand === brand.name
+              return (
+                <button
+                  key={brand.name}
+                  onClick={() => setActiveBrand(isActive ? "" : brand.name)}
+                  className={`flex items-center gap-2 px-5 h-12 md:h-14 md:px-6 rounded-full whitespace-nowrap transition-all shadow-sm hover:scale-105 ${
+                    isActive ? "bg-black text-white" : "bg-white text-gray-800 border border-gray-100"
+                  }`}
+                >
+                  <div className={`w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center ${isActive ? 'bg-white/20' : 'bg-gray-100'}`}>
+                    <brand.icon className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                  </div>
+                  <span className="font-medium text-[15px] md:text-[16px]">{brand.name}</span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Popular Scrolling Cards / Grid on Desktop */}
+        <div className="mb-10 md:mb-12">
+          <div className="flex justify-between items-end mb-4 md:mb-6">
+            <h2 className="text-xl md:text-2xl font-bold text-gray-900">Popular Options</h2>
+            <button className="text-sm md:text-base text-gray-500 font-medium hover:text-black transition-colors">See All</button>
+          </div>
+          
+          <div className="flex gap-4 md:gap-6 overflow-x-auto md:grid md:grid-cols-2 lg:grid-cols-3 md:overflow-visible pb-4 scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0 snap-x snap-mandatory md:snap-none">
+            {popularScooters.map(scooter => (
+              <Link key={scooter.id} href={`/detail/${scooter.id}`} className="min-w-full md:min-w-0 sm:min-w-[340px] shrink-0 block relative bg-white rounded-[32px] md:rounded-[40px] p-4 md:p-5 shadow-sm border border-gray-50 snap-center md:snap-align-none transition-transform hover:-translate-y-1 hover:shadow-md">
+                {/* Rating */}
+                <div className="absolute top-6 left-6 md:top-8 md:left-8 bg-white/90 backdrop-blur-sm px-3 md:px-4 py-1.5 md:py-2 rounded-full flex items-center gap-1.5 z-10 shadow-sm">
+                  <Star className="w-3.5 h-3.5 md:w-4 md:h-4 fill-black text-black" />
+                  <span className="text-sm md:text-base font-bold">{scooter.rating}</span>
+                </div>
+
+                {/* Image */}
+                <div className="relative w-full h-48 md:h-56 mb-4 md:mb-5 rounded-2xl md:rounded-3xl overflow-hidden bg-[#F8F9FA] flex items-center justify-center">
+                   <div 
+                     className="w-[90%] h-[90%] bg-contain bg-center bg-no-repeat"
+                     style={{ backgroundImage: `url("${scooter.img}")` }}
+                   />
+                </div>
+
+                {/* Info */}
+                <div className="flex items-end justify-between px-2 pb-2">
+                  <div>
+                    <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">{scooter.name}</h3>
+                    <p className="text-gray-500 text-sm md:text-base">
+                      <span className="font-extrabold text-gray-900 text-[16px] md:text-[18px]">Rp {scooter.price}</span> /{durationFilter}
+                    </p>
+                  </div>
+                  <button className="bg-black text-white px-5 md:px-6 py-2.5 md:py-3 rounded-full text-sm md:text-base font-semibold hover:bg-gray-800 transition-colors">
+                    Book Now
+                  </button>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* More Listings (Grid) */}
+        <div>
+          <div className="flex justify-between items-end mb-4 md:mb-6">
+            <h2 className="text-xl md:text-2xl font-bold text-gray-900">More Listings</h2>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            {recommendedScooters.map(scooter => (
+              <Link key={scooter.id} href={`/detail/${scooter.id}`} className="bg-white rounded-[24px] md:rounded-[32px] p-3 md:p-4 shadow-sm border border-gray-50 flex flex-col group transition-all hover:scale-[1.02] hover:shadow-md">
+                <div className="relative w-full aspect-square mb-3 md:mb-4 rounded-2xl bg-[#F8F9FA] flex items-center justify-center p-3 md:p-5">
+                  <div className="absolute top-2 right-2 md:top-3 md:right-3 bg-white/90 backdrop-blur-sm px-2 py-1 md:px-3 md:py-1.5 rounded-full flex items-center gap-1 z-10 shadow-sm">
+                    <Star className="w-3 h-3 md:w-3.5 md:h-3.5 fill-black text-black" />
+                    <span className="text-[11px] md:text-[13px] font-bold">{scooter.rating}</span>
+                  </div>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={scooter.img} alt={scooter.name} className="w-full h-full object-contain drop-shadow-md transition-transform group-hover:scale-110" />
+                </div>
+                <h3 className="font-bold text-gray-900 text-[14px] md:text-[16px] leading-tight mb-1.5 px-1">{scooter.name}</h3>
+                <p className="text-gray-900 text-[13px] md:text-[15px] font-extrabold mt-auto px-1">Rp {scooter.price} <span className="font-medium text-[11px] md:text-[13px] text-gray-500">/day</span></p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
-  );
+  )
 }
