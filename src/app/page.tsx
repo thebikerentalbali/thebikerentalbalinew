@@ -77,16 +77,8 @@ export default function Home() {
               <div className="flex flex-col gap-2">
                 <span className="text-[12px] font-bold text-gray-400 uppercase tracking-wider px-2">Partners</span>
                 <Link href="/vendor-dashboard" className="text-[16px] font-semibold text-gray-800 px-2 py-1 hover:text-black transition-colors flex justify-between items-center group">
-                  Vendor Dashboard
+                  Partner Portal
                   <span className="text-[11px] font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md">Sign In / Sign Up</span>
-                </Link>
-              </div>
-
-              <div className="flex flex-col gap-2 mt-1">
-                <span className="text-[12px] font-bold text-gray-400 uppercase tracking-wider px-2">Internal</span>
-                <Link href="/admin-dashboard" className="text-[16px] font-semibold text-gray-800 px-2 py-1 hover:text-black transition-colors flex justify-between items-center group">
-                  Admin Dashboard
-                  <span className="text-[11px] font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md">Login</span>
                 </Link>
               </div>
             </div>
