@@ -66,10 +66,29 @@ export default function Home() {
 
           {/* Dropdown Menu */}
           {isNavOpen && (
-            <div className="absolute top-[80px] left-0 right-0 bg-white/90 backdrop-blur-xl border border-white/50 shadow-lg rounded-3xl p-5 flex flex-col gap-4 animate-in slide-in-from-top-4 fade-in">
-              <Link href="/about" className="text-[16px] font-semibold text-gray-800 p-2 hover:text-black transition-colors">About Us</Link>
-              <div className="h-[1px] bg-gray-100"></div>
-              <Link href="/admin/login" className="text-[16px] font-semibold text-gray-800 p-2 hover:text-black transition-colors">Vendor Dashboard (Sign In / Sign Up)</Link>
+            <div className="absolute top-[80px] left-0 right-0 bg-white/95 backdrop-blur-2xl border border-white/60 shadow-xl rounded-3xl p-6 flex flex-col gap-4 animate-in slide-in-from-top-4 fade-in">
+              <Link href="/about" className="text-[16px] font-semibold text-gray-800 px-2 py-1 hover:text-black transition-colors">About Us</Link>
+              <Link href="/how-it-works" className="text-[16px] font-semibold text-gray-800 px-2 py-1 hover:text-black transition-colors">How it Works</Link>
+              <Link href="/faq" className="text-[16px] font-semibold text-gray-800 px-2 py-1 hover:text-black transition-colors">FAQ</Link>
+              <Link href="/contact" className="text-[16px] font-semibold text-gray-800 px-2 py-1 hover:text-black transition-colors">Contact Support</Link>
+              
+              <div className="h-[1px] bg-gray-200 my-1"></div>
+              
+              <div className="flex flex-col gap-2">
+                <span className="text-[12px] font-bold text-gray-400 uppercase tracking-wider px-2">Partners</span>
+                <Link href="/vendor-dashboard" className="text-[16px] font-semibold text-gray-800 px-2 py-1 hover:text-black transition-colors flex justify-between items-center group">
+                  Vendor Dashboard
+                  <span className="text-[11px] font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md">Sign In / Sign Up</span>
+                </Link>
+              </div>
+
+              <div className="flex flex-col gap-2 mt-1">
+                <span className="text-[12px] font-bold text-gray-400 uppercase tracking-wider px-2">Internal</span>
+                <Link href="/admin-dashboard" className="text-[16px] font-semibold text-gray-800 px-2 py-1 hover:text-black transition-colors flex justify-between items-center group">
+                  Admin Dashboard
+                  <span className="text-[11px] font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md">Login</span>
+                </Link>
+              </div>
             </div>
           )}
         </div>
