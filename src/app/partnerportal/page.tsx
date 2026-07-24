@@ -18,7 +18,7 @@ export default function VendorDashboard() {
         </div>
         
         <nav className="flex-1 px-4 py-2 space-y-2">
-          <Link href="/vendor-dashboard" className="flex items-center gap-3 bg-black text-white px-4 py-3.5 rounded-2xl transition-colors shadow-md shadow-black/10">
+          <Link href="/partnerportal" className="flex items-center gap-3 bg-black text-white px-4 py-3.5 rounded-2xl transition-colors shadow-md shadow-black/10">
             <Home className="w-5 h-5" />
             <span className="font-bold text-[15px]">Dashboard</span>
           </Link>
@@ -82,10 +82,10 @@ export default function VendorDashboard() {
               <Search className="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
               <input type="text" placeholder="Search bookings, scooters..." className="pl-11 pr-4 py-2.5 bg-white rounded-full text-sm font-medium outline-none w-72 shadow-sm border border-gray-100 focus:border-gray-300 focus:ring-4 focus:ring-gray-50 transition-all" />
             </div>
-            <button className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full border border-gray-100 flex items-center justify-center shadow-sm relative hover:bg-gray-50 transition-colors">
+            <Link href="#" className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full border border-gray-100 flex items-center justify-center shadow-sm relative hover:bg-gray-50 transition-colors">
               <span className="absolute top-2.5 right-2.5 md:top-3 md:right-3 w-2 h-2 md:w-2.5 md:h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
               <Bell className="w-5 h-5 text-gray-700" />
-            </button>
+            </Link>
           </div>
         </header>
 
@@ -94,18 +94,18 @@ export default function VendorDashboard() {
           
           {/* Quick Actions (App-like) */}
           <div className="grid grid-cols-2 gap-3 md:hidden">
-            <button className="bg-black text-white p-4 rounded-[20px] flex flex-col items-center justify-center gap-2 shadow-lg shadow-black/20 active:scale-95 transition-transform">
+            <Link href="#" className="bg-black text-white p-4 rounded-[20px] flex flex-col items-center justify-center gap-2 shadow-lg shadow-black/20 active:scale-95 transition-transform">
               <div className="bg-white/20 p-2 rounded-full">
                 <Plus className="w-5 h-5" />
               </div>
               <span className="font-bold text-[13px]">Add Scooter</span>
-            </button>
-            <button className="bg-white text-gray-900 p-4 rounded-[20px] border border-gray-100 flex flex-col items-center justify-center gap-2 shadow-sm active:scale-95 transition-transform">
+            </Link>
+            <Link href="#" className="bg-white text-gray-900 p-4 rounded-[20px] border border-gray-100 flex flex-col items-center justify-center gap-2 shadow-sm active:scale-95 transition-transform">
               <div className="bg-gray-100 p-2 rounded-full">
                 <QrCode className="w-5 h-5" />
               </div>
               <span className="font-bold text-[13px]">Scan QR</span>
-            </button>
+            </Link>
           </div>
 
           {/* Stats Row */}
@@ -165,9 +165,9 @@ export default function VendorDashboard() {
             <div className="bg-white rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm overflow-hidden lg:col-span-2 flex flex-col">
               <div className="p-5 md:p-6 border-b border-gray-50 flex justify-between items-center">
                 <h3 className="text-lg md:text-xl font-bold text-gray-900">Recent Bookings</h3>
-                <button className="text-[13px] md:text-sm font-bold text-gray-500 hover:text-black transition-colors flex items-center gap-1">
+                <Link href="#" className="text-[13px] md:text-sm font-bold text-gray-500 hover:text-black transition-colors flex items-center gap-1">
                   View All <ChevronRight className="w-4 h-4" />
-                </button>
+                </Link>
               </div>
               
               <div className="p-2 md:p-4 flex-1">
@@ -240,20 +240,20 @@ export default function VendorDashboard() {
               </div>
 
               <div className="relative z-10 mt-6 space-y-3">
-                <button className="w-full bg-white text-black p-4 rounded-2xl flex items-center justify-between font-bold text-[14px] hover:bg-gray-100 transition-colors">
+                <Link href="#" className="w-full bg-white text-black p-4 rounded-2xl flex items-center justify-between font-bold text-[14px] hover:bg-gray-100 transition-colors">
                   <div className="flex items-center gap-3">
                     <span className="w-2 h-2 rounded-full bg-red-500"></span>
                     Accept 1 Pending Booking
                   </div>
                   <ChevronRight className="w-4 h-4 text-gray-400" />
-                </button>
-                <button className="w-full bg-white/10 text-white p-4 rounded-2xl flex items-center justify-between font-bold text-[14px] hover:bg-white/20 transition-colors border border-white/5">
+                </Link>
+                <Link href="#" className="w-full bg-white/10 text-white p-4 rounded-2xl flex items-center justify-between font-bold text-[14px] hover:bg-white/20 transition-colors border border-white/5">
                   <div className="flex items-center gap-3">
                     <span className="w-2 h-2 rounded-full bg-yellow-500"></span>
                     Service Due (2 Bikes)
                   </div>
                   <ChevronRight className="w-4 h-4 text-white/50" />
-                </button>
+                </Link>
               </div>
             </div>
           </div>
@@ -268,34 +268,34 @@ export default function VendorDashboard() {
       */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 pb-safe z-50 rounded-t-[32px] shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
         <div className="flex justify-around items-center h-20 px-4">
-          <button className="flex flex-col items-center gap-1.5 p-2 text-black transition-colors w-16">
+          <Link href="/partnerportal" className="flex flex-col items-center gap-1.5 p-2 text-black transition-colors w-16">
             <div className="bg-black/5 p-1.5 rounded-full">
               <Home className="w-6 h-6" />
             </div>
             <span className="text-[10px] font-bold">Home</span>
-          </button>
+          </Link>
           
-          <button className="flex flex-col items-center gap-1.5 p-2 text-gray-400 hover:text-black transition-colors w-16 group">
+          <Link href="#" className="flex flex-col items-center gap-1.5 p-2 text-gray-400 hover:text-black transition-colors w-16 group">
             <div className="group-hover:bg-black/5 p-1.5 rounded-full transition-colors">
               <Bike className="w-6 h-6" />
             </div>
             <span className="text-[10px] font-bold">Fleet</span>
-          </button>
+          </Link>
           
-          <button className="flex flex-col items-center gap-1.5 p-2 text-gray-400 hover:text-black transition-colors w-16 group relative">
+          <Link href="#" className="flex flex-col items-center gap-1.5 p-2 text-gray-400 hover:text-black transition-colors w-16 group relative">
             <div className="group-hover:bg-black/5 p-1.5 rounded-full transition-colors relative">
               <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
               <CalendarDays className="w-6 h-6" />
             </div>
             <span className="text-[10px] font-bold">Bookings</span>
-          </button>
+          </Link>
           
-          <button className="flex flex-col items-center gap-1.5 p-2 text-gray-400 hover:text-black transition-colors w-16 group">
+          <Link href="#" className="flex flex-col items-center gap-1.5 p-2 text-gray-400 hover:text-black transition-colors w-16 group">
             <div className="group-hover:bg-black/5 p-1.5 rounded-full transition-colors">
               <User className="w-6 h-6" />
             </div>
             <span className="text-[10px] font-bold">Profile</span>
-          </button>
+          </Link>
         </div>
       </nav>
     </div>
