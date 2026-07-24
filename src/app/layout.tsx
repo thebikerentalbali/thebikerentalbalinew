@@ -29,7 +29,7 @@ export default function RootLayout({
       className={`${inter.variable} ${poppins.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <main className="flex-1 max-w-md mx-auto w-full min-h-screen relative shadow-2xl bg-[#F0F2F5] sm:border-x sm:border-gray-200">
+        <main className="flex-1 w-full min-h-screen relative bg-[#F0F2F5]">
           {children}
         </main>
       </body>
