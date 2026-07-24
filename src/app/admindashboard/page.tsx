@@ -1,7 +1,11 @@
+"use client"
+
+import { useState } from "react"
 import { Users, Bike, DollarSign, Settings, Bell, Search, Store, BarChart3, Home, ChevronRight, TrendingUp } from "lucide-react"
 import Link from "next/link"
 
 export default function AdminDashboard() {
+  const [activeTab, setActiveTab] = useState("home")
   return (
     <div className="min-h-screen bg-[#F5F7FA] md:flex pb-28 md:pb-0">
       {/* 
@@ -18,27 +22,27 @@ export default function AdminDashboard() {
         </div>
         
         <nav className="flex-1 px-4 py-2 space-y-2">
-          <Link href="/admindashboard" className="flex items-center gap-3 bg-white/10 text-white px-4 py-3.5 rounded-2xl transition-colors shadow-sm shadow-white/5">
+          <button onClick={() => setActiveTab('home')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors ${activeTab === 'home' ? 'bg-white/10 text-white shadow-sm shadow-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
             <BarChart3 className="w-5 h-5" />
             <span className="font-bold text-[15px]">Overview</span>
-          </Link>
-          <Link href="#" className="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-white/5 px-4 py-3.5 rounded-2xl transition-colors">
+          </button>
+          <button onClick={() => setActiveTab('vendors')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors ${activeTab === 'vendors' ? 'bg-white/10 text-white shadow-sm shadow-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
             <Store className="w-5 h-5" />
             <span className="font-semibold text-[15px]">Vendors</span>
-          </Link>
-          <Link href="#" className="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-white/5 px-4 py-3.5 rounded-2xl transition-colors relative">
+          </button>
+          <button onClick={() => setActiveTab('users')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors relative ${activeTab === 'users' ? 'bg-white/10 text-white shadow-sm shadow-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
             <Users className="w-5 h-5" />
             <span className="font-semibold text-[15px]">Users</span>
             <span className="absolute right-4 bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">New</span>
-          </Link>
-          <Link href="#" className="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-white/5 px-4 py-3.5 rounded-2xl transition-colors">
+          </button>
+          <button onClick={() => setActiveTab('revenue')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors ${activeTab === 'revenue' ? 'bg-white/10 text-white shadow-sm shadow-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
             <DollarSign className="w-5 h-5" />
             <span className="font-semibold text-[15px]">Revenue</span>
-          </Link>
-          <Link href="#" className="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-white/5 px-4 py-3.5 rounded-2xl transition-colors">
+          </button>
+          <button onClick={() => setActiveTab('settings')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors ${activeTab === 'settings' ? 'bg-white/10 text-white shadow-sm shadow-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
             <Settings className="w-5 h-5" />
             <span className="font-semibold text-[15px]">Platform Settings</span>
-          </Link>
+          </button>
         </nav>
 
         <div className="p-6 border-t border-gray-800">
@@ -90,6 +94,7 @@ export default function AdminDashboard() {
         </header>
 
         {/* Dashboard Content */}
+        {activeTab === 'home' ? (
         <div className="p-5 md:px-8 md:pb-12 space-y-6 md:space-y-8">
 
           {/* Stats Row */}
@@ -253,6 +258,18 @@ export default function AdminDashboard() {
           </div>
 
         </div>
+        ) : (
+          <div className="p-5 md:px-8 md:pb-12 flex flex-col items-center justify-center flex-1 min-h-[50vh] text-center animate-in fade-in slide-in-from-bottom-4">
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+              {activeTab === 'vendors' && <Store className="w-10 h-10 text-gray-400" />}
+              {activeTab === 'users' && <Users className="w-10 h-10 text-gray-400" />}
+              {activeTab === 'revenue' && <DollarSign className="w-10 h-10 text-gray-400" />}
+              {activeTab === 'settings' && <Settings className="w-10 h-10 text-gray-400" />}
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2 capitalize">{activeTab} Management</h2>
+            <p className="text-gray-500 max-w-sm">This section is currently under development. Check back soon for updates!</p>
+          </div>
+        )}
       </main>
 
       {/* 
@@ -262,34 +279,34 @@ export default function AdminDashboard() {
       */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-50 rounded-t-[32px] shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
         <div className="flex justify-around items-center pt-3 pb-8 px-4">
-          <Link href="/admindashboard" className="flex flex-col items-center gap-1.5 p-2 text-blue-600 transition-colors w-16">
-            <div className="bg-blue-50 p-1.5 rounded-full">
+          <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group ${activeTab === 'home' ? 'text-blue-600' : 'text-gray-400 hover:text-black'}`}>
+            <div className={`${activeTab === 'home' ? 'bg-blue-50' : 'group-hover:bg-gray-50'} p-1.5 rounded-full transition-colors`}>
               <Home className="w-6 h-6" />
             </div>
             <span className="text-[10px] font-bold">Home</span>
-          </Link>
+          </button>
           
-          <Link href="#" className="flex flex-col items-center gap-1.5 p-2 text-gray-400 hover:text-black transition-colors w-16 group">
-            <div className="group-hover:bg-gray-50 p-1.5 rounded-full transition-colors">
+          <button onClick={() => setActiveTab('vendors')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group ${activeTab === 'vendors' ? 'text-blue-600' : 'text-gray-400 hover:text-black'}`}>
+            <div className={`${activeTab === 'vendors' ? 'bg-blue-50' : 'group-hover:bg-gray-50'} p-1.5 rounded-full transition-colors`}>
               <Store className="w-6 h-6" />
             </div>
             <span className="text-[10px] font-bold">Vendors</span>
-          </Link>
+          </button>
           
-          <Link href="#" className="flex flex-col items-center gap-1.5 p-2 text-gray-400 hover:text-black transition-colors w-16 group relative">
-            <div className="group-hover:bg-gray-50 p-1.5 rounded-full transition-colors relative">
+          <button onClick={() => setActiveTab('users')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group relative ${activeTab === 'users' ? 'text-blue-600' : 'text-gray-400 hover:text-black'}`}>
+            <div className={`${activeTab === 'users' ? 'bg-blue-50' : 'group-hover:bg-gray-50'} p-1.5 rounded-full transition-colors relative`}>
               <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-white"></span>
               <Users className="w-6 h-6" />
             </div>
             <span className="text-[10px] font-bold">Users</span>
-          </Link>
+          </button>
           
-          <Link href="#" className="flex flex-col items-center gap-1.5 p-2 text-gray-400 hover:text-black transition-colors w-16 group">
-            <div className="group-hover:bg-gray-50 p-1.5 rounded-full transition-colors">
+          <button onClick={() => setActiveTab('settings')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group ${activeTab === 'settings' ? 'text-blue-600' : 'text-gray-400 hover:text-black'}`}>
+            <div className={`${activeTab === 'settings' ? 'bg-blue-50' : 'group-hover:bg-gray-50'} p-1.5 rounded-full transition-colors`}>
               <Settings className="w-6 h-6" />
             </div>
             <span className="text-[10px] font-bold">Settings</span>
-          </Link>
+          </button>
         </div>
       </nav>
     </div>
