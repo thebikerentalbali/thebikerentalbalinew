@@ -136,18 +136,11 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex flex-col flex-1 py-1">
                   <h3 className="font-semibold text-gray-900 text-[15px] leading-tight mb-1">{item.name}</h3>
-                  <div className="flex flex-col gap-1.5 mb-2">
-                    <div className="flex items-center gap-1 text-gray-500">
-                      <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400 shrink-0" />
-                      <span className="text-[12px] font-medium">{item.rating}</span>
-                      <span className="mx-1">•</span>
-                      <span className="text-[12px] font-medium">{item.brand}</span>
-                    </div>
-                    <div className="flex items-start">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-[#FFF4E5] text-[#E65100] border border-[#FFE0B2]">
-                        {item.available} Units Available
-                      </span>
-                    </div>
+                  <div className="flex items-center gap-1 text-gray-500 mb-2">
+                    <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400 shrink-0" />
+                    <span className="text-[12px] font-medium">{item.rating}</span>
+                    <span className="mx-1">•</span>
+                    <span className="text-[12px] font-medium">{item.brand}</span>
                   </div>
                   
                   <div className="flex items-end justify-between mt-auto">
@@ -162,7 +155,12 @@ export default function CheckoutPage() {
               <div className="border-t border-gray-100 pt-5 space-y-5">
                 {/* Duration Mode Selection */}
                 <div>
-                  <label className="block text-[14px] text-gray-700 font-medium mb-3">Rental Plan</label>
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="text-[14px] text-gray-700 font-medium">Rental Plan</label>
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold text-gray-800 bg-[#EBECEF]/60 backdrop-blur-md border border-gray-200/60 shadow-sm">
+                      {item.available} Units Available
+                    </span>
+                  </div>
                   <div className="flex bg-gray-50 rounded-xl p-1">
                     <button 
                       onClick={() => updateDurationMode(item.id, "daily")}
@@ -394,13 +392,13 @@ export default function CheckoutPage() {
                     <img src={scooter.img} alt={scooter.name} className="w-full h-full object-contain drop-shadow-md" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 text-[14px] mb-0.5">{scooter.name}</h3>
-                    <p className="text-[12px] text-gray-500 mb-1.5">Rp {scooter.daily.toLocaleString()}/Day</p>
-                    <div className="mb-3">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-[#FFF4E5] text-[#E65100] border border-[#FFE0B2]">
-                        {scooter.available} Units Available
+                    <div className="flex items-start justify-between gap-2 mb-0.5">
+                      <h3 className="font-semibold text-gray-900 text-[14px] leading-tight">{scooter.name}</h3>
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold text-gray-800 bg-[#EBECEF]/60 backdrop-blur-md border border-gray-200/60 shadow-sm whitespace-nowrap">
+                        {scooter.available} Available
                       </span>
                     </div>
+                    <p className="text-[12px] text-gray-500 mb-3">Rp {scooter.daily.toLocaleString()}/Day</p>
                     <button 
                       onClick={() => addToCart(scooter)}
                       className="text-xs font-semibold bg-black text-white px-4 py-2 rounded-full hover:bg-gray-800 transition-colors"
