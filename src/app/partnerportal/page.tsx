@@ -257,35 +257,33 @@ export default function VendorDashboard() {
         </div>
         ) : activeTab === 'fleet' ? (
           <div className="p-5 md:px-8 pb-12 animate-in fade-in">
-            <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
-              <div className="flex items-center gap-4 flex-1">
-                <div className="relative shrink-0">
-                  <select 
-                    value={fleetFilter}
-                    onChange={(e) => setFleetFilter(e.target.value)}
-                    className="text-xl md:text-2xl font-black text-gray-900 bg-transparent outline-none cursor-pointer appearance-none pr-8 pl-1 w-full"
-                    style={{ WebkitAppearance: 'none' }}
-                  >
-                    <option value="All">All Scooters</option>
-                    <option value="Available">Available</option>
-                    <option value="Rented">Rented</option>
-                  </select>
-                  <ChevronDown className="w-5 h-5 absolute right-1 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" />
-                </div>
-                <div className="relative flex-1 max-w-sm">
-                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input 
-                    type="text" 
-                    placeholder="Search fleet..." 
-                    value={fleetSearch}
-                    onChange={(e) => setFleetSearch(e.target.value)}
-                    className="w-full bg-white border border-gray-100 rounded-xl pl-9 pr-4 py-2 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all shadow-sm"
-                  />
-                </div>
+            <div className="mb-6 space-y-4">
+              <div className="relative w-max">
+                <select 
+                  value={fleetFilter}
+                  onChange={(e) => setFleetFilter(e.target.value)}
+                  className="text-2xl font-black text-gray-900 bg-transparent outline-none cursor-pointer appearance-none pr-8 pl-1"
+                  style={{ WebkitAppearance: 'none' }}
+                >
+                  <option value="All">All Scooters</option>
+                  <option value="Available">Available</option>
+                  <option value="Rented">Rented</option>
+                </select>
+                <ChevronDown className="w-5 h-5 absolute right-1 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" />
               </div>
-              <button onClick={() => setIsAddingScooter(true)} className="bg-black text-white px-4 py-2.5 rounded-[14px] text-[13px] font-bold flex items-center gap-2 hover:scale-[1.02] transition-transform shadow-md shadow-black/10 shrink-0">
-                <Plus className="w-4 h-4" /> Add Scooter
+              <button onClick={() => setIsAddingScooter(true)} className="w-full bg-black text-white px-4 py-3.5 rounded-[16px] text-[15px] font-bold flex items-center justify-center gap-2 hover:scale-[1.01] transition-transform shadow-md shadow-black/10">
+                <Plus className="w-5 h-5" /> Add Scooter
               </button>
+              <div className="relative w-full">
+                <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input 
+                  type="text" 
+                  placeholder="Search fleet..." 
+                  value={fleetSearch}
+                  onChange={(e) => setFleetSearch(e.target.value)}
+                  className="w-full bg-white border border-gray-100 rounded-[16px] pl-12 pr-4 py-4 text-[15px] font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all shadow-sm"
+                />
+              </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {fleet.filter(s => {
@@ -368,16 +366,19 @@ export default function VendorDashboard() {
           </div>
         ) : activeTab === 'maintenance' ? (
           <div className="p-5 md:px-8 pb-12 animate-in fade-in">
-            <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
-              <h2 className="text-2xl font-bold text-gray-900">Maintenance Log</h2>
-              <div className="relative w-full sm:max-w-sm">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <div className="mb-6 space-y-4">
+              <h2 className="text-2xl font-black text-gray-900">Maintenance Log</h2>
+              <button onClick={() => setIsAddingScooter(true)} className="w-full bg-black text-white px-4 py-3.5 rounded-[16px] text-[15px] font-bold flex items-center justify-center gap-2 hover:scale-[1.01] transition-transform shadow-md shadow-black/10">
+                <Plus className="w-5 h-5" /> Add Scooter
+              </button>
+              <div className="relative w-full">
+                <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input 
                   type="text" 
                   placeholder="Search by plate or name..." 
                   value={serviceSearch}
                   onChange={(e) => setServiceSearch(e.target.value)}
-                  className="w-full bg-white border border-gray-100 rounded-xl pl-9 pr-4 py-2 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all shadow-sm"
+                  className="w-full bg-white border border-gray-100 rounded-[16px] pl-12 pr-4 py-4 text-[15px] font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all shadow-sm"
                 />
               </div>
             </div>
