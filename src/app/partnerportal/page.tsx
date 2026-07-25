@@ -19,6 +19,15 @@ export default function VendorDashboard() {
   const [editingScooter, setEditingScooter] = useState<any>(null)
   const [isAddingScooter, setIsAddingScooter] = useState(false)
   const [newScooter, setNewScooter] = useState({ name: "", brand: "", cc: "", year: "", price: 0, priceWeekly: 0, priceMonthly: 0, totalUnits: 1, availableUnits: 1, photos: [] as string[] })
+
+  // Service State
+  const [serviceLogs, setServiceLogs] = useState([
+    { id: 1, name: "Yamaha NMAX", plate: "DK 1823 XA", odo: "12,450", oil: "2026-08-10", service: "2026-07-15" },
+    { id: 2, name: "Honda Vario", plate: "DK 8899 BB", odo: "8,300", oil: "2026-08-05", service: "2026-06-20" }
+  ])
+  const [isAddingServiceScooter, setIsAddingServiceScooter] = useState(false)
+  const [newServiceScooter, setNewServiceScooter] = useState({ name: "", plate: "", odo: "", oil: "", service: "" })
+  const [editingServiceLog, setEditingServiceLog] = useState<any>(null)
   return (
     <div className="min-h-screen bg-[#F5F7FA] md:flex pb-28 md:pb-0">
       {/* 
@@ -258,22 +267,24 @@ export default function VendorDashboard() {
         ) : activeTab === 'fleet' ? (
           <div className="p-5 md:px-8 pb-12 animate-in fade-in">
             <div className="mb-6 space-y-4">
-              <div className="relative w-max">
-                <select 
-                  value={fleetFilter}
-                  onChange={(e) => setFleetFilter(e.target.value)}
-                  className="text-2xl font-black text-gray-900 bg-transparent outline-none cursor-pointer appearance-none pr-8 pl-1"
-                  style={{ WebkitAppearance: 'none' }}
-                >
-                  <option value="All">All Scooters</option>
-                  <option value="Available">Available</option>
-                  <option value="Rented">Rented</option>
-                </select>
-                <ChevronDown className="w-5 h-5 absolute right-1 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" />
+              <div className="flex justify-between items-center gap-4">
+                <div className="relative w-max shrink-0">
+                  <select 
+                    value={fleetFilter}
+                    onChange={(e) => setFleetFilter(e.target.value)}
+                    className="text-xl md:text-2xl font-black text-gray-900 bg-transparent outline-none cursor-pointer appearance-none pr-8 pl-1"
+                    style={{ WebkitAppearance: 'none' }}
+                  >
+                    <option value="All">All Scooters</option>
+                    <option value="Available">Available</option>
+                    <option value="Rented">Rented</option>
+                  </select>
+                  <ChevronDown className="w-5 h-5 absolute right-1 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" />
+                </div>
+                <button onClick={() => setIsAddingScooter(true)} className="bg-black text-white px-4 py-2.5 rounded-[14px] text-[13px] font-bold flex items-center gap-2 hover:scale-[1.02] transition-transform shadow-md shadow-black/10 shrink-0">
+                  <Plus className="w-4 h-4" /> Add Scooter
+                </button>
               </div>
-              <button onClick={() => setIsAddingScooter(true)} className="w-full bg-black text-white px-4 py-3.5 rounded-[16px] text-[15px] font-bold flex items-center justify-center gap-2 hover:scale-[1.01] transition-transform shadow-md shadow-black/10">
-                <Plus className="w-5 h-5" /> Add Scooter
-              </button>
               <div className="relative w-full">
                 <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input 
@@ -367,10 +378,12 @@ export default function VendorDashboard() {
         ) : activeTab === 'maintenance' ? (
           <div className="p-5 md:px-8 pb-12 animate-in fade-in">
             <div className="mb-6 space-y-4">
-              <h2 className="text-2xl font-black text-gray-900">Maintenance Log</h2>
-              <button onClick={() => setIsAddingScooter(true)} className="w-full bg-black text-white px-4 py-3.5 rounded-[16px] text-[15px] font-bold flex items-center justify-center gap-2 hover:scale-[1.01] transition-transform shadow-md shadow-black/10">
-                <Plus className="w-5 h-5" /> Add Scooter
-              </button>
+              <div className="flex justify-between items-center gap-4">
+                <h2 className="text-xl md:text-2xl font-black text-gray-900">Maintenance Log</h2>
+                <button onClick={() => setIsAddingServiceScooter(true)} className="bg-black text-white px-4 py-2.5 rounded-[14px] text-[13px] font-bold flex items-center gap-2 hover:scale-[1.02] transition-transform shadow-md shadow-black/10 shrink-0">
+                  <Plus className="w-4 h-4" /> Add Scooter
+                </button>
+              </div>
               <div className="relative w-full">
                 <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input 
@@ -383,27 +396,24 @@ export default function VendorDashboard() {
               </div>
             </div>
             <div className="space-y-4">
-              {[
-                { name: "Yamaha NMAX", plate: "DK 1823 XA", odo: "12,450 km", oil: "10 Aug 2026", service: "15 Jul 2026" },
-                { name: "Honda Vario", plate: "DK 8899 BB", odo: "8,300 km", oil: "05 Aug 2026", service: "20 Jun 2026" }
-              ].filter(s => s.name.toLowerCase().includes(serviceSearch.toLowerCase()) || s.plate.toLowerCase().includes(serviceSearch.toLowerCase())).map((scooter, i) => (
-                <div key={i} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm">
+              {serviceLogs.filter(s => s.name.toLowerCase().includes(serviceSearch.toLowerCase()) || s.plate.toLowerCase().includes(serviceSearch.toLowerCase())).map((scooter) => (
+                <div key={scooter.id} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm">
                   <div className="flex items-center gap-4 mb-4">
                     <div>
                       <h3 className="font-bold text-gray-900">{scooter.name}</h3>
                       <p className="text-xs text-gray-500 font-bold mt-0.5">{scooter.plate}</p>
                     </div>
-                    <button className="ml-auto bg-gray-100 hover:bg-gray-200 text-black px-3 py-1.5 rounded-full text-xs font-bold transition-colors">
+                    <button onClick={() => setEditingServiceLog(scooter)} className="ml-auto bg-gray-100 hover:bg-gray-200 text-black px-3 py-1.5 rounded-full text-xs font-bold transition-colors">
                       Update Log
                     </button>
                   </div>
                   <div className="grid grid-cols-3 gap-2 border-t border-gray-50 pt-4">
                     <div>
                       <p className="text-[10px] text-gray-500 font-semibold uppercase mb-1">Odometer</p>
-                      <p className="text-sm font-bold text-gray-900">{scooter.odo}</p>
+                      <p className="text-sm font-bold text-gray-900">{scooter.odo} km</p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-gray-500 font-semibold uppercase mb-1">Last Oil Change</p>
+                      <p className="text-[10px] text-gray-500 font-semibold uppercase mb-1">Last Oil</p>
                       <p className="text-sm font-bold text-gray-900">{scooter.oil}</p>
                     </div>
                     <div>
@@ -413,10 +423,7 @@ export default function VendorDashboard() {
                   </div>
                 </div>
               ))}
-              {[
-                { name: "Yamaha NMAX", plate: "DK 1823 XA", odo: "12,450 km", oil: "10 Aug 2026", service: "15 Jul 2026" },
-                { name: "Honda Vario", plate: "DK 8899 BB", odo: "8,300 km", oil: "05 Aug 2026", service: "20 Jun 2026" }
-              ].filter(s => s.name.toLowerCase().includes(serviceSearch.toLowerCase()) || s.plate.toLowerCase().includes(serviceSearch.toLowerCase())).length === 0 && (
+              {serviceLogs.filter(s => s.name.toLowerCase().includes(serviceSearch.toLowerCase()) || s.plate.toLowerCase().includes(serviceSearch.toLowerCase())).length === 0 && (
                 <div className="py-12 text-center text-gray-400 font-bold">No records found.</div>
               )}
             </div>
@@ -605,6 +612,74 @@ export default function VendorDashboard() {
           </div>
         )}
 
+        {/* Add Service Scooter Modal */}
+        {isAddingServiceScooter && (
+          <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-[32px] p-6 md:p-8 w-full max-w-md animate-in zoom-in-95 duration-200">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-black">Add Service Scooter</h3>
+                <button onClick={() => setIsAddingServiceScooter(false)}><X className="w-6 h-6 text-gray-400" /></button>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Scooter Name</label>
+                  <input type="text" placeholder="e.g. Yamaha NMAX" value={newServiceScooter.name} onChange={e => setNewServiceScooter({...newServiceScooter, name: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Plate Number</label>
+                  <input type="text" placeholder="e.g. DK 1823 XA" value={newServiceScooter.plate} onChange={e => setNewServiceScooter({...newServiceScooter, plate: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                </div>
+              </div>
+              <button 
+                onClick={() => {
+                  if(!newServiceScooter.name || !newServiceScooter.plate) return;
+                  setServiceLogs([...serviceLogs, { ...newServiceScooter, id: Date.now(), odo: "0", oil: "N/A", service: "N/A" }]);
+                  setIsAddingServiceScooter(false);
+                  setNewServiceScooter({ name: "", plate: "", odo: "", oil: "", service: "" });
+                }} 
+                className="w-full mt-8 bg-black text-white rounded-[16px] py-4 font-black text-sm hover:scale-[1.02] shadow-xl shadow-black/10 transition-all">
+                Add to Service Tracker
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Service Log Modal */}
+        {editingServiceLog && (
+          <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-[32px] p-6 md:p-8 w-full max-w-md animate-in zoom-in-95 duration-200">
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h3 className="text-2xl font-black">Update Log</h3>
+                  <p className="text-sm font-bold text-gray-500 mt-1">{editingServiceLog.name} • {editingServiceLog.plate}</p>
+                </div>
+                <button onClick={() => setEditingServiceLog(null)}><X className="w-6 h-6 text-gray-400" /></button>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Odometer (km)</label>
+                  <input type="text" value={editingServiceLog.odo} onChange={e => setEditingServiceLog({...editingServiceLog, odo: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Last Oil Change (Date)</label>
+                  <input type="text" value={editingServiceLog.oil} onChange={e => setEditingServiceLog({...editingServiceLog, oil: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Last Service (Date)</label>
+                  <input type="text" value={editingServiceLog.service} onChange={e => setEditingServiceLog({...editingServiceLog, service: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                </div>
+              </div>
+              <button 
+                onClick={() => {
+                  setServiceLogs(logs => logs.map(l => l.id === editingServiceLog.id ? editingServiceLog : l));
+                  setEditingServiceLog(null);
+                }} 
+                className="w-full mt-8 bg-black text-white rounded-[16px] py-4 font-black text-sm hover:scale-[1.02] shadow-xl shadow-black/10 transition-all">
+                Save Updates
+              </button>
+            </div>
+          </div>
+        )}
 
 
       </main>
