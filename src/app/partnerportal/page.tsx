@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Bike, DollarSign, CalendarDays, Settings, Bell, Search, Star, Plus, QrCode, Home, Wallet, User, ChevronRight, TrendingUp, Wrench, MoreVertical, CheckCircle2, Clock, X } from "lucide-react"
+import { Bike, DollarSign, CalendarDays, Settings, Bell, Search, Star, Plus, QrCode, Home, Wallet, User, ChevronRight, TrendingUp, Wrench, MoreVertical, CheckCircle2, Clock, X, ChevronDown } from "lucide-react"
 import Link from "next/link"
 
 export default function VendorDashboard() {
@@ -9,13 +9,15 @@ export default function VendorDashboard() {
   
   // Fleet State
   const [fleet, setFleet] = useState([
-    { id: 1, name: "Vespa Primavera", plate: "DK 4920 FZ", year: "2023", price: 350000, status: "Available", returnDate: null },
-    { id: 2, name: "Honda Scoopy", plate: "DK 1234 AB", year: "2022", price: 150000, status: "Rented", returnDate: new Date(Date.now() + 15000).toISOString() }, 
-    { id: 3, name: "Yamaha NMAX", plate: "DK 8888 ZZ", year: "2021", price: 250000, status: "Rented", returnDate: new Date(Date.now() - 10000).toISOString() }, 
+    { id: 1, name: "Vespa Primavera", plate: "DK 4920 FZ", year: "2023", price: 350000, totalUnits: 3, rentals: [] },
+    { id: 2, name: "Honda Scoopy", plate: "DK 1234 AB", year: "2022", price: 150000, totalUnits: 4, rentals: [{ id: 'r1', returnDate: new Date(Date.now() + 15000).toISOString() }] }, 
+    { id: 3, name: "Yamaha NMAX", plate: "DK 8888 ZZ", year: "2021", price: 250000, totalUnits: 2, rentals: [{ id: 'r2', returnDate: new Date(Date.now() - 10000).toISOString() }] }, 
   ])
   const [fleetFilter, setFleetFilter] = useState("All")
   const [editingScooter, setEditingScooter] = useState<any>(null)
   const [rentingScooter, setRentingScooter] = useState<any>(null)
+  const [isAddingScooter, setIsAddingScooter] = useState(false)
+  const [newScooter, setNewScooter] = useState({ name: "", plate: "", year: "", price: 0, totalUnits: 1 })
   const [returnDateInput, setReturnDateInput] = useState("")
 
   // Auto-expire rented scooters
@@ -24,10 +26,17 @@ export default function VendorDashboard() {
       setFleet(currentFleet => {
         let changed = false;
         const newFleet = currentFleet.map(scooter => {
-          if (scooter.status === 'Rented' && scooter.returnDate) {
-            if (new Date() >= new Date(scooter.returnDate)) {
-              changed = true;
-              return { ...scooter, status: 'Available', returnDate: null };
+          if (scooter.rentals && scooter.rentals.length > 0) {
+            const now = new Date();
+            const validRentals = scooter.rentals.filter((r: any) => {
+              if (new Date(r.returnDate) <= now) {
+                changed = true;
+                return false; // expire
+              }
+              return true;
+            });
+            if (validRentals.length !== scooter.rentals.length) {
+              return { ...scooter, rentals: validRentals };
             }
           }
           return scooter;
@@ -276,51 +285,68 @@ export default function VendorDashboard() {
         ) : activeTab === 'fleet' ? (
           <div className="p-5 md:px-8 pb-12 animate-in fade-in">
             <div className="flex justify-between items-center mb-6">
-              <select 
-                value={fleetFilter}
-                onChange={(e) => setFleetFilter(e.target.value)}
-                className="text-2xl font-bold text-gray-900 bg-transparent outline-none cursor-pointer appearance-none pr-4"
-                style={{ WebkitAppearance: 'none' }}
-              >
-                <option value="All">All Scooters</option>
-                <option value="Available">Available</option>
-                <option value="Rented">Rented</option>
-              </select>
-              <button className="bg-black text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2">
+              <div className="relative">
+                <select 
+                  value={fleetFilter}
+                  onChange={(e) => setFleetFilter(e.target.value)}
+                  className="text-xl md:text-2xl font-black text-gray-900 bg-transparent outline-none cursor-pointer appearance-none pr-8 pl-1 w-full"
+                  style={{ WebkitAppearance: 'none' }}
+                >
+                  <option value="All">All Scooters</option>
+                  <option value="Available">Available</option>
+                  <option value="Rented">Rented</option>
+                </select>
+                <ChevronDown className="w-5 h-5 absolute right-1 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" />
+              </div>
+              <button onClick={() => setIsAddingScooter(true)} className="bg-black text-white px-4 py-2.5 rounded-[14px] text-[13px] font-bold flex items-center gap-2 hover:scale-[1.02] transition-transform shadow-md shadow-black/10">
                 <Plus className="w-4 h-4" /> Add Scooter
               </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {fleet.filter(s => fleetFilter === "All" || s.status === fleetFilter).map((scooter) => (
-                <div key={scooter.id} className="bg-white p-4 rounded-3xl border border-gray-100 flex items-center gap-4 shadow-sm hover:border-gray-300 transition-all relative group">
-                  <div className="w-20 h-20 bg-gray-50 rounded-2xl p-2 shrink-0">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/images/scooter.png" alt="Scooter" className="w-full h-full object-contain" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start">
-                      <h3 className="font-bold text-gray-900">{scooter.name}</h3>
-                      <div className="flex gap-2">
-                        {scooter.status === 'Available' && (
-                          <button onClick={() => { setRentingScooter(scooter); setReturnDateInput(""); }} className="text-[10px] bg-black text-white font-bold px-2 py-1 rounded-md">Rent Out</button>
-                        )}
-                        <button onClick={() => setEditingScooter(scooter)} className="text-gray-400 hover:text-black">
-                          <MoreVertical className="w-4 h-4" />
-                        </button>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {fleet.filter(s => {
+                const available = s.totalUnits - s.rentals.length;
+                if (fleetFilter === "Available") return available > 0;
+                if (fleetFilter === "Rented") return s.rentals.length > 0;
+                return true;
+              }).map((scooter) => {
+                const availableUnits = scooter.totalUnits - scooter.rentals.length;
+                return (
+                  <div key={scooter.id} className="bg-white p-5 md:p-6 rounded-[28px] border border-gray-100 flex items-center gap-5 shadow-sm hover:shadow-md hover:border-gray-200 transition-all relative group">
+                    <div className="w-24 h-24 bg-gray-50 rounded-[20px] p-2 shrink-0">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="/images/scooter.png" alt="Scooter" className="w-full h-full object-contain" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start mb-1">
+                        <h3 className="font-bold text-gray-900 text-lg md:text-xl truncate pr-2">{scooter.name}</h3>
+                        <div className="flex gap-2 shrink-0">
+                          {availableUnits > 0 && (
+                            <button onClick={() => { setRentingScooter(scooter); setReturnDateInput(""); }} className="text-[11px] bg-black text-white font-bold px-3 py-1.5 rounded-[10px] hover:bg-gray-800 transition-colors">Rent Out</button>
+                          )}
+                          <button onClick={() => setEditingScooter(scooter)} className="text-gray-400 hover:text-black p-1">
+                            <MoreVertical className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </div>
+                      <p className="text-[13px] text-gray-500 mb-3">{scooter.plate} • {scooter.year}</p>
+                      <div className="flex items-center gap-3">
+                        <span className={`px-2.5 py-1 rounded-[8px] text-[10px] md:text-[11px] font-black uppercase tracking-wide flex items-center gap-1 ${availableUnits > 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                          {availableUnits > 0 ? <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span> : null}
+                          {availableUnits} / {scooter.totalUnits} Available
+                        </span>
+                        <span className="text-[15px] md:text-base font-black text-gray-900 truncate">Rp {scooter.price.toLocaleString()}<span className="text-gray-500 text-xs font-semibold">/day</span></span>
                       </div>
                     </div>
-                    <p className="text-xs text-gray-500 mb-2">{scooter.plate} • {scooter.year}</p>
-                    <div className="flex items-center gap-2">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide ${scooter.status === 'Available' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                        {scooter.status}
-                      </span>
-                      <span className="text-sm font-bold text-gray-900">Rp {scooter.price.toLocaleString()}<span className="text-gray-500 text-xs font-normal">/day</span></span>
-                    </div>
                   </div>
-                </div>
-              ))}
-              {fleet.filter(s => fleetFilter === "All" || s.status === fleetFilter).length === 0 && (
-                <div className="col-span-full py-8 text-center text-gray-500 font-medium">No scooters found for this filter.</div>
+                )
+              })}
+              {fleet.filter(s => {
+                const available = s.totalUnits - s.rentals.length;
+                if (fleetFilter === "Available") return available > 0;
+                if (fleetFilter === "Rented") return s.rentals.length > 0;
+                return true;
+              }).length === 0 && (
+                <div className="col-span-full py-12 text-center text-gray-400 font-bold">No scooters found for this filter.</div>
               )}
             </div>
           </div>
@@ -411,32 +437,86 @@ export default function VendorDashboard() {
           </div>
         )}
 
-        {/* Edit Modal */}
-        {editingScooter && (
+        {/* Add Scooter Modal */}
+        {isAddingScooter && (
           <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl p-6 w-full max-w-md animate-in zoom-in-95 duration-200">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold">Edit Scooter Details</h3>
-                <button onClick={() => setEditingScooter(null)}><X className="w-5 h-5 text-gray-400" /></button>
+            <div className="bg-white rounded-[32px] p-6 md:p-8 w-full max-w-md animate-in zoom-in-95 duration-200">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-black">Add New Scooter</h3>
+                <button onClick={() => setIsAddingScooter(false)}><X className="w-6 h-6 text-gray-400" /></button>
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Name</label>
-                  <input type="text" value={editingScooter.name} onChange={e => setEditingScooter({...editingScooter, name: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none" />
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Model Name</label>
+                  <input type="text" placeholder="e.g. Yamaha NMAX" value={newScooter.name} onChange={e => setNewScooter({...newScooter, name: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Plate</label>
-                    <input type="text" value={editingScooter.plate} onChange={e => setEditingScooter({...editingScooter, plate: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none" />
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Plate Prefix</label>
+                    <input type="text" placeholder="e.g. DK" value={newScooter.plate} onChange={e => setNewScooter({...newScooter, plate: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Year</label>
-                    <input type="text" value={editingScooter.year} onChange={e => setEditingScooter({...editingScooter, year: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none" />
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Year</label>
+                    <input type="text" placeholder="2024" value={newScooter.year} onChange={e => setNewScooter({...newScooter, year: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                   </div>
                 </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Daily Price (Rp)</label>
+                    <input type="number" value={newScooter.price || ''} onChange={e => setNewScooter({...newScooter, price: parseInt(e.target.value) || 0})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Total Units</label>
+                    <input type="number" min="1" value={newScooter.totalUnits} onChange={e => setNewScooter({...newScooter, totalUnits: parseInt(e.target.value) || 1})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                  </div>
+                </div>
+              </div>
+              <button 
+                onClick={() => {
+                  if(!newScooter.name) return;
+                  setFleet([...fleet, { ...newScooter, id: Date.now(), rentals: [] }]);
+                  setIsAddingScooter(false);
+                  setNewScooter({ name: "", plate: "", year: "", price: 0, totalUnits: 1 });
+                }} 
+                className="w-full mt-8 bg-black text-white rounded-[16px] py-4 font-black text-sm hover:scale-[1.02] shadow-xl shadow-black/10 transition-all">
+                Add to Fleet
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Modal */}
+        {editingScooter && (
+          <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-[32px] p-6 md:p-8 w-full max-w-md animate-in zoom-in-95 duration-200">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-black">Edit Scooter</h3>
+                <button onClick={() => setEditingScooter(null)}><X className="w-6 h-6 text-gray-400" /></button>
+              </div>
+              <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Daily Price (Rp)</label>
-                  <input type="number" value={editingScooter.price} onChange={e => setEditingScooter({...editingScooter, price: parseInt(e.target.value) || 0})} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none" />
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Name</label>
+                  <input type="text" value={editingScooter.name} onChange={e => setEditingScooter({...editingScooter, name: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Plate</label>
+                    <input type="text" value={editingScooter.plate} onChange={e => setEditingScooter({...editingScooter, plate: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Year</label>
+                    <input type="text" value={editingScooter.year} onChange={e => setEditingScooter({...editingScooter, year: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Daily Price (Rp)</label>
+                    <input type="number" value={editingScooter.price} onChange={e => setEditingScooter({...editingScooter, price: parseInt(e.target.value) || 0})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Total Units</label>
+                    <input type="number" min="1" value={editingScooter.totalUnits} onChange={e => setEditingScooter({...editingScooter, totalUnits: parseInt(e.target.value) || 1})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                  </div>
                 </div>
               </div>
               <button 
@@ -444,7 +524,7 @@ export default function VendorDashboard() {
                   setFleet(f => f.map(s => s.id === editingScooter.id ? editingScooter : s));
                   setEditingScooter(null);
                 }} 
-                className="w-full mt-6 bg-black text-white rounded-xl py-3.5 font-bold text-sm hover:scale-[1.02] transition-transform">
+                className="w-full mt-8 bg-black text-white rounded-[16px] py-4 font-black text-sm hover:scale-[1.02] shadow-xl shadow-black/10 transition-all">
                 Save Changes
               </button>
             </div>
@@ -454,25 +534,26 @@ export default function VendorDashboard() {
         {/* Rent Modal */}
         {rentingScooter && (
           <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl p-6 w-full max-w-md animate-in zoom-in-95 duration-200">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold">Mark as Rented</h3>
-                <button onClick={() => setRentingScooter(null)}><X className="w-5 h-5 text-gray-400" /></button>
+            <div className="bg-white rounded-[32px] p-6 md:p-8 w-full max-w-md animate-in zoom-in-95 duration-200">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-black">Rent Out Unit</h3>
+                <button onClick={() => setRentingScooter(null)}><X className="w-6 h-6 text-gray-400" /></button>
               </div>
               <div className="space-y-4">
-                <p className="text-sm text-gray-500 font-medium">Set the return date and time. Once this time passes, {rentingScooter.name} will automatically be marked as Available.</p>
+                <p className="text-[13px] text-gray-500 font-medium leading-relaxed">You are renting out 1 unit of <span className="text-black font-bold">{rentingScooter.name}</span>. Set the expected return date. It will automatically become available again once this time passes.</p>
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Return Date & Time</label>
-                  <input type="datetime-local" value={returnDateInput} onChange={e => setReturnDateInput(e.target.value)} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none" />
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Return Date & Time</label>
+                  <input type="datetime-local" value={returnDateInput} onChange={e => setReturnDateInput(e.target.value)} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                 </div>
               </div>
               <button 
                 onClick={() => {
                   if(!returnDateInput) return;
-                  setFleet(f => f.map(s => s.id === rentingScooter.id ? { ...s, status: 'Rented', returnDate: new Date(returnDateInput).toISOString() } : s));
+                  const newRental = { id: Math.random().toString(), returnDate: new Date(returnDateInput).toISOString() };
+                  setFleet(f => f.map(s => s.id === rentingScooter.id ? { ...s, rentals: [...s.rentals, newRental] } : s));
                   setRentingScooter(null);
                 }} 
-                className="w-full mt-6 bg-black text-white rounded-xl py-3.5 font-bold text-sm hover:scale-[1.02] transition-transform">
+                className="w-full mt-8 bg-black text-white rounded-[16px] py-4 font-black text-sm hover:scale-[1.02] shadow-xl shadow-black/10 transition-all">
                 Confirm Rental
               </button>
             </div>
