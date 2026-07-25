@@ -498,8 +498,7 @@ export default function VendorDashboard() {
                     <input type="number" min="1" value={newScooter.totalUnits} onChange={e => setNewScooter({...newScooter, totalUnits: parseInt(e.target.value) || 1})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                   </div>
                 </div>
-                </div>
-                
+
                 <div className="pt-4">
                   <button 
                     onClick={() => {
