@@ -9,43 +9,14 @@ export default function VendorDashboard() {
   
   // Fleet State
   const [fleet, setFleet] = useState([
-    { id: 1, name: "Vespa Primavera", plate: "DK 4920 FZ", year: "2023", price: 350000, totalUnits: 3, rentals: [] },
-    { id: 2, name: "Honda Scoopy", plate: "DK 1234 AB", year: "2022", price: 150000, totalUnits: 4, rentals: [{ id: 'r1', returnDate: new Date(Date.now() + 15000).toISOString() }] }, 
-    { id: 3, name: "Yamaha NMAX", plate: "DK 8888 ZZ", year: "2021", price: 250000, totalUnits: 2, rentals: [{ id: 'r2', returnDate: new Date(Date.now() - 10000).toISOString() }] }, 
+    { id: 1, name: "Vespa Primavera", plate: "DK 4920 FZ", year: "2023", price: 350000, totalUnits: 3, availableUnits: 2 },
+    { id: 2, name: "Honda Scoopy", plate: "DK 1234 AB", year: "2022", price: 150000, totalUnits: 4, availableUnits: 4 }, 
+    { id: 3, name: "Yamaha NMAX", plate: "DK 8888 ZZ", year: "2021", price: 250000, totalUnits: 2, availableUnits: 2 }, 
   ])
   const [fleetFilter, setFleetFilter] = useState("All")
   const [editingScooter, setEditingScooter] = useState<any>(null)
-  const [rentingScooter, setRentingScooter] = useState<any>(null)
   const [isAddingScooter, setIsAddingScooter] = useState(false)
-  const [newScooter, setNewScooter] = useState({ name: "", plate: "", year: "", price: 0, totalUnits: 1 })
-  const [returnDateInput, setReturnDateInput] = useState("")
-
-  // Auto-expire rented scooters
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setFleet(currentFleet => {
-        let changed = false;
-        const newFleet = currentFleet.map(scooter => {
-          if (scooter.rentals && scooter.rentals.length > 0) {
-            const now = new Date();
-            const validRentals = scooter.rentals.filter((r: any) => {
-              if (new Date(r.returnDate) <= now) {
-                changed = true;
-                return false; // expire
-              }
-              return true;
-            });
-            if (validRentals.length !== scooter.rentals.length) {
-              return { ...scooter, rentals: validRentals };
-            }
-          }
-          return scooter;
-        });
-        return changed ? newFleet : currentFleet;
-      });
-    }, 1000); 
-    return () => clearInterval(interval);
-  }, []);
+  const [newScooter, setNewScooter] = useState({ name: "", plate: "", year: "", price: 0, totalUnits: 1, availableUnits: 1 })
   return (
     <div className="min-h-screen bg-[#F5F7FA] md:flex pb-28 md:pb-0">
       {/* 
@@ -304,12 +275,10 @@ export default function VendorDashboard() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {fleet.filter(s => {
-                const available = s.totalUnits - s.rentals.length;
-                if (fleetFilter === "Available") return available > 0;
-                if (fleetFilter === "Rented") return s.rentals.length > 0;
+                if (fleetFilter === "Available") return s.availableUnits > 0;
+                if (fleetFilter === "Rented") return s.availableUnits < s.totalUnits;
                 return true;
               }).map((scooter) => {
-                const availableUnits = scooter.totalUnits - scooter.rentals.length;
                 return (
                   <div key={scooter.id} className="bg-white p-5 md:p-6 rounded-[28px] border border-gray-100 flex items-center gap-5 shadow-sm hover:shadow-md hover:border-gray-200 transition-all relative group">
                     <div className="w-24 h-24 bg-gray-50 rounded-[20px] p-2 shrink-0">
@@ -318,32 +287,46 @@ export default function VendorDashboard() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start mb-1">
-                        <h3 className="font-bold text-gray-900 text-lg md:text-xl truncate pr-2">{scooter.name}</h3>
-                        <div className="flex gap-2 shrink-0">
-                          {availableUnits > 0 && (
-                            <button onClick={() => { setRentingScooter(scooter); setReturnDateInput(""); }} className="text-[11px] bg-black text-white font-bold px-3 py-1.5 rounded-[10px] hover:bg-gray-800 transition-colors">Rent Out</button>
-                          )}
-                          <button onClick={() => setEditingScooter(scooter)} className="text-gray-400 hover:text-black p-1">
-                            <MoreVertical className="w-5 h-5" />
-                          </button>
-                        </div>
+                        <h3 className="font-bold text-gray-900 text-lg md:text-xl truncate pr-2" title={scooter.name}>{scooter.name}</h3>
+                        <button onClick={() => setEditingScooter(scooter)} className="text-gray-400 hover:text-black p-1 shrink-0">
+                          <MoreVertical className="w-5 h-5" />
+                        </button>
                       </div>
                       <p className="text-[13px] text-gray-500 mb-3">{scooter.plate} • {scooter.year}</p>
-                      <div className="flex items-center gap-3">
-                        <span className={`px-2.5 py-1 rounded-[8px] text-[10px] md:text-[11px] font-black uppercase tracking-wide flex items-center gap-1 ${availableUnits > 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                          {availableUnits > 0 ? <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span> : null}
-                          {availableUnits} / {scooter.totalUnits} Available
-                        </span>
-                        <span className="text-[15px] md:text-base font-black text-gray-900 truncate">Rp {scooter.price.toLocaleString()}<span className="text-gray-500 text-xs font-semibold">/day</span></span>
+                      <div className="flex items-center justify-between">
+                        <div className="flex flex-col gap-1">
+                          <span className={`px-2.5 py-1.5 rounded-[10px] text-[10px] md:text-[11px] font-black uppercase tracking-wide flex items-center gap-1.5 w-fit ${scooter.availableUnits > 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                            {scooter.availableUnits > 0 ? <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span> : null}
+                            {scooter.availableUnits} / {scooter.totalUnits} Available
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-[15px] md:text-base font-black text-gray-900 truncate hidden sm:block">Rp {scooter.price.toLocaleString()}<span className="text-gray-500 text-[10px] font-semibold">/day</span></span>
+                          {scooter.availableUnits < scooter.totalUnits && (
+                            <button 
+                              onClick={() => setFleet(f => f.map(s => s.id === scooter.id ? { ...s, availableUnits: s.availableUnits + 1 } : s))} 
+                              className="text-[11px] bg-gray-100 text-gray-600 font-bold px-3 py-2 rounded-[10px] hover:bg-gray-200 transition-colors"
+                            >
+                              Return
+                            </button>
+                          )}
+                          {scooter.availableUnits > 0 && (
+                            <button 
+                              onClick={() => setFleet(f => f.map(s => s.id === scooter.id ? { ...s, availableUnits: s.availableUnits - 1 } : s))} 
+                              className="text-[11px] bg-black text-white font-bold px-3 py-2 rounded-[10px] hover:bg-gray-800 transition-colors"
+                            >
+                              Rent Out
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
                 )
               })}
               {fleet.filter(s => {
-                const available = s.totalUnits - s.rentals.length;
-                if (fleetFilter === "Available") return available > 0;
-                if (fleetFilter === "Rented") return s.rentals.length > 0;
+                if (fleetFilter === "Available") return s.availableUnits > 0;
+                if (fleetFilter === "Rented") return s.availableUnits < s.totalUnits;
                 return true;
               }).length === 0 && (
                 <div className="col-span-full py-12 text-center text-gray-400 font-bold">No scooters found for this filter.</div>
@@ -474,9 +457,9 @@ export default function VendorDashboard() {
               <button 
                 onClick={() => {
                   if(!newScooter.name) return;
-                  setFleet([...fleet, { ...newScooter, id: Date.now(), rentals: [] }]);
+                  setFleet([...fleet, { ...newScooter, id: Date.now(), availableUnits: newScooter.totalUnits }]);
                   setIsAddingScooter(false);
-                  setNewScooter({ name: "", plate: "", year: "", price: 0, totalUnits: 1 });
+                  setNewScooter({ name: "", plate: "", year: "", price: 0, totalUnits: 1, availableUnits: 1 });
                 }} 
                 className="w-full mt-8 bg-black text-white rounded-[16px] py-4 font-black text-sm hover:scale-[1.02] shadow-xl shadow-black/10 transition-all">
                 Add to Fleet
@@ -531,34 +514,7 @@ export default function VendorDashboard() {
           </div>
         )}
 
-        {/* Rent Modal */}
-        {rentingScooter && (
-          <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-[32px] p-6 md:p-8 w-full max-w-md animate-in zoom-in-95 duration-200">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-2xl font-black">Rent Out Unit</h3>
-                <button onClick={() => setRentingScooter(null)}><X className="w-6 h-6 text-gray-400" /></button>
-              </div>
-              <div className="space-y-4">
-                <p className="text-[13px] text-gray-500 font-medium leading-relaxed">You are renting out 1 unit of <span className="text-black font-bold">{rentingScooter.name}</span>. Set the expected return date. It will automatically become available again once this time passes.</p>
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Return Date & Time</label>
-                  <input type="datetime-local" value={returnDateInput} onChange={e => setReturnDateInput(e.target.value)} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
-                </div>
-              </div>
-              <button 
-                onClick={() => {
-                  if(!returnDateInput) return;
-                  const newRental = { id: Math.random().toString(), returnDate: new Date(returnDateInput).toISOString() };
-                  setFleet(f => f.map(s => s.id === rentingScooter.id ? { ...s, rentals: [...s.rentals, newRental] } : s));
-                  setRentingScooter(null);
-                }} 
-                className="w-full mt-8 bg-black text-white rounded-[16px] py-4 font-black text-sm hover:scale-[1.02] shadow-xl shadow-black/10 transition-all">
-                Confirm Rental
-              </button>
-            </div>
-          </div>
-        )}
+
 
       </main>
 
