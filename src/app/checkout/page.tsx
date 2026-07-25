@@ -136,13 +136,18 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex flex-col flex-1 py-1">
                   <h3 className="font-semibold text-gray-900 text-[15px] leading-tight mb-1">{item.name}</h3>
-                  <div className="flex items-center gap-1 text-gray-500 mb-2">
-                    <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400 shrink-0" />
-                    <span className="text-[12px] font-medium">{item.rating}</span>
-                    <span className="mx-1">•</span>
-                    <span className="text-[12px] font-medium">{item.brand}</span>
-                    <span className="mx-1">•</span>
-                    <span className="text-[12px] font-medium text-[#E65100]">{item.available} Available</span>
+                  <div className="flex flex-col gap-1.5 mb-2">
+                    <div className="flex items-center gap-1 text-gray-500">
+                      <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400 shrink-0" />
+                      <span className="text-[12px] font-medium">{item.rating}</span>
+                      <span className="mx-1">•</span>
+                      <span className="text-[12px] font-medium">{item.brand}</span>
+                    </div>
+                    <div className="flex items-start">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-[#FFF4E5] text-[#E65100] border border-[#FFE0B2]">
+                        {item.available} Units Available
+                      </span>
+                    </div>
                   </div>
                   
                   <div className="flex items-end justify-between mt-auto">
@@ -389,9 +394,13 @@ export default function CheckoutPage() {
                     <img src={scooter.img} alt={scooter.name} className="w-full h-full object-contain drop-shadow-md" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 text-[14px]">{scooter.name}</h3>
-                    <p className="text-[12px] text-gray-500 mb-1">Rp {scooter.daily.toLocaleString()}/Day</p>
-                    <p className="text-[11px] text-[#E65100] font-medium mb-2">{scooter.available} Available</p>
+                    <h3 className="font-semibold text-gray-900 text-[14px] mb-0.5">{scooter.name}</h3>
+                    <p className="text-[12px] text-gray-500 mb-1.5">Rp {scooter.daily.toLocaleString()}/Day</p>
+                    <div className="mb-3">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-[#FFF4E5] text-[#E65100] border border-[#FFE0B2]">
+                        {scooter.available} Units Available
+                      </span>
+                    </div>
                     <button 
                       onClick={() => addToCart(scooter)}
                       className="text-xs font-semibold bg-black text-white px-4 py-2 rounded-full hover:bg-gray-800 transition-colors"
