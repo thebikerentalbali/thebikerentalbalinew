@@ -9,14 +9,16 @@ export default function VendorDashboard() {
   
   // Fleet State
   const [fleet, setFleet] = useState([
-    { id: 1, name: "Vespa Primavera", plate: "DK 4920 FZ", year: "2023", price: 350000, totalUnits: 3, availableUnits: 2 },
-    { id: 2, name: "Honda Scoopy", plate: "DK 1234 AB", year: "2022", price: 150000, totalUnits: 4, availableUnits: 4 }, 
-    { id: 3, name: "Yamaha NMAX", plate: "DK 8888 ZZ", year: "2021", price: 250000, totalUnits: 2, availableUnits: 2 }, 
+    { id: 1, name: "Vespa Primavera", year: "2023", price: 350000, totalUnits: 3, availableUnits: 2 },
+    { id: 2, name: "Honda Scoopy", year: "2022", price: 150000, totalUnits: 4, availableUnits: 4 }, 
+    { id: 3, name: "Yamaha NMAX", year: "2021", price: 250000, totalUnits: 2, availableUnits: 2 }, 
   ])
   const [fleetFilter, setFleetFilter] = useState("All")
+  const [fleetSearch, setFleetSearch] = useState("")
+  const [serviceSearch, setServiceSearch] = useState("")
   const [editingScooter, setEditingScooter] = useState<any>(null)
   const [isAddingScooter, setIsAddingScooter] = useState(false)
-  const [newScooter, setNewScooter] = useState({ name: "", brand: "", cc: "", plate: "", year: "", price: 0, priceWeekly: 0, priceMonthly: 0, totalUnits: 1, availableUnits: 1, photos: [] as string[] })
+  const [newScooter, setNewScooter] = useState({ name: "", brand: "", cc: "", year: "", price: 0, priceWeekly: 0, priceMonthly: 0, totalUnits: 1, availableUnits: 1, photos: [] as string[] })
   return (
     <div className="min-h-screen bg-[#F5F7FA] md:flex pb-28 md:pb-0">
       {/* 
@@ -255,21 +257,33 @@ export default function VendorDashboard() {
         </div>
         ) : activeTab === 'fleet' ? (
           <div className="p-5 md:px-8 pb-12 animate-in fade-in">
-            <div className="flex justify-between items-center mb-6">
-              <div className="relative">
-                <select 
-                  value={fleetFilter}
-                  onChange={(e) => setFleetFilter(e.target.value)}
-                  className="text-xl md:text-2xl font-black text-gray-900 bg-transparent outline-none cursor-pointer appearance-none pr-8 pl-1 w-full"
-                  style={{ WebkitAppearance: 'none' }}
-                >
-                  <option value="All">All Scooters</option>
-                  <option value="Available">Available</option>
-                  <option value="Rented">Rented</option>
-                </select>
-                <ChevronDown className="w-5 h-5 absolute right-1 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" />
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
+              <div className="flex items-center gap-4 flex-1">
+                <div className="relative shrink-0">
+                  <select 
+                    value={fleetFilter}
+                    onChange={(e) => setFleetFilter(e.target.value)}
+                    className="text-xl md:text-2xl font-black text-gray-900 bg-transparent outline-none cursor-pointer appearance-none pr-8 pl-1 w-full"
+                    style={{ WebkitAppearance: 'none' }}
+                  >
+                    <option value="All">All Scooters</option>
+                    <option value="Available">Available</option>
+                    <option value="Rented">Rented</option>
+                  </select>
+                  <ChevronDown className="w-5 h-5 absolute right-1 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" />
+                </div>
+                <div className="relative flex-1 max-w-sm">
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input 
+                    type="text" 
+                    placeholder="Search fleet..." 
+                    value={fleetSearch}
+                    onChange={(e) => setFleetSearch(e.target.value)}
+                    className="w-full bg-white border border-gray-100 rounded-xl pl-9 pr-4 py-2 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all shadow-sm"
+                  />
+                </div>
               </div>
-              <button onClick={() => setIsAddingScooter(true)} className="bg-black text-white px-4 py-2.5 rounded-[14px] text-[13px] font-bold flex items-center gap-2 hover:scale-[1.02] transition-transform shadow-md shadow-black/10">
+              <button onClick={() => setIsAddingScooter(true)} className="bg-black text-white px-4 py-2.5 rounded-[14px] text-[13px] font-bold flex items-center gap-2 hover:scale-[1.02] transition-transform shadow-md shadow-black/10 shrink-0">
                 <Plus className="w-4 h-4" /> Add Scooter
               </button>
             </div>
@@ -293,11 +307,13 @@ export default function VendorDashboard() {
                             <MoreVertical className="w-5 h-5" />
                           </button>
                         </div>
-                        <p className="text-[13px] text-gray-500 mb-3">{scooter.plate} • {scooter.year}</p>
-                        <span className={`px-2.5 py-1.5 rounded-[10px] text-[10px] md:text-[11px] font-black uppercase tracking-wide flex items-center gap-1.5 w-fit ${scooter.availableUnits > 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                          {scooter.availableUnits > 0 ? <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span> : null}
-                          {scooter.availableUnits} / {scooter.totalUnits} Available
-                        </span>
+                        <p className="text-[13px] font-bold text-gray-900 mb-3">Rp {scooter.price.toLocaleString()} <span className="text-gray-500 font-normal">/day</span> • {scooter.year}</p>
+                        <div className="flex flex-wrap items-center gap-2 mt-1">
+                          <span className={`px-2.5 py-1.5 rounded-[10px] text-[10px] md:text-[11px] font-black uppercase tracking-wide flex items-center gap-1.5 w-fit ${scooter.availableUnits > 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                            {scooter.availableUnits > 0 ? <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span> : null}
+                            {scooter.availableUnits} / {scooter.totalUnits} Available
+                          </span>
+                        </div>
                       </div>
                     </div>
                     {/* Action Buttons Row */}
@@ -321,9 +337,9 @@ export default function VendorDashboard() {
                 )
               })}
               {fleet.filter(s => {
-                if (fleetFilter === "Available") return s.availableUnits > 0;
-                if (fleetFilter === "Rented") return s.availableUnits < s.totalUnits;
-                return true;
+                const matchesFilter = fleetFilter === "Available" ? s.availableUnits > 0 : fleetFilter === "Rented" ? s.availableUnits < s.totalUnits : true;
+                const matchesSearch = s.name.toLowerCase().includes(fleetSearch.toLowerCase());
+                return matchesFilter && matchesSearch;
               }).length === 0 && (
                 <div className="col-span-full py-12 text-center text-gray-400 font-bold">No scooters found for this filter.</div>
               )}
@@ -352,18 +368,29 @@ export default function VendorDashboard() {
           </div>
         ) : activeTab === 'maintenance' ? (
           <div className="p-5 md:px-8 pb-12 animate-in fade-in">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Maintenance Log</h2>
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
+              <h2 className="text-2xl font-bold text-gray-900">Maintenance Log</h2>
+              <div className="relative w-full sm:max-w-sm">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input 
+                  type="text" 
+                  placeholder="Search by plate or name..." 
+                  value={serviceSearch}
+                  onChange={(e) => setServiceSearch(e.target.value)}
+                  className="w-full bg-white border border-gray-100 rounded-xl pl-9 pr-4 py-2 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all shadow-sm"
+                />
+              </div>
+            </div>
             <div className="space-y-4">
-              {[1, 2].map((i) => (
+              {[
+                { name: "Yamaha NMAX", plate: "DK 1823 XA", odo: "12,450 km", oil: "10 Aug 2026", service: "15 Jul 2026" },
+                { name: "Honda Vario", plate: "DK 8899 BB", odo: "8,300 km", oil: "05 Aug 2026", service: "20 Jun 2026" }
+              ].filter(s => s.name.toLowerCase().includes(serviceSearch.toLowerCase()) || s.plate.toLowerCase().includes(serviceSearch.toLowerCase())).map((scooter, i) => (
                 <div key={i} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm">
                   <div className="flex items-center gap-4 mb-4">
-                    <div className="w-14 h-14 bg-gray-50 rounded-2xl p-1 shrink-0">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/images/scooter.png" alt="Scooter" className="w-full h-full object-contain" />
-                    </div>
                     <div>
-                      <h3 className="font-bold text-gray-900">Yamaha NMAX</h3>
-                      <p className="text-xs text-gray-500">DK 1823 XA</p>
+                      <h3 className="font-bold text-gray-900">{scooter.name}</h3>
+                      <p className="text-xs text-gray-500 font-bold mt-0.5">{scooter.plate}</p>
                     </div>
                     <button className="ml-auto bg-gray-100 hover:bg-gray-200 text-black px-3 py-1.5 rounded-full text-xs font-bold transition-colors">
                       Update Log
@@ -372,19 +399,25 @@ export default function VendorDashboard() {
                   <div className="grid grid-cols-3 gap-2 border-t border-gray-50 pt-4">
                     <div>
                       <p className="text-[10px] text-gray-500 font-semibold uppercase mb-1">Odometer</p>
-                      <p className="text-sm font-bold text-gray-900">12,450 km</p>
+                      <p className="text-sm font-bold text-gray-900">{scooter.odo}</p>
                     </div>
                     <div>
                       <p className="text-[10px] text-gray-500 font-semibold uppercase mb-1">Last Oil Change</p>
-                      <p className="text-sm font-bold text-gray-900">10 Aug 2026</p>
+                      <p className="text-sm font-bold text-gray-900">{scooter.oil}</p>
                     </div>
                     <div>
                       <p className="text-[10px] text-gray-500 font-semibold uppercase mb-1">Last Service</p>
-                      <p className="text-sm font-bold text-gray-900">15 Jul 2026</p>
+                      <p className="text-sm font-bold text-gray-900">{scooter.service}</p>
                     </div>
                   </div>
                 </div>
               ))}
+              {[
+                { name: "Yamaha NMAX", plate: "DK 1823 XA", odo: "12,450 km", oil: "10 Aug 2026", service: "15 Jul 2026" },
+                { name: "Honda Vario", plate: "DK 8899 BB", odo: "8,300 km", oil: "05 Aug 2026", service: "20 Jun 2026" }
+              ].filter(s => s.name.toLowerCase().includes(serviceSearch.toLowerCase()) || s.plate.toLowerCase().includes(serviceSearch.toLowerCase())).length === 0 && (
+                <div className="py-12 text-center text-gray-400 font-bold">No records found.</div>
+              )}
             </div>
           </div>
         ) : activeTab === 'profile' || activeTab === 'settings' ? (
@@ -464,15 +497,9 @@ export default function VendorDashboard() {
                       <input type="text" placeholder="e.g. 155cc" value={newScooter.cc} onChange={e => setNewScooter({...newScooter, cc: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Plate Prefix</label>
-                      <input type="text" placeholder="e.g. DK" value={newScooter.plate} onChange={e => setNewScooter({...newScooter, plate: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Year</label>
-                      <input type="text" placeholder="2024" value={newScooter.year} onChange={e => setNewScooter({...newScooter, year: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
-                    </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Year</label>
+                    <input type="text" placeholder="2024" value={newScooter.year} onChange={e => setNewScooter({...newScooter, year: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                   </div>
                 </div>
 
@@ -505,7 +532,7 @@ export default function VendorDashboard() {
                       if(!newScooter.name) return;
                       setFleet([...fleet, { ...newScooter, id: Date.now(), availableUnits: newScooter.totalUnits }]);
                       setIsAddingScooter(false);
-                      setNewScooter({ name: "", brand: "", cc: "", plate: "", year: "", price: 0, priceWeekly: 0, priceMonthly: 0, totalUnits: 1, availableUnits: 1, photos: [] });
+                      setNewScooter({ name: "", brand: "", cc: "", year: "", price: 0, priceWeekly: 0, priceMonthly: 0, totalUnits: 1, availableUnits: 1, photos: [] });
                     }} 
                     className="w-full bg-black text-white rounded-[20px] py-4 font-black text-lg hover:scale-[1.01] shadow-xl shadow-black/10 transition-transform">
                     Publish
@@ -541,10 +568,6 @@ export default function VendorDashboard() {
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Plate</label>
-                    <input type="text" value={editingScooter.plate} onChange={e => setEditingScooter({...editingScooter, plate: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
-                  </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Year</label>
                     <input type="text" value={editingScooter.year} onChange={e => setEditingScooter({...editingScooter, year: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
