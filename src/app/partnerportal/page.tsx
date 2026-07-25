@@ -280,41 +280,42 @@ export default function VendorDashboard() {
                 return true;
               }).map((scooter) => {
                 return (
-                  <div key={scooter.id} className="bg-white p-5 md:p-6 rounded-[28px] border border-gray-100 flex items-center gap-5 shadow-sm hover:shadow-md hover:border-gray-200 transition-all relative group">
-                    <div className="w-24 h-24 bg-gray-50 rounded-[20px] p-2 shrink-0">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/images/scooter.png" alt="Scooter" className="w-full h-full object-contain" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start mb-1">
-                        <h3 className="font-bold text-gray-900 text-lg md:text-xl truncate pr-2" title={scooter.name}>{scooter.name}</h3>
-                        <button onClick={() => setEditingScooter(scooter)} className="text-gray-400 hover:text-black p-1 shrink-0">
-                          <MoreVertical className="w-5 h-5" />
-                        </button>
+                  <div key={scooter.id} className="bg-white p-5 md:p-6 rounded-[28px] border border-gray-100 flex flex-col gap-4 shadow-sm hover:shadow-md hover:border-gray-200 transition-all relative group">
+                    <div className="flex items-center gap-5">
+                      <div className="w-24 h-24 bg-gray-50 rounded-[20px] p-2 shrink-0">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/images/scooter.png" alt="Scooter" className="w-full h-full object-contain" />
                       </div>
-                      <p className="text-[13px] text-gray-500 mb-3">{scooter.plate} • {scooter.year}</p>
-                      <div className="flex flex-wrap items-center gap-2 mt-1">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start mb-1">
+                          <h3 className="font-bold text-gray-900 text-lg md:text-xl truncate pr-2" title={scooter.name}>{scooter.name}</h3>
+                          <button onClick={() => setEditingScooter(scooter)} className="text-gray-400 hover:text-black p-1 shrink-0">
+                            <MoreVertical className="w-5 h-5" />
+                          </button>
+                        </div>
+                        <p className="text-[13px] text-gray-500 mb-3">{scooter.plate} • {scooter.year}</p>
                         <span className={`px-2.5 py-1.5 rounded-[10px] text-[10px] md:text-[11px] font-black uppercase tracking-wide flex items-center gap-1.5 w-fit ${scooter.availableUnits > 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
                           {scooter.availableUnits > 0 ? <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span> : null}
                           {scooter.availableUnits} / {scooter.totalUnits} Available
                         </span>
-                        {scooter.availableUnits < scooter.totalUnits && (
-                          <button 
-                            onClick={() => setFleet(f => f.map(s => s.id === scooter.id ? { ...s, availableUnits: s.availableUnits + 1 } : s))} 
-                            className="text-[11px] bg-gray-100 text-gray-600 font-bold px-3 py-1.5 rounded-[10px] hover:bg-gray-200 transition-colors"
-                          >
-                            Return
-                          </button>
-                        )}
-                        {scooter.availableUnits > 0 && (
-                          <button 
-                            onClick={() => setFleet(f => f.map(s => s.id === scooter.id ? { ...s, availableUnits: s.availableUnits - 1 } : s))} 
-                            className="text-[11px] bg-black text-white font-bold px-3 py-1.5 rounded-[10px] hover:bg-gray-800 transition-colors"
-                          >
-                            Rent Out
-                          </button>
-                        )}
                       </div>
+                    </div>
+                    {/* Action Buttons Row */}
+                    <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-50">
+                      <button 
+                        disabled={scooter.availableUnits === scooter.totalUnits}
+                        onClick={() => setFleet(f => f.map(s => s.id === scooter.id ? { ...s, availableUnits: s.availableUnits + 1 } : s))} 
+                        className={`py-3 rounded-[14px] font-bold text-sm transition-all ${scooter.availableUnits < scooter.totalUnits ? 'bg-gray-100 text-gray-900 hover:bg-gray-200' : 'bg-gray-50 text-gray-400 opacity-50 cursor-not-allowed'}`}
+                      >
+                        Return
+                      </button>
+                      <button 
+                        disabled={scooter.availableUnits === 0}
+                        onClick={() => setFleet(f => f.map(s => s.id === scooter.id ? { ...s, availableUnits: s.availableUnits - 1 } : s))} 
+                        className={`py-3 rounded-[14px] font-bold text-sm transition-all ${scooter.availableUnits > 0 ? 'bg-black text-white hover:bg-gray-800 hover:scale-[1.02] shadow-md shadow-black/10' : 'bg-gray-100 text-gray-400 opacity-50 cursor-not-allowed'}`}
+                      >
+                        Rent Out
+                      </button>
                     </div>
                   </div>
                 )
@@ -497,11 +498,9 @@ export default function VendorDashboard() {
                     <input type="number" min="1" value={newScooter.totalUnits} onChange={e => setNewScooter({...newScooter, totalUnits: parseInt(e.target.value) || 1})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                   </div>
                 </div>
-              </div>
-
-              {/* Fixed Bottom Bar */}
-              <div className="fixed bottom-0 left-0 right-0 p-4 md:p-6 bg-white border-t border-gray-100 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-20">
-                <div className="max-w-3xl mx-auto">
+                </div>
+                
+                <div className="pt-4">
                   <button 
                     onClick={() => {
                       if(!newScooter.name) return;
@@ -510,10 +509,11 @@ export default function VendorDashboard() {
                       setNewScooter({ name: "", brand: "", cc: "", plate: "", year: "", price: 0, priceWeekly: 0, priceMonthly: 0, totalUnits: 1, availableUnits: 1, photos: [] });
                     }} 
                     className="w-full bg-black text-white rounded-[20px] py-4 font-black text-lg hover:scale-[1.01] shadow-xl shadow-black/10 transition-transform">
-                    Add to Fleet
+                    Publish
                   </button>
                 </div>
               </div>
+
             </div>
           </div>
         )}
