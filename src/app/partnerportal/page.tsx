@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Bike, DollarSign, CalendarDays, Settings, Bell, Search, Star, Plus, QrCode, Home, Wallet, User, ChevronRight, TrendingUp } from "lucide-react"
+import { Bike, DollarSign, CalendarDays, Settings, Bell, Search, Star, Plus, QrCode, Home, Wallet, User, ChevronRight, TrendingUp, Wrench, MoreVertical, CheckCircle2, Clock } from "lucide-react"
 import Link from "next/link"
 
 export default function VendorDashboard() {
@@ -38,6 +38,10 @@ export default function VendorDashboard() {
           <button onClick={() => setActiveTab('earnings')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors ${activeTab === 'earnings' ? 'bg-black text-white shadow-md shadow-black/10' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}>
             <Wallet className="w-5 h-5" />
             <span className="font-semibold text-[15px]">Earnings</span>
+          </button>
+          <button onClick={() => setActiveTab('maintenance')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors ${activeTab === 'maintenance' ? 'bg-black text-white shadow-md shadow-black/10' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}>
+            <Wrench className="w-5 h-5" />
+            <span className="font-semibold text-[15px]">Maintenance</span>
           </button>
           <button onClick={() => setActiveTab('settings')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors ${activeTab === 'settings' ? 'bg-black text-white shadow-md shadow-black/10' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}>
             <Settings className="w-5 h-5" />
@@ -264,17 +268,120 @@ export default function VendorDashboard() {
           </div>
 
         </div>
-        ) : (
-          <div className="p-5 md:px-8 md:pb-12 flex flex-col items-center justify-center flex-1 min-h-[50vh] text-center animate-in fade-in slide-in-from-bottom-4">
-            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-              {activeTab === 'fleet' && <Bike className="w-10 h-10 text-gray-400" />}
-              {activeTab === 'bookings' && <CalendarDays className="w-10 h-10 text-gray-400" />}
-              {activeTab === 'earnings' && <Wallet className="w-10 h-10 text-gray-400" />}
-              {activeTab === 'profile' && <User className="w-10 h-10 text-gray-400" />}
-              {activeTab === 'settings' && <Settings className="w-10 h-10 text-gray-400" />}
+        ) : activeTab === 'fleet' ? (
+          <div className="p-5 md:px-8 pb-12 animate-in fade-in">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">My Fleet</h2>
+              <button className="bg-black text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2">
+                <Plus className="w-4 h-4" /> Add Scooter
+              </button>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2 capitalize">{activeTab} Management</h2>
-            <p className="text-gray-500 max-w-sm">This section is currently under development. Check back soon for updates!</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-white p-4 rounded-3xl border border-gray-100 flex items-center gap-4 shadow-sm hover:border-gray-300 transition-all">
+                  <div className="w-20 h-20 bg-gray-50 rounded-2xl p-2 shrink-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/images/scooter.png" alt="Scooter" className="w-full h-full object-contain" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <h3 className="font-bold text-gray-900">Vespa Primavera</h3>
+                      <button><MoreVertical className="w-4 h-4 text-gray-400" /></button>
+                    </div>
+                    <p className="text-xs text-gray-500 mb-2">DK 4920 FZ • 2023</p>
+                    <div className="flex items-center gap-2">
+                      <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide">Available</span>
+                      <span className="text-sm font-bold text-gray-900">Rp 350k<span className="text-gray-500 text-xs font-normal">/day</span></span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : activeTab === 'bookings' ? (
+          <div className="p-5 md:px-8 pb-12 animate-in fade-in">
+             <h2 className="text-2xl font-bold text-gray-900 mb-6">All Bookings</h2>
+             <div className="space-y-3">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="bg-white p-4 rounded-3xl border border-gray-100 flex items-center gap-4 shadow-sm">
+                  <div className="w-12 h-12 bg-gray-50 rounded-2xl overflow-hidden shrink-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/images/scooter.png" alt="Scooter" className="w-full h-full object-cover opacity-80" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start mb-1">
+                      <h4 className="font-bold text-gray-900 text-[15px]">Honda Scoopy</h4>
+                      <span className="bg-yellow-100 text-yellow-700 px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide">In Progress</span>
+                    </div>
+                    <p className="text-[13px] font-medium text-gray-500">Aug 12 - Aug 15 • <span className="text-gray-900 font-bold">Rp 450.000</span></p>
+                  </div>
+                </div>
+              ))}
+             </div>
+          </div>
+        ) : activeTab === 'maintenance' ? (
+          <div className="p-5 md:px-8 pb-12 animate-in fade-in">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Maintenance Log</h2>
+            <div className="space-y-4">
+              {[1, 2].map((i) => (
+                <div key={i} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-14 h-14 bg-gray-50 rounded-2xl p-1 shrink-0">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="/images/scooter.png" alt="Scooter" className="w-full h-full object-contain" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-gray-900">Yamaha NMAX</h3>
+                      <p className="text-xs text-gray-500">DK 1823 XA</p>
+                    </div>
+                    <button className="ml-auto bg-gray-100 hover:bg-gray-200 text-black px-3 py-1.5 rounded-full text-xs font-bold transition-colors">
+                      Update Log
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 border-t border-gray-50 pt-4">
+                    <div>
+                      <p className="text-[10px] text-gray-500 font-semibold uppercase mb-1">Odometer</p>
+                      <p className="text-sm font-bold text-gray-900">12,450 km</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-gray-500 font-semibold uppercase mb-1">Last Oil Change</p>
+                      <p className="text-sm font-bold text-gray-900">10 Aug 2026</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-gray-500 font-semibold uppercase mb-1">Last Service</p>
+                      <p className="text-sm font-bold text-gray-900">15 Jul 2026</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : activeTab === 'profile' || activeTab === 'settings' ? (
+          <div className="p-5 md:px-8 pb-12 animate-in fade-in max-w-2xl">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Profile Settings</h2>
+            <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm space-y-5">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Vendor Name</label>
+                <input type="text" defaultValue="Putu Rentals" className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">WhatsApp Number</label>
+                <input type="text" defaultValue="+62 851 7411 9423" className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Location / Address</label>
+                <textarea defaultValue="Jl. Monkey Forest No. 12, Ubud, Bali" className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all min-h-[100px]"></textarea>
+              </div>
+              <button className="w-full bg-black text-white rounded-xl py-3.5 font-bold text-sm hover:scale-[1.02] transition-transform">Save Changes</button>
+            </div>
+          </div>
+        ) : (
+          <div className="p-5 md:px-8 pb-12 flex flex-col items-center justify-center flex-1 min-h-[50vh] text-center animate-in fade-in slide-in-from-bottom-4">
+             <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+               {activeTab === 'earnings' && <Wallet className="w-10 h-10 text-gray-400" />}
+             </div>
+             <h2 className="text-2xl font-bold text-gray-900 mb-2 capitalize">{activeTab} Management</h2>
+             <p className="text-gray-500 max-w-sm">This section is currently under development. Check back soon for updates!</p>
           </div>
         )}
       </main>
@@ -285,32 +392,39 @@ export default function VendorDashboard() {
         ========================================================================
       */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-50 rounded-t-[32px] shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
-        <div className="flex justify-around items-center pt-3 pb-8 px-4">
-          <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group ${activeTab === 'home' ? 'text-black' : 'text-gray-400 hover:text-black'}`}>
+        <div className="flex justify-between items-center pt-3 pb-8 px-4 sm:px-6">
+          <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors flex-1 group ${activeTab === 'home' ? 'text-black' : 'text-gray-400 hover:text-black'}`}>
             <div className={`${activeTab === 'home' ? 'bg-black/5' : 'group-hover:bg-black/5'} p-1.5 rounded-full transition-colors`}>
-              <Home className="w-6 h-6" />
+              <Home className="w-5 h-5" />
             </div>
             <span className="text-[10px] font-bold">Home</span>
           </button>
           
-          <button onClick={() => setActiveTab('fleet')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group ${activeTab === 'fleet' ? 'text-black' : 'text-gray-400 hover:text-black'}`}>
+          <button onClick={() => setActiveTab('fleet')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors flex-1 group ${activeTab === 'fleet' ? 'text-black' : 'text-gray-400 hover:text-black'}`}>
             <div className={`${activeTab === 'fleet' ? 'bg-black/5' : 'group-hover:bg-black/5'} p-1.5 rounded-full transition-colors`}>
-              <Bike className="w-6 h-6" />
+              <Bike className="w-5 h-5" />
             </div>
             <span className="text-[10px] font-bold">Fleet</span>
           </button>
           
-          <button onClick={() => setActiveTab('bookings')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group relative ${activeTab === 'bookings' ? 'text-black' : 'text-gray-400 hover:text-black'}`}>
+          <button onClick={() => setActiveTab('bookings')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors flex-1 group relative ${activeTab === 'bookings' ? 'text-black' : 'text-gray-400 hover:text-black'}`}>
             <div className={`${activeTab === 'bookings' ? 'bg-black/5' : 'group-hover:bg-black/5'} p-1.5 rounded-full transition-colors relative`}>
               <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
-              <CalendarDays className="w-6 h-6" />
+              <CalendarDays className="w-5 h-5" />
             </div>
             <span className="text-[10px] font-bold">Bookings</span>
           </button>
           
-          <button onClick={() => setActiveTab('profile')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group ${activeTab === 'profile' ? 'text-black' : 'text-gray-400 hover:text-black'}`}>
+          <button onClick={() => setActiveTab('maintenance')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors flex-1 group ${activeTab === 'maintenance' ? 'text-black' : 'text-gray-400 hover:text-black'}`}>
+            <div className={`${activeTab === 'maintenance' ? 'bg-black/5' : 'group-hover:bg-black/5'} p-1.5 rounded-full transition-colors`}>
+              <Wrench className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] font-bold truncate max-w-full">Service</span>
+          </button>
+
+          <button onClick={() => setActiveTab('profile')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors flex-1 group ${activeTab === 'profile' ? 'text-black' : 'text-gray-400 hover:text-black'}`}>
             <div className={`${activeTab === 'profile' ? 'bg-black/5' : 'group-hover:bg-black/5'} p-1.5 rounded-full transition-colors`}>
-              <User className="w-6 h-6" />
+              <User className="w-5 h-5" />
             </div>
             <span className="text-[10px] font-bold">Profile</span>
           </button>
