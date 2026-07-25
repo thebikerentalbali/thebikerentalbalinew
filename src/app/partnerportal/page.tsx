@@ -1,11 +1,42 @@
 "use client"
 
-import { useState } from "react"
-import { Bike, DollarSign, CalendarDays, Settings, Bell, Search, Star, Plus, QrCode, Home, Wallet, User, ChevronRight, TrendingUp, Wrench, MoreVertical, CheckCircle2, Clock } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Bike, DollarSign, CalendarDays, Settings, Bell, Search, Star, Plus, QrCode, Home, Wallet, User, ChevronRight, TrendingUp, Wrench, MoreVertical, CheckCircle2, Clock, X } from "lucide-react"
 import Link from "next/link"
 
 export default function VendorDashboard() {
   const [activeTab, setActiveTab] = useState("home")
+  
+  // Fleet State
+  const [fleet, setFleet] = useState([
+    { id: 1, name: "Vespa Primavera", plate: "DK 4920 FZ", year: "2023", price: 350000, status: "Available", returnDate: null },
+    { id: 2, name: "Honda Scoopy", plate: "DK 1234 AB", year: "2022", price: 150000, status: "Rented", returnDate: new Date(Date.now() + 15000).toISOString() }, 
+    { id: 3, name: "Yamaha NMAX", plate: "DK 8888 ZZ", year: "2021", price: 250000, status: "Rented", returnDate: new Date(Date.now() - 10000).toISOString() }, 
+  ])
+  const [fleetFilter, setFleetFilter] = useState("All")
+  const [editingScooter, setEditingScooter] = useState<any>(null)
+  const [rentingScooter, setRentingScooter] = useState<any>(null)
+  const [returnDateInput, setReturnDateInput] = useState("")
+
+  // Auto-expire rented scooters
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFleet(currentFleet => {
+        let changed = false;
+        const newFleet = currentFleet.map(scooter => {
+          if (scooter.status === 'Rented' && scooter.returnDate) {
+            if (new Date() >= new Date(scooter.returnDate)) {
+              changed = true;
+              return { ...scooter, status: 'Available', returnDate: null };
+            }
+          }
+          return scooter;
+        });
+        return changed ? newFleet : currentFleet;
+      });
+    }, 1000); 
+    return () => clearInterval(interval);
+  }, []);
   return (
     <div className="min-h-screen bg-[#F5F7FA] md:flex pb-28 md:pb-0">
       {/* 
@@ -69,34 +100,8 @@ export default function VendorDashboard() {
         MAIN CONTENT
         ========================================================================
       */}
-      <main className="flex-1 w-full max-w-full md:max-w-4xl lg:max-w-5xl mx-auto flex flex-col min-h-screen">
+      <main className="flex-1 w-full max-w-full md:max-w-4xl lg:max-w-5xl mx-auto flex flex-col min-h-screen pt-4 md:pt-8">
         
-        {/* Mobile App-like Header */}
-        <header className="bg-white/80 backdrop-blur-xl sticky top-0 z-30 px-5 py-4 border-b border-gray-100 flex items-center justify-between md:py-6 md:px-8 md:bg-transparent md:border-none md:backdrop-blur-none">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-yellow-400 to-orange-500 p-[2px] shrink-0 md:hidden">
-              <div className="w-full h-full bg-white rounded-full flex items-center justify-center">
-                <span className="font-bold text-gray-800 text-xs">PR</span>
-              </div>
-            </div>
-            <div>
-              <h1 className="text-xl md:text-3xl font-bold text-gray-900 leading-tight">Overview</h1>
-              <p className="text-xs font-medium text-gray-500 md:text-sm md:mt-1 hidden md:block">Welcome back, Putu Rentals</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-3 md:gap-5">
-            <div className="relative hidden md:block">
-              <Search className="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
-              <input type="text" placeholder="Search bookings, scooters..." className="pl-11 pr-4 py-2.5 bg-white rounded-full text-sm font-medium outline-none w-72 shadow-sm border border-gray-100 focus:border-gray-300 focus:ring-4 focus:ring-gray-50 transition-all" />
-            </div>
-            <Link href="#" className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full border border-gray-100 flex items-center justify-center shadow-sm relative hover:bg-gray-50 transition-colors">
-              <span className="absolute top-2.5 right-2.5 md:top-3 md:right-3 w-2 h-2 md:w-2.5 md:h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
-              <Bell className="w-5 h-5 text-gray-700" />
-            </Link>
-          </div>
-        </header>
-
         {/* Dashboard Content */}
         {activeTab === 'home' ? (
         <div className="p-5 md:px-8 md:pb-12 space-y-6 md:space-y-8">
@@ -271,31 +276,52 @@ export default function VendorDashboard() {
         ) : activeTab === 'fleet' ? (
           <div className="p-5 md:px-8 pb-12 animate-in fade-in">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">My Fleet</h2>
+              <select 
+                value={fleetFilter}
+                onChange={(e) => setFleetFilter(e.target.value)}
+                className="text-2xl font-bold text-gray-900 bg-transparent outline-none cursor-pointer appearance-none pr-4"
+                style={{ WebkitAppearance: 'none' }}
+              >
+                <option value="All">All Scooters</option>
+                <option value="Available">Available</option>
+                <option value="Rented">Rented</option>
+              </select>
               <button className="bg-black text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2">
                 <Plus className="w-4 h-4" /> Add Scooter
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-white p-4 rounded-3xl border border-gray-100 flex items-center gap-4 shadow-sm hover:border-gray-300 transition-all">
+              {fleet.filter(s => fleetFilter === "All" || s.status === fleetFilter).map((scooter) => (
+                <div key={scooter.id} className="bg-white p-4 rounded-3xl border border-gray-100 flex items-center gap-4 shadow-sm hover:border-gray-300 transition-all relative group">
                   <div className="w-20 h-20 bg-gray-50 rounded-2xl p-2 shrink-0">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="/images/scooter.png" alt="Scooter" className="w-full h-full object-contain" />
                   </div>
                   <div className="flex-1">
                     <div className="flex justify-between items-start">
-                      <h3 className="font-bold text-gray-900">Vespa Primavera</h3>
-                      <button><MoreVertical className="w-4 h-4 text-gray-400" /></button>
+                      <h3 className="font-bold text-gray-900">{scooter.name}</h3>
+                      <div className="flex gap-2">
+                        {scooter.status === 'Available' && (
+                          <button onClick={() => { setRentingScooter(scooter); setReturnDateInput(""); }} className="text-[10px] bg-black text-white font-bold px-2 py-1 rounded-md">Rent Out</button>
+                        )}
+                        <button onClick={() => setEditingScooter(scooter)} className="text-gray-400 hover:text-black">
+                          <MoreVertical className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
-                    <p className="text-xs text-gray-500 mb-2">DK 4920 FZ • 2023</p>
+                    <p className="text-xs text-gray-500 mb-2">{scooter.plate} • {scooter.year}</p>
                     <div className="flex items-center gap-2">
-                      <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide">Available</span>
-                      <span className="text-sm font-bold text-gray-900">Rp 350k<span className="text-gray-500 text-xs font-normal">/day</span></span>
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide ${scooter.status === 'Available' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                        {scooter.status}
+                      </span>
+                      <span className="text-sm font-bold text-gray-900">Rp {scooter.price.toLocaleString()}<span className="text-gray-500 text-xs font-normal">/day</span></span>
                     </div>
                   </div>
                 </div>
               ))}
+              {fleet.filter(s => fleetFilter === "All" || s.status === fleetFilter).length === 0 && (
+                <div className="col-span-full py-8 text-center text-gray-500 font-medium">No scooters found for this filter.</div>
+              )}
             </div>
           </div>
         ) : activeTab === 'bookings' ? (
@@ -384,6 +410,75 @@ export default function VendorDashboard() {
              <p className="text-gray-500 max-w-sm">This section is currently under development. Check back soon for updates!</p>
           </div>
         )}
+
+        {/* Edit Modal */}
+        {editingScooter && (
+          <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl p-6 w-full max-w-md animate-in zoom-in-95 duration-200">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold">Edit Scooter Details</h3>
+                <button onClick={() => setEditingScooter(null)}><X className="w-5 h-5 text-gray-400" /></button>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Name</label>
+                  <input type="text" value={editingScooter.name} onChange={e => setEditingScooter({...editingScooter, name: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Plate</label>
+                    <input type="text" value={editingScooter.plate} onChange={e => setEditingScooter({...editingScooter, plate: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Year</label>
+                    <input type="text" value={editingScooter.year} onChange={e => setEditingScooter({...editingScooter, year: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Daily Price (Rp)</label>
+                  <input type="number" value={editingScooter.price} onChange={e => setEditingScooter({...editingScooter, price: parseInt(e.target.value) || 0})} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none" />
+                </div>
+              </div>
+              <button 
+                onClick={() => {
+                  setFleet(f => f.map(s => s.id === editingScooter.id ? editingScooter : s));
+                  setEditingScooter(null);
+                }} 
+                className="w-full mt-6 bg-black text-white rounded-xl py-3.5 font-bold text-sm hover:scale-[1.02] transition-transform">
+                Save Changes
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Rent Modal */}
+        {rentingScooter && (
+          <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl p-6 w-full max-w-md animate-in zoom-in-95 duration-200">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold">Mark as Rented</h3>
+                <button onClick={() => setRentingScooter(null)}><X className="w-5 h-5 text-gray-400" /></button>
+              </div>
+              <div className="space-y-4">
+                <p className="text-sm text-gray-500 font-medium">Set the return date and time. Once this time passes, {rentingScooter.name} will automatically be marked as Available.</p>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Return Date & Time</label>
+                  <input type="datetime-local" value={returnDateInput} onChange={e => setReturnDateInput(e.target.value)} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none" />
+                </div>
+              </div>
+              <button 
+                onClick={() => {
+                  if(!returnDateInput) return;
+                  setFleet(f => f.map(s => s.id === rentingScooter.id ? { ...s, status: 'Rented', returnDate: new Date(returnDateInput).toISOString() } : s));
+                  setRentingScooter(null);
+                }} 
+                className="w-full mt-6 bg-black text-white rounded-xl py-3.5 font-bold text-sm hover:scale-[1.02] transition-transform">
+                Confirm Rental
+              </button>
+            </div>
+          </div>
+        )}
+
       </main>
 
       {/* 
