@@ -5,9 +5,9 @@ import Link from "next/link"
 import { ChevronLeft, Bell, Star, MapPin, Map, Info, Minus, Plus, PlusCircle, X, Trash2 } from "lucide-react"
 
 const vendorScooters = [
-  { id: 1, name: "Vespa Primavera", daily: 350000, weekly: 2100000, monthly: 7000000, img: "/images/scooter.png", rating: 4.9, brand: "Vespa" },
-  { id: 2, name: "Honda Scoopy", daily: 150000, weekly: 900000, monthly: 3000000, img: "/images/scooter.png", rating: 4.8, brand: "Honda" },
-  { id: 3, name: "Yamaha NMAX", daily: 200000, weekly: 1200000, monthly: 4000000, img: "/images/scooter.png", rating: 4.7, brand: "Yamaha" },
+  { id: 1, name: "Vespa Primavera", daily: 350000, weekly: 2100000, monthly: 7000000, img: "/images/scooter.png", rating: 4.9, brand: "Vespa", available: 5 },
+  { id: 2, name: "Honda Scoopy", daily: 150000, weekly: 900000, monthly: 3000000, img: "/images/scooter.png", rating: 4.8, brand: "Honda", available: 3 },
+  { id: 3, name: "Yamaha NMAX", daily: 200000, weekly: 1200000, monthly: 4000000, img: "/images/scooter.png", rating: 4.7, brand: "Yamaha", available: 2 },
 ]
 
 export default function CheckoutPage() {
@@ -31,7 +31,7 @@ export default function CheckoutPage() {
     setCart(prev => prev.map(item => {
       if (item.id === id) {
         const newQ = item.quantity + delta
-        return { ...item, quantity: Math.max(1, newQ) } // prevent going below 1 via this button
+        return { ...item, quantity: Math.max(1, Math.min(newQ, item.available)) } // prevent going below 1 or above available
       }
       return item
     }))
@@ -141,6 +141,8 @@ export default function CheckoutPage() {
                     <span className="text-[12px] font-medium">{item.rating}</span>
                     <span className="mx-1">•</span>
                     <span className="text-[12px] font-medium">{item.brand}</span>
+                    <span className="mx-1">•</span>
+                    <span className="text-[12px] font-medium text-[#E65100]">{item.available} Available</span>
                   </div>
                   
                   <div className="flex items-end justify-between mt-auto">
@@ -388,7 +390,8 @@ export default function CheckoutPage() {
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-gray-900 text-[14px]">{scooter.name}</h3>
-                    <p className="text-[12px] text-gray-500 mb-2">Rp {scooter.daily.toLocaleString()}/Day</p>
+                    <p className="text-[12px] text-gray-500 mb-1">Rp {scooter.daily.toLocaleString()}/Day</p>
+                    <p className="text-[11px] text-[#E65100] font-medium mb-2">{scooter.available} Available</p>
                     <button 
                       onClick={() => addToCart(scooter)}
                       className="text-xs font-semibold bg-black text-white px-4 py-2 rounded-full hover:bg-gray-800 transition-colors"

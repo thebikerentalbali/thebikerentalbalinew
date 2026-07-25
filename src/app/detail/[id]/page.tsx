@@ -76,9 +76,13 @@ export default function DetailPage() {
               <span className="text-gray-500 text-sm">Fuel Capacity</span>
               <span className="font-medium text-gray-900 text-sm">7 Liters</span>
             </div>
-            <div className="flex items-center justify-between py-3">
+            <div className="flex items-center justify-between py-3 border-b border-gray-50">
               <span className="text-gray-500 text-sm">Transmission</span>
               <span className="font-medium text-gray-900 text-sm">Automatic</span>
+            </div>
+            <div className="flex items-center justify-between py-3">
+              <span className="text-gray-500 text-sm">Available</span>
+              <span className="font-medium text-[#E65100] text-sm">5 Units</span>
             </div>
           </div>
         </div>
