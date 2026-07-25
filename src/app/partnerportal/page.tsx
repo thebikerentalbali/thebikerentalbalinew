@@ -22,11 +22,11 @@ export default function VendorDashboard() {
 
   // Service State
   const [serviceLogs, setServiceLogs] = useState([
-    { id: 1, name: "Yamaha NMAX", plate: "DK 1823 XA", odo: "12,450", oil: "2026-08-10", service: "2026-07-15" },
-    { id: 2, name: "Honda Vario", plate: "DK 8899 BB", odo: "8,300", oil: "2026-08-05", service: "2026-06-20" }
+    { id: 1, name: "Yamaha NMAX", plate: "DK 1823 XA", odo: "12,450", oil: "2026-08-10", service: "2026-07-15", nextOil: "2026-11-10", nextService: "2026-10-15" },
+    { id: 2, name: "Honda Vario", plate: "DK 8899 BB", odo: "8,300", oil: "2026-08-05", service: "2026-06-20", nextOil: "2026-11-05", nextService: "2026-09-20" }
   ])
   const [isAddingServiceScooter, setIsAddingServiceScooter] = useState(false)
-  const [newServiceScooter, setNewServiceScooter] = useState({ name: "", plate: "", odo: "", oil: "", service: "" })
+  const [newServiceScooter, setNewServiceScooter] = useState({ name: "", plate: "", odo: "", oil: "", service: "", nextOil: "", nextService: "" })
   const [editingServiceLog, setEditingServiceLog] = useState<any>(null)
   return (
     <div className="min-h-screen bg-[#F5F7FA] md:flex pb-28 md:pb-0">
@@ -404,21 +404,30 @@ export default function VendorDashboard() {
                       <p className="text-xs text-gray-500 font-bold mt-0.5">{scooter.plate}</p>
                     </div>
                     <button onClick={() => setEditingServiceLog(scooter)} className="ml-auto bg-gray-100 hover:bg-gray-200 text-black px-3 py-1.5 rounded-full text-xs font-bold transition-colors">
-                      Update Log
+                      Record Service
                     </button>
                   </div>
-                  <div className="grid grid-cols-3 gap-2 border-t border-gray-50 pt-4">
+                  <div className="grid grid-cols-2 gap-y-4 gap-x-2 border-t border-gray-50 pt-4">
                     <div>
                       <p className="text-[10px] text-gray-500 font-semibold uppercase mb-1">Odometer</p>
                       <p className="text-sm font-bold text-gray-900">{scooter.odo} km</p>
                     </div>
+                    <div></div>
                     <div>
                       <p className="text-[10px] text-gray-500 font-semibold uppercase mb-1">Last Oil</p>
                       <p className="text-sm font-bold text-gray-900">{scooter.oil}</p>
                     </div>
                     <div>
+                      <p className="text-[10px] text-blue-500 font-semibold uppercase mb-1">Next Oil</p>
+                      <p className="text-sm font-bold text-blue-700">{scooter.nextOil || 'N/A'}</p>
+                    </div>
+                    <div>
                       <p className="text-[10px] text-gray-500 font-semibold uppercase mb-1">Last Service</p>
                       <p className="text-sm font-bold text-gray-900">{scooter.service}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-red-500 font-semibold uppercase mb-1">Next Service</p>
+                      <p className="text-sm font-bold text-red-700">{scooter.nextService || 'N/A'}</p>
                     </div>
                   </div>
                 </div>
@@ -633,9 +642,9 @@ export default function VendorDashboard() {
               <button 
                 onClick={() => {
                   if(!newServiceScooter.name || !newServiceScooter.plate) return;
-                  setServiceLogs([...serviceLogs, { ...newServiceScooter, id: Date.now(), odo: "0", oil: "N/A", service: "N/A" }]);
+                  setServiceLogs([...serviceLogs, { ...newServiceScooter, id: Date.now(), odo: "0", oil: "N/A", service: "N/A", nextOil: "N/A", nextService: "N/A" }]);
                   setIsAddingServiceScooter(false);
-                  setNewServiceScooter({ name: "", plate: "", odo: "", oil: "", service: "" });
+                  setNewServiceScooter({ name: "", plate: "", odo: "", oil: "", service: "", nextOil: "", nextService: "" });
                 }} 
                 className="w-full mt-8 bg-black text-white rounded-[16px] py-4 font-black text-sm hover:scale-[1.02] shadow-xl shadow-black/10 transition-all">
                 Add to Service Tracker
@@ -660,13 +669,25 @@ export default function VendorDashboard() {
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Odometer (km)</label>
                   <input type="text" value={editingServiceLog.odo} onChange={e => setEditingServiceLog({...editingServiceLog, odo: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Last Oil Change (Date)</label>
-                  <input type="text" value={editingServiceLog.oil} onChange={e => setEditingServiceLog({...editingServiceLog, oil: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Last Oil</label>
+                    <input type="text" value={editingServiceLog.oil} onChange={e => setEditingServiceLog({...editingServiceLog, oil: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-blue-500 uppercase tracking-wide mb-1.5">Next Oil</label>
+                    <input type="text" value={editingServiceLog.nextOil || ''} onChange={e => setEditingServiceLog({...editingServiceLog, nextOil: e.target.value})} className="w-full bg-blue-50 border border-blue-100 rounded-[16px] px-4 py-3.5 text-sm font-bold text-blue-700 outline-none focus:ring-2 focus:ring-blue-500/20" />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Last Service (Date)</label>
-                  <input type="text" value={editingServiceLog.service} onChange={e => setEditingServiceLog({...editingServiceLog, service: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Last Service</label>
+                    <input type="text" value={editingServiceLog.service} onChange={e => setEditingServiceLog({...editingServiceLog, service: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-red-500 uppercase tracking-wide mb-1.5">Next Service</label>
+                    <input type="text" value={editingServiceLog.nextService || ''} onChange={e => setEditingServiceLog({...editingServiceLog, nextService: e.target.value})} className="w-full bg-red-50 border border-red-100 rounded-[16px] px-4 py-3.5 text-sm font-bold text-red-700 outline-none focus:ring-2 focus:ring-red-500/20" />
+                  </div>
                 </div>
               </div>
               <button 
