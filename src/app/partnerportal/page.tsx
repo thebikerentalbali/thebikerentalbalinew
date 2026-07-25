@@ -293,32 +293,27 @@ export default function VendorDashboard() {
                         </button>
                       </div>
                       <p className="text-[13px] text-gray-500 mb-3">{scooter.plate} • {scooter.year}</p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex flex-col gap-1">
-                          <span className={`px-2.5 py-1.5 rounded-[10px] text-[10px] md:text-[11px] font-black uppercase tracking-wide flex items-center gap-1.5 w-fit ${scooter.availableUnits > 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                            {scooter.availableUnits > 0 ? <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span> : null}
-                            {scooter.availableUnits} / {scooter.totalUnits} Available
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span className="text-[15px] md:text-base font-black text-gray-900 truncate hidden sm:block">Rp {scooter.price.toLocaleString()}<span className="text-gray-500 text-[10px] font-semibold">/day</span></span>
-                          {scooter.availableUnits < scooter.totalUnits && (
-                            <button 
-                              onClick={() => setFleet(f => f.map(s => s.id === scooter.id ? { ...s, availableUnits: s.availableUnits + 1 } : s))} 
-                              className="text-[11px] bg-gray-100 text-gray-600 font-bold px-3 py-2 rounded-[10px] hover:bg-gray-200 transition-colors"
-                            >
-                              Return
-                            </button>
-                          )}
-                          {scooter.availableUnits > 0 && (
-                            <button 
-                              onClick={() => setFleet(f => f.map(s => s.id === scooter.id ? { ...s, availableUnits: s.availableUnits - 1 } : s))} 
-                              className="text-[11px] bg-black text-white font-bold px-3 py-2 rounded-[10px] hover:bg-gray-800 transition-colors"
-                            >
-                              Rent Out
-                            </button>
-                          )}
-                        </div>
+                      <div className="flex flex-wrap items-center gap-2 mt-1">
+                        <span className={`px-2.5 py-1.5 rounded-[10px] text-[10px] md:text-[11px] font-black uppercase tracking-wide flex items-center gap-1.5 w-fit ${scooter.availableUnits > 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                          {scooter.availableUnits > 0 ? <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span> : null}
+                          {scooter.availableUnits} / {scooter.totalUnits} Available
+                        </span>
+                        {scooter.availableUnits < scooter.totalUnits && (
+                          <button 
+                            onClick={() => setFleet(f => f.map(s => s.id === scooter.id ? { ...s, availableUnits: s.availableUnits + 1 } : s))} 
+                            className="text-[11px] bg-gray-100 text-gray-600 font-bold px-3 py-1.5 rounded-[10px] hover:bg-gray-200 transition-colors"
+                          >
+                            Return
+                          </button>
+                        )}
+                        {scooter.availableUnits > 0 && (
+                          <button 
+                            onClick={() => setFleet(f => f.map(s => s.id === scooter.id ? { ...s, availableUnits: s.availableUnits - 1 } : s))} 
+                            className="text-[11px] bg-black text-white font-bold px-3 py-1.5 rounded-[10px] hover:bg-gray-800 transition-colors"
+                          >
+                            Rent Out
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
