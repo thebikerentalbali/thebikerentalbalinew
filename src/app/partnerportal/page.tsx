@@ -16,7 +16,7 @@ export default function VendorDashboard() {
   const [fleetFilter, setFleetFilter] = useState("All")
   const [editingScooter, setEditingScooter] = useState<any>(null)
   const [isAddingScooter, setIsAddingScooter] = useState(false)
-  const [newScooter, setNewScooter] = useState({ name: "", plate: "", year: "", price: 0, totalUnits: 1, availableUnits: 1 })
+  const [newScooter, setNewScooter] = useState({ name: "", brand: "", cc: "", plate: "", year: "", price: 0, priceWeekly: 0, priceMonthly: 0, totalUnits: 1, availableUnits: 1, photos: [] as string[] })
   return (
     <div className="min-h-screen bg-[#F5F7FA] md:flex pb-28 md:pb-0">
       {/* 
@@ -422,31 +422,80 @@ export default function VendorDashboard() {
 
         {/* Add Scooter Modal */}
         {isAddingScooter && (
-          <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-[32px] p-6 md:p-8 w-full max-w-md animate-in zoom-in-95 duration-200">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-2xl font-black">Add New Scooter</h3>
-                <button onClick={() => setIsAddingScooter(false)}><X className="w-6 h-6 text-gray-400" /></button>
+          <div className="fixed inset-0 bg-white z-50 overflow-y-auto animate-in slide-in-from-bottom-full duration-300">
+            <div className="max-w-3xl mx-auto px-4 py-6 md:py-10 pb-32">
+              <div className="flex justify-between items-center mb-8 sticky top-0 bg-white/80 backdrop-blur-md py-4 z-10">
+                <h3 className="text-3xl font-black tracking-tight">Add New Scooter</h3>
+                <button onClick={() => setIsAddingScooter(false)} className="bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition-colors"><X className="w-6 h-6 text-black" /></button>
               </div>
-              <div className="space-y-4">
+              
+              <div className="space-y-8">
+                {/* Photo Upload Section */}
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Model Name</label>
-                  <input type="text" placeholder="e.g. Yamaha NMAX" value={newScooter.name} onChange={e => setNewScooter({...newScooter, name: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Plate Prefix</label>
-                    <input type="text" placeholder="e.g. DK" value={newScooter.plate} onChange={e => setNewScooter({...newScooter, plate: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                  <h4 className="text-lg font-bold text-gray-900 mb-3">Scooter Photos (Max 2)</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="border-2 border-dashed border-gray-200 rounded-2xl h-40 flex flex-col items-center justify-center text-gray-400 hover:text-black hover:border-black transition-colors cursor-pointer bg-gray-50 relative overflow-hidden group">
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <Plus className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" />
+                        <span className="text-xs font-bold uppercase tracking-wide">Upload Photo 1</span>
+                      </div>
+                      <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" />
+                    </div>
+                    <div className="border-2 border-dashed border-gray-200 rounded-2xl h-40 flex flex-col items-center justify-center text-gray-400 hover:text-black hover:border-black transition-colors cursor-pointer bg-gray-50 relative overflow-hidden group">
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <Plus className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" />
+                        <span className="text-xs font-bold uppercase tracking-wide">Upload Photo 2</span>
+                      </div>
+                      <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" />
+                    </div>
                   </div>
+                </div>
+
+                {/* Details Section */}
+                <div className="space-y-5">
+                  <h4 className="text-lg font-bold text-gray-900 mb-3">Vehicle Details</h4>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Year</label>
-                    <input type="text" placeholder="2024" value={newScooter.year} onChange={e => setNewScooter({...newScooter, year: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Model Name</label>
+                    <input type="text" placeholder="e.g. Yamaha NMAX" value={newScooter.name} onChange={e => setNewScooter({...newScooter, name: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Brand</label>
+                      <input type="text" placeholder="e.g. Yamaha" value={newScooter.brand} onChange={e => setNewScooter({...newScooter, brand: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Engine (CC)</label>
+                      <input type="text" placeholder="e.g. 155cc" value={newScooter.cc} onChange={e => setNewScooter({...newScooter, cc: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Plate Prefix</label>
+                      <input type="text" placeholder="e.g. DK" value={newScooter.plate} onChange={e => setNewScooter({...newScooter, plate: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Year</label>
+                      <input type="text" placeholder="2024" value={newScooter.year} onChange={e => setNewScooter({...newScooter, year: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    </div>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Daily Price (Rp)</label>
-                    <input type="number" value={newScooter.price || ''} onChange={e => setNewScooter({...newScooter, price: parseInt(e.target.value) || 0})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+
+                {/* Pricing & Units Section */}
+                <div className="space-y-5">
+                  <h4 className="text-lg font-bold text-gray-900 mb-3">Pricing & Units</h4>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">Daily (Rp)</label>
+                      <input type="number" value={newScooter.price || ''} onChange={e => setNewScooter({...newScooter, price: parseInt(e.target.value) || 0})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">Weekly (Rp)</label>
+                      <input type="number" value={newScooter.priceWeekly || ''} onChange={e => setNewScooter({...newScooter, priceWeekly: parseInt(e.target.value) || 0})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">Monthly (Rp)</label>
+                      <input type="number" value={newScooter.priceMonthly || ''} onChange={e => setNewScooter({...newScooter, priceMonthly: parseInt(e.target.value) || 0})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    </div>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Total Units</label>
@@ -454,16 +503,22 @@ export default function VendorDashboard() {
                   </div>
                 </div>
               </div>
-              <button 
-                onClick={() => {
-                  if(!newScooter.name) return;
-                  setFleet([...fleet, { ...newScooter, id: Date.now(), availableUnits: newScooter.totalUnits }]);
-                  setIsAddingScooter(false);
-                  setNewScooter({ name: "", plate: "", year: "", price: 0, totalUnits: 1, availableUnits: 1 });
-                }} 
-                className="w-full mt-8 bg-black text-white rounded-[16px] py-4 font-black text-sm hover:scale-[1.02] shadow-xl shadow-black/10 transition-all">
-                Add to Fleet
-              </button>
+
+              {/* Fixed Bottom Bar */}
+              <div className="fixed bottom-0 left-0 right-0 p-4 md:p-6 bg-white border-t border-gray-100 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-20">
+                <div className="max-w-3xl mx-auto">
+                  <button 
+                    onClick={() => {
+                      if(!newScooter.name) return;
+                      setFleet([...fleet, { ...newScooter, id: Date.now(), availableUnits: newScooter.totalUnits }]);
+                      setIsAddingScooter(false);
+                      setNewScooter({ name: "", brand: "", cc: "", plate: "", year: "", price: 0, priceWeekly: 0, priceMonthly: 0, totalUnits: 1, availableUnits: 1, photos: [] });
+                    }} 
+                    className="w-full bg-black text-white rounded-[20px] py-4 font-black text-lg hover:scale-[1.01] shadow-xl shadow-black/10 transition-transform">
+                    Add to Fleet
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -476,10 +531,20 @@ export default function VendorDashboard() {
                 <h3 className="text-2xl font-black">Edit Scooter</h3>
                 <button onClick={() => setEditingScooter(null)}><X className="w-6 h-6 text-gray-400" /></button>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-4 max-h-[70vh] overflow-y-auto px-1 -mx-1">
                 <div>
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Name</label>
                   <input type="text" value={editingScooter.name} onChange={e => setEditingScooter({...editingScooter, name: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Brand</label>
+                    <input type="text" value={editingScooter.brand || ''} onChange={e => setEditingScooter({...editingScooter, brand: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Engine (CC)</label>
+                    <input type="text" value={editingScooter.cc || ''} onChange={e => setEditingScooter({...editingScooter, cc: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -491,15 +556,23 @@ export default function VendorDashboard() {
                     <input type="text" value={editingScooter.year} onChange={e => setEditingScooter({...editingScooter, year: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Daily Price (Rp)</label>
+                    <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">Daily (Rp)</label>
                     <input type="number" value={editingScooter.price} onChange={e => setEditingScooter({...editingScooter, price: parseInt(e.target.value) || 0})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Total Units</label>
-                    <input type="number" min="1" value={editingScooter.totalUnits} onChange={e => setEditingScooter({...editingScooter, totalUnits: parseInt(e.target.value) || 1})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">Weekly (Rp)</label>
+                    <input type="number" value={editingScooter.priceWeekly || ''} onChange={e => setEditingScooter({...editingScooter, priceWeekly: parseInt(e.target.value) || 0})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                   </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">Monthly (Rp)</label>
+                    <input type="number" value={editingScooter.priceMonthly || ''} onChange={e => setEditingScooter({...editingScooter, priceMonthly: parseInt(e.target.value) || 0})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Total Units</label>
+                  <input type="number" min="1" value={editingScooter.totalUnits} onChange={e => setEditingScooter({...editingScooter, totalUnits: parseInt(e.target.value) || 1})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                 </div>
               </div>
               <button 
