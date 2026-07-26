@@ -1,11 +1,34 @@
 "use client"
 
 import { useState } from "react"
-import { Users, Bike, DollarSign, Settings, Bell, Search, Store, BarChart3, Home, ChevronRight, TrendingUp } from "lucide-react"
+import { Users, Bike, DollarSign, Settings, Bell, Search, Store, BarChart3, Home, ChevronRight, TrendingUp, CalendarDays, MoreVertical, Filter, ArrowUpRight, CheckCircle2, AlertCircle } from "lucide-react"
 import Link from "next/link"
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("home")
+  const [expandedVendorId, setExpandedVendorId] = useState<number | null>(null)
+
+  // Mock Data
+  const mockVendors = [
+    { id: 1, name: "Putu Rentals", initials: "PR", verified: true, location: "Ubud", scooters: 12, revenue: "Rp 12.5M", color: "blue" },
+    { id: 2, name: "Wayan Bikes", initials: "WB", verified: true, location: "Canggu", scooters: 24, revenue: "Rp 28.2M", color: "purple" },
+    { id: 3, name: "Made Scooter", initials: "MS", verified: false, location: "Seminyak", scooters: 8, revenue: "Rp 8.1M", color: "orange" },
+    { id: 4, name: "Ketut Rides", initials: "KR", verified: true, location: "Kuta", scooters: 15, revenue: "Rp 15.4M", color: "green" },
+  ]
+
+  const mockUsers = [
+    { id: 1, name: "Alex Johnson", email: "alex.j@example.com", joined: "Aug 12, 2026", rentals: 4, status: "Active" },
+    { id: 2, name: "Sarah Williams", email: "sarah.w@example.com", joined: "Aug 10, 2026", rentals: 1, status: "Active" },
+    { id: 3, name: "Michael Chen", email: "m.chen@example.com", joined: "Aug 05, 2026", rentals: 0, status: "Inactive" },
+    { id: 4, name: "Emma Davis", email: "emma.d@example.com", joined: "Jul 28, 2026", rentals: 12, status: "Active" },
+  ]
+
+  const mockBookings = [
+    { id: "B-1042", vendorId: 1, customer: "Alex Johnson", scooter: "Honda Scoopy", dates: "Aug 12 - Aug 15", price: 450000, status: "Active" },
+    { id: "B-1043", vendorId: 1, customer: "John Doe", scooter: "Vespa Primavera", dates: "Aug 14 - Aug 16", price: 700000, status: "Upcoming" },
+    { id: "B-1044", vendorId: 2, customer: "Sarah Williams", scooter: "Yamaha NMAX", dates: "Aug 10 - Aug 12", price: 500000, status: "Completed" },
+    { id: "B-1045", vendorId: 3, customer: "Emma Davis", scooter: "Honda Vario", dates: "Aug 15 - Aug 20", price: 750000, status: "Upcoming" },
+  ]
   return (
     <div className="min-h-screen bg-[#F5F7FA] md:flex pb-28 md:pb-0">
       {/* 
@@ -38,6 +61,10 @@ export default function AdminDashboard() {
           <button onClick={() => setActiveTab('revenue')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors ${activeTab === 'revenue' ? 'bg-white/10 text-white shadow-sm shadow-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
             <DollarSign className="w-5 h-5" />
             <span className="font-semibold text-[15px]">Revenue</span>
+          </button>
+          <button onClick={() => setActiveTab('bookings')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors ${activeTab === 'bookings' ? 'bg-white/10 text-white shadow-sm shadow-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
+            <CalendarDays className="w-5 h-5" />
+            <span className="font-semibold text-[15px]">Bookings</span>
           </button>
           <button onClick={() => setActiveTab('settings')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors ${activeTab === 'settings' ? 'bg-white/10 text-white shadow-sm shadow-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
             <Settings className="w-5 h-5" />
@@ -76,8 +103,19 @@ export default function AdminDashboard() {
               </div>
             </div>
             <div>
-              <h1 className="text-xl md:text-3xl font-bold text-gray-900 leading-tight">Platform Overview</h1>
-              <p className="text-xs font-medium text-gray-500 md:text-sm md:mt-1 hidden md:block">System-wide metrics and performance</p>
+              <h1 className="text-xl md:text-3xl font-bold text-gray-900 leading-tight">
+                {activeTab === 'home' ? 'Platform Overview' : 
+                 activeTab === 'vendors' ? 'Vendors Management' : 
+                 activeTab === 'users' ? 'Users Management' : 
+                 activeTab === 'bookings' ? 'Platform Bookings' : 
+                 activeTab === 'revenue' ? 'Revenue Analytics' : 'Platform Settings'}
+              </h1>
+              <p className="text-xs font-medium text-gray-500 md:text-sm md:mt-1 hidden md:block">
+                {activeTab === 'home' ? 'System-wide metrics and performance' : 
+                 activeTab === 'vendors' ? 'Manage and monitor all platform vendors' : 
+                 activeTab === 'users' ? 'Manage platform users and roles' : 
+                 activeTab === 'bookings' ? 'Global overview of all active and past bookings' : 'Configure system settings'}
+              </p>
             </div>
           </div>
           
@@ -258,13 +296,198 @@ export default function AdminDashboard() {
           </div>
 
         </div>
+        ) : activeTab === 'vendors' ? (
+          <div className="p-5 md:px-8 md:pb-12 space-y-4 animate-in fade-in">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {mockVendors.map(vendor => (
+                <div key={vendor.id} className="bg-white p-5 rounded-[24px] border border-gray-100 shadow-sm flex flex-col gap-4">
+                  <div className="flex justify-between items-start">
+                    <div className="flex gap-3 items-center">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg bg-${vendor.color}-100 text-${vendor.color}-700`}>
+                        {vendor.initials}
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-gray-900 text-lg">{vendor.name}</h3>
+                        <p className="text-sm font-medium text-gray-500 flex items-center gap-1"><Store className="w-3.5 h-3.5" /> {vendor.location}</p>
+                      </div>
+                    </div>
+                    <button className="text-gray-400 hover:text-black"><MoreVertical className="w-5 h-5" /></button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 pt-3 border-t border-gray-50">
+                    <div>
+                      <p className="text-[11px] font-bold text-gray-400 uppercase">Scooters</p>
+                      <p className="font-black text-gray-900 text-lg">{vendor.scooters}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-bold text-gray-400 uppercase">Revenue</p>
+                      <p className="font-black text-gray-900 text-lg">{vendor.revenue}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : activeTab === 'users' ? (
+          <div className="p-5 md:px-8 md:pb-12 animate-in fade-in">
+            <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-gray-50/50">
+                      <th className="px-6 py-4 text-[12px] font-bold text-gray-400 uppercase tracking-wider">User</th>
+                      <th className="px-6 py-4 text-[12px] font-bold text-gray-400 uppercase tracking-wider">Joined Date</th>
+                      <th className="px-6 py-4 text-[12px] font-bold text-gray-400 uppercase tracking-wider">Total Rentals</th>
+                      <th className="px-6 py-4 text-[12px] font-bold text-gray-400 uppercase tracking-wider">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {mockUsers.map(user => (
+                      <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="font-bold text-gray-900">{user.name}</div>
+                          <div className="text-sm font-medium text-gray-500">{user.email}</div>
+                        </td>
+                        <td className="px-6 py-4 text-sm font-medium text-gray-700">{user.joined}</td>
+                        <td className="px-6 py-4">
+                          <span className="font-bold text-gray-900 bg-gray-100 px-3 py-1 rounded-full">{user.rentals}</span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`px-2.5 py-1 rounded text-[11px] font-bold uppercase tracking-wide ${user.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                            {user.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        ) : activeTab === 'bookings' ? (
+          <div className="p-5 md:px-8 md:pb-12 animate-in fade-in space-y-6">
+            <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+               <h3 className="font-bold text-gray-900">Vendor Bookings Dashboard</h3>
+               <button className="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-200 transition-colors">
+                 <Filter className="w-4 h-4" /> Filter
+               </button>
+            </div>
+            
+            <div className="space-y-4">
+              {mockVendors.map(vendor => {
+                const vendorBookings = mockBookings.filter(b => b.vendorId === vendor.id);
+                const isExpanded = expandedVendorId === vendor.id;
+                
+                return (
+                  <div key={vendor.id} className="bg-white rounded-[24px] border border-gray-100 shadow-sm overflow-hidden transition-all duration-300">
+                    <div 
+                      onClick={() => setExpandedVendorId(isExpanded ? null : vendor.id)}
+                      className="p-5 md:p-6 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg bg-${vendor.color}-100 text-${vendor.color}-700 shrink-0`}>
+                          {vendor.initials}
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-gray-900 text-lg md:text-xl">{vendor.name}</h4>
+                          <p className="text-sm font-medium text-gray-500">{vendorBookings.length} Total Bookings</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="hidden md:block text-right">
+                          <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">Vendor Revenue</p>
+                          <p className="font-black text-gray-900 text-lg">{vendor.revenue}</p>
+                        </div>
+                        <div className={`p-2 rounded-full transition-transform ${isExpanded ? 'rotate-90 bg-gray-100' : 'bg-gray-50 hover:bg-gray-100'}`}>
+                          <ChevronRight className="w-5 h-5 text-gray-600" />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {isExpanded && (
+                      <div className="border-t border-gray-50 bg-gray-50/50 p-5 md:p-6 space-y-3">
+                        {vendorBookings.length === 0 ? (
+                          <div className="text-center py-6 text-gray-400 font-medium bg-white rounded-2xl border border-dashed border-gray-200">
+                            No recent bookings for this vendor.
+                          </div>
+                        ) : (
+                          vendorBookings.map(booking => (
+                            <div key={booking.id} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-blue-200 transition-colors">
+                              <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 bg-gray-50 rounded-xl overflow-hidden shrink-0">
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img src="/images/scooter.png" alt="Scooter" className="w-full h-full object-cover opacity-80" />
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <h5 className="font-bold text-gray-900">{booking.scooter}</h5>
+                                    <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">{booking.id}</span>
+                                  </div>
+                                  <p className="text-xs font-medium text-gray-500">{booking.customer} • {booking.dates}</p>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center justify-between md:justify-end gap-6 border-t md:border-none border-gray-50 pt-3 md:pt-0">
+                                <div className="text-left md:text-right">
+                                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Total Price</p>
+                                  <p className="font-bold text-gray-900">Rp {booking.price.toLocaleString()}</p>
+                                </div>
+                                <span className={`px-2.5 py-1 rounded text-[11px] font-bold uppercase tracking-wide shrink-0 ${booking.status === 'Active' || booking.status === 'In Progress' ? 'bg-yellow-100 text-yellow-700' : booking.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
+                                  {booking.status}
+                                </span>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        ) : activeTab === 'revenue' ? (
+          <div className="p-5 md:px-8 md:pb-12 flex flex-col items-center justify-center flex-1 min-h-[50vh] text-center animate-in fade-in">
+             <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mb-4">
+               <DollarSign className="w-10 h-10 text-green-500" />
+             </div>
+             <h2 className="text-2xl font-bold text-gray-900 mb-2">Revenue Analytics</h2>
+             <p className="text-gray-500 max-w-sm mb-6">Detailed revenue reports, platform commissions, and payout schedules are being processed.</p>
+             <button className="bg-black text-white px-6 py-3 rounded-xl font-bold hover:scale-[1.02] transition-transform shadow-md">
+               Download CSV Report
+             </button>
+          </div>
+        ) : activeTab === 'settings' ? (
+          <div className="p-5 md:px-8 md:pb-12 animate-in fade-in max-w-2xl">
+            <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm space-y-6">
+              <div>
+                <h3 className="font-bold text-gray-900 text-lg mb-4">Platform Configuration</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Admin Email Address</label>
+                    <input type="email" defaultValue="admin@thebikerental.com" className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Global Platform Commission (%)</label>
+                    <input type="number" defaultValue="15" className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all" />
+                  </div>
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <div>
+                      <h4 className="font-bold text-gray-900 text-sm">Maintenance Mode</h4>
+                      <p className="text-xs text-gray-500 mt-0.5">Disable all new bookings temporarily</p>
+                    </div>
+                    <div className="w-12 h-6 bg-gray-300 rounded-full relative cursor-pointer">
+                      <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button className="w-full bg-black text-white rounded-xl py-3.5 font-bold text-sm hover:scale-[1.02] transition-transform">Save Platform Settings</button>
+            </div>
+          </div>
         ) : (
           <div className="p-5 md:px-8 md:pb-12 flex flex-col items-center justify-center flex-1 min-h-[50vh] text-center animate-in fade-in slide-in-from-bottom-4">
             <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-              {activeTab === 'vendors' && <Store className="w-10 h-10 text-gray-400" />}
-              {activeTab === 'users' && <Users className="w-10 h-10 text-gray-400" />}
-              {activeTab === 'revenue' && <DollarSign className="w-10 h-10 text-gray-400" />}
-              {activeTab === 'settings' && <Settings className="w-10 h-10 text-gray-400" />}
+              <AlertCircle className="w-10 h-10 text-gray-400" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2 capitalize">{activeTab} Management</h2>
             <p className="text-gray-500 max-w-sm">This section is currently under development. Check back soon for updates!</p>
@@ -299,6 +522,13 @@ export default function AdminDashboard() {
               <Users className="w-6 h-6" />
             </div>
             <span className="text-[10px] font-bold">Users</span>
+          </button>
+          
+          <button onClick={() => setActiveTab('bookings')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group ${activeTab === 'bookings' ? 'text-blue-600' : 'text-gray-400 hover:text-black'}`}>
+            <div className={`${activeTab === 'bookings' ? 'bg-blue-50' : 'group-hover:bg-gray-50'} p-1.5 rounded-full transition-colors`}>
+              <CalendarDays className="w-6 h-6" />
+            </div>
+            <span className="text-[10px] font-bold">Bookings</span>
           </button>
           
           <button onClick={() => setActiveTab('settings')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group ${activeTab === 'settings' ? 'text-blue-600' : 'text-gray-400 hover:text-black'}`}>
