@@ -1,0 +1,50 @@
+"use client"
+
+import { useEffect, useState } from 'react'
+import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
+import 'leaflet/dist/leaflet.css'
+import L from 'leaflet'
+
+// Fix for default marker icons in React-Leaflet
+const icon = L.icon({
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41]
+});
+
+interface MapPickerProps {
+  position: [number, number];
+  onPositionChange: (lat: number, lng: number) => void;
+}
+
+function LocationMarker({ position, onPositionChange }: MapPickerProps) {
+  useMapEvents({
+    click(e) {
+      onPositionChange(e.latlng.lat, e.latlng.lng)
+    },
+  })
+
+  return position[0] === 0 ? null : (
+    <Marker position={position} icon={icon}></Marker>
+  )
+}
+
+export default function MapPicker({ position, onPositionChange }: MapPickerProps) {
+  // Center map on Bali roughly
+  const defaultCenter: [number, number] = [-8.409518, 115.188919]; 
+  const center = position[0] !== 0 ? position : defaultCenter;
+
+  return (
+    <div className="h-[300px] w-full rounded-2xl overflow-hidden border border-gray-200 shadow-sm relative z-0">
+      <MapContainer center={center} zoom={11} scrollWheelZoom={false} className="h-full w-full">
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <LocationMarker position={position} onPositionChange={onPositionChange} />
+      </MapContainer>
+    </div>
+  )
+}
