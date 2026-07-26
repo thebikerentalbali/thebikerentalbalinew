@@ -16,12 +16,7 @@ export default function AdminDashboard() {
     { id: 4, name: "Ketut Rides", initials: "KR", verified: true, location: "Kuta", scooters: 15, revenue: "Rp 15.4M", color: "green" },
   ]
 
-  const mockUsers = [
-    { id: 1, name: "Alex Johnson", email: "alex.j@example.com", joined: "Aug 12, 2026", rentals: 4, status: "Active" },
-    { id: 2, name: "Sarah Williams", email: "sarah.w@example.com", joined: "Aug 10, 2026", rentals: 1, status: "Active" },
-    { id: 3, name: "Michael Chen", email: "m.chen@example.com", joined: "Aug 05, 2026", rentals: 0, status: "Inactive" },
-    { id: 4, name: "Emma Davis", email: "emma.d@example.com", joined: "Jul 28, 2026", rentals: 12, status: "Active" },
-  ]
+  const mockUsers = []
 
   const mockBookings = [
     { id: "B-1042", vendorId: 1, customer: "Alex Johnson", scooter: "Honda Scoopy", dates: "Aug 12 - Aug 15", price: 450000, status: "Active" },
@@ -53,11 +48,7 @@ export default function AdminDashboard() {
             <Store className="w-5 h-5" />
             <span className="font-semibold text-[15px]">Vendors</span>
           </button>
-          <button onClick={() => setActiveTab('users')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors relative ${activeTab === 'users' ? 'bg-white/10 text-white shadow-sm shadow-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
-            <Users className="w-5 h-5" />
-            <span className="font-semibold text-[15px]">Users</span>
-            <span className="absolute right-4 bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">New</span>
-          </button>
+
           <button onClick={() => setActiveTab('revenue')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors ${activeTab === 'revenue' ? 'bg-white/10 text-white shadow-sm shadow-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
             <DollarSign className="w-5 h-5" />
             <span className="font-semibold text-[15px]">Revenue</span>
@@ -95,7 +86,7 @@ export default function AdminDashboard() {
       <main className="flex-1 w-full max-w-full md:max-w-4xl lg:max-w-5xl mx-auto flex flex-col min-h-screen">
         
         {/* Mobile App-like Header */}
-        <header className="bg-white/80 backdrop-blur-xl sticky top-0 z-30 px-5 py-4 border-b border-gray-100 flex items-center justify-between md:py-6 md:px-8 md:bg-transparent md:border-none md:backdrop-blur-none">
+        <header className={`bg-white/80 backdrop-blur-xl sticky top-0 z-30 px-5 py-4 border-b border-gray-100 items-center justify-between md:py-6 md:px-8 md:bg-transparent md:border-none md:backdrop-blur-none ${activeTab === 'vendors' ? 'hidden md:flex' : 'flex'}`}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-black p-[2px] shrink-0 md:hidden">
               <div className="w-full h-full bg-white rounded-full flex items-center justify-center border-2 border-black">
@@ -327,42 +318,6 @@ export default function AdminDashboard() {
               ))}
             </div>
           </div>
-        ) : activeTab === 'users' ? (
-          <div className="p-5 md:px-8 md:pb-12 animate-in fade-in">
-            <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-gray-50/50">
-                      <th className="px-6 py-4 text-[12px] font-bold text-gray-400 uppercase tracking-wider">User</th>
-                      <th className="px-6 py-4 text-[12px] font-bold text-gray-400 uppercase tracking-wider">Joined Date</th>
-                      <th className="px-6 py-4 text-[12px] font-bold text-gray-400 uppercase tracking-wider">Total Rentals</th>
-                      <th className="px-6 py-4 text-[12px] font-bold text-gray-400 uppercase tracking-wider">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-50">
-                    {mockUsers.map(user => (
-                      <tr key={user.id} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-6 py-4">
-                          <div className="font-bold text-gray-900">{user.name}</div>
-                          <div className="text-sm font-medium text-gray-500">{user.email}</div>
-                        </td>
-                        <td className="px-6 py-4 text-sm font-medium text-gray-700">{user.joined}</td>
-                        <td className="px-6 py-4">
-                          <span className="font-bold text-gray-900 bg-gray-100 px-3 py-1 rounded-full">{user.rentals}</span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`px-2.5 py-1 rounded text-[11px] font-bold uppercase tracking-wide ${user.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                            {user.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
         ) : activeTab === 'bookings' ? (
           <div className="p-5 md:px-8 md:pb-12 animate-in fade-in space-y-6">
             <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
@@ -516,14 +471,7 @@ export default function AdminDashboard() {
             <span className="text-[10px] font-bold">Vendors</span>
           </button>
           
-          <button onClick={() => setActiveTab('users')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group relative ${activeTab === 'users' ? 'text-blue-600' : 'text-gray-400 hover:text-black'}`}>
-            <div className={`${activeTab === 'users' ? 'bg-blue-50' : 'group-hover:bg-gray-50'} p-1.5 rounded-full transition-colors relative`}>
-              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-white"></span>
-              <Users className="w-6 h-6" />
-            </div>
-            <span className="text-[10px] font-bold">Users</span>
-          </button>
-          
+
           <button onClick={() => setActiveTab('bookings')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group ${activeTab === 'bookings' ? 'text-blue-600' : 'text-gray-400 hover:text-black'}`}>
             <div className={`${activeTab === 'bookings' ? 'bg-blue-50' : 'group-hover:bg-gray-50'} p-1.5 rounded-full transition-colors`}>
               <CalendarDays className="w-6 h-6" />
