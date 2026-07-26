@@ -8,12 +8,13 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("home")
   const [expandedVendorId, setExpandedVendorId] = useState<number | null>(null)
   const [expandedVendorDetailsId, setExpandedVendorDetailsId] = useState<number | null>(null)
+  const [expandedPendingVendorId, setExpandedPendingVendorId] = useState<number | null>(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   // Mock Data
   const mockPendingVendors = [
-    { id: 101, name: "Bagus Rentals", initials: "BR", location: "Jimbaran", email: "bagus@example.com", appliedDate: "Aug 22, 2026", color: "rose" },
-    { id: 102, name: "Bali Wheels", initials: "BW", location: "Uluwatu", email: "wheels@bali.com", appliedDate: "Aug 20, 2026", color: "teal" },
+    { id: 101, name: "Bagus Rentals", initials: "BR", location: "Jimbaran", email: "bagus@example.com", phone: "+62 812-3456-7890", appliedDate: "Aug 22, 2026", color: "rose", documents: "Verified (ID, License)", fleetIntent: "10x Honda Scoopy, 5x Yamaha NMAX" },
+    { id: 102, name: "Bali Wheels", initials: "BW", location: "Uluwatu", email: "wheels@bali.com", phone: "+62 813-9876-5432", appliedDate: "Aug 20, 2026", color: "teal", documents: "Pending (Missing Business License)", fleetIntent: "20x Custom Vespa" },
   ]
 
   const mockVendors = [
@@ -324,30 +325,63 @@ export default function AdminDashboard() {
         ) : activeTab === 'approvals' ? (
           <div className="p-5 md:px-8 md:pb-12 animate-in fade-in">
             <div className="space-y-4">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {mockPendingVendors.map(vendor => (
-                  <div key={vendor.id} className="bg-white p-5 rounded-[24px] border border-gray-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-gray-200 transition-colors">
-                    <div className="flex gap-4 items-center">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg bg-${vendor.color}-100 text-${vendor.color}-700 shrink-0`}>
-                        {vendor.initials}
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-gray-900 text-base">{vendor.name}</h4>
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-xs font-medium text-gray-500 mt-1">
-                          <span className="flex items-center gap-1"><Store className="w-3 h-3" /> {vendor.location}</span>
-                          <span className="hidden sm:inline text-gray-300">•</span>
-                          <span>{vendor.email}</span>
-                          <span className="hidden sm:inline text-gray-300">•</span>
-                          <span>Applied {vendor.appliedDate}</span>
+              <div className="grid grid-cols-1 gap-4">
+                {mockPendingVendors.map(vendor => {
+                  const isExpanded = expandedPendingVendorId === vendor.id;
+                  return (
+                    <div key={vendor.id} className="bg-white rounded-[24px] border border-gray-100 shadow-sm flex flex-col overflow-hidden transition-all duration-300 hover:border-gray-200">
+                      <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex gap-4 items-center cursor-pointer flex-1" onClick={() => setExpandedPendingVendorId(isExpanded ? null : vendor.id)}>
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg bg-${vendor.color}-100 text-${vendor.color}-700 shrink-0`}>
+                            {vendor.initials}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <h4 className="font-bold text-gray-900 text-base">{vendor.name}</h4>
+                              <div className={`p-1.5 rounded-full transition-transform sm:hidden ${isExpanded ? 'rotate-90 bg-gray-100' : 'bg-gray-50 hover:bg-gray-100'}`}>
+                                <ChevronRight className="w-4 h-4 text-gray-600" />
+                              </div>
+                            </div>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-xs font-medium text-gray-500 mt-1">
+                              <span className="flex items-center gap-1"><Store className="w-3 h-3" /> {vendor.location}</span>
+                              <span className="hidden sm:inline text-gray-300">•</span>
+                              <span>{vendor.email}</span>
+                              <span className="hidden sm:inline text-gray-300">•</span>
+                              <span>Applied {vendor.appliedDate}</span>
+                            </div>
+                          </div>
+                          <div className={`hidden sm:flex p-1.5 rounded-full transition-transform ${isExpanded ? 'rotate-90 bg-gray-100' : 'bg-gray-50 hover:bg-gray-100'}`}>
+                            <ChevronRight className="w-5 h-5 text-gray-600" />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0 pt-3 sm:pt-0 border-t border-gray-100 sm:border-none">
+                          <button className="flex-1 sm:flex-none bg-black text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-800 transition-colors shadow-sm">Approve</button>
+                          <button className="flex-1 sm:flex-none bg-gray-100 text-gray-700 px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-200 transition-colors">Reject</button>
                         </div>
                       </div>
+                      
+                      {isExpanded && (
+                        <div className="bg-gray-50/50 p-5 border-t border-gray-100 animate-in slide-in-from-top-2">
+                          <h5 className="text-xs font-bold text-gray-900 uppercase tracking-wide mb-4">Vendor Details</h5>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                              <p className="text-xs font-medium text-gray-500 mb-1">Contact Phone</p>
+                              <p className="font-semibold text-gray-900 text-sm">{vendor.phone}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs font-medium text-gray-500 mb-1">Document Status</p>
+                              <p className={`font-semibold text-sm ${vendor.documents.includes('Pending') ? 'text-yellow-600' : 'text-green-600'}`}>{vendor.documents}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs font-medium text-gray-500 mb-1">Intended Fleet</p>
+                              <p className="font-semibold text-gray-900 text-sm">{vendor.fleetIntent}</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
-                      <button className="flex-1 sm:flex-none bg-black text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-gray-800 transition-colors shadow-sm">Approve</button>
-                      <button className="flex-1 sm:flex-none bg-gray-100 text-gray-700 px-4 py-2 rounded-xl text-sm font-bold hover:bg-gray-200 transition-colors">Reject</button>
-                    </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           </div>
@@ -593,6 +627,13 @@ export default function AdminDashboard() {
             <span className="text-[10px] font-bold">Vendors</span>
           </button>
           
+          <button onClick={() => { setActiveTab('bookings'); setIsMobileMenuOpen(false); }} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group ${activeTab === 'bookings' ? 'text-blue-600' : 'text-gray-400 hover:text-black'}`}>
+            <div className={`${activeTab === 'bookings' ? 'bg-blue-50' : 'group-hover:bg-gray-50'} p-1.5 rounded-full transition-colors`}>
+              <CalendarDays className="w-6 h-6" />
+            </div>
+            <span className="text-[10px] font-bold">Bookings</span>
+          </button>
+          
           <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group ${isMobileMenuOpen ? 'text-blue-600' : 'text-gray-400 hover:text-black'}`}>
             <div className={`${isMobileMenuOpen ? 'bg-blue-50' : 'group-hover:bg-gray-50'} p-1.5 rounded-full transition-colors`}>
               <Menu className="w-6 h-6" />
@@ -604,12 +645,6 @@ export default function AdminDashboard() {
           {isMobileMenuOpen && (
             <div className="absolute bottom-full right-4 mb-2 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden w-48 animate-in slide-in-from-bottom-2 fade-in">
               <div className="flex flex-col">
-                <button 
-                  onClick={() => { setActiveTab('bookings'); setIsMobileMenuOpen(false); }}
-                  className={`flex items-center gap-3 px-4 py-3 text-sm font-bold transition-colors ${activeTab === 'bookings' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`}
-                >
-                  <CalendarDays className="w-4 h-4" /> Bookings
-                </button>
                 <button 
                   onClick={() => { setActiveTab('revenue'); setIsMobileMenuOpen(false); }}
                   className={`flex items-center gap-3 px-4 py-3 text-sm font-bold transition-colors ${activeTab === 'revenue' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`}
