@@ -1,13 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { Users, Bike, DollarSign, Settings, Bell, Search, Store, BarChart3, Home, ChevronRight, TrendingUp, CalendarDays, MoreVertical, Filter, ArrowUpRight, CheckCircle2, AlertCircle } from "lucide-react"
+import { Users, Bike, DollarSign, Settings, Bell, Search, Store, BarChart3, Home, ChevronRight, TrendingUp, CalendarDays, MoreVertical, Filter, ArrowUpRight, CheckCircle2, AlertCircle, Menu, UserCheck, MoreHorizontal } from "lucide-react"
 import Link from "next/link"
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("home")
   const [expandedVendorId, setExpandedVendorId] = useState<number | null>(null)
   const [expandedVendorDetailsId, setExpandedVendorDetailsId] = useState<number | null>(null)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   // Mock Data
   const mockPendingVendors = [
@@ -70,6 +71,11 @@ export default function AdminDashboard() {
             <BarChart3 className="w-5 h-5" />
             <span className="font-bold text-[15px]">Overview</span>
           </button>
+          <button onClick={() => setActiveTab('approvals')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors relative ${activeTab === 'approvals' ? 'bg-white/10 text-white shadow-sm shadow-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
+            <UserCheck className="w-5 h-5" />
+            <span className="font-semibold text-[15px]">Approvals</span>
+            <span className="absolute right-4 bg-yellow-500 text-black text-[10px] font-bold px-2 py-0.5 rounded-full">{mockPendingVendors.length}</span>
+          </button>
           <button onClick={() => setActiveTab('vendors')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors ${activeTab === 'vendors' ? 'bg-white/10 text-white shadow-sm shadow-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
             <Store className="w-5 h-5" />
             <span className="font-semibold text-[15px]">Vendors</span>
@@ -122,6 +128,7 @@ export default function AdminDashboard() {
             <div>
               <h1 className="text-xl md:text-3xl font-bold text-gray-900 leading-tight">
                 {activeTab === 'home' ? 'Platform Overview' : 
+                 activeTab === 'approvals' ? 'Pending Approvals' : 
                  activeTab === 'vendors' ? 'Vendors Management' : 
                  activeTab === 'users' ? 'Users Management' : 
                  activeTab === 'bookings' ? 'Platform Bookings' : 
@@ -129,6 +136,7 @@ export default function AdminDashboard() {
               </h1>
               <p className="text-xs font-medium text-gray-500 md:text-sm md:mt-1 hidden md:block">
                 {activeTab === 'home' ? 'System-wide metrics and performance' : 
+                 activeTab === 'approvals' ? 'Review and manage vendor sign-up applications' : 
                  activeTab === 'vendors' ? 'Manage and monitor all platform vendors' : 
                  activeTab === 'users' ? 'Manage platform users and roles' : 
                  activeTab === 'bookings' ? 'Global overview of all active and past bookings' : 'Configure system settings'}
@@ -313,15 +321,9 @@ export default function AdminDashboard() {
           </div>
 
         </div>
-        ) : activeTab === 'vendors' ? (
-          <div className="p-5 md:px-8 md:pb-12 space-y-8 animate-in fade-in">
-            {/* Pending Approvals Section */}
+        ) : activeTab === 'approvals' ? (
+          <div className="p-5 md:px-8 md:pb-12 animate-in fade-in">
             <div className="space-y-4">
-              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-yellow-400"></span>
-                Pending Approvals
-                <span className="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full ml-2">{mockPendingVendors.length}</span>
-              </h3>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {mockPendingVendors.map(vendor => (
                   <div key={vendor.id} className="bg-white p-5 rounded-[24px] border border-gray-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-gray-200 transition-colors">
@@ -348,9 +350,11 @@ export default function AdminDashboard() {
                 ))}
               </div>
             </div>
-
+          </div>
+        ) : activeTab === 'vendors' ? (
+          <div className="p-5 md:px-8 md:pb-12 animate-in fade-in">
             {/* Active Vendors Grid */}
-            <div className="space-y-4 pt-4 border-t border-gray-100">
+            <div className="space-y-4">
               <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-green-500"></span>
                 Active Vendors
@@ -562,35 +566,65 @@ export default function AdminDashboard() {
         ========================================================================
       */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-50 rounded-t-[32px] shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
-        <div className="flex justify-around items-center pt-3 pb-8 px-4">
-          <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group ${activeTab === 'home' ? 'text-blue-600' : 'text-gray-400 hover:text-black'}`}>
+        <div className="flex justify-around items-center pt-3 pb-8 px-4 relative">
+          <button onClick={() => { setActiveTab('home'); setIsMobileMenuOpen(false); }} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group ${activeTab === 'home' ? 'text-blue-600' : 'text-gray-400 hover:text-black'}`}>
             <div className={`${activeTab === 'home' ? 'bg-blue-50' : 'group-hover:bg-gray-50'} p-1.5 rounded-full transition-colors`}>
               <Home className="w-6 h-6" />
             </div>
             <span className="text-[10px] font-bold">Home</span>
           </button>
           
-          <button onClick={() => setActiveTab('vendors')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group ${activeTab === 'vendors' ? 'text-blue-600' : 'text-gray-400 hover:text-black'}`}>
+          <button onClick={() => { setActiveTab('approvals'); setIsMobileMenuOpen(false); }} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group relative ${activeTab === 'approvals' ? 'text-blue-600' : 'text-gray-400 hover:text-black'}`}>
+            <div className={`${activeTab === 'approvals' ? 'bg-blue-50' : 'group-hover:bg-gray-50'} p-1.5 rounded-full transition-colors`}>
+              <UserCheck className="w-6 h-6" />
+            </div>
+            <span className="text-[10px] font-bold">Approvals</span>
+            {mockPendingVendors.length > 0 && (
+              <span className="absolute top-1 right-2 bg-yellow-500 text-black text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full border border-white">
+                {mockPendingVendors.length}
+              </span>
+            )}
+          </button>
+          
+          <button onClick={() => { setActiveTab('vendors'); setIsMobileMenuOpen(false); }} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group ${activeTab === 'vendors' ? 'text-blue-600' : 'text-gray-400 hover:text-black'}`}>
             <div className={`${activeTab === 'vendors' ? 'bg-blue-50' : 'group-hover:bg-gray-50'} p-1.5 rounded-full transition-colors`}>
               <Store className="w-6 h-6" />
             </div>
             <span className="text-[10px] font-bold">Vendors</span>
           </button>
           
-
-          <button onClick={() => setActiveTab('bookings')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group ${activeTab === 'bookings' ? 'text-blue-600' : 'text-gray-400 hover:text-black'}`}>
-            <div className={`${activeTab === 'bookings' ? 'bg-blue-50' : 'group-hover:bg-gray-50'} p-1.5 rounded-full transition-colors`}>
-              <CalendarDays className="w-6 h-6" />
+          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group ${isMobileMenuOpen ? 'text-blue-600' : 'text-gray-400 hover:text-black'}`}>
+            <div className={`${isMobileMenuOpen ? 'bg-blue-50' : 'group-hover:bg-gray-50'} p-1.5 rounded-full transition-colors`}>
+              <Menu className="w-6 h-6" />
             </div>
-            <span className="text-[10px] font-bold">Bookings</span>
+            <span className="text-[10px] font-bold">More</span>
           </button>
           
-          <button onClick={() => setActiveTab('settings')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group ${activeTab === 'settings' ? 'text-blue-600' : 'text-gray-400 hover:text-black'}`}>
-            <div className={`${activeTab === 'settings' ? 'bg-blue-50' : 'group-hover:bg-gray-50'} p-1.5 rounded-full transition-colors`}>
-              <Settings className="w-6 h-6" />
+          {/* Mobile Dropdown Menu */}
+          {isMobileMenuOpen && (
+            <div className="absolute bottom-full right-4 mb-2 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden w-48 animate-in slide-in-from-bottom-2 fade-in">
+              <div className="flex flex-col">
+                <button 
+                  onClick={() => { setActiveTab('bookings'); setIsMobileMenuOpen(false); }}
+                  className={`flex items-center gap-3 px-4 py-3 text-sm font-bold transition-colors ${activeTab === 'bookings' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`}
+                >
+                  <CalendarDays className="w-4 h-4" /> Bookings
+                </button>
+                <button 
+                  onClick={() => { setActiveTab('revenue'); setIsMobileMenuOpen(false); }}
+                  className={`flex items-center gap-3 px-4 py-3 text-sm font-bold transition-colors ${activeTab === 'revenue' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`}
+                >
+                  <DollarSign className="w-4 h-4" /> Revenue
+                </button>
+                <button 
+                  onClick={() => { setActiveTab('settings'); setIsMobileMenuOpen(false); }}
+                  className={`flex items-center gap-3 px-4 py-3 text-sm font-bold transition-colors border-t border-gray-50 ${activeTab === 'settings' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`}
+                >
+                  <Settings className="w-4 h-4" /> Settings
+                </button>
+              </div>
             </div>
-            <span className="text-[10px] font-bold">Settings</span>
-          </button>
+          )}
         </div>
       </nav>
     </div>
