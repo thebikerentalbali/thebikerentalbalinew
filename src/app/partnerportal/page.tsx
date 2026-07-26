@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Bike, DollarSign, CalendarDays, Settings, Bell, Search, Star, Plus, QrCode, Home, Wallet, User, ChevronRight, ChevronLeft, TrendingUp, Wrench, MoreVertical, CheckCircle2, Clock, X, ChevronDown, List, Calendar as CalendarIcon } from "lucide-react"
+import { Bike, DollarSign, CalendarDays, Settings, Bell, Search, Star, Plus, QrCode, Home, Wallet, User, ChevronRight, ChevronLeft, TrendingUp, Wrench, MoreVertical, CheckCircle2, Clock, X, ChevronDown, List, Calendar as CalendarIcon, Camera } from "lucide-react"
 import Link from "next/link"
 
 export default function VendorDashboard() {
@@ -28,6 +28,7 @@ export default function VendorDashboard() {
   const [isAddingServiceScooter, setIsAddingServiceScooter] = useState(false)
   const [newServiceScooter, setNewServiceScooter] = useState({ name: "", plate: "", odo: "", oil: "", service: "", nextOil: "", nextService: "" })
   const [editingServiceLog, setEditingServiceLog] = useState<any>(null)
+  const [vendorLogo, setVendorLogo] = useState<string | null>(null)
 
   // Bookings State
   const [bookingView, setBookingView] = useState<'list' | 'calendar'>('list')
@@ -619,6 +620,37 @@ export default function VendorDashboard() {
           <div className="p-5 md:px-8 pb-12 animate-in fade-in max-w-2xl">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Profile Settings</h2>
             <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm space-y-5">
+              {/* Logo Upload Section */}
+              <div className="flex flex-col items-center sm:flex-row sm:items-start gap-6 pb-4 border-b border-gray-50">
+                <div className="relative group">
+                  <div className={`w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-white shadow-md flex items-center justify-center overflow-hidden bg-gray-50 transition-all ${!vendorLogo ? 'group-hover:bg-gray-100' : ''}`}>
+                    {vendorLogo ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={vendorLogo} alt="Vendor Logo" className="w-full h-full object-cover" />
+                    ) : (
+                      <User className="w-10 h-10 text-gray-400 group-hover:scale-110 transition-transform" />
+                    )}
+                  </div>
+                  <label className="absolute bottom-0 right-0 bg-black text-white p-2.5 rounded-full cursor-pointer shadow-lg hover:scale-110 transition-transform border-2 border-white">
+                    <Camera className="w-4 h-4" />
+                    <input 
+                      type="file" 
+                      className="hidden" 
+                      accept="image/*" 
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          setVendorLogo(URL.createObjectURL(e.target.files[0]))
+                        }
+                      }} 
+                    />
+                  </label>
+                </div>
+                <div className="text-center sm:text-left flex-1 pt-2">
+                  <h3 className="font-bold text-gray-900 text-lg">Vendor Logo</h3>
+                  <p className="text-sm text-gray-500 mt-1">Upload a professional logo to build trust with customers. Recommended size: 500x500px.</p>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Vendor Name</label>
                 <input type="text" defaultValue="Putu Rentals" className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all" />
