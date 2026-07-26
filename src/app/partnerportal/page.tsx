@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Bike, DollarSign, CalendarDays, Settings, Bell, Search, Star, Plus, QrCode, Home, Wallet, User, ChevronRight, TrendingUp, Wrench, MoreVertical, CheckCircle2, Clock, X, ChevronDown } from "lucide-react"
+import { Bike, DollarSign, CalendarDays, Settings, Bell, Search, Star, Plus, QrCode, Home, Wallet, User, ChevronRight, ChevronLeft, TrendingUp, Wrench, MoreVertical, CheckCircle2, Clock, X, ChevronDown, List, Calendar as CalendarIcon } from "lucide-react"
 import Link from "next/link"
 
 export default function VendorDashboard() {
@@ -28,6 +28,29 @@ export default function VendorDashboard() {
   const [isAddingServiceScooter, setIsAddingServiceScooter] = useState(false)
   const [newServiceScooter, setNewServiceScooter] = useState({ name: "", plate: "", odo: "", oil: "", service: "", nextOil: "", nextService: "" })
   const [editingServiceLog, setEditingServiceLog] = useState<any>(null)
+
+  // Bookings State
+  const [bookingView, setBookingView] = useState<'list' | 'calendar'>('list')
+  const [currentDate, setCurrentDate] = useState(new Date())
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
+  
+  const [bookingsList, setBookingsList] = useState([
+    { id: 1, scooter: "Honda Scoopy", status: "In Progress", startDate: new Date(new Date().setDate(new Date().getDate() - 2)), endDate: new Date(new Date().setDate(new Date().getDate() + 1)), price: 450000, customer: "John Doe" },
+    { id: 2, scooter: "Vespa Primavera", status: "Upcoming", startDate: new Date(new Date().setDate(new Date().getDate() + 1)), endDate: new Date(new Date().setDate(new Date().getDate() + 4)), price: 1050000, customer: "Jane Smith" },
+    { id: 3, scooter: "Yamaha NMAX", status: "Completed", startDate: new Date(new Date().setDate(new Date().getDate() - 5)), endDate: new Date(new Date().setDate(new Date().getDate() - 3)), price: 500000, customer: "Mike Johnson" },
+  ])
+
+  // Calendar Helpers
+  const daysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
+  const firstDayOfMonth = (year: number, month: number) => new Date(year, month, 1).getDay();
+
+  const handlePrevMonth = () => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+  };
   return (
     <div className="min-h-screen bg-[#F5F7FA] md:flex pb-28 md:pb-0">
       {/* 
@@ -356,24 +379,179 @@ export default function VendorDashboard() {
           </div>
         ) : activeTab === 'bookings' ? (
           <div className="p-5 md:px-8 pb-12 animate-in fade-in">
-             <h2 className="text-2xl font-bold text-gray-900 mb-6">All Bookings</h2>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">All Bookings</h2>
+              <div className="bg-gray-100 p-1 rounded-xl flex items-center">
+                <button 
+                  onClick={() => setBookingView('list')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-[13px] transition-all ${bookingView === 'list' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black'}`}
+                >
+                  <List className="w-4 h-4" /> List View
+                </button>
+                <button 
+                  onClick={() => setBookingView('calendar')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-[13px] transition-all ${bookingView === 'calendar' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black'}`}
+                >
+                  <CalendarIcon className="w-4 h-4" /> Calendar
+                </button>
+              </div>
+            </div>
+
+            {bookingView === 'list' ? (
              <div className="space-y-3">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="bg-white p-4 rounded-3xl border border-gray-100 flex items-center gap-4 shadow-sm">
+              {bookingsList.map((booking) => (
+                <div key={booking.id} className="bg-white p-4 rounded-3xl border border-gray-100 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
                   <div className="w-12 h-12 bg-gray-50 rounded-2xl overflow-hidden shrink-0">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="/images/scooter.png" alt="Scooter" className="w-full h-full object-cover opacity-80" />
                   </div>
                   <div className="flex-1">
                     <div className="flex justify-between items-start mb-1">
-                      <h4 className="font-bold text-gray-900 text-[15px]">Honda Scoopy</h4>
-                      <span className="bg-yellow-100 text-yellow-700 px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide">In Progress</span>
+                      <h4 className="font-bold text-gray-900 text-[15px]">{booking.scooter}</h4>
+                      <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide ${booking.status === 'In Progress' ? 'bg-yellow-100 text-yellow-700' : booking.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
+                        {booking.status}
+                      </span>
                     </div>
-                    <p className="text-[13px] font-medium text-gray-500">Aug 12 - Aug 15 • <span className="text-gray-900 font-bold">Rp 450.000</span></p>
+                    <p className="text-[13px] font-medium text-gray-500">
+                      {booking.startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {booking.endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} • <span className="text-gray-900 font-bold">Rp {booking.price.toLocaleString()}</span>
+                    </p>
+                    <p className="text-[11px] text-gray-400 mt-0.5">Booked by {booking.customer}</p>
                   </div>
                 </div>
               ))}
              </div>
+            ) : (
+              <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-5 md:p-6 animate-in slide-in-from-bottom-4">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-lg font-black text-gray-900">
+                    {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    <button onClick={handlePrevMonth} className="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                      <ChevronLeft className="w-5 h-5 text-gray-600" />
+                    </button>
+                    <button onClick={handleNextMonth} className="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                      <ChevronRight className="w-5 h-5 text-gray-600" />
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-7 gap-1 md:gap-2 mb-2">
+                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                    <div key={day} className="text-center text-[11px] font-bold text-gray-400 uppercase tracking-wider py-2">
+                      {day}
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="grid grid-cols-7 gap-1 md:gap-2">
+                  {Array.from({ length: firstDayOfMonth(currentDate.getFullYear(), currentDate.getMonth()) }).map((_, i) => (
+                    <div key={`empty-${i}`} className="aspect-square rounded-2xl bg-gray-50/50" />
+                  ))}
+                  
+                  {Array.from({ length: daysInMonth(currentDate.getFullYear(), currentDate.getMonth()) }).map((_, i) => {
+                    const date = i + 1;
+                    const currentDateObj = new Date(currentDate.getFullYear(), currentDate.getMonth(), date);
+                    const isToday = new Date().toDateString() === currentDateObj.toDateString();
+                    const isSelected = selectedDate?.toDateString() === currentDateObj.toDateString();
+                    
+                    const dayBookings = bookingsList.filter(b => {
+                      const d = new Date(currentDateObj);
+                      d.setHours(0,0,0,0);
+                      const start = new Date(b.startDate);
+                      start.setHours(0,0,0,0);
+                      const end = new Date(b.endDate);
+                      end.setHours(0,0,0,0);
+                      return d >= start && d <= end;
+                    });
+                    
+                    return (
+                      <button
+                        key={date}
+                        onClick={() => setSelectedDate(currentDateObj)}
+                        className={`aspect-square rounded-2xl flex flex-col items-center justify-center relative transition-all hover:scale-[1.02] ${
+                          isSelected ? 'bg-black text-white shadow-md shadow-black/20' : 
+                          isToday ? 'bg-blue-50 text-blue-700 font-bold border border-blue-100' : 
+                          'bg-white text-gray-700 hover:bg-gray-50 border border-transparent'
+                        }`}
+                      >
+                        <span className={`text-sm md:text-base ${isSelected ? 'font-bold' : 'font-semibold'}`}>{date}</span>
+                        {dayBookings.length > 0 && (
+                          <div className="flex gap-0.5 mt-1">
+                            {dayBookings.slice(0, 3).map((b, idx) => (
+                              <div key={idx} className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white/80' : b.status === 'In Progress' ? 'bg-yellow-400' : b.status === 'Completed' ? 'bg-green-400' : 'bg-blue-400'}`} />
+                            ))}
+                            {dayBookings.length > 3 && <div className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white/80' : 'bg-gray-300'}`} />}
+                          </div>
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {/* Day Details */}
+                {selectedDate && (
+                  <div className="mt-8 pt-6 border-t border-gray-100 animate-in fade-in">
+                    <h4 className="font-bold text-gray-900 mb-4 flex items-center justify-between">
+                      Bookings on {selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                      <span className="bg-gray-100 text-gray-600 px-2.5 py-1 rounded-lg text-xs">
+                        {bookingsList.filter(b => {
+                          const d = new Date(selectedDate);
+                          d.setHours(0,0,0,0);
+                          const start = new Date(b.startDate);
+                          start.setHours(0,0,0,0);
+                          const end = new Date(b.endDate);
+                          end.setHours(0,0,0,0);
+                          return d >= start && d <= end;
+                        }).length} Bookings
+                      </span>
+                    </h4>
+                    
+                    <div className="space-y-3">
+                      {bookingsList.filter(b => {
+                        const d = new Date(selectedDate);
+                        d.setHours(0,0,0,0);
+                        const start = new Date(b.startDate);
+                        start.setHours(0,0,0,0);
+                        const end = new Date(b.endDate);
+                        end.setHours(0,0,0,0);
+                        return d >= start && d <= end;
+                      }).length === 0 ? (
+                        <div className="text-center py-6 text-gray-400 font-medium bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                          No bookings scheduled for this date.
+                        </div>
+                      ) : (
+                        bookingsList.filter(b => {
+                          const d = new Date(selectedDate);
+                          d.setHours(0,0,0,0);
+                          const start = new Date(b.startDate);
+                          start.setHours(0,0,0,0);
+                          const end = new Date(b.endDate);
+                          end.setHours(0,0,0,0);
+                          return d >= start && d <= end;
+                        }).map((booking) => (
+                          <div key={`detail-${booking.id}`} className="bg-gray-50 p-4 rounded-2xl flex items-center gap-4">
+                            <div className="w-10 h-10 bg-white rounded-xl overflow-hidden shrink-0 shadow-sm border border-gray-100">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src="/images/scooter.png" alt="Scooter" className="w-full h-full object-cover opacity-80" />
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex justify-between items-start">
+                                <h5 className="font-bold text-gray-900 text-sm">{booking.scooter}</h5>
+                                <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide ${booking.status === 'In Progress' ? 'bg-yellow-100 text-yellow-700' : booking.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
+                                  {booking.status}
+                                </span>
+                              </div>
+                              <p className="text-[12px] font-medium text-gray-500 mt-0.5">{booking.customer} • Rp {booking.price.toLocaleString()}</p>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         ) : activeTab === 'maintenance' ? (
           <div className="p-5 md:px-8 pb-12 animate-in fade-in">
