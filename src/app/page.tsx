@@ -35,6 +35,16 @@ export default function Home() {
   const [activeBrand, setActiveBrand] = useState("")
   const [durationFilter, setDurationFilter] = useState("Daily")
   const [isNavOpen, setIsNavOpen] = useState(false)
+  
+  // Filter States
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [maxPrice, setMaxPrice] = useState(500000)
+
+  // Filter Logic
+  const filterByPrice = (priceStr: string) => parseInt(priceStr.replace(/,/g, '')) <= maxPrice
+  
+  const filteredPopular = popularScooters.filter(s => filterByPrice(s.price))
+  const filteredRecommended = recommendedScooters.filter(s => filterByPrice(s.price))
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F0F2F5] px-6 pb-24 md:px-12 md:pb-32">
@@ -111,7 +121,10 @@ export default function Home() {
               className="w-full pl-12 pr-4 h-14 md:h-16 bg-white border-none rounded-full focus:ring-0 outline-none text-[15px] md:text-[16px] placeholder:text-gray-400 text-gray-800 shadow-sm"
             />
           </div>
-          <button className="w-14 h-14 md:w-16 md:h-16 bg-white rounded-full flex items-center justify-center shadow-sm shrink-0 border border-gray-100 transition-transform hover:scale-105">
+          <button 
+            onClick={() => setIsFilterOpen(true)}
+            className="w-14 h-14 md:w-16 md:h-16 bg-white rounded-full flex items-center justify-center shadow-sm shrink-0 border border-gray-100 transition-transform hover:scale-105"
+          >
             <SlidersHorizontal className="w-5 h-5 md:w-6 md:h-6 text-gray-800" />
           </button>
         </div>
@@ -201,7 +214,7 @@ export default function Home() {
           </div>
           
           <div className="flex gap-4 md:gap-6 overflow-x-auto md:grid md:grid-cols-2 lg:grid-cols-3 md:overflow-visible pb-4 scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0 snap-x snap-mandatory md:snap-none">
-            {popularScooters.map(scooter => (
+            {filteredPopular.map(scooter => (
               <Link key={scooter.id} href={`/detail/${scooter.id}`} className="min-w-full md:min-w-0 sm:min-w-[340px] shrink-0 block relative bg-white rounded-[32px] md:rounded-[40px] p-4 md:p-5 shadow-sm border border-gray-50 snap-center md:snap-align-none transition-transform hover:-translate-y-1 hover:shadow-md">
                 {/* Rating */}
                 <div className="absolute top-6 left-6 md:top-8 md:left-8 bg-white/90 backdrop-blur-sm px-3 md:px-4 py-1.5 md:py-2 rounded-full flex items-center gap-1.5 z-10 shadow-sm">
@@ -241,7 +254,7 @@ export default function Home() {
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {recommendedScooters.map(scooter => (
+            {filteredRecommended.map(scooter => (
               <Link key={scooter.id} href={`/detail/${scooter.id}`} className="bg-white rounded-[24px] md:rounded-[32px] p-3 md:p-4 shadow-sm border border-gray-50 flex flex-col group transition-all hover:scale-[1.02] hover:shadow-md">
                 <div className="relative w-full aspect-square mb-3 md:mb-4 rounded-2xl bg-[#F8F9FA] flex items-center justify-center p-3 md:p-5">
                   <div className="absolute top-2 right-2 md:top-3 md:right-3 bg-white/90 backdrop-blur-sm px-2 py-1 md:px-3 md:py-1.5 rounded-full flex items-center gap-1 z-10 shadow-sm">
@@ -257,6 +270,56 @@ export default function Home() {
             ))}
           </div>
         </div>
+
+        {/* Filter Modal */}
+        {isFilterOpen && (
+          <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-6 bg-black/40 backdrop-blur-sm animate-in fade-in">
+            <div className="w-full md:max-w-md bg-white rounded-t-[32px] md:rounded-[32px] p-6 pb-12 md:pb-6 shadow-xl animate-in slide-in-from-bottom-8 md:slide-in-from-bottom-4 relative">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-gray-900">Filters</h3>
+                <button 
+                  onClick={() => setIsFilterOpen(false)}
+                  className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <label className="font-bold text-gray-900 text-[15px]">Max Price (Daily)</label>
+                    <span className="font-black text-lg text-black">Rp {maxPrice.toLocaleString('id-ID')}</span>
+                  </div>
+                  
+                  <div className="px-2">
+                    <input 
+                      type="range" 
+                      min="100000" 
+                      max="500000" 
+                      step="50000"
+                      value={maxPrice}
+                      onChange={(e) => setMaxPrice(Number(e.target.value))}
+                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black"
+                    />
+                    <div className="flex justify-between text-xs font-medium text-gray-400 mt-2">
+                      <span>Rp 100k</span>
+                      <span>Rp 500k</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <button 
+                onClick={() => setIsFilterOpen(false)}
+                className="w-full bg-black text-white font-bold text-lg py-4 rounded-2xl mt-8 shadow-sm hover:bg-gray-900 transition-colors"
+              >
+                Apply Filters
+              </button>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   )
