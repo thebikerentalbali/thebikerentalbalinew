@@ -330,33 +330,33 @@ export default function AdminDashboard() {
                   const isExpanded = expandedPendingVendorId === vendor.id;
                   return (
                     <div key={vendor.id} className="bg-white rounded-[24px] border border-gray-100 shadow-sm flex flex-col overflow-hidden transition-all duration-300 hover:border-gray-200">
-                      <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div className="flex gap-4 items-center cursor-pointer flex-1" onClick={() => setExpandedPendingVendorId(isExpanded ? null : vendor.id)}>
+                      <div className="p-5 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+                        <div className="flex gap-4 items-center cursor-pointer flex-1 min-w-0" onClick={() => setExpandedPendingVendorId(isExpanded ? null : vendor.id)}>
                           <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg bg-${vendor.color}-100 text-${vendor.color}-700 shrink-0`}>
                             {vendor.initials}
                           </div>
-                          <div className="flex-1">
+                          <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
-                              <h4 className="font-bold text-gray-900 text-base">{vendor.name}</h4>
-                              <div className={`p-1.5 rounded-full transition-transform sm:hidden ${isExpanded ? 'rotate-90 bg-gray-100' : 'bg-gray-50 hover:bg-gray-100'}`}>
+                              <h4 className="font-bold text-gray-900 text-base truncate">{vendor.name}</h4>
+                              <div className={`p-1.5 rounded-full transition-transform xl:hidden ${isExpanded ? 'rotate-90 bg-gray-100' : 'bg-gray-50 hover:bg-gray-100'}`}>
                                 <ChevronRight className="w-4 h-4 text-gray-600" />
                               </div>
                             </div>
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-xs font-medium text-gray-500 mt-1">
-                              <span className="flex items-center gap-1"><Store className="w-3 h-3" /> {vendor.location}</span>
-                              <span className="hidden sm:inline text-gray-300">•</span>
-                              <span>{vendor.email}</span>
-                              <span className="hidden sm:inline text-gray-300">•</span>
-                              <span>Applied {vendor.appliedDate}</span>
+                            <div className="flex flex-col lg:flex-row lg:items-center gap-1 lg:gap-3 text-xs font-medium text-gray-500 mt-1 flex-wrap">
+                              <span className="flex items-center gap-1 shrink-0"><Store className="w-3 h-3" /> {vendor.location}</span>
+                              <span className="hidden lg:inline text-gray-300 shrink-0">•</span>
+                              <span className="truncate">{vendor.email}</span>
+                              <span className="hidden lg:inline text-gray-300 shrink-0">•</span>
+                              <span className="shrink-0">Applied {vendor.appliedDate}</span>
                             </div>
                           </div>
-                          <div className={`hidden sm:flex p-1.5 rounded-full transition-transform ${isExpanded ? 'rotate-90 bg-gray-100' : 'bg-gray-50 hover:bg-gray-100'}`}>
+                          <div className={`hidden xl:flex p-1.5 rounded-full transition-transform shrink-0 ${isExpanded ? 'rotate-90 bg-gray-100' : 'bg-gray-50 hover:bg-gray-100'}`}>
                             <ChevronRight className="w-5 h-5 text-gray-600" />
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0 pt-3 sm:pt-0 border-t border-gray-100 sm:border-none">
-                          <button className="flex-1 sm:flex-none bg-black text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-800 transition-colors shadow-sm">Approve</button>
-                          <button className="flex-1 sm:flex-none bg-gray-100 text-gray-700 px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-200 transition-colors">Reject</button>
+                        <div className="flex flex-row items-center gap-2 w-full xl:w-auto mt-2 xl:mt-0 pt-3 xl:pt-0 border-t border-gray-100 xl:border-none shrink-0">
+                          <button className="flex-1 xl:flex-none bg-black text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-800 transition-colors shadow-sm">Approve</button>
+                          <button className="flex-1 xl:flex-none bg-gray-100 text-gray-700 px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-200 transition-colors">Reject</button>
                         </div>
                       </div>
                       
