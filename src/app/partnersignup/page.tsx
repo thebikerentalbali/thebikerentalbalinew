@@ -9,7 +9,7 @@ import dynamic from "next/dynamic"
 const MapPicker = dynamic(() => import('@/components/MapPicker'), { ssr: false })
 
 export default function PartnerSignUp() {
-  const [step, setStep] = useState(1)
+  const [step, setStep] = useState(0)
   const [formData, setFormData] = useState({
     companyName: "",
     contactName: "",
@@ -69,18 +69,59 @@ export default function PartnerSignUp() {
         </div>
       </div>
 
-      {/* Right Column: Form */}
-      <div className="flex-1 flex flex-col justify-center min-h-screen relative">
+      {/* Right Column: Content Area */}
+      <div className="flex-1 flex flex-col justify-center min-h-screen relative bg-[#F8F9FA] md:bg-white">
         <div className="absolute top-6 left-6 md:hidden">
           <Link href="/" className="inline-block">
             <h2 className="text-xl font-black text-black tracking-tight leading-none">THE BIKE RENTAL</h2>
           </Link>
         </div>
 
-        <div className="w-full max-w-xl mx-auto px-6 py-20 md:px-12">
+        <div className="w-full max-w-xl mx-auto px-4 py-20 md:px-12">
+          {step === 0 && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 bg-white p-8 md:p-10 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
+              <div className="mb-10 text-center">
+                <div className="w-16 h-16 bg-black rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-md">
+                  <Store className="w-8 h-8 text-white" />
+                </div>
+                <h2 className="text-3xl font-black text-gray-900 mb-3 tracking-tight">Partner Portal</h2>
+                <p className="text-gray-500 font-medium max-w-sm mx-auto">
+                  Manage your fleet, track bookings, and grow your rental business with ease.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <button 
+                  onClick={() => setStep(1)}
+                  className="w-full bg-black text-white font-bold py-4 px-6 rounded-2xl flex items-center justify-between hover:bg-gray-900 transition-all shadow-[0_10px_20px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 group"
+                >
+                  <div className="flex items-center gap-3">
+                    <User className="w-5 h-5 text-yellow-400" />
+                    <span>Create New Account</span>
+                  </div>
+                  <ChevronRight className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" />
+                </button>
+                
+                <Link 
+                  href="/partnerportal"
+                  className="w-full bg-white text-gray-900 font-bold py-4 px-6 rounded-2xl flex items-center justify-between border-2 border-gray-100 hover:border-gray-200 hover:bg-gray-50 transition-all group"
+                >
+                  <div className="flex items-center gap-3">
+                    <Lock className="w-5 h-5 text-gray-400 group-hover:text-black transition-colors" />
+                    <span>Log In to Existing Account</span>
+                  </div>
+                  <ChevronRight className="w-5 h-5 opacity-40 group-hover:opacity-100 transition-opacity" />
+                </Link>
+              </div>
+            </div>
+          )}
+
           {step === 1 && (
-            <div className="animate-in fade-in slide-in-from-bottom-4">
+            <div className="animate-in fade-in slide-in-from-bottom-4 bg-white p-6 md:p-10 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
               <div className="mb-8">
+                <button onClick={() => setStep(0)} className="text-sm font-bold text-gray-500 hover:text-black mb-6 flex items-center gap-1 transition-colors">
+                  &larr; Back
+                </button>
                 <h2 className="text-3xl font-bold text-gray-900 mb-2">Create Partner Account</h2>
                 <p className="text-gray-500">Provide your business details to get started.</p>
               </div>
@@ -189,7 +230,7 @@ export default function PartnerSignUp() {
                 </button>
               </form>
 
-              <div className="mt-8 text-center">
+              <div className="mt-8 text-center pt-6 border-t border-gray-100">
                 <p className="text-sm text-gray-600 font-medium">
                   Already a partner? <Link href="/partnerportal" className="text-black font-bold hover:underline">Login here</Link>
                 </p>
@@ -198,7 +239,7 @@ export default function PartnerSignUp() {
           )}
 
           {step === 2 && (
-            <div className="animate-in fade-in slide-in-from-right-8">
+            <div className="animate-in fade-in slide-in-from-right-8 bg-white p-6 md:p-10 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
               <div className="mb-8">
                 <button onClick={() => setStep(1)} className="text-sm font-bold text-gray-500 hover:text-black mb-4 flex items-center gap-1">
                   &larr; Back
@@ -266,7 +307,7 @@ export default function PartnerSignUp() {
           )}
 
           {step === 3 && (
-            <div className="text-center animate-in fade-in zoom-in-95 duration-500 py-12">
+            <div className="text-center animate-in fade-in zoom-in-95 duration-500 py-12 bg-white p-8 md:p-12 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
               <div className="w-24 h-24 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
                 <CheckCircle2 className="w-12 h-12 text-green-500" />
               </div>
