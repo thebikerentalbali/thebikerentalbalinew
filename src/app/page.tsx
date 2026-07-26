@@ -76,7 +76,7 @@ export default function Home() {
               
               <div className="flex flex-col gap-2">
                 <span className="text-[12px] font-bold text-gray-400 uppercase tracking-wider px-2">Partners</span>
-                <Link href="/partnerportal" className="text-[16px] font-semibold text-gray-800 px-2 py-1 hover:text-black transition-colors flex justify-between items-center group">
+                <Link href="/partnersignup" className="text-[16px] font-semibold text-gray-800 px-2 py-1 hover:text-black transition-colors flex justify-between items-center group">
                   Partner Portal
                   <span className="text-[11px] font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md">Sign In / Sign Up</span>
                 </Link>
