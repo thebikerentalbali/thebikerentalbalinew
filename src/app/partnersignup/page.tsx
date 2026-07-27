@@ -90,7 +90,7 @@ export default function PartnerSignUp() {
                 </p>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <button 
                   onClick={() => setStep(1)}
                   className="w-full bg-black text-white font-bold py-4 px-6 rounded-2xl flex items-center justify-between hover:bg-gray-900 transition-all shadow-[0_10px_20px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 group"
@@ -102,16 +102,11 @@ export default function PartnerSignUp() {
                   <ChevronRight className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" />
                 </button>
                 
-                <Link 
-                  href="/partnerportal"
-                  className="w-full bg-white text-gray-900 font-bold py-4 px-6 rounded-2xl flex items-center justify-between border-2 border-gray-100 hover:border-gray-200 hover:bg-gray-50 transition-all group"
-                >
-                  <div className="flex items-center gap-3">
-                    <Lock className="w-5 h-5 text-gray-400 group-hover:text-black transition-colors" />
-                    <span>Log In to Existing Account</span>
-                  </div>
-                  <ChevronRight className="w-5 h-5 opacity-40 group-hover:opacity-100 transition-opacity" />
-                </Link>
+                <div className="text-center">
+                  <p className="text-[15px] text-gray-500 font-medium">
+                    Already a partner? <Link href="/partnerportal" className="text-black font-bold hover:underline ml-1">Log In</Link>
+                  </p>
+                </div>
               </div>
             </div>
           )}
