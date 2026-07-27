@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Heart, Search, SlidersHorizontal, Star, Bike, MapPin, ChevronDown, Menu, X } from "lucide-react"
 import Link from "next/link"
 import dynamic from "next/dynamic"
+import usePlacesAutocomplete, { getGeocode, getLatLng } from "use-places-autocomplete"
 
 const MapPicker = dynamic(() => import('@/components/MapPicker'), { ssr: false })
 
@@ -52,22 +53,59 @@ export default function Home() {
   const [mapPosition, setMapPosition] = useState<[number, number]>([0, 0])
   const [tempLocationName, setTempLocationName] = useState("")
   const [tempSearchArea, setTempSearchArea] = useState("")
-  const [mapSearchQuery, setMapSearchQuery] = useState("")
-  const [isSearchingMap, setIsSearchingMap] = useState(false)
   
   // Filter States
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [maxPrice, setMaxPrice] = useState(500000)
 
-  const reverseGeocode = async (lat: number, lng: number) => {
+  const {
+    ready,
+    value,
+    suggestions: { status, data },
+    setValue,
+    clearSuggestions,
+  } = usePlacesAutocomplete({
+    debounce: 300,
+  });
+
+  const handleSelect = async (address: string) => {
+    setValue(address, false);
+    clearSuggestions();
+
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-      const data = await res.json();
-      const address = data.address || {};
-      const roadName = address.road || address.neighbourhood || address.suburb || address.village || address.city || "Selected Location";
-      const searchArea = address.suburb || address.village || address.city || address.town || "";
+      const results = await getGeocode({ address });
+      const { lat, lng } = await getLatLng(results[0]);
+      setMapPosition([lat, lng]);
+      
+      const roadName = results[0].formatted_address;
+      const components = results[0].address_components;
+      const locality = components.find(c => c.types.includes("locality"));
+      const searchArea = locality ? locality.long_name : "";
+      
       setTempLocationName(roadName);
       setTempSearchArea(searchArea);
+    } catch (error) {
+      console.error("Error: ", error);
+    }
+  };
+
+  const reverseGeocode = async (lat: number, lng: number) => {
+    try {
+      if (typeof window !== "undefined" && window.google) {
+        const geocoder = new window.google.maps.Geocoder();
+        const response = await geocoder.geocode({ location: { lat, lng } });
+        if (response.results[0]) {
+          const address = response.results[0].formatted_address;
+          setTempLocationName(address);
+          const components = response.results[0].address_components;
+          const locality = components.find((c: any) => c.types.includes("locality"));
+          setTempSearchArea(locality ? locality.long_name : "");
+        } else {
+          setTempLocationName("Location Found");
+        }
+      } else {
+        setTempLocationName("Location Found (No API)");
+      }
     } catch (error) {
       console.error("Reverse geocoding error", error);
       setTempLocationName("Location Found");
@@ -79,36 +117,11 @@ export default function Home() {
     reverseGeocode(lat, lng);
   }
 
-  const handleMapSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!mapSearchQuery.trim()) return;
-    
-    setIsSearchingMap(true);
-    try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(mapSearchQuery + ', Bali')}&limit=1`);
-      const data = await res.json();
-      if (data && data.length > 0) {
-        const { lat, lon } = data[0];
-        const latitude = parseFloat(lat);
-        const longitude = parseFloat(lon);
-        setMapPosition([latitude, longitude]);
-        await reverseGeocode(latitude, longitude);
-      } else {
-        alert("Location not found. Please try a different search term or tap the map directly.");
-      }
-    } catch (error) {
-      console.error("Map search error", error);
-      alert("Error searching location. Please try again.");
-    } finally {
-      setIsSearchingMap(false);
-    }
-  }
-
   const openLocationPicker = () => {
     setIsLocationModalOpen(true);
     setMapPosition([0, 0]);
     setTempLocationName("Please search or tap map");
-    setMapSearchQuery("");
+    setValue("");
   }
 
   const toggleSaveScooter = (e: React.MouseEvent, id: number) => {
@@ -491,27 +504,34 @@ export default function Home() {
                 </button>
               </div>
 
-              <form onSubmit={handleMapSearch} className="mb-4 relative">
+              <div className="mb-4 relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <Search className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
                   type="text"
                   placeholder="Search hotel, villa, or street..."
-                  value={mapSearchQuery}
-                  onChange={(e) => setMapSearchQuery(e.target.value)}
-                  className="block w-full pl-11 pr-24 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-[15px] text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                  value={value}
+                  onChange={(e) => setValue(e.target.value)}
+                  disabled={!ready}
+                  className="block w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-[15px] text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
                 />
-                <button 
-                  type="submit"
-                  disabled={isSearchingMap || !mapSearchQuery.trim()}
-                  className="absolute inset-y-1.5 right-1.5 px-4 bg-black text-white text-sm font-bold rounded-xl hover:bg-gray-900 disabled:bg-gray-300 transition-colors flex items-center"
-                >
-                  {isSearchingMap ? (
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  ) : "Search"}
-                </button>
-              </form>
+                
+                {/* Autocomplete Suggestions */}
+                {status === "OK" && (
+                  <ul className="absolute z-10 w-full mt-2 bg-white border border-gray-100 shadow-lg rounded-2xl overflow-hidden">
+                    {data.map(({ place_id, description }) => (
+                      <li
+                        key={place_id}
+                        className="px-4 py-3 hover:bg-gray-50 cursor-pointer text-sm text-gray-700 transition-colors border-b border-gray-50 last:border-0"
+                        onClick={() => handleSelect(description)}
+                      >
+                        {description}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
 
               <div className="mb-6 relative rounded-2xl overflow-hidden border border-gray-200">
                 {isLocating && (

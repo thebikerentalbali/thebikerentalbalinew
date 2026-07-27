@@ -6,12 +6,12 @@ import Link from "next/link"
 
 export default function VendorDashboard() {
   const [activeTab, setActiveTab] = useState("home")
-  
+
   // Fleet State
   const [fleet, setFleet] = useState([
     { id: 1, name: "Vespa Primavera", year: "2023", price: 350000, totalUnits: 3, availableUnits: 2 },
-    { id: 2, name: "Honda Scoopy", year: "2022", price: 150000, totalUnits: 4, availableUnits: 4 }, 
-    { id: 3, name: "Yamaha NMAX", year: "2021", price: 250000, totalUnits: 2, availableUnits: 2 }, 
+    { id: 2, name: "Honda Scoopy", year: "2022", price: 150000, totalUnits: 4, availableUnits: 4 },
+    { id: 3, name: "Yamaha NMAX", year: "2021", price: 250000, totalUnits: 2, availableUnits: 2 },
   ])
   const [fleetFilter, setFleetFilter] = useState("All")
   const [fleetSearch, setFleetSearch] = useState("")
@@ -34,7 +34,7 @@ export default function VendorDashboard() {
   const [bookingView, setBookingView] = useState<'list' | 'calendar'>('list')
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
-  
+
   const [bookingsList, setBookingsList] = useState([
     { id: 1, scooter: "Honda Scoopy", status: "In Progress", startDate: new Date(new Date().setDate(new Date().getDate() - 2)), endDate: new Date(new Date().setDate(new Date().getDate() + 1)), price: 450000, customer: "John Doe" },
     { id: 2, scooter: "Vespa Primavera", status: "Upcoming", startDate: new Date(new Date().setDate(new Date().getDate() + 1)), endDate: new Date(new Date().setDate(new Date().getDate() + 4)), price: 1050000, customer: "Jane Smith" },
@@ -66,7 +66,7 @@ export default function VendorDashboard() {
             <p className="text-[11px] font-bold text-gray-400 mt-1 uppercase tracking-wider">Partner Portal</p>
           </Link>
         </div>
-        
+
         <nav className="flex-1 px-4 py-2 space-y-2">
           <button onClick={() => setActiveTab('home')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors ${activeTab === 'home' ? 'bg-black text-white shadow-md shadow-black/10' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}>
             <Home className="w-5 h-5" />
@@ -116,184 +116,184 @@ export default function VendorDashboard() {
         ========================================================================
       */}
       <main className="flex-1 w-full max-w-full md:max-w-4xl lg:max-w-5xl mx-auto flex flex-col min-h-screen pt-4 md:pt-8">
-        
+
         {/* Dashboard Content */}
         {activeTab === 'home' ? (
-        <div className="p-5 md:px-8 md:pb-12 space-y-6 md:space-y-8">
-          
-          {/* Quick Actions (App-like) */}
-          <div className="grid grid-cols-2 gap-3 md:hidden">
-            <Link href="#" className="bg-black text-white p-4 rounded-[20px] flex flex-col items-center justify-center gap-2 shadow-lg shadow-black/20 active:scale-95 transition-transform">
-              <div className="bg-white/20 p-2 rounded-full">
-                <Plus className="w-5 h-5" />
+          <div className="p-5 md:px-8 md:pb-12 space-y-6 md:space-y-8">
+
+            {/* Quick Actions (App-like) */}
+            <div className="grid grid-cols-2 gap-3 md:hidden">
+              <Link href="#" className="bg-black text-white p-4 rounded-[20px] flex flex-col items-center justify-center gap-2 shadow-lg shadow-black/20 active:scale-95 transition-transform">
+                <div className="bg-white/20 p-2 rounded-full">
+                  <Plus className="w-5 h-5" />
+                </div>
+                <span className="font-bold text-[13px]">Add Scooter</span>
+              </Link>
+              <Link href="#" className="bg-white text-gray-900 p-4 rounded-[20px] border border-gray-100 flex flex-col items-center justify-center gap-2 shadow-sm active:scale-95 transition-transform">
+                <div className="bg-gray-100 p-2 rounded-full">
+                  <QrCode className="w-5 h-5" />
+                </div>
+                <span className="font-bold text-[13px]">Scan QR</span>
+              </Link>
+            </div>
+
+            {/* Stats Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+              <div className="bg-white p-5 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group hover:border-gray-200 transition-colors">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-green-50 to-transparent rounded-bl-full opacity-50"></div>
+                <div className="flex items-center gap-3 mb-3 md:mb-4">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-green-50 text-green-600 flex items-center justify-center">
+                    <Wallet className="w-5 h-5 md:w-6 md:h-6" />
+                  </div>
+                  <h3 className="text-[13px] md:text-[14px] font-bold text-gray-500 uppercase tracking-wide">Total Earnings</h3>
+                </div>
+                <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">Rp 4.2M</p>
+                <div className="flex items-center gap-1.5 mt-2 md:mt-3 bg-green-50 text-green-700 w-fit px-2.5 py-1 rounded-full">
+                  <TrendingUp className="w-3.5 h-3.5" />
+                  <span className="text-[11px] md:text-xs font-bold">+12.5% vs last week</span>
+                </div>
               </div>
-              <span className="font-bold text-[13px]">Add Scooter</span>
-            </Link>
-            <Link href="#" className="bg-white text-gray-900 p-4 rounded-[20px] border border-gray-100 flex flex-col items-center justify-center gap-2 shadow-sm active:scale-95 transition-transform">
-              <div className="bg-gray-100 p-2 rounded-full">
-                <QrCode className="w-5 h-5" />
+
+              <div className="bg-white p-5 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group hover:border-gray-200 transition-colors">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-50 to-transparent rounded-bl-full opacity-50"></div>
+                <div className="flex items-center gap-3 mb-3 md:mb-4">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
+                    <Bike className="w-5 h-5 md:w-6 md:h-6" />
+                  </div>
+                  <h3 className="text-[13px] md:text-[14px] font-bold text-gray-500 uppercase tracking-wide">Active Rentals</h3>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">8</p>
+                  <span className="text-sm md:text-base font-bold text-gray-400">/ 12 fleet</span>
+                </div>
+                <p className="text-[12px] md:text-[13px] font-semibold text-gray-500 mt-2 md:mt-3 flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                  4 available for booking
+                </p>
               </div>
-              <span className="font-bold text-[13px]">Scan QR</span>
-            </Link>
+
+              <div className="bg-white p-5 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group hover:border-gray-200 transition-colors sm:col-span-2 lg:col-span-1">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-orange-50 to-transparent rounded-bl-full opacity-50"></div>
+                <div className="flex items-center gap-3 mb-3 md:mb-4">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center">
+                    <Star className="w-5 h-5 md:w-6 md:h-6 fill-orange-500" />
+                  </div>
+                  <h3 className="text-[13px] md:text-[14px] font-bold text-gray-500 uppercase tracking-wide">Avg Rating</h3>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">4.9</p>
+                </div>
+                <p className="text-[12px] md:text-[13px] font-semibold text-gray-500 mt-2 md:mt-3">
+                  Based on <span className="text-black">124 verified reviews</span>
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+              {/* Active Bookings (App-like List for Mobile, Table-like for Desktop) */}
+              <div className="bg-white rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm overflow-hidden lg:col-span-2 flex flex-col">
+                <div className="p-5 md:p-6 border-b border-gray-50 flex justify-between items-center">
+                  <h3 className="text-lg md:text-xl font-bold text-gray-900">Recent Bookings</h3>
+                  <Link href="#" className="text-[13px] md:text-sm font-bold text-gray-500 hover:text-black transition-colors flex items-center gap-1">
+                    View All <ChevronRight className="w-4 h-4" />
+                  </Link>
+                </div>
+
+                <div className="p-2 md:p-4 flex-1">
+                  <div className="space-y-2">
+                    {/* Booking Item 1 */}
+                    <div className="bg-white hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-all p-3 md:p-4 rounded-[20px] flex items-center gap-4 cursor-pointer">
+                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gray-100 overflow-hidden shrink-0">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/images/scooter.png" alt="scooter" className="w-full h-full object-cover opacity-80" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start mb-1">
+                          <h4 className="font-bold text-gray-900 text-[14px] md:text-[16px] truncate">Yamaha NMAX</h4>
+                          <span className="bg-green-100 text-green-700 px-2.5 py-0.5 rounded-lg text-[10px] md:text-[11px] font-black uppercase tracking-wide shrink-0">Active</span>
+                        </div>
+                        <div className="flex justify-between items-end">
+                          <p className="text-[12px] md:text-[13px] font-medium text-gray-500 truncate">Booked by <span className="text-gray-900 font-bold">John Doe</span></p>
+                          <p className="text-[12px] md:text-[13px] font-bold text-gray-900 shrink-0">3 Days</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Booking Item 2 */}
+                    <div className="bg-white hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-all p-3 md:p-4 rounded-[20px] flex items-center gap-4 cursor-pointer">
+                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gray-100 overflow-hidden shrink-0">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/images/scooter.png" alt="scooter" className="w-full h-full object-cover opacity-80" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start mb-1">
+                          <h4 className="font-bold text-gray-900 text-[14px] md:text-[16px] truncate">Honda Scoopy</h4>
+                          <span className="bg-yellow-100 text-yellow-700 px-2.5 py-0.5 rounded-lg text-[10px] md:text-[11px] font-black uppercase tracking-wide shrink-0">Pending</span>
+                        </div>
+                        <div className="flex justify-between items-end">
+                          <p className="text-[12px] md:text-[13px] font-medium text-gray-500 truncate">Booked by <span className="text-gray-900 font-bold">Sarah Smith</span></p>
+                          <p className="text-[12px] md:text-[13px] font-bold text-gray-900 shrink-0">1 Week</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Booking Item 3 */}
+                    <div className="bg-white hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-all p-3 md:p-4 rounded-[20px] flex items-center gap-4 cursor-pointer">
+                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gray-100 overflow-hidden shrink-0">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/images/scooter.png" alt="scooter" className="w-full h-full object-cover opacity-80" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start mb-1">
+                          <h4 className="font-bold text-gray-900 text-[14px] md:text-[16px] truncate">Vespa Primavera</h4>
+                          <span className="bg-gray-100 text-gray-600 px-2.5 py-0.5 rounded-lg text-[10px] md:text-[11px] font-black uppercase tracking-wide shrink-0">Done</span>
+                        </div>
+                        <div className="flex justify-between items-end">
+                          <p className="text-[12px] md:text-[13px] font-medium text-gray-500 truncate">Booked by <span className="text-gray-900 font-bold">Michael T.</span></p>
+                          <p className="text-[12px] md:text-[13px] font-bold text-gray-900 shrink-0">Daily</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Actions Desktop / Need Attention */}
+              <div className="bg-black rounded-[24px] md:rounded-[32px] p-6 md:p-8 text-white relative overflow-hidden flex flex-col justify-between min-h-[250px]">
+                <div className="absolute -right-8 -top-8 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+                <div className="absolute -left-8 -bottom-8 w-32 h-32 bg-blue-500/20 rounded-full blur-2xl"></div>
+
+                <div className="relative z-10">
+                  <h3 className="text-xl font-bold mb-2">Need Attention</h3>
+                  <p className="text-gray-400 text-sm font-medium">You have tasks that require your immediate action.</p>
+                </div>
+
+                <div className="relative z-10 mt-6 space-y-3">
+                  <Link href="#" className="w-full bg-white text-black p-4 rounded-2xl flex items-center justify-between font-bold text-[14px] hover:bg-gray-100 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                      Accept 1 Pending Booking
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                  </Link>
+                  <Link href="#" className="w-full bg-white/10 text-white p-4 rounded-2xl flex items-center justify-between font-bold text-[14px] hover:bg-white/20 transition-colors border border-white/5">
+                    <div className="flex items-center gap-3">
+                      <span className="w-2 h-2 rounded-full bg-yellow-500"></span>
+                      Service Due (2 Bikes)
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-white/50" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+
           </div>
-
-          {/* Stats Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            <div className="bg-white p-5 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group hover:border-gray-200 transition-colors">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-green-50 to-transparent rounded-bl-full opacity-50"></div>
-              <div className="flex items-center gap-3 mb-3 md:mb-4">
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-green-50 text-green-600 flex items-center justify-center">
-                  <Wallet className="w-5 h-5 md:w-6 md:h-6" />
-                </div>
-                <h3 className="text-[13px] md:text-[14px] font-bold text-gray-500 uppercase tracking-wide">Total Earnings</h3>
-              </div>
-              <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">Rp 4.2M</p>
-              <div className="flex items-center gap-1.5 mt-2 md:mt-3 bg-green-50 text-green-700 w-fit px-2.5 py-1 rounded-full">
-                <TrendingUp className="w-3.5 h-3.5" />
-                <span className="text-[11px] md:text-xs font-bold">+12.5% vs last week</span>
-              </div>
-            </div>
-            
-            <div className="bg-white p-5 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group hover:border-gray-200 transition-colors">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-50 to-transparent rounded-bl-full opacity-50"></div>
-              <div className="flex items-center gap-3 mb-3 md:mb-4">
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
-                  <Bike className="w-5 h-5 md:w-6 md:h-6" />
-                </div>
-                <h3 className="text-[13px] md:text-[14px] font-bold text-gray-500 uppercase tracking-wide">Active Rentals</h3>
-              </div>
-              <div className="flex items-baseline gap-2">
-                <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">8</p>
-                <span className="text-sm md:text-base font-bold text-gray-400">/ 12 fleet</span>
-              </div>
-              <p className="text-[12px] md:text-[13px] font-semibold text-gray-500 mt-2 md:mt-3 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                4 available for booking
-              </p>
-            </div>
-
-            <div className="bg-white p-5 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group hover:border-gray-200 transition-colors sm:col-span-2 lg:col-span-1">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-orange-50 to-transparent rounded-bl-full opacity-50"></div>
-              <div className="flex items-center gap-3 mb-3 md:mb-4">
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center">
-                  <Star className="w-5 h-5 md:w-6 md:h-6 fill-orange-500" />
-                </div>
-                <h3 className="text-[13px] md:text-[14px] font-bold text-gray-500 uppercase tracking-wide">Avg Rating</h3>
-              </div>
-              <div className="flex items-baseline gap-2">
-                <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">4.9</p>
-              </div>
-              <p className="text-[12px] md:text-[13px] font-semibold text-gray-500 mt-2 md:mt-3">
-                Based on <span className="text-black">124 verified reviews</span>
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-            {/* Active Bookings (App-like List for Mobile, Table-like for Desktop) */}
-            <div className="bg-white rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm overflow-hidden lg:col-span-2 flex flex-col">
-              <div className="p-5 md:p-6 border-b border-gray-50 flex justify-between items-center">
-                <h3 className="text-lg md:text-xl font-bold text-gray-900">Recent Bookings</h3>
-                <Link href="#" className="text-[13px] md:text-sm font-bold text-gray-500 hover:text-black transition-colors flex items-center gap-1">
-                  View All <ChevronRight className="w-4 h-4" />
-                </Link>
-              </div>
-              
-              <div className="p-2 md:p-4 flex-1">
-                <div className="space-y-2">
-                  {/* Booking Item 1 */}
-                  <div className="bg-white hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-all p-3 md:p-4 rounded-[20px] flex items-center gap-4 cursor-pointer">
-                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gray-100 overflow-hidden shrink-0">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/images/scooter.png" alt="scooter" className="w-full h-full object-cover opacity-80" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start mb-1">
-                        <h4 className="font-bold text-gray-900 text-[14px] md:text-[16px] truncate">Yamaha NMAX</h4>
-                        <span className="bg-green-100 text-green-700 px-2.5 py-0.5 rounded-lg text-[10px] md:text-[11px] font-black uppercase tracking-wide shrink-0">Active</span>
-                      </div>
-                      <div className="flex justify-between items-end">
-                        <p className="text-[12px] md:text-[13px] font-medium text-gray-500 truncate">Booked by <span className="text-gray-900 font-bold">John Doe</span></p>
-                        <p className="text-[12px] md:text-[13px] font-bold text-gray-900 shrink-0">3 Days</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Booking Item 2 */}
-                  <div className="bg-white hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-all p-3 md:p-4 rounded-[20px] flex items-center gap-4 cursor-pointer">
-                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gray-100 overflow-hidden shrink-0">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/images/scooter.png" alt="scooter" className="w-full h-full object-cover opacity-80" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start mb-1">
-                        <h4 className="font-bold text-gray-900 text-[14px] md:text-[16px] truncate">Honda Scoopy</h4>
-                        <span className="bg-yellow-100 text-yellow-700 px-2.5 py-0.5 rounded-lg text-[10px] md:text-[11px] font-black uppercase tracking-wide shrink-0">Pending</span>
-                      </div>
-                      <div className="flex justify-between items-end">
-                        <p className="text-[12px] md:text-[13px] font-medium text-gray-500 truncate">Booked by <span className="text-gray-900 font-bold">Sarah Smith</span></p>
-                        <p className="text-[12px] md:text-[13px] font-bold text-gray-900 shrink-0">1 Week</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Booking Item 3 */}
-                  <div className="bg-white hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-all p-3 md:p-4 rounded-[20px] flex items-center gap-4 cursor-pointer">
-                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gray-100 overflow-hidden shrink-0">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/images/scooter.png" alt="scooter" className="w-full h-full object-cover opacity-80" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start mb-1">
-                        <h4 className="font-bold text-gray-900 text-[14px] md:text-[16px] truncate">Vespa Primavera</h4>
-                        <span className="bg-gray-100 text-gray-600 px-2.5 py-0.5 rounded-lg text-[10px] md:text-[11px] font-black uppercase tracking-wide shrink-0">Done</span>
-                      </div>
-                      <div className="flex justify-between items-end">
-                        <p className="text-[12px] md:text-[13px] font-medium text-gray-500 truncate">Booked by <span className="text-gray-900 font-bold">Michael T.</span></p>
-                        <p className="text-[12px] md:text-[13px] font-bold text-gray-900 shrink-0">Daily</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Quick Actions Desktop / Need Attention */}
-            <div className="bg-black rounded-[24px] md:rounded-[32px] p-6 md:p-8 text-white relative overflow-hidden flex flex-col justify-between min-h-[250px]">
-              <div className="absolute -right-8 -top-8 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
-              <div className="absolute -left-8 -bottom-8 w-32 h-32 bg-blue-500/20 rounded-full blur-2xl"></div>
-              
-              <div className="relative z-10">
-                <h3 className="text-xl font-bold mb-2">Need Attention</h3>
-                <p className="text-gray-400 text-sm font-medium">You have tasks that require your immediate action.</p>
-              </div>
-
-              <div className="relative z-10 mt-6 space-y-3">
-                <Link href="#" className="w-full bg-white text-black p-4 rounded-2xl flex items-center justify-between font-bold text-[14px] hover:bg-gray-100 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <span className="w-2 h-2 rounded-full bg-red-500"></span>
-                    Accept 1 Pending Booking
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-gray-400" />
-                </Link>
-                <Link href="#" className="w-full bg-white/10 text-white p-4 rounded-2xl flex items-center justify-between font-bold text-[14px] hover:bg-white/20 transition-colors border border-white/5">
-                  <div className="flex items-center gap-3">
-                    <span className="w-2 h-2 rounded-full bg-yellow-500"></span>
-                    Service Due (2 Bikes)
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-white/50" />
-                </Link>
-              </div>
-            </div>
-          </div>
-
-        </div>
         ) : activeTab === 'fleet' ? (
           <div className="p-5 md:px-8 pb-12 animate-in fade-in">
             <div className="mb-6 space-y-4">
               <div className="flex justify-between items-center gap-4">
                 <div className="relative w-max shrink-0">
-                  <select 
+                  <select
                     value={fleetFilter}
                     onChange={(e) => setFleetFilter(e.target.value)}
                     className="text-xl md:text-2xl font-black text-gray-900 bg-transparent outline-none cursor-pointer appearance-none pr-8 pl-1"
@@ -311,9 +311,9 @@ export default function VendorDashboard() {
               </div>
               <div className="relative w-full">
                 <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input 
-                  type="text" 
-                  placeholder="Search fleet..." 
+                <input
+                  type="text"
+                  placeholder="Search fleet..."
                   value={fleetSearch}
                   onChange={(e) => setFleetSearch(e.target.value)}
                   className="w-full bg-white border border-gray-100 rounded-[16px] pl-12 pr-4 py-4 text-[15px] font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all shadow-sm"
@@ -351,16 +351,16 @@ export default function VendorDashboard() {
                     </div>
                     {/* Action Buttons Row */}
                     <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-50">
-                      <button 
+                      <button
                         disabled={scooter.availableUnits === scooter.totalUnits}
-                        onClick={() => setFleet(f => f.map(s => s.id === scooter.id ? { ...s, availableUnits: s.availableUnits + 1 } : s))} 
+                        onClick={() => setFleet(f => f.map(s => s.id === scooter.id ? { ...s, availableUnits: s.availableUnits + 1 } : s))}
                         className={`py-3 rounded-[14px] font-bold text-sm transition-all ${scooter.availableUnits < scooter.totalUnits ? 'bg-gray-100 text-gray-900 hover:bg-gray-200' : 'bg-gray-50 text-gray-400 opacity-50 cursor-not-allowed'}`}
                       >
                         Return
                       </button>
-                      <button 
+                      <button
                         disabled={scooter.availableUnits === 0}
-                        onClick={() => setFleet(f => f.map(s => s.id === scooter.id ? { ...s, availableUnits: s.availableUnits - 1 } : s))} 
+                        onClick={() => setFleet(f => f.map(s => s.id === scooter.id ? { ...s, availableUnits: s.availableUnits - 1 } : s))}
                         className={`py-3 rounded-[14px] font-bold text-sm transition-all ${scooter.availableUnits > 0 ? 'bg-black text-white hover:bg-gray-800 hover:scale-[1.02] shadow-md shadow-black/10' : 'bg-gray-100 text-gray-400 opacity-50 cursor-not-allowed'}`}
                       >
                         Rent Out
@@ -374,8 +374,8 @@ export default function VendorDashboard() {
                 const matchesSearch = s.name.toLowerCase().includes(fleetSearch.toLowerCase());
                 return matchesFilter && matchesSearch;
               }).length === 0 && (
-                <div className="col-span-full py-12 text-center text-gray-400 font-bold">No scooters found for this filter.</div>
-              )}
+                  <div className="col-span-full py-12 text-center text-gray-400 font-bold">No scooters found for this filter.</div>
+                )}
             </div>
           </div>
         ) : activeTab === 'bookings' ? (
@@ -383,13 +383,13 @@ export default function VendorDashboard() {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
               <h2 className="text-2xl font-bold text-gray-900">All Bookings</h2>
               <div className="bg-gray-100 p-1 rounded-xl flex items-center">
-                <button 
+                <button
                   onClick={() => setBookingView('list')}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-[13px] transition-all ${bookingView === 'list' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black'}`}
                 >
                   <List className="w-4 h-4" /> List View
                 </button>
-                <button 
+                <button
                   onClick={() => setBookingView('calendar')}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-[13px] transition-all ${bookingView === 'calendar' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black'}`}
                 >
@@ -399,28 +399,28 @@ export default function VendorDashboard() {
             </div>
 
             {bookingView === 'list' ? (
-             <div className="space-y-3">
-              {bookingsList.map((booking) => (
-                <div key={booking.id} className="bg-white p-4 rounded-3xl border border-gray-100 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
-                  <div className="w-12 h-12 bg-gray-50 rounded-2xl overflow-hidden shrink-0">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/images/scooter.png" alt="Scooter" className="w-full h-full object-cover opacity-80" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start mb-1">
-                      <h4 className="font-bold text-gray-900 text-[15px]">{booking.scooter}</h4>
-                      <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide ${booking.status === 'In Progress' ? 'bg-yellow-100 text-yellow-700' : booking.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
-                        {booking.status}
-                      </span>
+              <div className="space-y-3">
+                {bookingsList.map((booking) => (
+                  <div key={booking.id} className="bg-white p-4 rounded-3xl border border-gray-100 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                    <div className="w-12 h-12 bg-gray-50 rounded-2xl overflow-hidden shrink-0">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="/images/scooter.png" alt="Scooter" className="w-full h-full object-cover opacity-80" />
                     </div>
-                    <p className="text-[13px] font-medium text-gray-500">
-                      {booking.startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {booking.endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} • <span className="text-gray-900 font-bold">Rp {booking.price.toLocaleString()}</span>
-                    </p>
-                    <p className="text-[11px] text-gray-400 mt-0.5">Booked by {booking.customer}</p>
+                    <div className="flex-1">
+                      <div className="flex justify-between items-start mb-1">
+                        <h4 className="font-bold text-gray-900 text-[15px]">{booking.scooter}</h4>
+                        <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide ${booking.status === 'In Progress' ? 'bg-yellow-100 text-yellow-700' : booking.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
+                          {booking.status}
+                        </span>
+                      </div>
+                      <p className="text-[13px] font-medium text-gray-500">
+                        {booking.startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {booking.endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} • <span className="text-gray-900 font-bold">Rp {booking.price.toLocaleString()}</span>
+                      </p>
+                      <p className="text-[11px] text-gray-400 mt-0.5">Booked by {booking.customer}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
-             </div>
+                ))}
+              </div>
             ) : (
               <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-5 md:p-6 animate-in slide-in-from-bottom-4">
                 <div className="flex justify-between items-center mb-6">
@@ -436,7 +436,7 @@ export default function VendorDashboard() {
                     </button>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-7 gap-1 md:gap-2 mb-2">
                   {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
                     <div key={day} className="text-center text-[11px] font-bold text-gray-400 uppercase tracking-wider py-2">
@@ -444,37 +444,36 @@ export default function VendorDashboard() {
                     </div>
                   ))}
                 </div>
-                
+
                 <div className="grid grid-cols-7 gap-1 md:gap-2">
                   {Array.from({ length: firstDayOfMonth(currentDate.getFullYear(), currentDate.getMonth()) }).map((_, i) => (
                     <div key={`empty-${i}`} className="aspect-square rounded-2xl bg-gray-50/50" />
                   ))}
-                  
+
                   {Array.from({ length: daysInMonth(currentDate.getFullYear(), currentDate.getMonth()) }).map((_, i) => {
                     const date = i + 1;
                     const currentDateObj = new Date(currentDate.getFullYear(), currentDate.getMonth(), date);
                     const isToday = new Date().toDateString() === currentDateObj.toDateString();
                     const isSelected = selectedDate?.toDateString() === currentDateObj.toDateString();
-                    
+
                     const dayBookings = bookingsList.filter(b => {
                       const d = new Date(currentDateObj);
-                      d.setHours(0,0,0,0);
+                      d.setHours(0, 0, 0, 0);
                       const start = new Date(b.startDate);
-                      start.setHours(0,0,0,0);
+                      start.setHours(0, 0, 0, 0);
                       const end = new Date(b.endDate);
-                      end.setHours(0,0,0,0);
+                      end.setHours(0, 0, 0, 0);
                       return d >= start && d <= end;
                     });
-                    
+
                     return (
                       <button
                         key={date}
                         onClick={() => setSelectedDate(currentDateObj)}
-                        className={`aspect-square rounded-2xl flex flex-col items-center justify-center relative transition-all hover:scale-[1.02] ${
-                          isSelected ? 'bg-black text-white shadow-md shadow-black/20' : 
-                          isToday ? 'bg-blue-50 text-blue-700 font-bold border border-blue-100' : 
-                          'bg-white text-gray-700 hover:bg-gray-50 border border-transparent'
-                        }`}
+                        className={`aspect-square rounded-2xl flex flex-col items-center justify-center relative transition-all hover:scale-[1.02] ${isSelected ? 'bg-black text-white shadow-md shadow-black/20' :
+                            isToday ? 'bg-blue-50 text-blue-700 font-bold border border-blue-100' :
+                              'bg-white text-gray-700 hover:bg-gray-50 border border-transparent'
+                          }`}
                       >
                         <span className={`text-sm md:text-base ${isSelected ? 'font-bold' : 'font-semibold'}`}>{date}</span>
                         {dayBookings.length > 0 && (
@@ -498,24 +497,24 @@ export default function VendorDashboard() {
                       <span className="bg-gray-100 text-gray-600 px-2.5 py-1 rounded-lg text-xs">
                         {bookingsList.filter(b => {
                           const d = new Date(selectedDate);
-                          d.setHours(0,0,0,0);
+                          d.setHours(0, 0, 0, 0);
                           const start = new Date(b.startDate);
-                          start.setHours(0,0,0,0);
+                          start.setHours(0, 0, 0, 0);
                           const end = new Date(b.endDate);
-                          end.setHours(0,0,0,0);
+                          end.setHours(0, 0, 0, 0);
                           return d >= start && d <= end;
                         }).length} Bookings
                       </span>
                     </h4>
-                    
+
                     <div className="space-y-3">
                       {bookingsList.filter(b => {
                         const d = new Date(selectedDate);
-                        d.setHours(0,0,0,0);
+                        d.setHours(0, 0, 0, 0);
                         const start = new Date(b.startDate);
-                        start.setHours(0,0,0,0);
+                        start.setHours(0, 0, 0, 0);
                         const end = new Date(b.endDate);
-                        end.setHours(0,0,0,0);
+                        end.setHours(0, 0, 0, 0);
                         return d >= start && d <= end;
                       }).length === 0 ? (
                         <div className="text-center py-6 text-gray-400 font-medium bg-gray-50 rounded-2xl border border-dashed border-gray-200">
@@ -524,11 +523,11 @@ export default function VendorDashboard() {
                       ) : (
                         bookingsList.filter(b => {
                           const d = new Date(selectedDate);
-                          d.setHours(0,0,0,0);
+                          d.setHours(0, 0, 0, 0);
                           const start = new Date(b.startDate);
-                          start.setHours(0,0,0,0);
+                          start.setHours(0, 0, 0, 0);
                           const end = new Date(b.endDate);
-                          end.setHours(0,0,0,0);
+                          end.setHours(0, 0, 0, 0);
                           return d >= start && d <= end;
                         }).map((booking) => (
                           <div key={`detail-${booking.id}`} className="bg-gray-50 p-4 rounded-2xl flex items-center gap-4">
@@ -565,9 +564,9 @@ export default function VendorDashboard() {
               </div>
               <div className="relative w-full">
                 <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input 
-                  type="text" 
-                  placeholder="Search by plate or name..." 
+                <input
+                  type="text"
+                  placeholder="Search by plate or name..."
                   value={serviceSearch}
                   onChange={(e) => setServiceSearch(e.target.value)}
                   className="w-full bg-white border border-gray-100 rounded-[16px] pl-12 pr-4 py-4 text-[15px] font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all shadow-sm"
@@ -633,15 +632,15 @@ export default function VendorDashboard() {
                   </div>
                   <label className="absolute bottom-0 right-0 bg-black text-white p-2.5 rounded-full cursor-pointer shadow-lg hover:scale-110 transition-transform border-2 border-white">
                     <Camera className="w-4 h-4" />
-                    <input 
-                      type="file" 
-                      className="hidden" 
-                      accept="image/*" 
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
                       onChange={(e) => {
                         if (e.target.files && e.target.files[0]) {
                           setVendorLogo(URL.createObjectURL(e.target.files[0]))
                         }
-                      }} 
+                      }}
                     />
                   </label>
                 </div>
@@ -668,11 +667,11 @@ export default function VendorDashboard() {
           </div>
         ) : (
           <div className="p-5 md:px-8 pb-12 flex flex-col items-center justify-center flex-1 min-h-[50vh] text-center animate-in fade-in slide-in-from-bottom-4">
-             <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-               {activeTab === 'earnings' && <Wallet className="w-10 h-10 text-gray-400" />}
-             </div>
-             <h2 className="text-2xl font-bold text-gray-900 mb-2 capitalize">{activeTab} Management</h2>
-             <p className="text-gray-500 max-w-sm">This section is currently under development. Check back soon for updates!</p>
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+              {activeTab === 'earnings' && <Wallet className="w-10 h-10 text-gray-400" />}
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2 capitalize">{activeTab} Management</h2>
+            <p className="text-gray-500 max-w-sm">This section is currently under development. Check back soon for updates!</p>
           </div>
         )}
 
@@ -684,7 +683,7 @@ export default function VendorDashboard() {
                 <h3 className="text-3xl font-black tracking-tight">Add New Scooter</h3>
                 <button onClick={() => setIsAddingScooter(false)} className="bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition-colors"><X className="w-6 h-6 text-black" /></button>
               </div>
-              
+
               <div className="space-y-8">
                 {/* Photo Upload Section */}
                 <div>
@@ -712,21 +711,21 @@ export default function VendorDashboard() {
                   <h4 className="text-lg font-bold text-gray-900 mb-3">Vehicle Details</h4>
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Model Name</label>
-                    <input type="text" placeholder="e.g. Yamaha NMAX" value={newScooter.name} onChange={e => setNewScooter({...newScooter, name: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    <input type="text" placeholder="e.g. Yamaha NMAX" value={newScooter.name} onChange={e => setNewScooter({ ...newScooter, name: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Brand</label>
-                      <input type="text" placeholder="e.g. Yamaha" value={newScooter.brand} onChange={e => setNewScooter({...newScooter, brand: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                      <input type="text" placeholder="e.g. Yamaha" value={newScooter.brand} onChange={e => setNewScooter({ ...newScooter, brand: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Engine (CC)</label>
-                      <input type="text" placeholder="e.g. 155cc" value={newScooter.cc} onChange={e => setNewScooter({...newScooter, cc: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                      <input type="text" placeholder="e.g. 155cc" value={newScooter.cc} onChange={e => setNewScooter({ ...newScooter, cc: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Year</label>
-                    <input type="text" placeholder="2024" value={newScooter.year} onChange={e => setNewScooter({...newScooter, year: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    <input type="text" placeholder="2024" value={newScooter.year} onChange={e => setNewScooter({ ...newScooter, year: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                   </div>
                 </div>
 
@@ -736,31 +735,31 @@ export default function VendorDashboard() {
                   <div className="grid grid-cols-3 gap-4">
                     <div>
                       <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">Daily (Rp)</label>
-                      <input type="number" value={newScooter.price || ''} onChange={e => setNewScooter({...newScooter, price: parseInt(e.target.value) || 0})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                      <input type="number" value={newScooter.price || ''} onChange={e => setNewScooter({ ...newScooter, price: parseInt(e.target.value) || 0 })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                     </div>
                     <div>
                       <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">Weekly (Rp)</label>
-                      <input type="number" value={newScooter.priceWeekly || ''} onChange={e => setNewScooter({...newScooter, priceWeekly: parseInt(e.target.value) || 0})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                      <input type="number" value={newScooter.priceWeekly || ''} onChange={e => setNewScooter({ ...newScooter, priceWeekly: parseInt(e.target.value) || 0 })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                     </div>
                     <div>
                       <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">Monthly (Rp)</label>
-                      <input type="number" value={newScooter.priceMonthly || ''} onChange={e => setNewScooter({...newScooter, priceMonthly: parseInt(e.target.value) || 0})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                      <input type="number" value={newScooter.priceMonthly || ''} onChange={e => setNewScooter({ ...newScooter, priceMonthly: parseInt(e.target.value) || 0 })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Total Units</label>
-                    <input type="number" min="1" value={newScooter.totalUnits} onChange={e => setNewScooter({...newScooter, totalUnits: parseInt(e.target.value) || 1})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    <input type="number" min="1" value={newScooter.totalUnits} onChange={e => setNewScooter({ ...newScooter, totalUnits: parseInt(e.target.value) || 1 })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                   </div>
                 </div>
 
                 <div className="pt-4">
-                  <button 
+                  <button
                     onClick={() => {
-                      if(!newScooter.name) return;
+                      if (!newScooter.name) return;
                       setFleet([...fleet, { ...newScooter, id: Date.now(), availableUnits: newScooter.totalUnits }]);
                       setIsAddingScooter(false);
                       setNewScooter({ name: "", brand: "", cc: "", year: "", price: 0, priceWeekly: 0, priceMonthly: 0, totalUnits: 1, availableUnits: 1, photos: [] });
-                    }} 
+                    }}
                     className="w-full bg-black text-white rounded-[20px] py-4 font-black text-lg hover:scale-[1.01] shadow-xl shadow-black/10 transition-transform">
                     Publish
                   </button>
@@ -782,48 +781,48 @@ export default function VendorDashboard() {
               <div className="space-y-4 max-h-[70vh] overflow-y-auto px-1 -mx-1">
                 <div>
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Name</label>
-                  <input type="text" value={editingScooter.name} onChange={e => setEditingScooter({...editingScooter, name: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                  <input type="text" value={editingScooter.name} onChange={e => setEditingScooter({ ...editingScooter, name: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Brand</label>
-                    <input type="text" value={editingScooter.brand || ''} onChange={e => setEditingScooter({...editingScooter, brand: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    <input type="text" value={editingScooter.brand || ''} onChange={e => setEditingScooter({ ...editingScooter, brand: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Engine (CC)</label>
-                    <input type="text" value={editingScooter.cc || ''} onChange={e => setEditingScooter({...editingScooter, cc: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    <input type="text" value={editingScooter.cc || ''} onChange={e => setEditingScooter({ ...editingScooter, cc: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Year</label>
-                    <input type="text" value={editingScooter.year} onChange={e => setEditingScooter({...editingScooter, year: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    <input type="text" value={editingScooter.year} onChange={e => setEditingScooter({ ...editingScooter, year: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
                     <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">Daily (Rp)</label>
-                    <input type="number" value={editingScooter.price} onChange={e => setEditingScooter({...editingScooter, price: parseInt(e.target.value) || 0})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    <input type="number" value={editingScooter.price} onChange={e => setEditingScooter({ ...editingScooter, price: parseInt(e.target.value) || 0 })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">Weekly (Rp)</label>
-                    <input type="number" value={editingScooter.priceWeekly || ''} onChange={e => setEditingScooter({...editingScooter, priceWeekly: parseInt(e.target.value) || 0})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    <input type="number" value={editingScooter.priceWeekly || ''} onChange={e => setEditingScooter({ ...editingScooter, priceWeekly: parseInt(e.target.value) || 0 })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">Monthly (Rp)</label>
-                    <input type="number" value={editingScooter.priceMonthly || ''} onChange={e => setEditingScooter({...editingScooter, priceMonthly: parseInt(e.target.value) || 0})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    <input type="number" value={editingScooter.priceMonthly || ''} onChange={e => setEditingScooter({ ...editingScooter, priceMonthly: parseInt(e.target.value) || 0 })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                   </div>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Total Units</label>
-                  <input type="number" min="1" value={editingScooter.totalUnits} onChange={e => setEditingScooter({...editingScooter, totalUnits: parseInt(e.target.value) || 1})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                  <input type="number" min="1" value={editingScooter.totalUnits} onChange={e => setEditingScooter({ ...editingScooter, totalUnits: parseInt(e.target.value) || 1 })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                 </div>
               </div>
-              <button 
+              <button
                 onClick={() => {
                   setFleet(f => f.map(s => s.id === editingScooter.id ? editingScooter : s));
                   setEditingScooter(null);
-                }} 
+                }}
                 className="w-full mt-8 bg-black text-white rounded-[16px] py-4 font-black text-sm hover:scale-[1.02] shadow-xl shadow-black/10 transition-all">
                 Save Changes
               </button>
@@ -842,20 +841,20 @@ export default function VendorDashboard() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Scooter Name</label>
-                  <input type="text" placeholder="e.g. Yamaha NMAX" value={newServiceScooter.name} onChange={e => setNewServiceScooter({...newServiceScooter, name: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                  <input type="text" placeholder="e.g. Yamaha NMAX" value={newServiceScooter.name} onChange={e => setNewServiceScooter({ ...newServiceScooter, name: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Plate Number</label>
-                  <input type="text" placeholder="e.g. DK 1823 XA" value={newServiceScooter.plate} onChange={e => setNewServiceScooter({...newServiceScooter, plate: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                  <input type="text" placeholder="e.g. DK 1823 XA" value={newServiceScooter.plate} onChange={e => setNewServiceScooter({ ...newServiceScooter, plate: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                 </div>
               </div>
-              <button 
+              <button
                 onClick={() => {
-                  if(!newServiceScooter.name || !newServiceScooter.plate) return;
+                  if (!newServiceScooter.name || !newServiceScooter.plate) return;
                   setServiceLogs([...serviceLogs, { ...newServiceScooter, id: Date.now(), odo: "0", oil: "N/A", service: "N/A", nextOil: "N/A", nextService: "N/A" }]);
                   setIsAddingServiceScooter(false);
                   setNewServiceScooter({ name: "", plate: "", odo: "", oil: "", service: "", nextOil: "", nextService: "" });
-                }} 
+                }}
                 className="w-full mt-8 bg-black text-white rounded-[16px] py-4 font-black text-sm hover:scale-[1.02] shadow-xl shadow-black/10 transition-all">
                 Add to Service Tracker
               </button>
@@ -877,34 +876,34 @@ export default function VendorDashboard() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Odometer (km)</label>
-                  <input type="text" value={editingServiceLog.odo} onChange={e => setEditingServiceLog({...editingServiceLog, odo: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                  <input type="text" value={editingServiceLog.odo} onChange={e => setEditingServiceLog({ ...editingServiceLog, odo: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Last Oil</label>
-                    <input type="text" value={editingServiceLog.oil} onChange={e => setEditingServiceLog({...editingServiceLog, oil: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    <input type="text" value={editingServiceLog.oil} onChange={e => setEditingServiceLog({ ...editingServiceLog, oil: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-blue-500 uppercase tracking-wide mb-1.5">Next Oil</label>
-                    <input type="text" value={editingServiceLog.nextOil || ''} onChange={e => setEditingServiceLog({...editingServiceLog, nextOil: e.target.value})} className="w-full bg-blue-50 border border-blue-100 rounded-[16px] px-4 py-3.5 text-sm font-bold text-blue-700 outline-none focus:ring-2 focus:ring-blue-500/20" />
+                    <input type="text" value={editingServiceLog.nextOil || ''} onChange={e => setEditingServiceLog({ ...editingServiceLog, nextOil: e.target.value })} className="w-full bg-blue-50 border border-blue-100 rounded-[16px] px-4 py-3.5 text-sm font-bold text-blue-700 outline-none focus:ring-2 focus:ring-blue-500/20" />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Last Service</label>
-                    <input type="text" value={editingServiceLog.service} onChange={e => setEditingServiceLog({...editingServiceLog, service: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    <input type="text" value={editingServiceLog.service} onChange={e => setEditingServiceLog({ ...editingServiceLog, service: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-red-500 uppercase tracking-wide mb-1.5">Next Service</label>
-                    <input type="text" value={editingServiceLog.nextService || ''} onChange={e => setEditingServiceLog({...editingServiceLog, nextService: e.target.value})} className="w-full bg-red-50 border border-red-100 rounded-[16px] px-4 py-3.5 text-sm font-bold text-red-700 outline-none focus:ring-2 focus:ring-red-500/20" />
+                    <input type="text" value={editingServiceLog.nextService || ''} onChange={e => setEditingServiceLog({ ...editingServiceLog, nextService: e.target.value })} className="w-full bg-red-50 border border-red-100 rounded-[16px] px-4 py-3.5 text-sm font-bold text-red-700 outline-none focus:ring-2 focus:ring-red-500/20" />
                   </div>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={() => {
                   setServiceLogs(logs => logs.map(l => l.id === editingServiceLog.id ? editingServiceLog : l));
                   setEditingServiceLog(null);
-                }} 
+                }}
                 className="w-full mt-8 bg-black text-white rounded-[16px] py-4 font-black text-sm hover:scale-[1.02] shadow-xl shadow-black/10 transition-all">
                 Save Updates
               </button>
@@ -928,14 +927,14 @@ export default function VendorDashboard() {
             </div>
             <span className="text-[10px] font-bold">Home</span>
           </button>
-          
+
           <button onClick={() => setActiveTab('fleet')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors flex-1 group ${activeTab === 'fleet' ? 'text-black' : 'text-gray-400 hover:text-black'}`}>
             <div className={`${activeTab === 'fleet' ? 'bg-black/5' : 'group-hover:bg-black/5'} p-1.5 rounded-full transition-colors`}>
               <Bike className="w-5 h-5" />
             </div>
             <span className="text-[10px] font-bold">Fleet</span>
           </button>
-          
+
           <button onClick={() => setActiveTab('bookings')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors flex-1 group relative ${activeTab === 'bookings' ? 'text-black' : 'text-gray-400 hover:text-black'}`}>
             <div className={`${activeTab === 'bookings' ? 'bg-black/5' : 'group-hover:bg-black/5'} p-1.5 rounded-full transition-colors relative`}>
               <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
@@ -943,7 +942,7 @@ export default function VendorDashboard() {
             </div>
             <span className="text-[10px] font-bold">Bookings</span>
           </button>
-          
+
           <button onClick={() => setActiveTab('maintenance')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors flex-1 group ${activeTab === 'maintenance' ? 'text-black' : 'text-gray-400 hover:text-black'}`}>
             <div className={`${activeTab === 'maintenance' ? 'bg-black/5' : 'group-hover:bg-black/5'} p-1.5 rounded-full transition-colors`}>
               <Wrench className="w-5 h-5" />
