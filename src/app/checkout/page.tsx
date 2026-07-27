@@ -257,23 +257,23 @@ export default function CheckoutPage() {
         {/* Rental Period */}
         <section>
           <h2 className="text-[18px] font-semibold text-gray-900 mb-4">Rental Period</h2>
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <label className="block text-[14px] text-gray-700 font-medium mb-1.5 pl-1">Start Date</label>
+          <div className="flex gap-3 sm:gap-4">
+            <div className="flex-1 min-w-0">
+              <label className="block text-[14px] text-gray-700 font-medium mb-1.5 pl-1 truncate">Start Date</label>
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full h-14 bg-white/60 border-none rounded-2xl px-5 text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none text-gray-800 transition-shadow"
+                className="w-full min-w-0 h-14 bg-white/60 border-none rounded-2xl px-3 sm:px-5 text-[13px] sm:text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none text-gray-800 transition-shadow"
               />
             </div>
-            <div className="flex-1">
-              <label className="block text-[14px] text-gray-700 font-medium mb-1.5 pl-1">End Date</label>
+            <div className="flex-1 min-w-0">
+              <label className="block text-[14px] text-gray-700 font-medium mb-1.5 pl-1 truncate">End Date</label>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full h-14 bg-white/60 border-none rounded-2xl px-5 text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none text-gray-800 transition-shadow"
+                className="w-full min-w-0 h-14 bg-white/60 border-none rounded-2xl px-3 sm:px-5 text-[13px] sm:text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none text-gray-800 transition-shadow"
               />
             </div>
           </div>
