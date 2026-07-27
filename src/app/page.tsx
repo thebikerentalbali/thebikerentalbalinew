@@ -74,10 +74,18 @@ export default function Home() {
           }
         },
         (error) => {
-          console.error("Error getting location", error)
-          setLocationName("Location Access Denied") 
-          setIsLocating(false)
-        }
+          console.error("Error getting location", error);
+          if (error.code === 1) {
+            alert("Please enable location access in your device settings to find nearby scooters.");
+          } else {
+            alert("Unable to fetch location. Please try again or search manually.");
+          }
+          // Professional fallback
+          setLocationName("Bali, Indonesia");
+          setSearchQuery("Bali");
+          setIsLocating(false);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       )
     } else {
       setIsLocating(false)
