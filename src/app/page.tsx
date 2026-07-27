@@ -105,43 +105,10 @@ export default function Home() {
   }
 
   const openLocationPicker = () => {
-    setIsLocationModalOpen(true)
-    setIsLocating(true)
-    setTempLocationName("Locating...")
-    
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
-          setMapPosition([latitude, longitude]);
-          await reverseGeocode(latitude, longitude);
-          setIsLocating(false);
-        },
-        async (error) => {
-          console.error("GPS failed, trying IP", error);
-          try {
-            const ipRes = await fetch('https://ipapi.co/json/');
-            const ipData = await ipRes.json();
-            if (ipData && ipData.latitude && ipData.longitude) {
-              setMapPosition([ipData.latitude, ipData.longitude]);
-              const fallbackLocation = `${ipData.city}${ipData.region ? `, ${ipData.region}` : ''}`;
-              setTempLocationName(fallbackLocation);
-              setTempSearchArea(ipData.city);
-              setIsLocating(false);
-              return;
-            }
-          } catch (ipError) {
-            console.error("IP fallback failed", ipError);
-          }
-          setTempLocationName("Tap map to select location");
-          setIsLocating(false);
-        },
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 300000 }
-      )
-    } else {
-      setTempLocationName("Tap map to select location");
-      setIsLocating(false);
-    }
+    setIsLocationModalOpen(true);
+    setMapPosition([0, 0]);
+    setTempLocationName("Please search or tap map");
+    setMapSearchQuery("");
   }
 
   const toggleSaveScooter = (e: React.MouseEvent, id: number) => {
