@@ -3,6 +3,9 @@
 import { useState } from "react"
 import { Heart, Search, SlidersHorizontal, Star, Bike, MapPin, ChevronDown, Menu, X } from "lucide-react"
 import Link from "next/link"
+import dynamic from "next/dynamic"
+
+const MapPicker = dynamic(() => import('@/components/MapPicker'), { ssr: false })
 
 const topVendors = [
   { id: 1, name: "Putu Rentals", rating: 4.9, location: "Jl. Raya Ubud", initials: "PR" },
@@ -45,66 +48,72 @@ export default function Home() {
   const [isLocating, setIsLocating] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false)
+  const [mapPosition, setMapPosition] = useState<[number, number]>([0, 0])
+  const [tempLocationName, setTempLocationName] = useState("")
+  const [tempSearchArea, setTempSearchArea] = useState("")
+  
   // Filter States
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [maxPrice, setMaxPrice] = useState(500000)
 
-  const handleGetLocation = () => {
+  const reverseGeocode = async (lat: number, lng: number) => {
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+      const data = await res.json();
+      const address = data.address || {};
+      const roadName = address.road || address.neighbourhood || address.suburb || address.village || address.city || "Selected Location";
+      const searchArea = address.suburb || address.village || address.city || address.town || "";
+      setTempLocationName(roadName);
+      setTempSearchArea(searchArea);
+    } catch (error) {
+      console.error("Reverse geocoding error", error);
+      setTempLocationName("Location Found");
+    }
+  }
+
+  const handleMapPositionChange = (lat: number, lng: number) => {
+    setMapPosition([lat, lng]);
+    reverseGeocode(lat, lng);
+  }
+
+  const openLocationPicker = () => {
+    setIsLocationModalOpen(true)
     setIsLocating(true)
+    setTempLocationName("Locating...")
+    
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
-          try {
-            const { latitude, longitude } = position.coords;
-            // Use Nominatim OSM for reverse geocoding
-            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
-            const data = await res.json();
-            
-            const address = data.address || {};
-            const roadName = address.road || address.neighbourhood || address.suburb || address.village || address.city || "Current Location";
-            const searchArea = address.suburb || address.village || address.city || address.town || "";
-            
-            setLocationName(roadName);
-            setSearchQuery(searchArea);
-          } catch (error) {
-            console.error("Error fetching location details", error);
-            setLocationName("Location Found"); 
-          } finally {
-            setIsLocating(false);
-          }
+          const { latitude, longitude } = position.coords;
+          setMapPosition([latitude, longitude]);
+          await reverseGeocode(latitude, longitude);
+          setIsLocating(false);
         },
         async (error) => {
-          console.error("Error getting location", error);
-          
-          // Professional Fallback: IP-based Geolocation
+          console.error("GPS failed, trying IP", error);
           try {
             const ipRes = await fetch('https://ipapi.co/json/');
             const ipData = await ipRes.json();
-            if (ipData && ipData.city) {
+            if (ipData && ipData.latitude && ipData.longitude) {
+              setMapPosition([ipData.latitude, ipData.longitude]);
               const fallbackLocation = `${ipData.city}${ipData.region ? `, ${ipData.region}` : ''}`;
-              setLocationName(fallbackLocation);
-              setSearchQuery(ipData.city);
+              setTempLocationName(fallbackLocation);
+              setTempSearchArea(ipData.city);
               setIsLocating(false);
-              return; // Success via IP
+              return;
             }
           } catch (ipError) {
-            console.error("IP Geolocation fallback failed", ipError);
+            console.error("IP fallback failed", ipError);
           }
-
-          if (error.code === 1) {
-            alert("Please enable location access in your device settings to find nearby scooters.");
-          } else {
-            alert("Unable to fetch precise location. We'll show you popular options in Bali.");
-          }
-          // Ultimate fallback
-          setLocationName("Bali, Indonesia");
-          setSearchQuery("Bali");
+          setTempLocationName("Tap map to select location");
           setIsLocating(false);
         },
         { enableHighAccuracy: true, timeout: 15000, maximumAge: 300000 }
       )
     } else {
-      setIsLocating(false)
+      setTempLocationName("Tap map to select location");
+      setIsLocating(false);
     }
   }
 
@@ -128,19 +137,15 @@ export default function Home() {
         <div className="w-full max-w-7xl mx-auto relative pointer-events-auto">
           <div className="bg-white/70 backdrop-blur-xl border border-white/50 shadow-sm rounded-3xl p-3 px-4 flex justify-between items-center transition-all duration-300">
             {/* Location Selector (Street level) */}
-            <button onClick={handleGetLocation} className="flex items-center gap-2.5 text-left hover:bg-black/5 p-1.5 pr-3 rounded-full transition-colors">
+            <button onClick={openLocationPicker} className="flex items-center gap-2.5 text-left hover:bg-black/5 p-1.5 pr-3 rounded-full transition-colors">
               <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center shrink-0">
-                {isLocating ? (
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <MapPin className="w-4 h-4 text-white" />
-                )}
+                <MapPin className="w-4 h-4 text-white" />
               </div>
               <div className="flex flex-col">
                 <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Deliver To</span>
                 <div className="flex items-center gap-1">
                   <span className="text-[13px] font-bold text-gray-900 leading-tight">
-                    {isLocating ? "Locating..." : locationName}
+                    {locationName}
                   </span>
                   <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
                 </div>
@@ -471,6 +476,60 @@ export default function Home() {
                   ))
                 )}
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Location Picker Modal */}
+        {isLocationModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-6 bg-black/40 backdrop-blur-sm animate-in fade-in">
+            <div className="w-full md:max-w-md bg-white rounded-t-[32px] md:rounded-[32px] p-6 pb-12 md:pb-6 shadow-xl animate-in slide-in-from-bottom-8 md:slide-in-from-bottom-4 relative">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">Delivery Location</h3>
+                  <p className="text-sm font-medium text-gray-500 mt-1">Tap the map to set your exact location</p>
+                </div>
+                <button 
+                  onClick={() => setIsLocationModalOpen(false)}
+                  className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors shrink-0 ml-4"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="mb-6 relative rounded-2xl overflow-hidden border border-gray-200">
+                {isLocating && (
+                  <div className="absolute inset-0 bg-white/70 backdrop-blur-sm z-10 flex flex-col items-center justify-center">
+                    <div className="w-8 h-8 border-4 border-black/20 border-t-black rounded-full animate-spin mb-3"></div>
+                    <span className="font-bold text-gray-900">Finding you...</span>
+                  </div>
+                )}
+                <MapPicker position={mapPosition} onPositionChange={handleMapPositionChange} />
+              </div>
+              
+              <div className="bg-gray-50 p-4 rounded-2xl mb-6 flex items-center gap-3 border border-gray-100">
+                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shrink-0 shadow-sm border border-gray-100">
+                  <MapPin className="w-5 h-5 text-gray-900" />
+                </div>
+                <div className="flex-1">
+                  <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block mb-0.5">Selected Location</span>
+                  <span className="text-[15px] font-bold text-gray-900 leading-tight block">
+                    {tempLocationName || "Tap map to select"}
+                  </span>
+                </div>
+              </div>
+
+              <button 
+                onClick={() => {
+                  setLocationName(tempLocationName);
+                  setSearchQuery(tempSearchArea);
+                  setIsLocationModalOpen(false);
+                }}
+                disabled={mapPosition[0] === 0 && !tempLocationName}
+                className="w-full bg-black disabled:bg-gray-300 text-white font-bold text-lg py-4 rounded-2xl shadow-[0_10px_20px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 transition-all"
+              >
+                Confirm Location
+              </button>
             </div>
           </div>
         )}
