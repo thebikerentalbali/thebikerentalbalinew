@@ -6,15 +6,15 @@ import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api'
 interface MapPickerProps {
   position: [number, number];
   onPositionChange: (lat: number, lng: number) => void;
+  className?: string;
 }
 
 const containerStyle = {
   width: '100%',
   height: '100%',
-  borderRadius: '1rem',
 };
 
-export default function MapPicker({ position, onPositionChange }: MapPickerProps) {
+export default function MapPicker({ position, onPositionChange, className }: MapPickerProps) {
   // Center map on Bali roughly
   const defaultCenter = useMemo(() => ({ lat: -8.409518, lng: 115.188919 }), []);
   
@@ -36,7 +36,7 @@ export default function MapPicker({ position, onPositionChange }: MapPickerProps
   }, [onPositionChange]);
 
   return (
-    <div className="h-[300px] w-full rounded-2xl overflow-hidden border border-gray-200 shadow-sm relative z-0">
+    <div className={className || "h-[300px] w-full rounded-2xl overflow-hidden border border-gray-200 shadow-sm relative z-0"}>
       {isLoaded ? (
         <GoogleMap
           mapContainerStyle={containerStyle}
@@ -44,7 +44,7 @@ export default function MapPicker({ position, onPositionChange }: MapPickerProps
           zoom={11}
           onClick={onClick}
           options={{
-            disableDefaultUI: false,
+            disableDefaultUI: true,
             zoomControl: true,
             scrollwheel: false,
           }}

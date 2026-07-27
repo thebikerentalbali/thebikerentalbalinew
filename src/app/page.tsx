@@ -489,83 +489,87 @@ export default function Home() {
 
         {/* Location Picker Modal */}
         {isLocationModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-6 bg-black/40 backdrop-blur-sm animate-in fade-in">
-            <div className="w-full md:max-w-md bg-white rounded-t-[32px] md:rounded-[32px] p-6 pb-12 md:pb-6 shadow-xl animate-in slide-in-from-bottom-8 md:slide-in-from-bottom-4 relative">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900">Delivery Location</h3>
-                  <p className="text-sm font-medium text-gray-500 mt-1">Search or tap the map to set location</p>
-                </div>
-                <button 
-                  onClick={() => setIsLocationModalOpen(false)}
-                  className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors shrink-0 ml-4"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="mb-4 relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Search className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search hotel, villa, or street..."
-                  value={value}
-                  onChange={(e) => setValue(e.target.value)}
-                  disabled={!ready}
-                  className="block w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-[15px] text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+          <div className="fixed inset-0 z-[100] flex flex-col bg-white animate-in slide-in-from-bottom-full md:slide-in-from-bottom-0 md:fade-in md:items-center md:justify-center md:bg-black/40 md:p-6">
+            <div className="flex flex-col w-full h-full md:h-auto md:max-h-[90vh] md:max-w-md bg-white md:rounded-[32px] md:shadow-2xl relative overflow-hidden">
+              
+              {/* MAP LAYER (Background on mobile, normal block on desktop) */}
+              <div className="absolute inset-0 z-0 md:relative md:h-[400px]">
+                <MapPicker 
+                  position={mapPosition} 
+                  onPositionChange={handleMapPositionChange} 
+                  className="w-full h-full object-cover"
                 />
                 
-                {/* Autocomplete Suggestions */}
-                {status === "OK" && (
-                  <ul className="absolute z-10 w-full mt-2 bg-white border border-gray-100 shadow-lg rounded-2xl overflow-hidden">
-                    {data.map(({ place_id, description }) => (
-                      <li
-                        key={place_id}
-                        className="px-4 py-3 hover:bg-gray-50 cursor-pointer text-sm text-gray-700 transition-colors border-b border-gray-50 last:border-0"
-                        onClick={() => handleSelect(description)}
-                      >
-                        {description}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-
-              <div className="mb-6 relative rounded-2xl overflow-hidden border border-gray-200">
+                {/* Locating overlay */}
                 {isLocating && (
                   <div className="absolute inset-0 bg-white/70 backdrop-blur-sm z-10 flex flex-col items-center justify-center">
                     <div className="w-8 h-8 border-4 border-black/20 border-t-black rounded-full animate-spin mb-3"></div>
                     <span className="font-bold text-gray-900">Finding you...</span>
                   </div>
                 )}
-                <MapPicker position={mapPosition} onPositionChange={handleMapPositionChange} />
-              </div>
-              
-              <div className="bg-gray-50 p-4 rounded-2xl mb-6 flex items-center gap-3 border border-gray-100">
-                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shrink-0 shadow-sm border border-gray-100">
-                  <MapPin className="w-5 h-5 text-gray-900" />
-                </div>
-                <div className="flex-1">
-                  <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block mb-0.5">Selected Location</span>
-                  <span className="text-[15px] font-bold text-gray-900 leading-tight block">
-                    {tempLocationName || "Tap map to select"}
-                  </span>
-                </div>
               </div>
 
-              <button 
-                onClick={() => {
-                  setLocationName(tempLocationName);
-                  setSearchQuery(tempSearchArea);
-                  setIsLocationModalOpen(false);
-                }}
-                disabled={mapPosition[0] === 0 && !tempLocationName}
-                className="w-full bg-black disabled:bg-gray-300 text-white font-bold text-lg py-4 rounded-2xl shadow-[0_10px_20px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 transition-all"
-              >
-                Confirm Location
-              </button>
+              {/* FOREGROUND UI OVERLAY ON MOBILE */}
+              <div className="z-10 flex flex-col h-full pointer-events-none md:pointer-events-auto p-4 md:p-6 absolute inset-0 md:relative md:inset-auto">
+                
+                {/* Top Section (Search & Close) */}
+                <div className="flex items-start gap-3 pointer-events-auto w-full">
+                  {/* Back/Close Button */}
+                  <button 
+                    onClick={() => setIsLocationModalOpen(false)}
+                    className="w-12 h-12 rounded-2xl bg-white shadow-lg flex items-center justify-center text-gray-900 hover:bg-gray-50 transition-colors shrink-0 border border-gray-100"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                  
+                  {/* Search Input */}
+                  <div className="flex-1 relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Search className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Search hotel or villa..."
+                      value={value}
+                      onChange={(e) => setValue(e.target.value)}
+                      disabled={!ready}
+                      className="block w-full pl-11 pr-4 h-12 bg-white border border-gray-100 shadow-lg rounded-2xl text-[15px] text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black transition-all"
+                    />
+                    
+                    {/* Autocomplete Suggestions */}
+                    {status === "OK" && (
+                      <ul className="absolute z-20 w-full mt-2 bg-white border border-gray-100 shadow-xl rounded-2xl overflow-hidden max-h-[250px] overflow-y-auto">
+                        {data.map(({ place_id, description }) => (
+                          <li
+                            key={place_id}
+                            className="px-4 py-3 hover:bg-gray-50 cursor-pointer text-sm text-gray-700 transition-colors border-b border-gray-50 last:border-0"
+                            onClick={() => handleSelect(description)}
+                          >
+                            {description}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex-1"></div> {/* Spacer for map on mobile */}
+
+                {/* Bottom Section (Confirm) */}
+                <div className="pointer-events-auto mt-auto pt-6 pb-2 md:pb-0">
+                  <button 
+                    onClick={() => {
+                      setLocationName(tempLocationName || "Selected Location");
+                      setSearchQuery(tempSearchArea);
+                      setIsLocationModalOpen(false);
+                    }}
+                    disabled={mapPosition[0] === 0 && !tempLocationName}
+                    className="w-full bg-black disabled:bg-gray-300 text-white font-bold text-lg py-4 rounded-2xl shadow-xl hover:-translate-y-0.5 transition-all"
+                  >
+                    Confirm Location
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}
