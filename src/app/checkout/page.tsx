@@ -166,7 +166,7 @@ export default function CheckoutPage() {
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <label className="text-[14px] text-gray-700 font-medium">Rental Plan</label>
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold text-gray-800 bg-[#EBECEF]/60 backdrop-blur-md border border-gray-200/60 shadow-sm">
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold text-white bg-black shadow-sm">
                       {item.available} Units Available
                     </span>
                   </div>
@@ -428,7 +428,7 @@ export default function CheckoutPage() {
                   <div className="flex-1">
                     <div className="flex items-start justify-between gap-2 mb-0.5">
                       <h3 className="font-semibold text-gray-900 text-[14px] leading-tight">{scooter.name}</h3>
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold text-gray-800 bg-[#EBECEF]/60 backdrop-blur-md border border-gray-200/60 shadow-sm whitespace-nowrap">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold text-white bg-black shadow-sm whitespace-nowrap">
                         {scooter.available} Available
                       </span>
                     </div>
