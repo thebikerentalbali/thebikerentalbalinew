@@ -52,6 +52,8 @@ export default function Home() {
   const [mapPosition, setMapPosition] = useState<[number, number]>([0, 0])
   const [tempLocationName, setTempLocationName] = useState("")
   const [tempSearchArea, setTempSearchArea] = useState("")
+  const [mapSearchQuery, setMapSearchQuery] = useState("")
+  const [isSearchingMap, setIsSearchingMap] = useState(false)
   
   // Filter States
   const [isFilterOpen, setIsFilterOpen] = useState(false)
@@ -75,6 +77,31 @@ export default function Home() {
   const handleMapPositionChange = (lat: number, lng: number) => {
     setMapPosition([lat, lng]);
     reverseGeocode(lat, lng);
+  }
+
+  const handleMapSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!mapSearchQuery.trim()) return;
+    
+    setIsSearchingMap(true);
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(mapSearchQuery + ', Bali')}&limit=1`);
+      const data = await res.json();
+      if (data && data.length > 0) {
+        const { lat, lon } = data[0];
+        const latitude = parseFloat(lat);
+        const longitude = parseFloat(lon);
+        setMapPosition([latitude, longitude]);
+        await reverseGeocode(latitude, longitude);
+      } else {
+        alert("Location not found. Please try a different search term or tap the map directly.");
+      }
+    } catch (error) {
+      console.error("Map search error", error);
+      alert("Error searching location. Please try again.");
+    } finally {
+      setIsSearchingMap(false);
+    }
   }
 
   const openLocationPicker = () => {
@@ -484,10 +511,10 @@ export default function Home() {
         {isLocationModalOpen && (
           <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-6 bg-black/40 backdrop-blur-sm animate-in fade-in">
             <div className="w-full md:max-w-md bg-white rounded-t-[32px] md:rounded-[32px] p-6 pb-12 md:pb-6 shadow-xl animate-in slide-in-from-bottom-8 md:slide-in-from-bottom-4 relative">
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-xl font-bold text-gray-900">Delivery Location</h3>
-                  <p className="text-sm font-medium text-gray-500 mt-1">Tap the map to set your exact location</p>
+                  <p className="text-sm font-medium text-gray-500 mt-1">Search or tap the map to set location</p>
                 </div>
                 <button 
                   onClick={() => setIsLocationModalOpen(false)}
@@ -496,6 +523,28 @@ export default function Home() {
                   <X className="w-5 h-5" />
                 </button>
               </div>
+
+              <form onSubmit={handleMapSearch} className="mb-4 relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Search className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search hotel, villa, or street..."
+                  value={mapSearchQuery}
+                  onChange={(e) => setMapSearchQuery(e.target.value)}
+                  className="block w-full pl-11 pr-24 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-[15px] text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                />
+                <button 
+                  type="submit"
+                  disabled={isSearchingMap || !mapSearchQuery.trim()}
+                  className="absolute inset-y-1.5 right-1.5 px-4 bg-black text-white text-sm font-bold rounded-xl hover:bg-gray-900 disabled:bg-gray-300 transition-colors flex items-center"
+                >
+                  {isSearchingMap ? (
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  ) : "Search"}
+                </button>
+              </form>
 
               <div className="mb-6 relative rounded-2xl overflow-hidden border border-gray-200">
                 {isLocating && (
