@@ -10,7 +10,7 @@ export default function Contact() {
           <span className="font-semibold text-sm">Back to Home</span>
         </Link>
         <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-8">Contact Support</h1>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-6">
             <div className="flex items-start gap-4">
@@ -37,11 +37,11 @@ export default function Contact() {
               </div>
               <div>
                 <h3 className="font-bold text-gray-900">Office</h3>
-                <p className="text-gray-600 mt-1">Jl. Raya Ubud No.14<br/>Bali, Indonesia</p>
+                <p className="text-gray-600 mt-1">Jl. Raya Ubud No.14<br />Bali, Indonesia</p>
               </div>
             </div>
           </div>
-          
+
           <form className="space-y-4">
             <input type="text" placeholder="Your Name" className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-gray-300" />
             <input type="email" placeholder="Your Email" className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-gray-300" />

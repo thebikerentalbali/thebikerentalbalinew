@@ -17,6 +17,8 @@ export default function CheckoutPage() {
   const [lastName, setLastName] = useState("")
   const [deliveryAddress, setDeliveryAddress] = useState("")
   const [agreedToFee, setAgreedToFee] = useState(false)
+  const [startDate, setStartDate] = useState("")
+  const [endDate, setEndDate] = useState("")
 
   const [cart, setCart] = useState([{
     ...vendorScooters[0],
@@ -79,6 +81,13 @@ export default function CheckoutPage() {
     let message = `*NEW BOOKING REQUEST*\n\n`;
     message += `*VENDOR:* Putu Rentals\n`;
     message += `*CUSTOMER:* ${firstName || "Not provided"} ${lastName || ""}\n`;
+    if (startDate && endDate) {
+      message += `*RENTAL PERIOD:* ${startDate} to ${endDate}\n`;
+    } else if (startDate) {
+      message += `*RENTAL START:* ${startDate}\n`;
+    } else if (endDate) {
+      message += `*RENTAL END:* ${endDate}\n`;
+    }
     message += `*HELMETS:* ${helmets}\n`;
     message += `*METHOD:* ${deliveryMethod === 'delivery' ? 'Delivery' : 'Pick Up'}\n`;
     if (deliveryMethod === 'delivery') {
@@ -245,6 +254,31 @@ export default function CheckoutPage() {
       </button>
 
       <div className="space-y-8">
+        {/* Rental Period */}
+        <section>
+          <h2 className="text-[18px] font-semibold text-gray-900 mb-4">Rental Period</h2>
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label className="block text-[14px] text-gray-700 font-medium mb-1.5 pl-1">Start Date</label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full h-14 bg-white/60 border-none rounded-2xl px-5 text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none text-gray-800 transition-shadow"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-[14px] text-gray-700 font-medium mb-1.5 pl-1">End Date</label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-full h-14 bg-white/60 border-none rounded-2xl px-5 text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none text-gray-800 transition-shadow"
+              />
+            </div>
+          </div>
+        </section>
+
         {/* Customer Details Form */}
         <section>
           <h2 className="text-[18px] font-semibold text-gray-900 mb-4">Customer Details</h2>
