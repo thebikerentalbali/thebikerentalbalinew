@@ -36,9 +36,48 @@ export default function Home() {
   const [durationFilter, setDurationFilter] = useState("Daily")
   const [isNavOpen, setIsNavOpen] = useState(false)
   
+  // Saved Scooters State
+  const [savedScooters, setSavedScooters] = useState<number[]>([])
+  const [isSavedModalOpen, setIsSavedModalOpen] = useState(false)
+
+  // Location & Search State
+  const [locationName, setLocationName] = useState("Ubud Main Street")
+  const [isLocating, setIsLocating] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  
   // Filter States
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [maxPrice, setMaxPrice] = useState(500000)
+
+  const handleGetLocation = () => {
+    setIsLocating(true)
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setTimeout(() => {
+            setLocationName("Ubud Area, Bali")
+            setSearchQuery("Ubud")
+            setIsLocating(false)
+          }, 1500)
+        },
+        (error) => {
+          console.error("Error getting location", error)
+          setLocationName("Ubud Area, Bali") // Fallback
+          setSearchQuery("Ubud")
+          setIsLocating(false)
+        }
+      )
+    } else {
+      setIsLocating(false)
+    }
+  }
+
+  const toggleSaveScooter = (e: React.MouseEvent, id: number) => {
+    e.preventDefault()
+    setSavedScooters(prev => 
+      prev.includes(id) ? prev.filter(sId => sId !== id) : [...prev, id]
+    )
+  }
 
   // Filter Logic
   const filterByPrice = (priceStr: string) => parseInt(priceStr.replace(/,/g, '')) <= maxPrice
@@ -53,14 +92,20 @@ export default function Home() {
         <div className="w-full max-w-7xl mx-auto relative pointer-events-auto">
           <div className="bg-white/70 backdrop-blur-xl border border-white/50 shadow-sm rounded-3xl p-3 px-4 flex justify-between items-center transition-all duration-300">
             {/* Location Selector (Street level) */}
-            <button className="flex items-center gap-2.5 text-left hover:bg-black/5 p-1.5 pr-3 rounded-full transition-colors">
+            <button onClick={handleGetLocation} className="flex items-center gap-2.5 text-left hover:bg-black/5 p-1.5 pr-3 rounded-full transition-colors">
               <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center shrink-0">
-                <MapPin className="w-4 h-4 text-white" />
+                {isLocating ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <MapPin className="w-4 h-4 text-white" />
+                )}
               </div>
               <div className="flex flex-col">
                 <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Deliver To</span>
                 <div className="flex items-center gap-1">
-                  <span className="text-[13px] font-bold text-gray-900 leading-tight">Ubud Main Street</span>
+                  <span className="text-[13px] font-bold text-gray-900 leading-tight">
+                    {isLocating ? "Locating..." : locationName}
+                  </span>
                   <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
                 </div>
               </div>
@@ -104,8 +149,14 @@ export default function Home() {
               Find Your <br className="md:hidden" /> Perfect Ride
             </h1>
           </div>
-          <button className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 shrink-0 hover:bg-gray-50 transition-colors">
+          <button 
+            onClick={() => setIsSavedModalOpen(true)}
+            className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 shrink-0 hover:bg-gray-50 transition-colors relative"
+          >
             <Heart className="w-5 h-5 text-gray-800" />
+            {savedScooters.length > 0 && (
+              <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+            )}
           </button>
         </header>
 
@@ -117,6 +168,8 @@ export default function Home() {
             </div>
             <input
               type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search nearby rentals..."
               className="w-full pl-12 pr-4 h-14 md:h-16 bg-white border-none rounded-full focus:ring-0 outline-none text-[15px] md:text-[16px] placeholder:text-gray-400 text-gray-800 shadow-sm"
             />
@@ -216,11 +269,17 @@ export default function Home() {
           <div className="flex gap-4 md:gap-6 overflow-x-auto md:grid md:grid-cols-2 lg:grid-cols-3 md:overflow-visible pb-4 scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0 snap-x snap-mandatory md:snap-none">
             {filteredPopular.map(scooter => (
               <Link key={scooter.id} href={`/detail/${scooter.id}`} className="min-w-full md:min-w-0 sm:min-w-[340px] shrink-0 block relative bg-white rounded-[32px] md:rounded-[40px] p-4 md:p-5 shadow-sm border border-gray-50 snap-center md:snap-align-none transition-transform hover:-translate-y-1 hover:shadow-md">
-                {/* Rating */}
+                {/* Rating & Save */}
                 <div className="absolute top-6 left-6 md:top-8 md:left-8 bg-white/90 backdrop-blur-sm px-3 md:px-4 py-1.5 md:py-2 rounded-full flex items-center gap-1.5 z-10 shadow-sm">
                   <Star className="w-3.5 h-3.5 md:w-4 md:h-4 fill-black text-black" />
                   <span className="text-sm md:text-base font-bold">{scooter.rating}</span>
                 </div>
+                <button 
+                  onClick={(e) => toggleSaveScooter(e, scooter.id)}
+                  className="absolute top-6 right-6 md:top-8 md:right-8 bg-white/90 backdrop-blur-sm w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center z-10 shadow-sm hover:scale-110 transition-transform"
+                >
+                  <Heart className={`w-4 h-4 md:w-5 md:h-5 ${savedScooters.includes(scooter.id) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
+                </button>
 
                 {/* Image */}
                 <div className="relative w-full h-48 md:h-56 mb-4 md:mb-5 rounded-2xl md:rounded-3xl overflow-hidden bg-[#F8F9FA] flex items-center justify-center">
@@ -257,6 +316,12 @@ export default function Home() {
             {filteredRecommended.map(scooter => (
               <Link key={scooter.id} href={`/detail/${scooter.id}`} className="bg-white rounded-[24px] md:rounded-[32px] p-3 md:p-4 shadow-sm border border-gray-50 flex flex-col group transition-all hover:scale-[1.02] hover:shadow-md">
                 <div className="relative w-full aspect-square mb-3 md:mb-4 rounded-2xl bg-[#F8F9FA] flex items-center justify-center p-3 md:p-5">
+                  <button 
+                    onClick={(e) => toggleSaveScooter(e, scooter.id)}
+                    className="absolute top-2 left-2 md:top-3 md:left-3 bg-white/90 backdrop-blur-sm w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center z-10 shadow-sm hover:scale-110 transition-transform"
+                  >
+                    <Heart className={`w-3.5 h-3.5 md:w-4 md:h-4 ${savedScooters.includes(scooter.id) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
+                  </button>
                   <div className="absolute top-2 right-2 md:top-3 md:right-3 bg-white/90 backdrop-blur-sm px-2 py-1 md:px-3 md:py-1.5 rounded-full flex items-center gap-1 z-10 shadow-sm">
                     <Star className="w-3 h-3 md:w-3.5 md:h-3.5 fill-black text-black" />
                     <span className="text-[11px] md:text-[13px] font-bold">{scooter.rating}</span>
@@ -316,6 +381,60 @@ export default function Home() {
               >
                 Apply Filters
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* Saved Scooters Modal */}
+        {isSavedModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-6 bg-black/40 backdrop-blur-sm animate-in fade-in">
+            <div className="w-full md:max-w-md bg-white rounded-t-[32px] md:rounded-[32px] p-6 pb-12 md:pb-6 shadow-xl animate-in slide-in-from-bottom-8 md:slide-in-from-bottom-4 relative max-h-[85vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-gray-900">Saved Scooters</h3>
+                <button 
+                  onClick={() => setIsSavedModalOpen(false)}
+                  className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {savedScooters.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Heart className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <p className="font-bold text-gray-900">No saved scooters yet</p>
+                    <p className="text-sm text-gray-500 mt-1">Tap the heart icon on a scooter to save it for later.</p>
+                  </div>
+                ) : (
+                  [...popularScooters, ...recommendedScooters].filter(s => savedScooters.includes(s.id)).map(scooter => (
+                    <Link key={scooter.id} href={`/detail/${scooter.id}`} className="bg-gray-50 p-3 rounded-2xl flex items-center gap-4 hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-200">
+                      <div className="w-16 h-16 bg-white rounded-xl overflow-hidden shrink-0 shadow-sm p-1">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={scooter.img} alt={scooter.name} className="w-full h-full object-contain" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex justify-between items-start">
+                          <h4 className="font-bold text-gray-900 text-[14px]">{scooter.name}</h4>
+                          <div className="flex items-center gap-1">
+                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                            <span className="text-[11px] font-bold">{scooter.rating}</span>
+                          </div>
+                        </div>
+                        <p className="text-[13px] font-extrabold text-gray-900 mt-1">Rp {scooter.price} <span className="text-gray-500 font-medium text-[11px]">/{durationFilter}</span></p>
+                      </div>
+                      <button 
+                        onClick={(e) => toggleSaveScooter(e, scooter.id)}
+                        className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0"
+                      >
+                        <Heart className="w-4 h-4 fill-red-500 text-red-500" />
+                      </button>
+                    </Link>
+                  ))
+                )}
+              </div>
             </div>
           </div>
         )}
