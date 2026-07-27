@@ -41,7 +41,7 @@ export default function Home() {
   const [isSavedModalOpen, setIsSavedModalOpen] = useState(false)
 
   // Location & Search State
-  const [locationName, setLocationName] = useState("Ubud Main Street")
+  const [locationName, setLocationName] = useState("Tap to find location")
   const [isLocating, setIsLocating] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   
@@ -53,17 +53,29 @@ export default function Home() {
     setIsLocating(true)
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setTimeout(() => {
-            setLocationName("Ubud Area, Bali")
-            setSearchQuery("Ubud")
-            setIsLocating(false)
-          }, 1500)
+        async (position) => {
+          try {
+            const { latitude, longitude } = position.coords;
+            // Use Nominatim OSM for reverse geocoding
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+            const data = await res.json();
+            
+            const address = data.address || {};
+            const roadName = address.road || address.neighbourhood || address.suburb || address.village || address.city || "Current Location";
+            const searchArea = address.suburb || address.village || address.city || address.town || "";
+            
+            setLocationName(roadName);
+            setSearchQuery(searchArea);
+          } catch (error) {
+            console.error("Error fetching location details", error);
+            setLocationName("Location Found"); 
+          } finally {
+            setIsLocating(false);
+          }
         },
         (error) => {
           console.error("Error getting location", error)
-          setLocationName("Ubud Area, Bali") // Fallback
-          setSearchQuery("Ubud")
+          setLocationName("Location Access Denied") 
           setIsLocating(false)
         }
       )
