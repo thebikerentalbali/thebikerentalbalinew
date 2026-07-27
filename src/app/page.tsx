@@ -73,19 +73,35 @@ export default function Home() {
             setIsLocating(false);
           }
         },
-        (error) => {
+        async (error) => {
           console.error("Error getting location", error);
+          
+          // Professional Fallback: IP-based Geolocation
+          try {
+            const ipRes = await fetch('https://ipapi.co/json/');
+            const ipData = await ipRes.json();
+            if (ipData && ipData.city) {
+              const fallbackLocation = `${ipData.city}${ipData.region ? `, ${ipData.region}` : ''}`;
+              setLocationName(fallbackLocation);
+              setSearchQuery(ipData.city);
+              setIsLocating(false);
+              return; // Success via IP
+            }
+          } catch (ipError) {
+            console.error("IP Geolocation fallback failed", ipError);
+          }
+
           if (error.code === 1) {
             alert("Please enable location access in your device settings to find nearby scooters.");
           } else {
-            alert("Unable to fetch location. Please try again or search manually.");
+            alert("Unable to fetch precise location. We'll show you popular options in Bali.");
           }
-          // Professional fallback
+          // Ultimate fallback
           setLocationName("Bali, Indonesia");
           setSearchQuery("Bali");
           setIsLocating(false);
         },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 300000 }
       )
     } else {
       setIsLocating(false)
