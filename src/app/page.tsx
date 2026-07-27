@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Bell, Search, SlidersHorizontal, Star, Bike, MapPin, ChevronDown, Menu, X } from "lucide-react"
+import { Heart, Search, SlidersHorizontal, Star, Bike, MapPin, ChevronDown, Menu, X } from "lucide-react"
 import Link from "next/link"
 
 const topVendors = [
@@ -58,7 +58,7 @@ export default function Home() {
                 <MapPin className="w-4 h-4 text-white" />
               </div>
               <div className="flex flex-col">
-                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Location</span>
+                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Deliver To</span>
                 <div className="flex items-center gap-1">
                   <span className="text-[13px] font-bold text-gray-900 leading-tight">Ubud Main Street</span>
                   <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
@@ -104,8 +104,8 @@ export default function Home() {
               Find Your <br className="md:hidden" /> Perfect Ride
             </h1>
           </div>
-          <button className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 shrink-0">
-            <Bell className="w-5 h-5 text-gray-800" />
+          <button className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 shrink-0 hover:bg-gray-50 transition-colors">
+            <Heart className="w-5 h-5 text-gray-800" />
           </button>
         </header>
 
