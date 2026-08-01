@@ -16,12 +16,15 @@ const brands = [
   { name: "Suzuki", icon: Bike },
 ]
 
+// Module-level in-memory cache for instant page loads
+let cachedHomeData: { topVendors: any[]; allScooters: any[] } | null = null;
+
 export default function Home() {
   const router = useRouter()
   const supabase = createClient()
   
-  const [topVendors, setTopVendors] = useState<any[]>([])
-  const [allScooters, setAllScooters] = useState<any[]>([])
+  const [topVendors, setTopVendors] = useState<any[]>(() => cachedHomeData?.topVendors || [])
+  const [allScooters, setAllScooters] = useState<any[]>(() => cachedHomeData?.allScooters || [])
 
   const [activeBrand, setActiveBrand] = useState("")
   const [durationFilter, setDurationFilter] = useState("Daily")
@@ -58,8 +61,17 @@ export default function Home() {
     }
 
     async function loadData() {
-      // Fetch reviews to compute real-time counts
-      const { data: allReviews } = await supabase.from('reviews').select('vendor_id')
+      // Parallelize Supabase requests to eliminate waterfall latency
+      const [
+        { data: allReviews },
+        { data: vendors },
+        { data: scooters }
+      ] = await Promise.all([
+        supabase.from('reviews').select('vendor_id'),
+        supabase.from('vendors').select('*').limit(6),
+        supabase.from('scooters').select('*')
+      ])
+
       const reviewCounts: Record<string, number> = {}
       if (allReviews) {
         for (const r of allReviews) {
@@ -69,8 +81,6 @@ export default function Home() {
         }
       }
 
-      const { data: vendors } = await supabase.from('vendors').select('*').limit(4)
-      
       const getReviewCount = (id: any, count: number) => {
         if (count > 0) return count;
         const hash = String(id || '').split('').reduce((acc, char) => char.charCodeAt(0) + ((acc << 5) - acc), 0);
@@ -81,13 +91,11 @@ export default function Home() {
       // format vendor initials if missing
       const formattedVendors = (vendors || []).map(v => ({
         ...v,
-        initials: v.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase(),
+        initials: v.name ? v.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() : 'V',
         location: v.address || 'Bali',
         reviewCount: getReviewCount(v.id, reviewCounts[v.id] || 0)
       }))
       setTopVendors(formattedVendors)
-      
-      const { data: scooters } = await supabase.from('scooters').select('*')
       
       const formattedScooters = (scooters || []).map(s => ({
         ...s,
@@ -101,6 +109,12 @@ export default function Home() {
       }))
       
       setAllScooters(formattedScooters)
+
+      // Save to in-memory cache for instant subsequent renders
+      cachedHomeData = {
+        topVendors: formattedVendors,
+        allScooters: formattedScooters
+      }
     }
     
     loadData()

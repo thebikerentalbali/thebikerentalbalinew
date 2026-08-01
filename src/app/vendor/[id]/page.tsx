@@ -47,14 +47,19 @@ export default function VendorPage() {
     async function loadData() {
       if (!id) return
       
-      const { data: vData } = await supabase.from('vendors').select('*').eq('id', id).single()
+      const [
+        { data: vData },
+        { data: sData },
+        { data: rData }
+      ] = await Promise.all([
+        supabase.from('vendors').select('*').eq('id', id).single(),
+        supabase.from('scooters').select('*').eq('vendor_id', id),
+        supabase.from('reviews').select('*').eq('vendor_id', id)
+      ])
+
       if (vData) {
         setVendor(vData)
-        
-        const { data: sData } = await supabase.from('scooters').select('*').eq('vendor_id', id)
         setScooters(sData || [])
-
-        const { data: rData } = await supabase.from('reviews').select('*').eq('vendor_id', id)
         let loadedReviews = rData || [];
         
         // Deterministic mock reviews algorithm
