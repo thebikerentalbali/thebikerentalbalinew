@@ -445,7 +445,7 @@ export default function AdminDashboard() {
                             <Bike className="w-4 h-4 text-gray-400" /> Published Fleet
                           </h5>
                           <div className="space-y-2">
-                            {vendor.scootersList.map(scooter => (
+                            {vendor.scootersList?.map((scooter: any) => (
                               <div key={scooter.id} className="bg-white border border-gray-100 p-3 rounded-xl flex items-center justify-between shadow-sm hover:border-gray-200 transition-colors">
                                 <div className="flex items-center gap-3">
                                   <div className="w-10 h-10 bg-gray-50 rounded-lg overflow-hidden shrink-0 border border-gray-50 flex items-center justify-center">
