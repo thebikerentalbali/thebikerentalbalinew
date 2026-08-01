@@ -169,4 +169,11 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  /* Hide Leaflet map zoom controls (+ and -) on mobile screens */
+  @media (max-width: 768px) {
+    .leaflet-control-zoom {
+      display: none !important;
+    }
+  }
 }
