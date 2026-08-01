@@ -1,14 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
-import { ChevronLeft, Bell, Star, MapPin, Map, Info, Minus, Plus, PlusCircle, X, Trash2 } from "lucide-react"
-
-const vendorScooters = [
-  { id: 1, name: "Vespa Primavera", daily: 350000, weekly: 2100000, monthly: 7000000, img: "/images/scooter.png", rating: 4.9, brand: "Vespa", available: 5 },
-  { id: 2, name: "Honda Scoopy", daily: 150000, weekly: 900000, monthly: 3000000, img: "/images/scooter.png", rating: 4.8, brand: "Honda", available: 3 },
-  { id: 3, name: "Yamaha NMAX", daily: 200000, weekly: 1200000, monthly: 4000000, img: "/images/scooter.png", rating: 4.7, brand: "Yamaha", available: 2 },
-]
+import { ChevronLeft, Bell, Star, MapPin, Map, Info, Minus, Plus, PlusCircle, X, Trash2, Loader2 } from "lucide-react"
+import { createClient } from '@/lib/supabase/client'
 
 export default function CheckoutPage() {
   const [deliveryMethod, setDeliveryMethod] = useState<"pickup" | "delivery">("pickup")
@@ -20,14 +15,31 @@ export default function CheckoutPage() {
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
 
-  const [cart, setCart] = useState([{
-    ...vendorScooters[0],
-    quantity: 1,
-    durationMode: "daily" as "daily" | "weekly" | "monthly",
-    durationCount: 1
-  }])
-
+  const [cart, setCart] = useState<any[]>([])
+  const [vendorScooters, setVendorScooters] = useState<any[]>([])
   const [showAddModal, setShowAddModal] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  const supabase = createClient()
+
+  useEffect(() => {
+    async function loadData() {
+      const { data } = await supabase.from('scooters').select('*')
+      if (data) {
+        setVendorScooters(data.map((s: any) => ({
+          ...s,
+          img: s.image_url || "/images/scooter.png",
+          rating: 4.9,
+          available: s.available_units,
+          daily: s.price_daily,
+          weekly: s.price_weekly || s.price_daily * 6,
+          monthly: s.price_monthly || s.price_daily * 20
+        })))
+      }
+      setLoading(false)
+    }
+    loadData()
+  }, [])
 
   const updateQuantity = (id: number, delta: number) => {
     setCart(prev => prev.map(item => {
@@ -55,7 +67,7 @@ export default function CheckoutPage() {
     setCart(prev => prev.filter(item => item.id !== id))
   }
 
-  const addToCart = (scooter: typeof vendorScooters[0]) => {
+  const addToCart = (scooter: any) => {
     setCart(prev => {
       const exists = prev.find(i => i.id === scooter.id)
       if (exists) {
@@ -107,33 +119,42 @@ export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-[#EBECEF] w-full md:py-8">
       <div className="flex flex-col min-h-screen md:min-h-0 bg-[#EBECEF] relative p-6 pb-36 md:max-w-6xl md:mx-auto md:shadow-2xl md:rounded-[40px] md:overflow-hidden md:border md:border-gray-200">
-      {/* Header */}
-      <header className="flex justify-between items-center pt-2 mb-8 relative">
-        <Link href="/detail/1" className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm transition-transform active:scale-95">
-          <ChevronLeft className="w-6 h-6 text-gray-800" />
-        </Link>
-        <h1 className="text-xl font-medium text-gray-900 absolute left-1/2 -translate-x-1/2">
-          Checkout
-        </h1>
-        <button className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
-          <Bell className="w-5 h-5 text-gray-800" />
-        </button>
-      </header>
-
-      {/* Desktop Grid Layout */}
-      <div className="flex flex-col md:grid md:grid-cols-[1fr_400px] lg:grid-cols-[1fr_450px] md:gap-8 lg:gap-12 md:px-4">
         
-        {/* Left Column */}
-        <div>
-          {/* Cart Items */}
-      <div className="space-y-6 mb-6">
-        {cart.map(item => {
+        {/* Header */}
+        <header className="flex justify-between items-center mb-8">
+          <Link href="/" className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
+            <ChevronLeft className="w-6 h-6 text-gray-800" />
+          </Link>
+          <h1 className="text-xl font-medium text-gray-900 absolute left-1/2 -translate-x-1/2">
+            Checkout
+          </h1>
+          <button className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm relative">
+            <Bell className="w-5 h-5 text-gray-800" />
+            <span className="absolute top-3 right-3.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+          </button>
+        </header>
+
+        {loading ? (
+          <div className="flex-1 flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-gray-400" /></div>
+        ) : (
+          <div className="flex flex-col md:grid md:grid-cols-2 md:gap-12 flex-1">
+            
+            {/* Left Column: Cart Items */}
+            <div className="flex flex-col h-full">
+              
+              {cart.length === 0 ? (
+                <div className="flex-1 bg-white rounded-3xl p-8 flex flex-col items-center justify-center shadow-sm text-center mb-6">
+                  <p className="text-gray-500 mb-4">Your cart is empty.</p>
+                  <button onClick={() => setShowAddModal(true)} className="px-6 py-2 bg-black text-white rounded-full font-medium">Add Scooters</button>
+                </div>
+              ) : (
+                cart.map(item => {
           const itemPrice = item.durationMode === "daily" ? item.daily : item.durationMode === "weekly" ? item.weekly : item.monthly
           const durationLabel = item.durationMode === "daily" ? "Days" : item.durationMode === "weekly" ? "Weeks" : "Months"
           const displayLabel = item.durationMode === "daily" ? "Day" : item.durationMode === "weekly" ? "Week" : "Month"
 
           return (
-            <div key={item.id} className="bg-white rounded-[24px] p-5 flex flex-col gap-5 shadow-sm relative border border-transparent">
+            <div key={item.id} className="bg-white rounded-[24px] p-5 flex flex-col gap-5 shadow-sm relative border border-transparent mb-6">
 
               {/* Top Section: Scooter Info */}
               <div className="flex gap-4 pr-8 relative">
@@ -248,17 +269,18 @@ export default function CheckoutPage() {
             </div>
           )
         })}
-      </div>
+              )}
 
-      {/* Add Another Scooter */}
-      <button
-        onClick={() => setShowAddModal(true)}
-        className="w-full bg-white rounded-3xl p-4 flex items-center justify-center gap-2 mb-8 text-gray-800 font-semibold shadow-sm border border-transparent hover:border-gray-200 transition-colors"
-      >
-        <PlusCircle className="w-5 h-5 text-gray-400" />
-        <span>Add scooter</span>
-      </button>
-        </div>
+            {cart.length > 0 && (
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="w-full bg-white rounded-3xl p-4 flex items-center justify-center gap-2 mb-8 text-gray-800 font-semibold shadow-sm border border-transparent hover:border-gray-100 transition-colors"
+              >
+                <PlusCircle className="w-5 h-5 text-gray-400" />
+                Add Another Scooter
+              </button>
+            )}
+            </div>
 
         {/* Right Column */}
         <div className="space-y-8 mt-10 md:mt-0 flex flex-col">
@@ -416,6 +438,8 @@ export default function CheckoutPage() {
         </a>
       </div>
       </div>
+      </div>
+      )}
       </div>
 
       {/* Bottom Button (Mobile Only) */}

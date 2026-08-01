@@ -5,15 +5,9 @@ import { Heart, Search, SlidersHorizontal, Star, Bike, MapPin, ChevronDown, Menu
 import Link from "next/link"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
+import { createClient } from '@/lib/supabase/client'
 
 const MapPicker = dynamic(() => import('@/components/MapPicker'), { ssr: false })
-
-const topVendors = [
-  { id: 1, name: "Putu Rentals", rating: 4.9, location: "Jl. Raya Ubud", initials: "PR", lat: -8.5069, lng: 115.2625 },
-  { id: 2, name: "Wayan Bikes", rating: 4.8, location: "Batu Bolong", initials: "WB", lat: -8.6534, lng: 115.1305 },
-  { id: 3, name: "Made Scooter", rating: 4.7, location: "Legian St", initials: "MS", lat: -8.7051, lng: 115.1706 },
-  { id: 4, name: "Nyoman Rides", rating: 4.9, location: "Seminyak", initials: "NR", lat: -8.6913, lng: 115.1682 },
-]
 
 const brands = [
   { name: "Honda", icon: Bike },
@@ -22,21 +16,14 @@ const brands = [
   { name: "Suzuki", icon: Bike },
 ]
 
-const popularScooters = [
-  { id: 1, name: "Vespa Primavera", price: "350,000", rating: 4.9, img: "/images/scooter.png" },
-  { id: 2, name: "Yamaha NMAX", price: "200,000", rating: 4.8, img: "/images/scooter.png" },
-  { id: 3, name: "Honda PCX", price: "200,000", rating: 4.7, img: "/images/scooter.png" },
-]
-
-const recommendedScooters = [
-  { id: 4, name: "Honda Scoopy", price: "150,000", rating: 4.8, img: "/images/scooter.png" },
-  { id: 5, name: "Vespa Sprint", price: "350,000", rating: 4.9, img: "/images/scooter.png" },
-  { id: 6, name: "Yamaha Lexi", price: "150,000", rating: 4.6, img: "/images/scooter.png" },
-  { id: 7, name: "Honda Vario", price: "120,000", rating: 4.5, img: "/images/scooter.png" },
-]
-
 export default function Home() {
   const router = useRouter()
+  const supabase = createClient()
+  
+  const [topVendors, setTopVendors] = useState<any[]>([])
+  const [popularScooters, setPopularScooters] = useState<any[]>([])
+  const [recommendedScooters, setRecommendedScooters] = useState<any[]>([])
+
   const [activeBrand, setActiveBrand] = useState("")
   const [durationFilter, setDurationFilter] = useState("Daily")
   const [isNavOpen, setIsNavOpen] = useState(false)
@@ -67,10 +54,35 @@ export default function Home() {
       const params = new URLSearchParams(window.location.search);
       if (params.get("showMap") === "true") {
         setIsLocationModalOpen(true);
-        // Optional: clear the url so it doesn't stay if they refresh
         window.history.replaceState({}, '', '/');
       }
     }
+
+    async function loadData() {
+      const { data: vendors } = await supabase.from('vendors').select('*').limit(4)
+      
+      // format vendor initials if missing
+      const formattedVendors = (vendors || []).map(v => ({
+        ...v,
+        initials: v.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase(),
+        location: v.address || 'Bali'
+      }))
+      setTopVendors(formattedVendors)
+      
+      const { data: scooters } = await supabase.from('scooters').select('*')
+      
+      const formattedScooters = (scooters || []).map(s => ({
+        ...s,
+        price: s.price_daily.toLocaleString(),
+        img: s.image_url || "/images/scooter.png",
+        rating: 4.9 // default rating since it's not in scooter table yet
+      }))
+      
+      setPopularScooters(formattedScooters.slice(0, 3))
+      setRecommendedScooters(formattedScooters.slice(3, 7))
+    }
+    
+    loadData()
   }, []);
 
   const handleMapSearch = async (e?: React.FormEvent) => {
