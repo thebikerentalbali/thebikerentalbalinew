@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ChevronLeft, MapPin, Star, Share, Loader2, X } from "lucide-react"
+import { ChevronLeft, MapPin, Star, Share, Loader2, X, BadgeCheck } from "lucide-react"
 import { useRouter, useParams } from "next/navigation"
 import Link from "next/link"
 import { createClient } from '@/lib/supabase/client'
@@ -150,7 +150,7 @@ export default function VendorPage() {
         {/* Header */}
         <header className="relative bg-white pb-6 shadow-sm rounded-b-3xl md:rounded-3xl z-10 h-fit overflow-hidden">
           {/* Cover Photo */}
-          <div className="relative h-32 md:h-48 w-full bg-gray-100">
+          <div className="relative h-48 md:h-64 w-full bg-gray-100">
             {vendor.image_url ? (
                /* eslint-disable-next-line @next/next/no-img-element */
               <img src={vendor.image_url} alt="Cover" className="w-full h-full object-cover" />
@@ -163,21 +163,7 @@ export default function VendorPage() {
               <button onClick={handleBack} className="w-10 h-10 md:w-12 md:h-12 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 shadow-sm hover:bg-white transition-colors">
                 <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-gray-800" />
               </button>
-            </div>
-          </div>
 
-          {/* Profile Details - Left Aligned Layout */}
-          <div className="px-5 md:px-6 relative z-10">
-            <div className="flex justify-between items-end -mt-12 md:-mt-14 mb-4">
-              <div className="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden bg-white border-4 border-white shadow-sm shrink-0 flex items-center justify-center">
-                {vendor.logo ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={vendor.logo} alt={vendor.name} className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-3xl font-black text-gray-400">{(vendor.name || "V").substring(0, 2).toUpperCase()}</span>
-                )}
-              </div>
-              
               <button 
                 onClick={() => {
                   const vendorSlug = vendor?.name ? vendor.name.toLowerCase().replace(/[^a-z0-9]+/g, '') : 'vendor';
@@ -189,24 +175,35 @@ export default function VendorPage() {
                     alert('Link copied to clipboard!');
                   }
                 }}
-                className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center border border-gray-200 shadow-sm active:scale-95 transition-transform"
+                className="w-10 h-10 md:w-12 md:h-12 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 shadow-sm hover:bg-white active:scale-95 transition-all"
               >
                 <Share className="w-4 h-4 md:w-5 md:h-5 text-gray-800" />
               </button>
+            </div>
+          </div>
+
+          {/* Profile Details - Left Aligned Layout */}
+          <div className="px-5 md:px-6 relative z-10">
+            <div className="flex justify-between items-end -mt-12 md:-mt-14 mb-4">
+              <div className="relative">
+                <div className="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden bg-white border-4 border-white shadow-sm shrink-0 flex items-center justify-center">
+                  {vendor.logo ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={vendor.logo} alt={vendor.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-3xl font-black text-gray-400">{(vendor.name || "V").substring(0, 2).toUpperCase()}</span>
+                  )}
+                </div>
+                {/* Verified Badge */}
+                <div className="absolute bottom-1 right-1 bg-white rounded-full p-0.5 shadow-sm">
+                  <BadgeCheck className="w-6 h-6 text-white fill-blue-500" />
+                </div>
+              </div>
             </div>
             
             <div className="mb-6">
               <h2 className="text-2xl md:text-[28px] font-bold text-gray-900 mb-1 leading-tight">{vendor.name}</h2>
               <p className="text-gray-500 text-[15px] md:text-base">{vendor.address || 'Premium scooter rental in Bali'}</p>
-              
-              <div className="flex items-center gap-2 mt-3">
-                <div className="flex items-center gap-1.5 bg-purple-50 text-purple-700 px-2.5 py-1 rounded-full border border-purple-100 w-fit">
-                  <div className="w-4 h-4 rounded-full bg-purple-600 flex items-center justify-center">
-                    <Star className="w-2.5 h-2.5 text-white fill-white" />
-                  </div>
-                  <span className="text-xs font-bold">Verified Partner</span>
-                </div>
-              </div>
             </div>
 
             {/* 3 Column Stats */}
@@ -230,10 +227,10 @@ export default function VendorPage() {
 
               <div className="w-px h-8 bg-gray-200" />
 
-              {/* Location */}
+              {/* Scooters Count */}
               <div className="flex flex-col items-center justify-center flex-1">
-                <span className="font-bold text-lg text-gray-900 truncate max-w-[90px] px-2">{vendor.address?.split(',')[0] || 'Bali'}</span>
-                <span className="text-[13px] text-gray-500 mt-0.5">location</span>
+                <span className="font-bold text-lg text-gray-900">{scooters.length}</span>
+                <span className="text-[13px] text-gray-500 mt-0.5">scooters</span>
               </div>
             </div>
 
