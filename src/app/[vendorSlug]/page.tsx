@@ -8,8 +8,9 @@ type Props = {
 
 // Generate metadata for social sharing (WhatsApp, Facebook, etc.)
 export async function generateMetadata(
-  { params }: Props
+  props: Props
 ): Promise<Metadata> {
+  const params = await props.params;
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
   const supabase = createClient(supabaseUrl, supabaseKey);
@@ -36,7 +37,8 @@ export async function generateMetadata(
   }
 }
 
-export default async function VendorSlugPage({ params }: Props) {
+export default async function VendorSlugPage(props: Props) {
+  const params = await props.params;
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
   const supabase = createClient(supabaseUrl, supabaseKey);
