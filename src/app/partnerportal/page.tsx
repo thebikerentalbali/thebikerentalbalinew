@@ -12,11 +12,7 @@ export default function VendorDashboard() {
   const [vendorLocation, setVendorLocation] = useState<[number, number]>([-8.5069, 115.2625])
 
   // Fleet State
-  const [fleet, setFleet] = useState([
-    { id: 1, name: "Vespa Primavera", year: "2023", price: 350000, totalUnits: 3, availableUnits: 2 },
-    { id: 2, name: "Honda Scoopy", year: "2022", price: 150000, totalUnits: 4, availableUnits: 4 },
-    { id: 3, name: "Yamaha NMAX", year: "2021", price: 250000, totalUnits: 2, availableUnits: 2 },
-  ])
+  const [fleet, setFleet] = useState<any[]>([])
   const [fleetFilter, setFleetFilter] = useState("All")
   const [fleetSearch, setFleetSearch] = useState("")
   const [serviceSearch, setServiceSearch] = useState("")
@@ -25,10 +21,7 @@ export default function VendorDashboard() {
   const [newScooter, setNewScooter] = useState({ name: "", brand: "", cc: "", year: "", price: 0, priceWeekly: 0, priceMonthly: 0, totalUnits: 1, availableUnits: 1, photos: [] as string[] })
 
   // Service State
-  const [serviceLogs, setServiceLogs] = useState([
-    { id: 1, name: "Yamaha NMAX", plate: "DK 1823 XA", odo: "12,450", oil: "2026-08-10", service: "2026-07-15", nextOil: "2026-11-10", nextService: "2026-10-15" },
-    { id: 2, name: "Honda Vario", plate: "DK 8899 BB", odo: "8,300", oil: "2026-08-05", service: "2026-06-20", nextOil: "2026-11-05", nextService: "2026-09-20" }
-  ])
+  const [serviceLogs, setServiceLogs] = useState<any[]>([])
   const [isAddingServiceScooter, setIsAddingServiceScooter] = useState(false)
   const [newServiceScooter, setNewServiceScooter] = useState({ name: "", plate: "", odo: "", oil: "", service: "", nextOil: "", nextService: "" })
   const [editingServiceLog, setEditingServiceLog] = useState<any>(null)
@@ -39,11 +32,7 @@ export default function VendorDashboard() {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
 
-  const [bookingsList, setBookingsList] = useState([
-    { id: 1, scooter: "Honda Scoopy", status: "In Progress", startDate: new Date(new Date().setDate(new Date().getDate() - 2)), endDate: new Date(new Date().setDate(new Date().getDate() + 1)), price: 450000, customer: "John Doe" },
-    { id: 2, scooter: "Vespa Primavera", status: "Upcoming", startDate: new Date(new Date().setDate(new Date().getDate() + 1)), endDate: new Date(new Date().setDate(new Date().getDate() + 4)), price: 1050000, customer: "Jane Smith" },
-    { id: 3, scooter: "Yamaha NMAX", status: "Completed", startDate: new Date(new Date().setDate(new Date().getDate() - 5)), endDate: new Date(new Date().setDate(new Date().getDate() - 3)), price: 500000, customer: "Mike Johnson" },
-  ])
+  const [bookingsList, setBookingsList] = useState<any[]>([])
 
   // Calendar Helpers
   const daysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
