@@ -335,7 +335,7 @@ export default function PartnerSignUp() {
 
                 {errorMsg && (
                   <div className="p-3 bg-red-50 border border-red-100 text-red-600 text-sm font-medium rounded-xl">
-                    {errorMsg}
+                    {typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg)}
                   </div>
                 )}
 
