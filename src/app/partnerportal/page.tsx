@@ -1,15 +1,53 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Bike, DollarSign, CalendarDays, Settings, Bell, Search, Star, Plus, QrCode, Home, Wallet, User, ChevronRight, ChevronLeft, TrendingUp, Wrench, MoreVertical, CheckCircle2, Clock, X, ChevronDown, List, Calendar as CalendarIcon, Camera } from "lucide-react"
+import { Bike, DollarSign, CalendarDays, Settings, Bell, Search, Star, Plus, QrCode, Home, Wallet, User, ChevronRight, ChevronLeft, TrendingUp, Wrench, MoreVertical, CheckCircle2, Clock, X, ChevronDown, List, Calendar as CalendarIcon, Camera, Loader2, LogOut } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import dynamic from "next/dynamic"
+import { createClient } from "@/lib/supabase/client"
 
 const MapPicker = dynamic(() => import('@/components/MapPicker'), { ssr: false })
 
 export default function VendorDashboard() {
   const [activeTab, setActiveTab] = useState("home")
   const [vendorLocation, setVendorLocation] = useState<[number, number]>([-8.5069, 115.2625])
+  const [vendorData, setVendorData] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  
+  const router = useRouter()
+  const supabase = createClient()
+
+  useEffect(() => {
+    async function checkAuth() {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        router.push('/partnerportal/login')
+        return
+      }
+      
+      const { data, error } = await supabase
+        .from('vendors')
+        .select('*')
+        .eq('auth_id', session.user.id)
+        .single()
+        
+      if (error || !data || data.status !== 'approved') {
+        await supabase.auth.signOut()
+        router.push('/partnerportal/login')
+        return
+      }
+      
+      setVendorData(data)
+      setIsLoading(false)
+    }
+    checkAuth()
+  }, [router, supabase])
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    router.push('/partnerportal/login')
+  }
 
   // Fleet State
   const [fleet, setFleet] = useState<any[]>([])
@@ -45,6 +83,15 @@ export default function VendorDashboard() {
   const handleNextMonth = () => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#F5F7FA] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-[#F5F7FA] md:flex pb-28 md:pb-0">
       {/* 
@@ -89,17 +136,21 @@ export default function VendorDashboard() {
         </nav>
 
         <div className="p-6 border-t border-gray-100">
-          <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-2xl border border-gray-100 cursor-pointer hover:border-gray-300 transition-colors">
+          <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-2xl border border-gray-100 mb-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-yellow-400 to-orange-500 p-[2px] shrink-0">
               <div className="w-full h-full bg-white rounded-full flex items-center justify-center">
-                <span className="font-bold text-gray-800 text-xs">PR</span>
+                <span className="font-bold text-gray-800 text-xs">{(vendorData?.name || "V").charAt(0).toUpperCase()}</span>
               </div>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-gray-900 truncate">Putu Rentals</p>
+              <p className="text-sm font-bold text-gray-900 truncate">{vendorData?.name || "Vendor"}</p>
               <p className="text-[11px] font-medium text-green-600 truncate">Verified Partner</p>
             </div>
           </div>
+          <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 bg-red-50 text-red-600 font-bold py-2.5 rounded-xl hover:bg-red-100 transition-colors text-sm">
+            <LogOut className="w-4 h-4" />
+            Logout
+          </button>
         </div>
       </aside>
 

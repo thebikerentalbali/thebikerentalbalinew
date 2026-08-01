@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
-import { Users, Bike, DollarSign, Settings, Bell, Search, Store, BarChart3, Home, ChevronRight, TrendingUp, CalendarDays, MoreVertical, Filter, ArrowUpRight, CheckCircle2, AlertCircle, Menu, UserCheck, MoreHorizontal } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Users, Bike, DollarSign, Settings, Bell, Search, Store, BarChart3, Home, ChevronRight, TrendingUp, CalendarDays, MoreVertical, Filter, ArrowUpRight, CheckCircle2, AlertCircle, Menu, UserCheck, MoreHorizontal, Loader2 } from "lucide-react"
 import Link from "next/link"
+import { createClient } from "@/lib/supabase/client"
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("home")
@@ -11,8 +12,41 @@ export default function AdminDashboard() {
   const [expandedPendingVendorId, setExpandedPendingVendorId] = useState<number | null>(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
-  // Mock Data
-  const mockPendingVendors: any[] = []
+  // Real Data
+  const [pendingVendors, setPendingVendors] = useState<any[]>([])
+  const [isLoadingApprovals, setIsLoadingApprovals] = useState(false)
+  const supabase = createClient()
+
+  useEffect(() => {
+    fetchPendingVendors()
+  }, [])
+
+  const fetchPendingVendors = async () => {
+    setIsLoadingApprovals(true)
+    const { data, error } = await supabase
+      .from('vendors')
+      .select('*')
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false })
+      
+    if (!error && data) {
+      setPendingVendors(data)
+    }
+    setIsLoadingApprovals(false)
+  }
+
+  const handleApprove = async (id: number) => {
+    const { error } = await supabase
+      .from('vendors')
+      .update({ status: 'approved' })
+      .eq('id', id)
+      
+    if (!error) {
+      setPendingVendors(prev => prev.filter(v => v.id !== id))
+    } else {
+      alert("Error approving vendor: " + error.message)
+    }
+  }
 
   const mockVendors: any[] = []
 
@@ -42,7 +76,7 @@ export default function AdminDashboard() {
           <button onClick={() => setActiveTab('approvals')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors relative ${activeTab === 'approvals' ? 'bg-white/10 text-white shadow-sm shadow-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
             <UserCheck className="w-5 h-5" />
             <span className="font-semibold text-[15px]">Approvals</span>
-            <span className="absolute right-4 bg-yellow-500 text-black text-[10px] font-bold px-2 py-0.5 rounded-full">{mockPendingVendors.length}</span>
+            <span className="absolute right-4 bg-yellow-500 text-black text-[10px] font-bold px-2 py-0.5 rounded-full">{pendingVendors.length}</span>
           </button>
           <button onClick={() => setActiveTab('vendors')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors ${activeTab === 'vendors' ? 'bg-white/10 text-white shadow-sm shadow-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
             <Store className="w-5 h-5" />
@@ -293,14 +327,20 @@ export default function AdminDashboard() {
           <div className="p-5 md:px-8 md:pb-12 animate-in fade-in">
             <div className="space-y-4">
               <div className="grid grid-cols-1 gap-4">
-                {mockPendingVendors.map(vendor => {
+                {isLoadingApprovals ? (
+                  <div className="flex justify-center p-10"><Loader2 className="w-8 h-8 animate-spin text-gray-400" /></div>
+                ) : pendingVendors.length === 0 ? (
+                  <div className="bg-white rounded-[24px] border border-gray-100 p-10 text-center">
+                    <p className="text-gray-500 font-medium">No pending approvals.</p>
+                  </div>
+                ) : pendingVendors.map(vendor => {
                   const isExpanded = expandedPendingVendorId === vendor.id;
                   return (
                     <div key={vendor.id} className="bg-white rounded-[24px] border border-gray-100 shadow-sm flex flex-col overflow-hidden transition-all duration-300 hover:border-gray-200">
                       <div className="p-5 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
                         <div className="flex gap-4 items-center cursor-pointer flex-1 min-w-0" onClick={() => setExpandedPendingVendorId(isExpanded ? null : vendor.id)}>
-                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg bg-${vendor.color}-100 text-${vendor.color}-700 shrink-0`}>
-                            {vendor.initials}
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg bg-blue-100 text-blue-700 shrink-0`}>
+                            {(vendor.name || "V").substring(0, 2).toUpperCase()}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
@@ -310,11 +350,11 @@ export default function AdminDashboard() {
                               </div>
                             </div>
                             <div className="flex flex-col lg:flex-row lg:items-center gap-1 lg:gap-3 text-xs font-medium text-gray-500 mt-1 flex-wrap">
-                              <span className="flex items-center gap-1 shrink-0"><Store className="w-3 h-3" /> {vendor.location}</span>
+                              <span className="flex items-center gap-1 shrink-0"><Store className="w-3 h-3" /> {vendor.address || "Unknown"}</span>
                               <span className="hidden lg:inline text-gray-300 shrink-0">•</span>
                               <span className="truncate">{vendor.email}</span>
                               <span className="hidden lg:inline text-gray-300 shrink-0">•</span>
-                              <span className="shrink-0">Applied {vendor.appliedDate}</span>
+                              <span className="shrink-0">Applied {new Date(vendor.created_at).toLocaleDateString()}</span>
                             </div>
                           </div>
                           <div className={`hidden xl:flex p-1.5 rounded-full transition-transform shrink-0 ${isExpanded ? 'rotate-90 bg-gray-100' : 'bg-gray-50 hover:bg-gray-100'}`}>
@@ -322,7 +362,7 @@ export default function AdminDashboard() {
                           </div>
                         </div>
                         <div className="flex flex-row items-center gap-2 w-full xl:w-auto mt-2 xl:mt-0 pt-3 xl:pt-0 border-t border-gray-100 xl:border-none shrink-0">
-                          <button className="flex-1 xl:flex-none bg-black text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-800 transition-colors shadow-sm">Approve</button>
+                          <button onClick={() => handleApprove(vendor.id)} className="flex-1 xl:flex-none bg-black text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-800 transition-colors shadow-sm">Approve</button>
                           <button className="flex-1 xl:flex-none bg-gray-100 text-gray-700 px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-200 transition-colors">Reject</button>
                         </div>
                       </div>
@@ -333,15 +373,15 @@ export default function AdminDashboard() {
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div>
                               <p className="text-xs font-medium text-gray-500 mb-1">Contact Phone</p>
-                              <p className="font-semibold text-gray-900 text-sm">{vendor.phone}</p>
+                              <p className="font-semibold text-gray-900 text-sm">N/A</p>
                             </div>
                             <div>
                               <p className="text-xs font-medium text-gray-500 mb-1">Document Status</p>
-                              <p className={`font-semibold text-sm ${vendor.documents.includes('Pending') ? 'text-yellow-600' : 'text-green-600'}`}>{vendor.documents}</p>
+                              <p className="font-semibold text-sm text-yellow-600">Pending</p>
                             </div>
                             <div>
                               <p className="text-xs font-medium text-gray-500 mb-1">Intended Fleet</p>
-                              <p className="font-semibold text-gray-900 text-sm">{vendor.fleetIntent}</p>
+                              <p className="font-semibold text-gray-900 text-sm">Unknown</p>
                             </div>
                           </div>
                         </div>
@@ -580,9 +620,9 @@ export default function AdminDashboard() {
               <UserCheck className="w-6 h-6" />
             </div>
             <span className="text-[10px] font-bold">Approvals</span>
-            {mockPendingVendors.length > 0 && (
-              <span className="absolute top-1 right-2 bg-yellow-500 text-black text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full border border-white">
-                {mockPendingVendors.length}
+            {pendingVendors.length > 0 && (
+              <span className="absolute top-2 right-2 w-4 h-4 bg-yellow-500 text-black text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-white">
+                {pendingVendors.length}
               </span>
             )}
           </button>

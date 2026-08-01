@@ -2,8 +2,9 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { ChevronRight, Store, User, Mail, Phone, Lock, Bike, MapPin, CheckCircle2 } from "lucide-react"
+import { ChevronRight, Store, User, Mail, Phone, Lock, Bike, MapPin, CheckCircle2, Loader2 } from "lucide-react"
 import dynamic from "next/dynamic"
+import { createClient } from "@/lib/supabase/client"
 
 // Dynamically import MapPicker to prevent SSR issues with Leaflet
 const MapPicker = dynamic(() => import('@/components/MapPicker'), { ssr: false })
@@ -21,6 +22,10 @@ export default function PartnerSignUp() {
     lat: 0,
     lng: 0
   })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errorMsg, setErrorMsg] = useState("")
+
+  const supabase = createClient()
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -35,9 +40,47 @@ export default function PartnerSignUp() {
     setStep(2)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setStep(3)
+    setIsSubmitting(true)
+    setErrorMsg("")
+    
+    // 1. Sign up the user in Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: formData.email,
+      password: formData.password,
+    })
+
+    if (authError) {
+      setErrorMsg(authError.message)
+      setIsSubmitting(false)
+      return
+    }
+
+    if (authData.user) {
+      // 2. Insert vendor profile
+      const { error: insertError } = await supabase.from('vendors').insert({
+        auth_id: authData.user.id,
+        name: formData.companyName,
+        email: formData.email,
+        address: formData.streetAddress,
+        lat: formData.lat,
+        lng: formData.lng,
+        status: 'pending'
+      })
+
+      if (insertError) {
+        setErrorMsg("Error creating profile: " + insertError.message)
+        setIsSubmitting(false)
+        return
+      }
+      
+      setStep(3)
+    } else {
+      setErrorMsg("Failed to create account")
+    }
+    
+    setIsSubmitting(false)
   }
 
   return (
@@ -290,12 +333,18 @@ export default function PartnerSignUp() {
                   </div>
                 </div>
 
+                {errorMsg && (
+                  <div className="p-3 bg-red-50 border border-red-100 text-red-600 text-sm font-medium rounded-xl">
+                    {errorMsg}
+                  </div>
+                )}
+
                 <button 
                   type="submit"
-                  disabled={formData.lat === 0}
+                  disabled={formData.lat === 0 || isSubmitting}
                   className="w-full bg-black disabled:bg-gray-300 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 hover:bg-gray-900 disabled:hover:bg-gray-300 transition-colors mt-4 shadow-[0_10px_20px_rgba(0,0,0,0.1)] disabled:shadow-none"
                 >
-                  Submit Application
+                  {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Submit Application"}
                 </button>
               </form>
             </div>
