@@ -6,7 +6,7 @@ import { ChevronLeft, Heart, Star, MapPin, ChevronRight } from "lucide-react"
 export default function DetailPage() {
   return (
     <div className="min-h-screen bg-[#EBECEF] w-full md:py-8">
-      <div className="flex flex-col min-h-screen md:min-h-0 bg-[#EBECEF] relative pb-28 md:max-w-xl md:mx-auto md:shadow-2xl md:rounded-[40px] md:overflow-hidden md:border md:border-gray-200">
+      <div className="flex flex-col min-h-screen md:min-h-0 bg-[#EBECEF] relative pb-28 md:pb-0 md:max-w-5xl md:mx-auto md:shadow-2xl md:rounded-[40px] md:overflow-hidden md:border md:border-gray-200">
         {/* Header */}
         <header className="flex justify-between items-center p-6 pt-8 relative z-10">
           <Link href="/" className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
@@ -20,16 +20,22 @@ export default function DetailPage() {
           </button>
         </header>
 
-        {/* Hero Image */}
+        {/* Desktop Grid Layout */}
+        <div className="flex flex-col md:grid md:grid-cols-[1fr_400px] lg:grid-cols-[1fr_450px] md:gap-8 lg:gap-12 md:p-8">
+          
+          {/* Left Column */}
+          <div>
+            {/* Hero Image */}
         <div className="relative w-full h-[300px] flex items-center justify-center mt-4 mb-8">
           <div 
             className="w-full h-full bg-contain bg-center bg-no-repeat drop-shadow-2xl scale-110"
             style={{ backgroundImage: 'url("/images/scooter.png")' }}
           />
-        </div>
+            </div>
+          </div>
 
-        {/* Vendor & Details */}
-        <div className="px-6 space-y-6">
+          {/* Right Column */}
+          <div className="px-6 md:px-0 space-y-6 md:pb-8 flex flex-col justify-center">
           
           {/* Vendor Profile */}
           <Link href="/vendor/1" className="block bg-white rounded-3xl p-5 shadow-sm transition-transform active:scale-[0.98]">
@@ -89,17 +95,35 @@ export default function DetailPage() {
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/70 backdrop-blur-xl rounded-t-[40px] px-8 py-5 flex items-center justify-between shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] border-t border-white/50 pb-8 sm:pb-5 md:absolute md:max-w-none md:rounded-none md:bg-white md:backdrop-blur-none md:border-none">
-          <div className="flex items-end">
-            <span className="text-2xl font-bold text-gray-900 tracking-tight">$25</span>
-            <span className="text-[13px] text-gray-500 font-medium ml-1 mb-1.5">/Per Day</span>
+        </div>
+
+        {/* Desktop Book Rent Button */}
+        <div className="hidden md:flex items-center justify-between bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mt-6">
+          <div className="flex flex-col">
+            <span className="text-[13px] text-gray-500 font-medium">Rental Price</span>
+            <div className="flex items-end mt-1">
+              <span className="text-2xl font-bold text-gray-900 tracking-tight">$25</span>
+              <span className="text-[13px] text-gray-500 font-medium ml-1 mb-1">/Per Day</span>
+            </div>
           </div>
-          
           <Link href="/checkout" className="bg-black text-white px-8 py-4 rounded-full text-base font-semibold shadow-xl shadow-black/20 hover:scale-105 transition-transform">
             Book Rent
           </Link>
         </div>
+      </div>
+      
+      {/* Bottom Bar (Mobile Only) */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/70 backdrop-blur-xl rounded-t-[40px] px-8 py-5 flex items-center justify-between shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] border-t border-white/50 pb-8 sm:pb-5">
+        <div className="flex items-end">
+          <span className="text-2xl font-bold text-gray-900 tracking-tight">$25</span>
+          <span className="text-[13px] text-gray-500 font-medium ml-1 mb-1.5">/Per Day</span>
+        </div>
+        
+        <Link href="/checkout" className="bg-black text-white px-8 py-4 rounded-full text-base font-semibold shadow-xl shadow-black/20 hover:scale-105 transition-transform">
+          Book Rent
+        </Link>
+      </div>
+
       </div>
     </div>
   )

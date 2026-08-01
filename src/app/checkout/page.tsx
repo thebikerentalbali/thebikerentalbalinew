@@ -106,7 +106,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-screen bg-[#EBECEF] w-full md:py-8">
-      <div className="flex flex-col min-h-screen md:min-h-0 bg-[#EBECEF] relative p-6 pb-36 md:max-w-xl md:mx-auto md:shadow-2xl md:rounded-[40px] md:overflow-hidden md:border md:border-gray-200">
+      <div className="flex flex-col min-h-screen md:min-h-0 bg-[#EBECEF] relative p-6 pb-36 md:max-w-6xl md:mx-auto md:shadow-2xl md:rounded-[40px] md:overflow-hidden md:border md:border-gray-200">
       {/* Header */}
       <header className="flex justify-between items-center pt-2 mb-8 relative">
         <Link href="/detail/1" className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm transition-transform active:scale-95">
@@ -120,7 +120,12 @@ export default function CheckoutPage() {
         </button>
       </header>
 
-      {/* Cart Items */}
+      {/* Desktop Grid Layout */}
+      <div className="flex flex-col md:grid md:grid-cols-[1fr_400px] lg:grid-cols-[1fr_450px] md:gap-8 lg:gap-12 md:px-4">
+        
+        {/* Left Column */}
+        <div>
+          {/* Cart Items */}
       <div className="space-y-6 mb-6">
         {cart.map(item => {
           const itemPrice = item.durationMode === "daily" ? item.daily : item.durationMode === "weekly" ? item.weekly : item.monthly
@@ -253,8 +258,11 @@ export default function CheckoutPage() {
         <PlusCircle className="w-5 h-5 text-gray-400" />
         <span>Add scooter</span>
       </button>
+        </div>
 
-      <div className="space-y-8">
+        {/* Right Column */}
+        <div className="space-y-8 mt-10 md:mt-0 flex flex-col">
+          <div className="space-y-8">
         {/* Rental Period */}
         <section>
           <h2 className="text-[18px] font-semibold text-gray-900 mb-4">Rental Period</h2>
@@ -393,11 +401,26 @@ export default function CheckoutPage() {
               </div>
             </div>
           )}
+          )}
         </section>
       </div>
 
-      {/* Bottom Button */}
-      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto px-6 py-6 pb-8 sm:pb-6 bg-[#EBECEF]/90 backdrop-blur-xl border-t border-white/50 z-10 md:absolute md:max-w-none md:bg-[#EBECEF] md:border-none md:rounded-b-[40px]">
+      {/* Desktop Confirm Button */}
+      <div className="hidden md:block pt-4">
+        <a
+          href={getWhatsAppLink()}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full h-14 bg-black text-white rounded-full text-[17px] font-semibold shadow-xl shadow-black/20 hover:scale-[1.02] transition-transform flex items-center justify-center gap-2"
+        >
+          Confirm via WhatsApp
+        </a>
+      </div>
+      </div>
+      </div>
+
+      {/* Bottom Button (Mobile Only) */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto px-6 py-6 pb-8 sm:pb-6 bg-[#EBECEF]/90 backdrop-blur-xl border-t border-white/50 z-10">
         <a
           href={getWhatsAppLink()}
           target="_blank"

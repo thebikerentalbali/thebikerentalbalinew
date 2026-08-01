@@ -20,9 +20,10 @@ export default function VendorPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F0F2F5] pb-24">
+    <div className="min-h-screen bg-[#F0F2F5] w-full md:py-8">
+      <div className="flex flex-col md:grid md:grid-cols-[350px_1fr] lg:grid-cols-[400px_1fr] md:gap-8 lg:gap-12 min-h-screen md:min-h-0 bg-[#F0F2F5] relative pb-24 md:pb-8 md:max-w-5xl md:mx-auto md:shadow-2xl md:rounded-[40px] md:overflow-hidden md:border md:border-gray-200 md:p-8">
       {/* Header */}
-      <header className="relative bg-white pt-8 pb-6 px-6 shadow-sm rounded-b-3xl z-10">
+      <header className="relative bg-white pt-8 pb-6 px-6 shadow-sm rounded-b-3xl md:rounded-3xl z-10 h-fit">
         <div className="flex items-center justify-between mb-6">
           <button onClick={handleBack} className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center border border-gray-100 hover:bg-gray-100 transition-colors">
             <ChevronLeft className="w-6 h-6 text-gray-800" />
@@ -67,7 +68,7 @@ export default function VendorPage() {
       </header>
 
       {/* Available Scooters */}
-      <div className="px-6 mt-8">
+      <div className="px-6 mt-8 md:mt-0 md:px-0">
         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center justify-between">
           <span>Available Scooters</span>
           <span className="text-xs font-medium text-[#00A86B] bg-[#00A86B]/10 px-2.5 py-1.5 rounded-full">3 Live Now</span>
@@ -101,6 +102,7 @@ export default function VendorPage() {
             </Link>
           ))}
         </div>
+      </div>
       </div>
     </div>
   )
