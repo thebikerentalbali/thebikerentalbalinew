@@ -119,7 +119,7 @@ export default function VendorDashboard() {
           <button onClick={() => setActiveTab('bookings')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors relative ${activeTab === 'bookings' ? 'bg-black text-white shadow-md shadow-black/10' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}>
             <CalendarDays className="w-5 h-5" />
             <span className="font-semibold text-[15px]">Bookings</span>
-            <span className="absolute right-4 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">3</span>
+            {bookingsList.length > 0 && <span className="absolute right-4 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{bookingsList.length}</span>}
           </button>
           <button onClick={() => setActiveTab('earnings')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors ${activeTab === 'earnings' ? 'bg-black text-white shadow-md shadow-black/10' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}>
             <Wallet className="w-5 h-5" />
@@ -628,15 +628,15 @@ export default function VendorDashboard() {
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Vendor Name</label>
-                <input type="text" defaultValue="Putu Rentals" className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all" />
+                <input type="text" defaultValue={vendorData?.name || ""} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">WhatsApp Number</label>
-                <input type="text" defaultValue="+62 851 7411 9423" className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all" />
+                <input type="text" defaultValue={vendorData?.phone || ""} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Location / Address</label>
-                <textarea defaultValue="Jl. Monkey Forest No. 12, Ubud, Bali" className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all min-h-[100px] mb-4"></textarea>
+                <textarea defaultValue={vendorData?.address || ""} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all min-h-[100px] mb-4"></textarea>
                 
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Pin Location on Map</label>
                 <div className="h-[300px] w-full rounded-xl overflow-hidden border border-gray-100 shadow-sm relative z-0">
@@ -918,7 +918,7 @@ export default function VendorDashboard() {
 
           <button onClick={() => setActiveTab('bookings')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors flex-1 group relative ${activeTab === 'bookings' ? 'text-black' : 'text-gray-400 hover:text-black'}`}>
             <div className={`${activeTab === 'bookings' ? 'bg-black/5' : 'group-hover:bg-black/5'} p-1.5 rounded-full transition-colors relative`}>
-              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+              {bookingsList.length > 0 && <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>}
               <CalendarDays className="w-5 h-5" />
             </div>
             <span className="text-[10px] font-bold">Bookings</span>
