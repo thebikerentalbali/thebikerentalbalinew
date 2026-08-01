@@ -278,9 +278,9 @@ export default function Home() {
                 {/* Details */}
                 <div className="text-center flex flex-col items-center">
                   <h3 className="font-semibold text-gray-900 text-[13px] md:text-[15px] leading-tight truncate w-[85px] md:w-[100px]">{vendor.name}</h3>
-                  <div className="flex items-center gap-0.5 md:gap-1 text-[11px] md:text-[13px] text-gray-500 mt-0.5 md:mt-1">
+                  <div className="flex items-center gap-1 text-[11px] md:text-[13px] mt-0.5 md:mt-1 bg-yellow-50 px-2 py-0.5 rounded-full border border-yellow-100 w-fit">
                     <Star className="w-3 h-3 md:w-3.5 md:h-3.5 fill-yellow-400 text-yellow-400" />
-                    <span className="font-semibold text-gray-700">{vendor.rating}</span>
+                    <span className="font-bold text-yellow-700">5.0 <span className="font-medium text-yellow-600/70">(120+)</span></span>
                   </div>
                   <div className="flex items-center gap-0.5 md:gap-1 text-[10px] md:text-[12px] text-gray-400 mt-0.5 md:mt-1">
                     <MapPin className="w-3 h-3 md:w-3.5 md:h-3.5" />
@@ -346,9 +346,9 @@ export default function Home() {
             {filteredPopular.map(scooter => (
               <Link key={scooter.id} href={`/detail/${scooter.id}`} className="min-w-full md:min-w-0 sm:min-w-[340px] shrink-0 block relative bg-white rounded-[32px] md:rounded-[40px] p-4 md:p-5 shadow-sm border border-gray-50 snap-center md:snap-align-none transition-transform hover:-translate-y-1 hover:shadow-md">
                 {/* Rating & Save */}
-                <div className="absolute top-6 left-6 md:top-8 md:left-8 bg-white/90 backdrop-blur-sm px-3 md:px-4 py-1.5 md:py-2 rounded-full flex items-center gap-1.5 z-10 shadow-sm">
-                  <Star className="w-3.5 h-3.5 md:w-4 md:h-4 fill-black text-black" />
-                  <span className="text-sm md:text-base font-bold">{scooter.rating}</span>
+                <div className="absolute top-6 left-6 md:top-8 md:left-8 bg-white/90 backdrop-blur-sm px-3 md:px-4 py-1.5 md:py-2 rounded-full flex items-center gap-1.5 z-10 shadow-sm border border-yellow-100">
+                  <Star className="w-3.5 h-3.5 md:w-4 md:h-4 fill-yellow-400 text-yellow-400" />
+                  <span className="text-sm md:text-base font-bold text-gray-900">5.0</span>
                 </div>
                 <button 
                   onClick={(e) => toggleSaveScooter(e, scooter.id)}
@@ -398,9 +398,9 @@ export default function Home() {
                   >
                     <Heart className={`w-3.5 h-3.5 md:w-4 md:h-4 ${savedScooters.includes(scooter.id) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
                   </button>
-                  <div className="absolute top-2 right-2 md:top-3 md:right-3 bg-white/90 backdrop-blur-sm px-2 py-1 md:px-3 md:py-1.5 rounded-full flex items-center gap-1 z-10 shadow-sm">
-                    <Star className="w-3 h-3 md:w-3.5 md:h-3.5 fill-black text-black" />
-                    <span className="text-[11px] md:text-[13px] font-bold">{scooter.rating}</span>
+                  <div className="absolute top-2 right-2 md:top-3 md:right-3 bg-white/90 backdrop-blur-sm px-2 py-1 md:px-3 md:py-1.5 rounded-full flex items-center gap-1 z-10 shadow-sm border border-yellow-100">
+                    <Star className="w-3 h-3 md:w-3.5 md:h-3.5 fill-yellow-400 text-yellow-400" />
+                    <span className="text-[11px] md:text-[13px] font-bold text-gray-900">5.0</span>
                   </div>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={scooter.img} alt={scooter.name} className="w-full h-full object-contain drop-shadow-md transition-transform group-hover:scale-110" />
@@ -494,9 +494,9 @@ export default function Home() {
                       <div className="flex-1">
                         <div className="flex justify-between items-start">
                           <h4 className="font-bold text-gray-900 text-[14px]">{scooter.name}</h4>
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-1 bg-yellow-50 px-1.5 py-0.5 rounded-md border border-yellow-100">
                             <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                            <span className="text-[11px] font-bold">{scooter.rating}</span>
+                            <span className="text-[11px] font-bold text-yellow-700">5.0</span>
                           </div>
                         </div>
                         <p className="text-[13px] font-extrabold text-gray-900 mt-1">Rp {durationFilter === 'Weekly' ? scooter.price_weekly.toLocaleString() : durationFilter === 'Monthly' ? scooter.price_monthly.toLocaleString() : scooter.price_daily.toLocaleString()} <span className="text-gray-500 font-medium text-[11px]">/{durationFilter}</span></p>

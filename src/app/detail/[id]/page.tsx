@@ -99,9 +99,9 @@ export default function DetailPage() {
                   <div>
                     <h3 className="font-semibold text-gray-900 text-[15px]">{vendor.name}</h3>
                     <div className="flex items-center gap-2 mt-1">
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1 bg-yellow-50 px-2 py-0.5 rounded-md border border-yellow-100">
                         <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
-                        <span className="text-sm font-medium text-gray-700">{vendor.rating || '5.0'}</span>
+                        <span className="text-sm font-bold text-yellow-700">5.0</span>
                       </div>
                       <div className="flex items-center gap-1 text-gray-500 border-l border-gray-200 pl-2 max-w-[120px]">
                         <MapPin className="w-3 h-3 shrink-0" />

@@ -169,9 +169,9 @@ export default function VendorPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-[10px] font-semibold tracking-wider uppercase text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">{scooter.brand}</span>
-                    <div className="flex items-center gap-1">
-                      <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                      <span className="text-xs font-medium text-gray-600">4.9</span>
+                    <div className="flex items-center gap-1.5 bg-[#00A86B]/10 px-2 py-0.5 rounded-full border border-[#00A86B]/20">
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#00A86B]"></div>
+                      <span className="text-[10px] font-bold text-[#00A86B] uppercase tracking-wider">Available</span>
                     </div>
                   </div>
                   <h4 className="font-semibold text-gray-900 text-[15px] mb-1 truncate">{scooter.name}</h4>
