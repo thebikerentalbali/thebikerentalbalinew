@@ -74,6 +74,9 @@ export default function Home() {
       const formattedScooters = (scooters || []).map(s => ({
         ...s,
         price: (s.price_daily || 0).toLocaleString(),
+        price_daily: s.price_daily || 0,
+        price_weekly: s.price_weekly || (s.price_daily || 0) * 6,
+        price_monthly: s.price_monthly || (s.price_daily || 0) * 20,
         img: s.image_url || "/images/scooter.png",
         rating: 4.9 // default rating since it's not in scooter table yet
       }))
@@ -367,7 +370,7 @@ export default function Home() {
                   <div>
                     <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">{scooter.name}</h3>
                     <p className="text-gray-500 text-sm md:text-base">
-                      <span className="font-extrabold text-gray-900 text-[16px] md:text-[18px]">Rp {scooter.price}</span> /{durationFilter}
+                      <span className="font-extrabold text-gray-900 text-[16px] md:text-[18px]">Rp {durationFilter === 'Weekly' ? scooter.price_weekly.toLocaleString() : durationFilter === 'Monthly' ? scooter.price_monthly.toLocaleString() : scooter.price_daily.toLocaleString()}</span> /{durationFilter}
                     </p>
                   </div>
                   <button className="bg-black text-white px-5 md:px-6 py-2.5 md:py-3 rounded-full text-sm md:text-base font-semibold hover:bg-gray-800 transition-colors">
@@ -403,7 +406,7 @@ export default function Home() {
                   <img src={scooter.img} alt={scooter.name} className="w-full h-full object-contain drop-shadow-md transition-transform group-hover:scale-110" />
                 </div>
                 <h3 className="font-bold text-gray-900 text-[14px] md:text-[16px] leading-tight mb-1.5 px-1">{scooter.name}</h3>
-                <p className="text-gray-900 text-[13px] md:text-[15px] font-extrabold mt-auto px-1">Rp {scooter.price} <span className="font-medium text-[11px] md:text-[13px] text-gray-500">/day</span></p>
+                <p className="text-gray-900 text-[13px] md:text-[15px] font-extrabold mt-auto px-1">Rp {durationFilter === 'Weekly' ? scooter.price_weekly.toLocaleString() : durationFilter === 'Monthly' ? scooter.price_monthly.toLocaleString() : scooter.price_daily.toLocaleString()} <span className="font-medium text-[11px] md:text-[13px] text-gray-500">/{durationFilter === 'Daily' ? 'day' : durationFilter === 'Weekly' ? 'week' : 'month'}</span></p>
               </Link>
             ))}
           </div>
@@ -496,7 +499,7 @@ export default function Home() {
                             <span className="text-[11px] font-bold">{scooter.rating}</span>
                           </div>
                         </div>
-                        <p className="text-[13px] font-extrabold text-gray-900 mt-1">Rp {scooter.price} <span className="text-gray-500 font-medium text-[11px]">/{durationFilter}</span></p>
+                        <p className="text-[13px] font-extrabold text-gray-900 mt-1">Rp {durationFilter === 'Weekly' ? scooter.price_weekly.toLocaleString() : durationFilter === 'Monthly' ? scooter.price_monthly.toLocaleString() : scooter.price_daily.toLocaleString()} <span className="text-gray-500 font-medium text-[11px]">/{durationFilter}</span></p>
                       </div>
                       <button 
                         onClick={(e) => toggleSaveScooter(e, scooter.id)}

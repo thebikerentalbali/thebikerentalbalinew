@@ -77,7 +77,13 @@ export default function VendorDashboard() {
       vendor_id: vendorData.id,
       name: newScooter.name,
       brand: newScooter.brand,
+      engine: newScooter.cc || null,
+      year: newScooter.year ? parseInt(newScooter.year) : null,
       price_daily: newScooter.price,
+      price_weekly: newScooter.priceWeekly || null,
+      price_monthly: newScooter.priceMonthly || null,
+      total_units: newScooter.totalUnits,
+      available_units: newScooter.availableUnits,
       image_url: newScooter.photos[0] // Save the first photo
     }).select().single()
 
@@ -89,6 +95,29 @@ export default function VendorDashboard() {
       setNewScooter({ name: "", brand: "", cc: "", year: "", price: 0, priceWeekly: 0, priceMonthly: 0, totalUnits: 1, availableUnits: 1, photos: [] })
     } else {
       alert("Failed to publish: " + (error?.message || 'Unknown error'))
+    }
+  }
+
+  const handleUpdateScooter = async () => {
+    if (!editingScooter) return;
+    setIsPublishing(true);
+    const { data, error } = await supabase.from('scooters').update({
+      name: editingScooter.name,
+      brand: editingScooter.brand,
+      engine: editingScooter.cc || null,
+      year: editingScooter.year ? parseInt(editingScooter.year) : null,
+      price_daily: editingScooter.price,
+      price_weekly: editingScooter.priceWeekly || null,
+      price_monthly: editingScooter.priceMonthly || null,
+      total_units: editingScooter.totalUnits,
+    }).eq('id', editingScooter.id).select().single()
+
+    setIsPublishing(false)
+    if (!error && data) {
+      setFleet(f => f.map(s => s.id === data.id ? data : s));
+      setEditingScooter(null);
+    } else {
+      alert("Failed to update: " + (error?.message || 'Unknown error'))
     }
   }
 
@@ -389,7 +418,14 @@ export default function VendorDashboard() {
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start mb-1">
                           <h3 className="font-bold text-gray-900 text-lg md:text-xl truncate pr-2" title={scooter.name}>{scooter.name}</h3>
-                          <button onClick={() => setEditingScooter(scooter)} className="text-gray-400 hover:text-black p-1 shrink-0">
+                          <button onClick={() => setEditingScooter({
+                            ...scooter,
+                            price: scooter.price_daily || 0,
+                            priceWeekly: scooter.price_weekly || '',
+                            priceMonthly: scooter.price_monthly || '',
+                            totalUnits: scooter.total_units || 1,
+                            cc: scooter.engine || ''
+                          })} className="text-gray-400 hover:text-black p-1 shrink-0">
                             <MoreVertical className="w-5 h-5" />
                           </button>
                         </div>
@@ -895,12 +931,10 @@ export default function VendorDashboard() {
                 </div>
               </div>
               <button
-                onClick={() => {
-                  setFleet(f => f.map(s => s.id === editingScooter.id ? { ...editingScooter, totalUnits: Number(editingScooter.totalUnits) || 1 } : s));
-                  setEditingScooter(null);
-                }}
-                className="w-full mt-8 bg-black text-white rounded-[16px] py-4 font-black text-sm hover:scale-[1.02] shadow-xl shadow-black/10 transition-all">
-                Save Changes
+                disabled={isPublishing}
+                onClick={handleUpdateScooter}
+                className="w-full mt-8 bg-black disabled:bg-gray-400 text-white rounded-[16px] py-4 font-black text-sm hover:scale-[1.02] shadow-xl shadow-black/10 transition-all">
+                {isPublishing ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
           </div>
