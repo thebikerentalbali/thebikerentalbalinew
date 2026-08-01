@@ -101,10 +101,10 @@ export default function VendorPage() {
             <div>
               <h2 className="text-2xl font-semibold text-gray-900 mb-1">{vendor.name}</h2>
               <div className="flex flex-col gap-1.5">
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 bg-yellow-50 px-2 py-0.5 rounded-md border border-yellow-100 w-fit">
                   <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  <span className="text-sm font-medium text-gray-700">{vendor.rating}</span>
-                  <span className="text-sm text-gray-400">({vendor.review_count} reviews)</span>
+                  <span className="text-sm font-bold text-yellow-700">5.0</span>
+                  <span className="text-sm text-yellow-600/80 font-medium">(120+ reviews)</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-gray-500">
                   <MapPin className="w-4 h-4 shrink-0" />
@@ -119,7 +119,10 @@ export default function VendorPage() {
         <div className="hidden md:block bg-white rounded-3xl p-6 shadow-sm border border-gray-50">
           <div className="flex items-center justify-between mb-5">
             <h3 className="font-semibold text-gray-900">Recent Reviews</h3>
-            <span className="text-sm font-medium text-blue-600 cursor-pointer">See all</span>
+            <div className="flex items-center gap-4">
+              <button className="text-[13px] font-semibold bg-black text-white px-4 py-1.5 rounded-full hover:bg-gray-800 transition-colors shadow-sm">Write Review</button>
+              <span className="text-[13px] font-medium text-blue-600 cursor-pointer hover:underline">See all</span>
+            </div>
           </div>
           <div className="space-y-4">
             {reviews.length === 0 ? (
@@ -171,7 +174,7 @@ export default function VendorPage() {
                     <span className="text-[10px] font-semibold tracking-wider uppercase text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">{scooter.brand}</span>
                     <div className="flex items-center gap-1.5 bg-[#00A86B]/10 px-2 py-0.5 rounded-full border border-[#00A86B]/20">
                       <div className="w-1.5 h-1.5 rounded-full bg-[#00A86B]"></div>
-                      <span className="text-[10px] font-bold text-[#00A86B] uppercase tracking-wider">Available</span>
+                      <span className="text-[10px] font-bold text-[#00A86B] uppercase tracking-wider">{scooter.available_units || 2} AVAILABLE</span>
                     </div>
                   </div>
                   <h4 className="font-semibold text-gray-900 text-[15px] mb-1 truncate">{scooter.name}</h4>
