@@ -12,46 +12,13 @@ export default function AdminDashboard() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   // Mock Data
-  const mockPendingVendors = [
-    { id: 101, name: "Bagus Rentals", initials: "BR", location: "Jimbaran", email: "bagus@example.com", phone: "+62 812-3456-7890", appliedDate: "Aug 22, 2026", color: "rose", documents: "Verified (ID, License)", fleetIntent: "10x Honda Scoopy, 5x Yamaha NMAX" },
-    { id: 102, name: "Bali Wheels", initials: "BW", location: "Uluwatu", email: "wheels@bali.com", phone: "+62 813-9876-5432", appliedDate: "Aug 20, 2026", color: "teal", documents: "Pending (Missing Business License)", fleetIntent: "20x Custom Vespa" },
-  ]
+  const mockPendingVendors: any[] = []
 
-  const mockVendors = [
-    { id: 1, name: "Putu Rentals", initials: "PR", verified: true, location: "Ubud", scooters: 12, revenue: "Rp 12.5M", color: "blue",
-      scootersList: [
-        { id: "S1", model: "Honda Scoopy", quantity: 5, price: "Rp 75.000/day" },
-        { id: "S2", model: "Vespa Primavera", quantity: 3, price: "Rp 150.000/day" },
-        { id: "S3", model: "Yamaha NMAX", quantity: 4, price: "Rp 120.000/day" },
-      ]
-    },
-    { id: 2, name: "Wayan Bikes", initials: "WB", verified: true, location: "Canggu", scooters: 24, revenue: "Rp 28.2M", color: "purple",
-      scootersList: [
-        { id: "S4", model: "Yamaha NMAX", quantity: 14, price: "Rp 120.000/day" },
-        { id: "S5", model: "Honda PCX", quantity: 10, price: "Rp 135.000/day" },
-      ]
-    },
-    { id: 3, name: "Made Scooter", initials: "MS", verified: false, location: "Seminyak", scooters: 8, revenue: "Rp 8.1M", color: "orange",
-      scootersList: [
-        { id: "S6", model: "Honda Vario", quantity: 8, price: "Rp 70.000/day" },
-      ]
-    },
-    { id: 4, name: "Ketut Rides", initials: "KR", verified: true, location: "Kuta", scooters: 15, revenue: "Rp 15.4M", color: "green",
-      scootersList: [
-        { id: "S7", model: "Honda Scoopy", quantity: 10, price: "Rp 75.000/day" },
-        { id: "S8", model: "Yamaha Lexi", quantity: 5, price: "Rp 90.000/day" },
-      ]
-    },
-  ]
+  const mockVendors: any[] = []
 
   const mockUsers = []
 
-  const mockBookings = [
-    { id: "B-1042", vendorId: 1, customer: "Alex Johnson", scooter: "Honda Scoopy", dates: "Aug 12 - Aug 15", price: 450000, status: "Active" },
-    { id: "B-1043", vendorId: 1, customer: "John Doe", scooter: "Vespa Primavera", dates: "Aug 14 - Aug 16", price: 700000, status: "Upcoming" },
-    { id: "B-1044", vendorId: 2, customer: "Sarah Williams", scooter: "Yamaha NMAX", dates: "Aug 10 - Aug 12", price: 500000, status: "Completed" },
-    { id: "B-1045", vendorId: 3, customer: "Emma Davis", scooter: "Honda Vario", dates: "Aug 15 - Aug 20", price: 750000, status: "Upcoming" },
-  ]
+  const mockBookings: any[] = []
   return (
     <div className="min-h-screen bg-[#F5F7FA] md:flex pb-28 md:pb-0">
       {/* 
