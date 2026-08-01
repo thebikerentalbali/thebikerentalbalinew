@@ -6,7 +6,7 @@ import { ChevronLeft, Heart, Star, MapPin, ChevronRight } from "lucide-react"
 export default function DetailPage() {
   return (
     <div className="min-h-screen bg-[#EBECEF] w-full md:py-8">
-      <div className="flex flex-col min-h-screen md:min-h-0 bg-[#EBECEF] relative pb-28 md:pb-0 md:max-w-5xl md:mx-auto md:shadow-2xl md:rounded-[40px] md:overflow-hidden md:border md:border-gray-200">
+      <div className="flex flex-col min-h-screen md:min-h-0 bg-[#EBECEF] relative pb-28 md:pb-0 md:max-w-2xl md:mx-auto md:shadow-2xl md:rounded-[40px] md:overflow-hidden md:border md:border-gray-200">
         {/* Header */}
         <header className="flex justify-between items-center p-6 pt-8 relative z-10">
           <Link href="/" className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
@@ -20,21 +20,17 @@ export default function DetailPage() {
           </button>
         </header>
 
-        {/* Desktop Grid Layout */}
-        <div className="flex flex-col md:grid md:grid-cols-[1fr_400px] lg:grid-cols-[1fr_450px] md:gap-8 lg:gap-12 md:p-8">
+        <div className="flex flex-col md:p-8">
           
-          {/* Left Column */}
-          <div>
-            {/* Hero Image */}
-        <div className="relative w-full h-[300px] flex items-center justify-center mt-4 mb-8">
-          <div 
-            className="w-full h-full bg-contain bg-center bg-no-repeat drop-shadow-2xl scale-110"
-            style={{ backgroundImage: 'url("/images/scooter.png")' }}
-          />
-            </div>
+          {/* Hero Image */}
+          <div className="relative w-full h-[300px] flex items-center justify-center mt-4 mb-8">
+            <div 
+              className="w-full h-full bg-contain bg-center bg-no-repeat drop-shadow-2xl scale-110"
+              style={{ backgroundImage: 'url("/images/scooter.png")' }}
+            />
           </div>
 
-          {/* Right Column */}
+          {/* Content Area */}
           <div className="px-6 md:px-0 space-y-6 md:pb-8 flex flex-col justify-center">
           
           {/* Vendor Profile */}
@@ -110,7 +106,6 @@ export default function DetailPage() {
         </div>
 
         </div>
-
       </div>
       
       {/* Bottom Bar (Mobile Only) */}
