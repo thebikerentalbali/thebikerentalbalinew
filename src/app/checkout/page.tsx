@@ -440,14 +440,20 @@ export default function CheckoutPage() {
 
       {/* Desktop Confirm Button */}
       <div className="hidden md:block pt-4">
-        <a
-          href={getWhatsAppLink()}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-full h-14 bg-black text-white rounded-full text-[17px] font-semibold shadow-xl shadow-black/20 hover:scale-[1.02] transition-transform flex items-center justify-center gap-2"
-        >
-          Confirm via WhatsApp
-        </a>
+        <div className="bg-white rounded-[28px] p-5 shadow-sm border border-gray-100 flex flex-col gap-4">
+          <div className="flex justify-between items-center px-2">
+             <span className="text-[13px] font-bold text-gray-500 uppercase tracking-wider">Total Amount</span>
+             <span className="text-2xl font-black text-gray-900 tracking-tight">Rp {getTotalPrice().toLocaleString()}</span>
+          </div>
+          <a
+            href={getWhatsAppLink()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full h-14 bg-black text-white rounded-full text-[17px] font-semibold shadow-xl shadow-black/20 hover:scale-[1.02] transition-transform flex items-center justify-center gap-2"
+          >
+            Confirm via WhatsApp
+          </a>
+        </div>
       </div>
       </div>
       </div>
@@ -455,7 +461,11 @@ export default function CheckoutPage() {
       </div>
 
       {/* Bottom Button (Mobile Only) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto px-6 py-6 pb-8 sm:pb-6 bg-[#EBECEF]/90 backdrop-blur-xl border-t border-white/50 z-10">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto px-5 py-5 pb-8 sm:pb-6 bg-white/95 backdrop-blur-xl border-t border-gray-100 z-10 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] rounded-t-[32px]">
+        <div className="flex items-center justify-between mb-4 px-2">
+           <span className="text-[13px] font-bold text-gray-500 uppercase tracking-wider">Total</span>
+           <span className="text-xl font-black text-gray-900 tracking-tight">Rp {getTotalPrice().toLocaleString()}</span>
+        </div>
         <a
           href={getWhatsAppLink()}
           target="_blank"
