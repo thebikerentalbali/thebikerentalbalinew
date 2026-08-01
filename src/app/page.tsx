@@ -505,7 +505,6 @@ export default function Home() {
                 <MapPicker 
                   vendors={topVendors}
                   onVendorClick={(id) => {
-                    setIsLocationModalOpen(false);
                     router.push(`/vendor/${id}?fromMap=true`);
                   }}
                   className="w-full h-full object-cover"

@@ -751,7 +751,7 @@ export default function VendorDashboard() {
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Total Units</label>
-                    <input type="number" min="1" value={newScooter.totalUnits} onChange={e => setNewScooter({ ...newScooter, totalUnits: parseInt(e.target.value) || 1 })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    <input type="number" min="1" value={newScooter.totalUnits} onChange={e => setNewScooter({ ...newScooter, totalUnits: e.target.value === '' ? ('' as any) : parseInt(e.target.value) })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                   </div>
                 </div>
 
@@ -759,7 +759,7 @@ export default function VendorDashboard() {
                   <button
                     onClick={() => {
                       if (!newScooter.name) return;
-                      setFleet([...fleet, { ...newScooter, id: Date.now(), availableUnits: newScooter.totalUnits }]);
+                      setFleet([...fleet, { ...newScooter, id: Date.now(), totalUnits: Number(newScooter.totalUnits) || 1, availableUnits: Number(newScooter.totalUnits) || 1 }]);
                       setIsAddingScooter(false);
                       setNewScooter({ name: "", brand: "", cc: "", year: "", price: 0, priceWeekly: 0, priceMonthly: 0, totalUnits: 1, availableUnits: 1, photos: [] });
                     }}
@@ -818,12 +818,12 @@ export default function VendorDashboard() {
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Total Units</label>
-                  <input type="number" min="1" value={editingScooter.totalUnits} onChange={e => setEditingScooter({ ...editingScooter, totalUnits: parseInt(e.target.value) || 1 })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                  <input type="number" min="1" value={editingScooter.totalUnits} onChange={e => setEditingScooter({ ...editingScooter, totalUnits: e.target.value === '' ? ('' as any) : parseInt(e.target.value) })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                 </div>
               </div>
               <button
                 onClick={() => {
-                  setFleet(f => f.map(s => s.id === editingScooter.id ? editingScooter : s));
+                  setFleet(f => f.map(s => s.id === editingScooter.id ? { ...editingScooter, totalUnits: Number(editingScooter.totalUnits) || 1 } : s));
                   setEditingScooter(null);
                 }}
                 className="w-full mt-8 bg-black text-white rounded-[16px] py-4 font-black text-sm hover:scale-[1.02] shadow-xl shadow-black/10 transition-all">
