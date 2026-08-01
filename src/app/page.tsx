@@ -4,14 +4,15 @@ import { useState } from "react"
 import { Heart, Search, SlidersHorizontal, Star, Bike, MapPin, ChevronDown, Menu, X } from "lucide-react"
 import Link from "next/link"
 import dynamic from "next/dynamic"
+import { useRouter } from "next/navigation"
 
 const MapPicker = dynamic(() => import('@/components/MapPicker'), { ssr: false })
 
 const topVendors = [
-  { id: 1, name: "Putu Rentals", rating: 4.9, location: "Jl. Raya Ubud", initials: "PR" },
-  { id: 2, name: "Wayan Bikes", rating: 4.8, location: "Batu Bolong", initials: "WB" },
-  { id: 3, name: "Made Scooter", rating: 4.7, location: "Legian St", initials: "MS" },
-  { id: 4, name: "Nyoman Rides", rating: 4.9, location: "Seminyak", initials: "NR" },
+  { id: 1, name: "Putu Rentals", rating: 4.9, location: "Jl. Raya Ubud", initials: "PR", lat: -8.5069, lng: 115.2625 },
+  { id: 2, name: "Wayan Bikes", rating: 4.8, location: "Batu Bolong", initials: "WB", lat: -8.6534, lng: 115.1305 },
+  { id: 3, name: "Made Scooter", rating: 4.7, location: "Legian St", initials: "MS", lat: -8.7051, lng: 115.1706 },
+  { id: 4, name: "Nyoman Rides", rating: 4.9, location: "Seminyak", initials: "NR", lat: -8.6913, lng: 115.1682 },
 ]
 
 const brands = [
@@ -35,6 +36,7 @@ const recommendedScooters = [
 ]
 
 export default function Home() {
+  const router = useRouter()
   const [activeBrand, setActiveBrand] = useState("")
   const [durationFilter, setDurationFilter] = useState("Daily")
   const [isNavOpen, setIsNavOpen] = useState(false)
@@ -144,10 +146,10 @@ export default function Home() {
                 <MapPin className="w-4 h-4 text-white" />
               </div>
               <div className="flex flex-col">
-                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Deliver To</span>
+                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Nearby</span>
                 <div className="flex items-center gap-1">
                   <span className="text-[13px] font-bold text-gray-900 leading-tight">
-                    {locationName}
+                    Vendor Locations
                   </span>
                   <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
                 </div>
@@ -490,24 +492,19 @@ export default function Home() {
               {/* MAP LAYER (Background on mobile, normal block on desktop) */}
               <div className="absolute inset-0 z-0 md:relative md:h-[400px]">
                 <MapPicker 
-                  position={mapPosition} 
-                  onPositionChange={handleMapPositionChange} 
+                  vendors={topVendors}
+                  onVendorClick={(id) => {
+                    setIsLocationModalOpen(false);
+                    router.push(`/vendor/${id}`);
+                  }}
                   className="w-full h-full object-cover"
                 />
-                
-                {/* Locating overlay */}
-                {isLocating && (
-                  <div className="absolute inset-0 bg-white/70 backdrop-blur-sm z-10 flex flex-col items-center justify-center">
-                    <div className="w-8 h-8 border-4 border-black/20 border-t-black rounded-full animate-spin mb-3"></div>
-                    <span className="font-bold text-gray-900">Finding you...</span>
-                  </div>
-                )}
               </div>
 
               {/* FOREGROUND UI OVERLAY ON MOBILE */}
               <div className="z-10 flex flex-col h-full pointer-events-none md:pointer-events-auto p-4 md:p-6 absolute inset-0 md:relative md:inset-auto">
                 
-                {/* Top Section (Search & Close) */}
+                {/* Top Section (Close) */}
                 <div className="flex items-start gap-3 pointer-events-auto w-full">
                   {/* Back/Close Button */}
                   <button 
@@ -515,61 +512,6 @@ export default function Home() {
                     className="w-12 h-12 rounded-2xl bg-white shadow-lg flex items-center justify-center text-gray-900 hover:bg-gray-50 transition-colors shrink-0 border border-gray-100"
                   >
                     <X className="w-6 h-6" />
-                  </button>
-                  
-                  {/* Search Input */}
-                  <form onSubmit={handleMapSearch} className="flex-1 relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Search className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Search hotel or villa..."
-                      value={mapSearchQuery}
-                      onChange={(e) => setMapSearchQuery(e.target.value)}
-                      className="block w-full pl-11 pr-24 h-12 bg-white border border-gray-100 shadow-lg rounded-2xl text-[15px] text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black transition-all"
-                    />
-                    <button 
-                      type="submit"
-                      disabled={isSearchingMap || !mapSearchQuery.trim()}
-                      className="absolute inset-y-1.5 right-1.5 px-4 h-9 bg-black text-white text-sm font-bold rounded-xl hover:bg-gray-900 disabled:bg-gray-300 transition-colors flex items-center justify-center"
-                    >
-                      {isSearchingMap ? (
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                      ) : "Search"}
-                    </button>
-                    
-                    {/* Autocomplete Suggestions */}
-                    {suggestions.length > 0 && (
-                      <ul className="absolute z-20 w-full mt-2 bg-white border border-gray-100 shadow-xl rounded-2xl overflow-hidden max-h-[250px] overflow-y-auto">
-                        {suggestions.map((place: any) => (
-                          <li
-                            key={place.place_id}
-                            className="px-4 py-3 hover:bg-gray-50 cursor-pointer text-sm text-gray-700 transition-colors border-b border-gray-50 last:border-0"
-                            onClick={() => handleSelect(place)}
-                          >
-                            {place.display_name}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </form>
-                </div>
-
-                <div className="flex-1"></div> {/* Spacer for map on mobile */}
-
-                {/* Bottom Section (Confirm) */}
-                <div className="pointer-events-auto mt-auto pt-6 pb-2 md:pb-0">
-                  <button 
-                    onClick={() => {
-                      setLocationName(tempLocationName || "Selected Location");
-                      setSearchQuery(tempSearchArea);
-                      setIsLocationModalOpen(false);
-                    }}
-                    disabled={mapPosition[0] === 0 && !tempLocationName}
-                    className="w-full bg-black disabled:bg-gray-300 text-white font-bold text-lg py-4 rounded-2xl shadow-xl hover:-translate-y-0.5 transition-all"
-                  >
-                    Confirm Location
                   </button>
                 </div>
               </div>
