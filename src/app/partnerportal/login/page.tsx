@@ -11,7 +11,7 @@ export default function PartnerLogin() {
   const [password, setPassword] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMsg, setErrorMsg] = useState("")
-  
+
   const router = useRouter()
   const supabase = createClient()
 
@@ -52,7 +52,7 @@ export default function PartnerLogin() {
         await supabase.auth.signOut()
       }
     }
-    
+
     setIsSubmitting(false)
   }
 
@@ -81,13 +81,13 @@ export default function PartnerLogin() {
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <Mail className="h-5 w-5 text-gray-400" />
                 </div>
-                <input 
-                  type="email" 
+                <input
+                  type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition-all"
-                  placeholder="business@example.com" 
+                  placeholder="business@example.com"
                 />
               </div>
             </div>
@@ -98,13 +98,13 @@ export default function PartnerLogin() {
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-gray-400" />
                 </div>
-                <input 
-                  type="password" 
+                <input
+                  type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition-all"
-                  placeholder="••••••••" 
+                  placeholder="••••••••"
                 />
               </div>
             </div>
@@ -115,7 +115,7 @@ export default function PartnerLogin() {
               </div>
             )}
 
-            <button 
+            <button
               type="submit"
               disabled={isSubmitting}
               className="w-full bg-black disabled:bg-gray-400 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 hover:bg-gray-900 transition-colors shadow-[0_10px_20px_rgba(0,0,0,0.1)] disabled:shadow-none"

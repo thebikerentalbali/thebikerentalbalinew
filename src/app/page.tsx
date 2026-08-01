@@ -73,7 +73,7 @@ export default function Home() {
       
       const formattedScooters = (scooters || []).map(s => ({
         ...s,
-        price: s.price_daily.toLocaleString(),
+        price: (s.price_daily || 0).toLocaleString(),
         img: s.image_url || "/images/scooter.png",
         rating: 4.9 // default rating since it's not in scooter table yet
       }))

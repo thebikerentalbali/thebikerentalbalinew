@@ -129,19 +129,19 @@ export default function DetailPage() {
               </div>
               <div className="flex items-center justify-between py-3 border-b border-gray-50">
                 <span className="text-gray-500 text-sm">Engine</span>
-                <span className="font-medium text-gray-900 text-sm">{scooter.engine || '150cc'}</span>
+                <span className="font-medium text-gray-900 text-sm">{scooter.engine || 'N/A'}</span>
               </div>
               <div className="flex items-center justify-between py-3 border-b border-gray-50">
                 <span className="text-gray-500 text-sm">Year</span>
-                <span className="font-medium text-gray-900 text-sm">{scooter.year || '2023'}</span>
+                <span className="font-medium text-gray-900 text-sm">{scooter.year || 'N/A'}</span>
               </div>
               <div className="flex items-center justify-between py-3 border-b border-gray-50">
                 <span className="text-gray-500 text-sm">Fuel Capacity</span>
-                <span className="font-medium text-gray-900 text-sm">{scooter.fuel_capacity || '7 Liters'}</span>
+                <span className="font-medium text-gray-900 text-sm">{scooter.fuel_capacity || 'N/A'}</span>
               </div>
               <div className="flex items-center justify-between py-3">
                 <span className="text-gray-500 text-sm">Transmission</span>
-                <span className="font-medium text-gray-900 text-sm">{scooter.transmission || 'Automatic'}</span>
+                <span className="font-medium text-gray-900 text-sm">{scooter.transmission || 'N/A'}</span>
               </div>
             </div>
           </div>
@@ -151,11 +151,11 @@ export default function DetailPage() {
             <div className="flex flex-col">
               <span className="text-[13px] text-gray-500 font-medium">Rental Price</span>
               <div className="flex items-end mt-1">
-                <span className="text-2xl font-bold text-gray-900 tracking-tight">${scooter.price_daily}</span>
+                <span className="text-2xl font-bold text-gray-900 tracking-tight">Rp {(scooter.price_daily || 0).toLocaleString()}</span>
                 <span className="text-[13px] text-gray-500 font-medium ml-1 mb-1">/Per Day</span>
               </div>
             </div>
-            <Link href="/checkout" className="bg-black text-white px-8 py-4 rounded-full text-base font-semibold shadow-xl shadow-black/20 hover:scale-105 transition-transform">
+            <Link href={`/checkout?scooterId=${scooter.id}`} className="bg-black text-white px-8 py-4 rounded-full text-base font-semibold shadow-xl shadow-black/20 hover:scale-105 transition-transform">
               Book Rent
             </Link>
           </div>
@@ -167,11 +167,11 @@ export default function DetailPage() {
       {/* Bottom Bar (Mobile Only) */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/70 backdrop-blur-xl rounded-t-[40px] px-8 py-5 flex items-center justify-between shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] border-t border-white/50 pb-8 sm:pb-5">
         <div className="flex items-end">
-          <span className="text-2xl font-bold text-gray-900 tracking-tight">${scooter.price_daily}</span>
+          <span className="text-2xl font-bold text-gray-900 tracking-tight">Rp {(scooter.price_daily || 0).toLocaleString()}</span>
           <span className="text-[13px] text-gray-500 font-medium ml-1 mb-1.5">/Per Day</span>
         </div>
         
-        <Link href="/checkout" className="bg-black text-white px-8 py-4 rounded-full text-base font-semibold shadow-xl shadow-black/20 hover:scale-105 transition-transform">
+        <Link href={`/checkout?scooterId=${scooter.id}`} className="bg-black text-white px-8 py-4 rounded-full text-base font-semibold shadow-xl shadow-black/20 hover:scale-105 transition-transform">
           Book Rent
         </Link>
       </div>

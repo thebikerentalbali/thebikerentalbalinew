@@ -26,15 +26,27 @@ export default function CheckoutPage() {
     async function loadData() {
       const { data } = await supabase.from('scooters').select('*')
       if (data) {
-        setVendorScooters(data.map((s: any) => ({
+        const formatted = data.map((s: any) => ({
           ...s,
           img: s.image_url || "/images/scooter.png",
           rating: 4.9,
           available: s.available_units,
-          daily: s.price_daily,
-          weekly: s.price_weekly || s.price_daily * 6,
-          monthly: s.price_monthly || s.price_daily * 20
-        })))
+          daily: s.price_daily || 0,
+          weekly: s.price_weekly || (s.price_daily || 0) * 6,
+          monthly: s.price_monthly || (s.price_daily || 0) * 20
+        }))
+        setVendorScooters(formatted)
+
+        if (typeof window !== 'undefined') {
+          const params = new URLSearchParams(window.location.search)
+          const sId = params.get("scooterId")
+          if (sId) {
+            const selected = formatted.find((s: any) => s.id.toString() === sId)
+            if (selected) {
+              setCart([{ ...selected, quantity: 1, durationMode: "daily", durationCount: 1 }])
+            }
+          }
+        }
       }
       setLoading(false)
     }
