@@ -268,8 +268,8 @@ export default function CheckoutPage() {
               </div>
             </div>
           )
-        })}
-              )}
+        })
+      )}
 
             {cart.length > 0 && (
               <button
@@ -493,7 +493,6 @@ export default function CheckoutPage() {
           </div>
         </div>
       )}
-      </div>
     </div>
   )
 }
