@@ -21,8 +21,7 @@ export default function Home() {
   const supabase = createClient()
   
   const [topVendors, setTopVendors] = useState<any[]>([])
-  const [popularScooters, setPopularScooters] = useState<any[]>([])
-  const [recommendedScooters, setRecommendedScooters] = useState<any[]>([])
+  const [allScooters, setAllScooters] = useState<any[]>([])
 
   const [activeBrand, setActiveBrand] = useState("")
   const [durationFilter, setDurationFilter] = useState("Daily")
@@ -101,8 +100,7 @@ export default function Home() {
         reviewCount: getReviewCount(s.vendor_id, reviewCounts[s.vendor_id] || 0)
       }))
       
-      setPopularScooters(formattedScooters.slice(0, 3))
-      setRecommendedScooters(formattedScooters.slice(3, 7))
+      setAllScooters(formattedScooters)
     }
     
     loadData()
@@ -176,10 +174,17 @@ export default function Home() {
 
   // Filter Logic
   const filterByPrice = (priceStr: string) => parseInt(priceStr.replace(/,/g, '')) <= maxPrice
-  const filterByBrand = (scooter: any) => !activeBrand || (scooter.name && scooter.name.toLowerCase().includes(activeBrand.toLowerCase()))
+  const filterByBrand = (scooter: any) => {
+    if (!activeBrand) return true;
+    const brandLower = activeBrand.toLowerCase();
+    const nameMatch = scooter.name && scooter.name.toLowerCase().includes(brandLower);
+    const brandMatch = scooter.brand && scooter.brand.toLowerCase().includes(brandLower);
+    return nameMatch || brandMatch;
+  }
   
-  const filteredPopular = popularScooters.filter(s => filterByPrice(s.price) && filterByBrand(s))
-  const filteredRecommended = recommendedScooters.filter(s => filterByPrice(s.price) && filterByBrand(s))
+  const allFiltered = allScooters.filter(s => filterByPrice(s.price) && filterByBrand(s))
+  const filteredPopular = allFiltered.slice(0, 3)
+  const filteredRecommended = allFiltered.slice(3)
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F0F2F5] px-6 pb-24 md:px-12 md:pb-32">
