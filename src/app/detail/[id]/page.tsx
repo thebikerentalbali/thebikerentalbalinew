@@ -125,7 +125,7 @@ export default function DetailPage() {
             <div className="space-y-4">
               <div className="flex items-center justify-between py-3 border-b border-gray-50">
                 <span className="text-gray-500 text-sm">Available</span>
-                <span className="font-medium text-[#E65100] text-sm">{scooter.available_units} Units</span>
+                <span className="font-bold text-white bg-black px-3 py-1 rounded-full text-xs tracking-wide">{scooter.available_units} Units</span>
               </div>
               <div className="flex items-center justify-between py-3 border-b border-gray-50">
                 <span className="text-gray-500 text-sm">Engine</span>

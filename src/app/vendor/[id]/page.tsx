@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ChevronLeft, MapPin, Star, Share, Loader2 } from "lucide-react"
+import { ChevronLeft, MapPin, Star, Share, Loader2, X } from "lucide-react"
 import { useRouter, useParams } from "next/navigation"
 import Link from "next/link"
 import { createClient } from '@/lib/supabase/client'
@@ -16,6 +16,8 @@ export default function VendorPage() {
   const [scooters, setScooters] = useState<any[]>([])
   const [reviews, setReviews] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false)
+  const [isWriteReviewModalOpen, setIsWriteReviewModalOpen] = useState(false)
 
   useEffect(() => {
     async function loadData() {
@@ -101,11 +103,11 @@ export default function VendorPage() {
             <div>
               <h2 className="text-2xl font-semibold text-gray-900 mb-1">{vendor.name}</h2>
               <div className="flex flex-col gap-1.5">
-                <div className="flex items-center gap-1.5 bg-yellow-50 px-2 py-0.5 rounded-md border border-yellow-100 w-fit">
+                <button onClick={() => setIsReviewModalOpen(true)} className="flex items-center gap-1.5 bg-yellow-50 px-2 py-0.5 rounded-md border border-yellow-100 w-fit hover:bg-yellow-100 transition-colors">
                   <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                   <span className="text-sm font-bold text-yellow-700">5.0</span>
                   <span className="text-sm text-yellow-600/80 font-medium">(120+ reviews)</span>
-                </div>
+                </button>
                 <div className="flex items-center gap-1.5 text-gray-500">
                   <MapPin className="w-4 h-4 shrink-0" />
                   <span className="text-sm truncate">{vendor.address || 'Bali'}</span>
@@ -178,6 +180,10 @@ export default function VendorPage() {
                     </div>
                   </div>
                   <h4 className="font-semibold text-gray-900 text-[15px] mb-1 truncate">{scooter.name}</h4>
+                  <div className="flex items-center gap-1 bg-yellow-50 px-2 py-0.5 rounded-md border border-yellow-100 w-fit">
+                    <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                    <span className="text-xs font-bold text-yellow-700">5.0</span>
+                  </div>
                   <div className="flex items-end mt-2">
                     <span className="text-lg font-bold text-gray-900 leading-none">${scooter.price_daily}</span>
                     <span className="text-xs text-gray-500 font-medium ml-1 mb-0.5">/Day</span>
@@ -189,6 +195,110 @@ export default function VendorPage() {
         </div>
       </div>
       </div>
+
+      {/* Reviews Modal for Mobile & Desktop */}
+      {isReviewModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-lg max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
+            <div className="p-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white rounded-t-3xl z-10">
+              <div>
+                <h3 className="font-bold text-lg">Reviews</h3>
+                <div className="flex items-center gap-1">
+                  <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                  <span className="text-xs font-bold">5.0</span>
+                  <span className="text-xs text-gray-500">(120+ reviews)</span>
+                </div>
+              </div>
+              <button onClick={() => setIsReviewModalOpen(false)} className="p-2 bg-gray-50 rounded-full hover:bg-gray-100">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-4 overflow-y-auto flex-1 space-y-4">
+              {reviews.length > 0 ? (
+                reviews.map(review => (
+                  <div key={review.id} className="pb-4 border-b border-gray-50 last:border-0">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center font-bold text-gray-500">
+                        {(review.user_name || 'U')[0]}
+                      </div>
+                      <div>
+                        <p className="font-bold text-sm">{review.user_name || 'User'}</p>
+                        <div className="flex gap-0.5">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className={`w-3 h-3 ${i < (review.rating || 5) ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-200 text-gray-200'}`} />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-600">{review.comment || 'Great service and very friendly!'}</p>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <p>No reviews yet.</p>
+                </div>
+              )}
+            </div>
+
+            <div className="p-4 border-t border-gray-100">
+              <button 
+                onClick={() => {
+                  setIsReviewModalOpen(false)
+                  setIsWriteReviewModalOpen(true)
+                }}
+                className="w-full bg-black text-white font-bold py-3.5 rounded-2xl hover:bg-gray-900 transition-colors"
+              >
+                Write a Review
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Write Review Modal */}
+      {isWriteReviewModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-lg p-6 animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-black">Write a Review</h3>
+              <button onClick={() => setIsWriteReviewModalOpen(false)}>
+                <X className="w-6 h-6 text-gray-400" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Rating</label>
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button key={star} className="p-1">
+                      <Star className="w-8 h-8 fill-yellow-400 text-yellow-400" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Your Review</label>
+                <textarea 
+                  className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm font-medium outline-none focus:ring-2 focus:ring-black/5 min-h-[120px]"
+                  placeholder="Share your experience..."
+                ></textarea>
+              </div>
+              <button 
+                onClick={() => {
+                  alert("Review submitted successfully!")
+                  setIsWriteReviewModalOpen(false)
+                }}
+                className="w-full bg-black text-white font-bold py-4 rounded-2xl hover:scale-[1.02] shadow-xl shadow-black/10 transition-all"
+              >
+                Submit Review
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }

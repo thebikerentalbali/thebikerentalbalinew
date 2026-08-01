@@ -63,7 +63,7 @@ export default function VendorDashboard() {
   const [serviceSearch, setServiceSearch] = useState("")
   const [editingScooter, setEditingScooter] = useState<any>(null)
   const [isAddingScooter, setIsAddingScooter] = useState(false)
-  const [newScooter, setNewScooter] = useState({ name: "", brand: "", cc: "", year: "", price: 0, priceWeekly: 0, priceMonthly: 0, totalUnits: 1, availableUnits: 1, photos: [] as string[] })
+  const [newScooter, setNewScooter] = useState({ name: "", brand: "", cc: "", year: "", fuelCapacity: "", transmission: "", price: 0, priceWeekly: 0, priceMonthly: 0, totalUnits: 1, availableUnits: 1, photos: [] as string[] })
   const [isPublishing, setIsPublishing] = useState(false)
 
   const handlePublishScooter = async () => {
@@ -79,6 +79,8 @@ export default function VendorDashboard() {
       brand: newScooter.brand,
       engine: newScooter.cc || null,
       year: newScooter.year ? parseInt(newScooter.year) : null,
+      fuel_capacity: newScooter.fuelCapacity || null,
+      transmission: newScooter.transmission || null,
       price_daily: newScooter.price,
       price_weekly: newScooter.priceWeekly || null,
       price_monthly: newScooter.priceMonthly || null,
@@ -92,7 +94,7 @@ export default function VendorDashboard() {
     if (!error && data) {
       setFleet([data, ...fleet])
       setIsAddingScooter(false)
-      setNewScooter({ name: "", brand: "", cc: "", year: "", price: 0, priceWeekly: 0, priceMonthly: 0, totalUnits: 1, availableUnits: 1, photos: [] })
+      setNewScooter({ name: "", brand: "", cc: "", year: "", fuelCapacity: "", transmission: "", price: 0, priceWeekly: 0, priceMonthly: 0, totalUnits: 1, availableUnits: 1, photos: [] })
     } else {
       alert("Failed to publish: " + (error?.message || 'Unknown error'))
     }
@@ -112,6 +114,8 @@ export default function VendorDashboard() {
       brand: editingScooter.brand,
       engine: editingScooter.cc || null,
       year: editingScooter.year ? parseInt(editingScooter.year) : null,
+      fuel_capacity: editingScooter.fuelCapacity || null,
+      transmission: editingScooter.transmission || null,
       price_daily: editingScooter.price,
       price_weekly: editingScooter.priceWeekly || null,
       price_monthly: editingScooter.priceMonthly || null,
@@ -433,7 +437,9 @@ export default function VendorDashboard() {
                             priceWeekly: scooter.price_weekly || '',
                             priceMonthly: scooter.price_monthly || '',
                             totalUnits: scooter.total_units || 1,
-                            cc: scooter.engine || ''
+                            cc: scooter.engine || '',
+                            fuelCapacity: scooter.fuel_capacity || '',
+                            transmission: scooter.transmission || ''
                           })} className="text-gray-400 hover:text-black p-1 shrink-0">
                             <MoreVertical className="w-5 h-5" />
                           </button>
@@ -862,6 +868,20 @@ export default function VendorDashboard() {
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Year</label>
                     <input type="text" placeholder="2024" value={newScooter.year} onChange={e => setNewScooter({ ...newScooter, year: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                   </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Fuel Capacity (L)</label>
+                      <input type="text" placeholder="e.g. 7.1L" value={newScooter.fuelCapacity} onChange={e => setNewScooter({ ...newScooter, fuelCapacity: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Transmission</label>
+                      <select value={newScooter.transmission} onChange={e => setNewScooter({ ...newScooter, transmission: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5 appearance-none">
+                        <option value="">Select</option>
+                        <option value="Automatic">Automatic</option>
+                        <option value="Manual">Manual</option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Pricing & Units Section */}
@@ -928,6 +948,20 @@ export default function VendorDashboard() {
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Year</label>
                     <input type="text" value={editingScooter.year} onChange={e => setEditingScooter({ ...editingScooter, year: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Fuel Capacity (L)</label>
+                    <input type="text" value={editingScooter.fuelCapacity || ''} onChange={e => setEditingScooter({ ...editingScooter, fuelCapacity: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Transmission</label>
+                    <select value={editingScooter.transmission || ''} onChange={e => setEditingScooter({ ...editingScooter, transmission: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5 appearance-none">
+                      <option value="">Select</option>
+                      <option value="Automatic">Automatic</option>
+                      <option value="Manual">Manual</option>
+                    </select>
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-4">
