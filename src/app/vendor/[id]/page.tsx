@@ -90,9 +90,13 @@ export default function VendorPage() {
           </div>
 
           <div className="flex items-center gap-5">
-            <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100 border-2 border-white shadow-sm shrink-0">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={vendor.image_url || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=200&h=200&fit=crop"} alt={vendor.name} className="w-full h-full object-cover" />
+            <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100 border-2 border-white shadow-sm shrink-0 flex items-center justify-center">
+              {vendor.logo ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img src={vendor.logo} alt={vendor.name} className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-3xl font-black text-gray-400">{(vendor.name || "V").substring(0, 2).toUpperCase()}</span>
+              )}
             </div>
             <div>
               <h2 className="text-2xl font-semibold text-gray-900 mb-1">{vendor.name}</h2>

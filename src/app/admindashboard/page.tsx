@@ -280,8 +280,13 @@ export default function AdminDashboard() {
                     <div key={vendor.id} className="bg-white rounded-[24px] border border-gray-100 shadow-sm flex flex-col overflow-hidden transition-all duration-300 hover:border-gray-200">
                       <div className="p-5 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
                         <div className="flex gap-4 items-center cursor-pointer flex-1 min-w-0" onClick={() => setExpandedPendingVendorId(isExpanded ? null : vendor.id)}>
-                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg bg-blue-100 text-blue-700 shrink-0`}>
-                            {(vendor.name || "V").substring(0, 2).toUpperCase()}
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg bg-blue-100 text-blue-700 shrink-0 overflow-hidden`}>
+                            {vendor.logo ? (
+                              /* eslint-disable-next-line @next/next/no-img-element */
+                              <img src={vendor.logo} alt={vendor.name} className="w-full h-full object-cover" />
+                            ) : (
+                              (vendor.name || "V").substring(0, 2).toUpperCase()
+                            )}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
@@ -354,8 +359,13 @@ export default function AdminDashboard() {
                       >
                         <div className="flex justify-between items-start">
                           <div className="flex gap-3 items-center">
-                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg bg-blue-100 text-blue-700 shrink-0`}>
-                              {(vendor.name || "V").substring(0, 2).toUpperCase()}
+                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg bg-blue-100 text-blue-700 shrink-0 overflow-hidden`}>
+                              {vendor.logo ? (
+                                /* eslint-disable-next-line @next/next/no-img-element */
+                                <img src={vendor.logo} alt={vendor.name} className="w-full h-full object-cover" />
+                              ) : (
+                                (vendor.name || "V").substring(0, 2).toUpperCase()
+                              )}
                             </div>
                             <div>
                               <h3 className="font-bold text-gray-900 text-lg leading-tight">{vendor.name}</h3>
@@ -431,8 +441,13 @@ export default function AdminDashboard() {
                       className="p-5 md:p-6 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors"
                     >
                       <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg bg-blue-100 text-blue-700 shrink-0`}>
-                          {(vendor.name || "V").substring(0, 2).toUpperCase()}
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg bg-blue-100 text-blue-700 shrink-0 overflow-hidden`}>
+                          {vendor.logo ? (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img src={vendor.logo} alt={vendor.name} className="w-full h-full object-cover" />
+                          ) : (
+                            (vendor.name || "V").substring(0, 2).toUpperCase()
+                          )}
                         </div>
                         <div>
                           <h4 className="font-bold text-gray-900 text-lg md:text-xl">{vendor.name}</h4>
