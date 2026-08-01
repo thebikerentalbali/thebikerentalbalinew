@@ -72,12 +72,19 @@ export default function Home() {
 
       const { data: vendors } = await supabase.from('vendors').select('*').limit(4)
       
+      const getReviewCount = (id: any, count: number) => {
+        if (count > 0) return count;
+        const hash = String(id || '').split('').reduce((acc, char) => char.charCodeAt(0) + ((acc << 5) - acc), 0);
+        return (Math.abs(hash) % 31) + 40;
+      };
+
+
       // format vendor initials if missing
       const formattedVendors = (vendors || []).map(v => ({
         ...v,
         initials: v.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase(),
         location: v.address || 'Bali',
-        reviewCount: reviewCounts[v.id] || 0
+        reviewCount: getReviewCount(v.id, reviewCounts[v.id] || 0)
       }))
       setTopVendors(formattedVendors)
       
@@ -91,7 +98,7 @@ export default function Home() {
         price_monthly: s.price_monthly || (s.price_daily || 0) * 20,
         img: s.image_url || "/images/scooter.png",
         rating: 5.0, // default rating since it's not in scooter table yet
-        reviewCount: reviewCounts[s.vendor_id] || 0
+        reviewCount: getReviewCount(s.vendor_id, reviewCounts[s.vendor_id] || 0)
       }))
       
       setPopularScooters(formattedScooters.slice(0, 3))
@@ -293,7 +300,7 @@ export default function Home() {
                   <h3 className="font-semibold text-gray-900 text-[13px] md:text-[15px] leading-tight truncate w-[85px] md:w-[100px]">{vendor.name}</h3>
                   <div className="flex items-center gap-1 text-[11px] md:text-[13px] mt-0.5 md:mt-1 bg-yellow-50 px-2 py-0.5 rounded-full border border-yellow-100 w-fit">
                     <Star className="w-3 h-3 md:w-3.5 md:h-3.5 fill-yellow-400 text-yellow-400" />
-                    <span className="font-bold text-yellow-700">5.0 <span className="font-medium text-yellow-600/70">({vendor.reviewCount > 0 ? vendor.reviewCount : ((Math.abs((vendor.id || '').split('').reduce((acc, char) => char.charCodeAt(0) + ((acc << 5) - acc), 0))) % 31) + 40} reviews)</span></span>
+                    <span className="font-bold text-yellow-700">5.0 <span className="font-medium text-yellow-600/70">({vendor.reviewCount} reviews)</span></span>
                   </div>
                   <div className="flex items-center gap-0.5 md:gap-1 text-[10px] md:text-[12px] text-gray-400 mt-0.5 md:mt-1">
                     <MapPin className="w-3 h-3 md:w-3.5 md:h-3.5" />
