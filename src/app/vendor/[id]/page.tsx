@@ -198,15 +198,15 @@ export default function VendorPage() {
                     <span className="text-3xl font-black text-gray-400">{(vendor.name || "V").substring(0, 2).toUpperCase()}</span>
                   )}
                 </div>
-                {/* Verified Badge */}
-                <div className="absolute bottom-1 right-1 bg-white rounded-full p-0.5 shadow-sm">
-                  <BadgeCheck className="w-6 h-6 text-white fill-blue-500" />
-                </div>
+
               </div>
             </div>
             
             <div className="mb-6">
-              <h2 className="text-2xl md:text-[28px] font-bold text-gray-900 mb-1 leading-tight">{vendor.name}</h2>
+              <div className="flex items-center gap-2 mb-1">
+                <h2 className="text-2xl md:text-[28px] font-bold text-gray-900 leading-tight">{vendor.name}</h2>
+                <BadgeCheck className="w-6 h-6 text-white fill-blue-500 shrink-0" />
+              </div>
               <p className="text-gray-500 text-[15px] md:text-base">{vendor.address || 'Premium scooter rental in Bali'}</p>
             </div>
 
