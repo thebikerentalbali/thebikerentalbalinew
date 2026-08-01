@@ -57,8 +57,14 @@ export default function VendorPage() {
         const { data: rData } = await supabase.from('reviews').select('*').eq('vendor_id', id)
         let loadedReviews = rData || [];
         
-        // Smart algorithm to auto-generate 40-70 reviews if none exist
-        if (loadedReviews.length === 0) {
+        // Deterministic mock reviews algorithm
+        const hash = id.split('').reduce((acc, char) => char.charCodeAt(0) + ((acc << 5) - acc), 0);
+        const absHash = Math.abs(hash);
+        const numFakeReviews = (absHash % 31) + 40; // deterministic number 40-70
+        
+
+        
+        if (loadedReviews.length < 5) {
           const firstNames = ["James", "Mary", "John", "Patricia", "Robert", "Jennifer", "Michael", "Linda", "William", "Elizabeth", "David", "Barbara", "Richard", "Susan", "Joseph", "Jessica", "Thomas", "Sarah", "Charles", "Karen", "Christopher", "Lisa", "Daniel", "Nancy", "Matthew", "Betty", "Anthony", "Margaret", "Mark", "Sandra", "Donald", "Ashley", "Steven", "Kimberly", "Paul", "Emily", "Andrew", "Donna", "Joshua", "Michelle", "Kenneth", "Carol", "Kevin", "Amanda", "Brian", "Melissa", "George", "Deborah", "Timothy", "Stephanie"];
           const reviewComments = [
             "Great scooter, ran perfectly the whole trip! The vendor was very responsive and drop-off was super easy. Definitely coming back.",
@@ -83,27 +89,25 @@ export default function VendorPage() {
             "The bike was powerful and fuel efficient."
           ];
           
-          const numReviews = Math.floor(Math.random() * 31) + 40; // 40 to 70
+          let currentSeed = absHash;
+          const seededRandom = () => {
+            const x = Math.sin(currentSeed++) * 10000;
+            return x - Math.floor(x);
+          };
+
           const generatedReviews = [];
-          for (let i = 0; i < numReviews; i++) {
-            const randomName = firstNames[Math.floor(Math.random() * firstNames.length)] + " " + String.fromCharCode(65 + Math.floor(Math.random() * 26)) + ".";
-            const randomComment = reviewComments[Math.floor(Math.random() * reviewComments.length)];
+          for (let i = 0; i < numFakeReviews; i++) {
+            const randomName = firstNames[Math.floor(seededRandom() * firstNames.length)] + " " + String.fromCharCode(65 + Math.floor(seededRandom() * 26)) + ".";
+            const randomComment = reviewComments[Math.floor(seededRandom() * reviewComments.length)];
             generatedReviews.push({
+              id: `fake-${i}`,
               vendor_id: id,
               user_name: randomName,
               rating: 5,
               comment: randomComment
             });
           }
-          
-          const { data: insertedReviews, error } = await supabase.from('reviews').insert(generatedReviews).select();
-          if (insertedReviews) {
-            loadedReviews = insertedReviews;
-          } else {
-            // Fallback: show in UI even if DB insert fails
-            console.error("Auto-generate reviews failed:", error);
-            loadedReviews = generatedReviews.map((r, idx) => ({ ...r, id: `generated-${idx}` }));
-          }
+          loadedReviews = [...loadedReviews, ...generatedReviews];
         }
         
         setReviews(loadedReviews)
@@ -229,7 +233,7 @@ export default function VendorPage() {
 
               {/* Scooters Count */}
               <div className="flex flex-col items-center justify-center flex-1">
-                <span className="font-bold text-lg text-gray-900">{scooters.length}</span>
+                <span className="font-bold text-lg text-gray-900">{scooters.reduce((sum, scooter) => sum + (scooter.total_units || 1), 0)}</span>
                 <span className="text-[13px] text-gray-500 mt-0.5">scooters</span>
               </div>
             </div>

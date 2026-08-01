@@ -141,6 +141,7 @@ export default function VendorDashboard() {
   // Settings State
   const [settingsForm, setSettingsForm] = useState({ name: "", phone: "", address: "" })
   const [vendorLogo, setVendorLogo] = useState<string | null>(null)
+  const [vendorCover, setVendorCover] = useState<string | null>(null)
   const [isSavingSettings, setIsSavingSettings] = useState(false)
 
   // Initialize settings when vendorData loads
@@ -153,6 +154,9 @@ export default function VendorDashboard() {
       })
       if (vendorData.logo) {
         setVendorLogo(vendorData.logo)
+      }
+      if (vendorData.image_url) {
+        setVendorCover(vendorData.image_url)
       }
     }
   }, [vendorData])
@@ -167,7 +171,8 @@ export default function VendorDashboard() {
         address: settingsForm.address,
         lat: vendorLocation[0],
         lng: vendorLocation[1],
-        logo: vendorLogo
+        logo: vendorLogo,
+        image_url: vendorCover
       })
       .eq('id', vendorData.id)
       
@@ -733,6 +738,42 @@ export default function VendorDashboard() {
           <div className="p-5 md:px-8 pb-12 animate-in fade-in max-w-2xl">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Profile Settings</h2>
             <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm space-y-5">
+              {/* Cover Image Upload Section */}
+              <div className="flex flex-col items-center sm:flex-row sm:items-start gap-6 pb-4 border-b border-gray-50">
+                <div className="relative group w-full sm:w-1/3">
+                  <div className={`w-full h-32 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden bg-gray-50 transition-all ${!vendorCover ? 'group-hover:bg-gray-100 group-hover:border-gray-300' : ''}`}>
+                    {vendorCover ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={vendorCover} alt="Cover" className="w-full h-full object-cover" />
+                    ) : (
+                      <Camera className="w-8 h-8 text-gray-400 group-hover:scale-110 transition-transform" />
+                    )}
+                  </div>
+                  <label className="absolute bottom-2 right-2 bg-black text-white p-2 rounded-full cursor-pointer shadow-lg hover:scale-110 transition-transform">
+                    <Camera className="w-4 h-4" />
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          const file = e.target.files[0]
+                          const reader = new FileReader()
+                          reader.onloadend = () => {
+                            setVendorCover(reader.result as string)
+                          }
+                          reader.readAsDataURL(file)
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+                <div className="text-center sm:text-left flex-1 pt-2">
+                  <h3 className="font-bold text-gray-900 text-lg">Cover Image</h3>
+                  <p className="text-sm text-gray-500 mt-1">Upload a landscape cover image for your profile header. Recommended size: 1200x600px.</p>
+                </div>
+              </div>
+
               {/* Logo Upload Section */}
               <div className="flex flex-col items-center sm:flex-row sm:items-start gap-6 pb-4 border-b border-gray-50">
                 <div className="relative group">
