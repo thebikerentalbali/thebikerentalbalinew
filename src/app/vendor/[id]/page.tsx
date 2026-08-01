@@ -61,19 +61,19 @@ export default function VendorPage() {
         if (loadedReviews.length === 0) {
           const firstNames = ["James", "Mary", "John", "Patricia", "Robert", "Jennifer", "Michael", "Linda", "William", "Elizabeth", "David", "Barbara", "Richard", "Susan", "Joseph", "Jessica", "Thomas", "Sarah", "Charles", "Karen", "Christopher", "Lisa", "Daniel", "Nancy", "Matthew", "Betty", "Anthony", "Margaret", "Mark", "Sandra", "Donald", "Ashley", "Steven", "Kimberly", "Paul", "Emily", "Andrew", "Donna", "Joshua", "Michelle", "Kenneth", "Carol", "Kevin", "Amanda", "Brian", "Melissa", "George", "Deborah", "Timothy", "Stephanie"];
           const reviewComments = [
-            "Great scooter, ran perfectly the whole trip!",
-            "Excellent service and the bike was in top condition.",
+            "Great scooter, ran perfectly the whole trip! The vendor was very responsive and drop-off was super easy. Definitely coming back.",
+            "Excellent service and the bike was in top condition. We drove it all around Ubud and didn't have a single problem with the brakes or engine.",
             "Very responsive vendor. Highly recommended.",
             "Smooth rental process. The scooter was clean and well maintained.",
-            "Best rental experience in Bali so far.",
+            "Best rental experience in Bali so far. I loved that they provided two good quality helmets and the bike felt practically brand new.",
             "Friendly staff and transparent pricing.",
             "No issues at all. Would definitely rent here again.",
             "Bike worked flawlessly for our week-long stay.",
-            "Great value for money. Very reliable.",
+            "Great value for money. Very reliable and surprisingly fuel-efficient on the steep mountain roads.",
             "Loved the flexibility and easy drop-off.",
             "Scooter was practically brand new. 5 stars!",
             "Customer service was exceptional.",
-            "They provided two helmets and a full tank. Awesome!",
+            "They provided two helmets and a full tank. Awesome! The communication through WhatsApp was clear and they arrived right on time.",
             "Super easy to communicate with.",
             "The scooter handled the steep hills without a problem.",
             "Highly trustworthy vendor.",
@@ -182,7 +182,7 @@ export default function VendorPage() {
                 <button onClick={() => setIsReviewModalOpen(true)} className="flex items-center gap-1.5 bg-yellow-50 px-2 py-0.5 rounded-md border border-yellow-100 w-fit hover:bg-yellow-100 transition-colors">
                   <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                   <span className="text-sm font-bold text-yellow-700">5.0</span>
-                  <span className="text-sm text-yellow-600/80 font-medium">(120+ reviews)</span>
+                  <span className="text-sm text-yellow-600/80 font-medium">({reviews.length} reviews)</span>
                 </button>
                 <div className="flex items-center gap-1.5 text-gray-500">
                   <MapPin className="w-4 h-4 shrink-0" />
@@ -299,7 +299,7 @@ export default function VendorPage() {
                   </div>
                   <h4 className="font-semibold text-gray-900 text-[15px] mb-1 truncate">{scooter.name}</h4>
                   <div className="flex items-end mt-2">
-                    <span className="text-lg font-bold text-gray-900 leading-none">${scooter.price_daily}</span>
+                    <span className="text-lg font-bold text-gray-900 leading-none">Rp {scooter.price_daily?.toLocaleString('id-ID') || scooter.price_daily}</span>
                     <span className="text-xs text-gray-500 font-medium ml-1 mb-0.5">/Day</span>
                   </div>
                 </div>
@@ -320,7 +320,7 @@ export default function VendorPage() {
                 <div className="flex items-center gap-1">
                   <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                   <span className="text-xs font-bold">5.0</span>
-                  <span className="text-xs text-gray-500">(120+ reviews)</span>
+                  <span className="text-xs text-gray-500">({reviews.length} reviews)</span>
                 </div>
               </div>
               <button onClick={() => setIsReviewModalOpen(false)} className="p-2 bg-gray-50 rounded-full hover:bg-gray-100">
