@@ -18,6 +18,30 @@ export default function VendorPage() {
   const [loading, setLoading] = useState(true)
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false)
   const [isWriteReviewModalOpen, setIsWriteReviewModalOpen] = useState(false)
+  const [newReview, setNewReview] = useState({ name: "", rating: 5, comment: "" })
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false)
+
+  const handleSubmitReview = async () => {
+    if (!newReview.name || !newReview.comment) {
+      alert("Please enter your name and review.")
+      return
+    }
+    setIsSubmittingReview(true)
+    const { error, data } = await supabase.from('reviews').insert({
+      vendor_id: id,
+      user_name: newReview.name,
+      rating: newReview.rating,
+      comment: newReview.comment
+    }).select().single()
+    setIsSubmittingReview(false)
+    if (!error && data) {
+      setReviews([data, ...reviews])
+      setIsWriteReviewModalOpen(false)
+      setNewReview({ name: "", rating: 5, comment: "" })
+    } else {
+      alert("Failed to submit review. The reviews table might not exist in Supabase yet.")
+    }
+  }
 
   useEffect(() => {
     async function loadData() {
@@ -115,6 +139,48 @@ export default function VendorPage() {
               </div>
             </div>
           </div>
+          
+          {/* Swipeable Reviews directly under vendor info */}
+          <div className="mt-6 -mx-4 sm:-mx-6 px-4 sm:px-6">
+            <style jsx>{`
+              .hide-scrollbar::-webkit-scrollbar { display: none; }
+              .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+            `}</style>
+            <div className="flex overflow-x-auto gap-4 pb-2 snap-x hide-scrollbar">
+              {reviews.slice(0, 5).map(review => (
+                <div key={review.id} className="snap-start shrink-0 w-[280px] bg-white rounded-2xl p-4 shadow-sm border border-gray-50 flex flex-col justify-between">
+                  <div>
+                    <div className="flex gap-0.5 mb-2">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className={`w-3.5 h-3.5 ${i < (review.rating || 5) ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-200 text-gray-200'}`} />
+                      ))}
+                    </div>
+                    <p className="text-[13px] text-gray-600 line-clamp-3 mb-3">"{review.comment}"</p>
+                  </div>
+                  <p className="font-bold text-xs text-gray-900">- {review.user_name || 'User'}</p>
+                </div>
+              ))}
+              {reviews.length === 0 && (
+                <div className="w-full text-center py-4 text-sm text-gray-500">No reviews yet. Be the first!</div>
+              )}
+            </div>
+            <div className="flex items-center gap-3 mt-4">
+              <button 
+                onClick={() => setIsWriteReviewModalOpen(true)}
+                className="flex-1 bg-black text-white font-bold py-2.5 rounded-xl text-sm hover:bg-gray-800 transition-colors shadow-sm"
+              >
+                Write a Review
+              </button>
+              {reviews.length > 0 && (
+                <button 
+                  onClick={() => setIsReviewModalOpen(true)}
+                  className="flex-1 bg-white border border-gray-200 text-black font-bold py-2.5 rounded-xl text-sm hover:bg-gray-50 transition-colors"
+                >
+                  See More
+                </button>
+              )}
+            </div>
+          </div>
         </header>
 
         {/* Desktop Reviews Section */}
@@ -180,10 +246,6 @@ export default function VendorPage() {
                     </div>
                   </div>
                   <h4 className="font-semibold text-gray-900 text-[15px] mb-1 truncate">{scooter.name}</h4>
-                  <div className="flex items-center gap-1 bg-yellow-50 px-2 py-0.5 rounded-md border border-yellow-100 w-fit">
-                    <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                    <span className="text-xs font-bold text-yellow-700">5.0</span>
-                  </div>
                   <div className="flex items-end mt-2">
                     <span className="text-lg font-bold text-gray-900 leading-none">${scooter.price_daily}</span>
                     <span className="text-xs text-gray-500 font-medium ml-1 mb-0.5">/Day</span>
@@ -269,11 +331,21 @@ export default function VendorPage() {
             
             <div className="space-y-4">
               <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Your Name</label>
+                <input 
+                  type="text"
+                  value={newReview.name}
+                  onChange={e => setNewReview({ ...newReview, name: e.target.value })}
+                  className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm font-medium outline-none focus:ring-2 focus:ring-black/5"
+                  placeholder="John Doe"
+                />
+              </div>
+              <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Rating</label>
                 <div className="flex gap-2">
                   {[1, 2, 3, 4, 5].map((star) => (
-                    <button key={star} className="p-1">
-                      <Star className="w-8 h-8 fill-yellow-400 text-yellow-400" />
+                    <button key={star} onClick={() => setNewReview({ ...newReview, rating: star })} className="p-1">
+                      <Star className={`w-8 h-8 ${star <= newReview.rating ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-200 text-gray-200'}`} />
                     </button>
                   ))}
                 </div>
@@ -281,18 +353,18 @@ export default function VendorPage() {
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Your Review</label>
                 <textarea 
+                  value={newReview.comment}
+                  onChange={e => setNewReview({ ...newReview, comment: e.target.value })}
                   className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm font-medium outline-none focus:ring-2 focus:ring-black/5 min-h-[120px]"
                   placeholder="Share your experience..."
                 ></textarea>
               </div>
               <button 
-                onClick={() => {
-                  alert("Review submitted successfully!")
-                  setIsWriteReviewModalOpen(false)
-                }}
-                className="w-full bg-black text-white font-bold py-4 rounded-2xl hover:scale-[1.02] shadow-xl shadow-black/10 transition-all"
+                onClick={handleSubmitReview}
+                disabled={isSubmittingReview}
+                className="w-full flex justify-center items-center bg-black disabled:bg-gray-400 text-white font-bold py-4 rounded-2xl hover:scale-[1.02] shadow-xl shadow-black/10 transition-all"
               >
-                Submit Review
+                {isSubmittingReview ? <Loader2 className="w-6 h-6 animate-spin text-white" /> : "Submit Review"}
               </button>
             </div>
           </div>
