@@ -39,6 +39,13 @@ export default function VendorDashboard() {
       }
       
       setVendorData(data)
+      
+      // Fetch Fleet
+      const { data: scootersData } = await supabase.from('scooters').select('*').eq('vendor_id', data.id)
+      if (scootersData) {
+        setFleet(scootersData)
+      }
+      
       setIsLoading(false)
     }
     checkAuth()
@@ -57,6 +64,33 @@ export default function VendorDashboard() {
   const [editingScooter, setEditingScooter] = useState<any>(null)
   const [isAddingScooter, setIsAddingScooter] = useState(false)
   const [newScooter, setNewScooter] = useState({ name: "", brand: "", cc: "", year: "", price: 0, priceWeekly: 0, priceMonthly: 0, totalUnits: 1, availableUnits: 1, photos: [] as string[] })
+  const [isPublishing, setIsPublishing] = useState(false)
+
+  const handlePublishScooter = async () => {
+    if (!newScooter.name || newScooter.photos.length === 0) {
+      alert("Please provide a name and at least 1 photo.")
+      return;
+    }
+    
+    setIsPublishing(true)
+    const { data, error } = await supabase.from('scooters').insert({
+      vendor_id: vendorData.id,
+      name: newScooter.name,
+      brand: newScooter.brand,
+      price_daily: newScooter.price,
+      image_url: newScooter.photos[0] // Save the first photo
+    }).select().single()
+
+    setIsPublishing(false)
+
+    if (!error && data) {
+      setFleet([data, ...fleet])
+      setIsAddingScooter(false)
+      setNewScooter({ name: "", brand: "", cc: "", year: "", price: 0, priceWeekly: 0, priceMonthly: 0, totalUnits: 1, availableUnits: 1, photos: [] })
+    } else {
+      alert("Failed to publish: " + (error?.message || 'Unknown error'))
+    }
+  }
 
   // Service State
   const [serviceLogs, setServiceLogs] = useState<any[]>([])
@@ -717,20 +751,35 @@ export default function VendorDashboard() {
                 <div>
                   <h4 className="text-lg font-bold text-gray-900 mb-3">Scooter Photos (Max 2)</h4>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="border-2 border-dashed border-gray-200 rounded-2xl h-40 flex flex-col items-center justify-center text-gray-400 hover:text-black hover:border-black transition-colors cursor-pointer bg-gray-50 relative overflow-hidden group">
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <Plus className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" />
-                        <span className="text-xs font-bold uppercase tracking-wide">Upload Photo 1</span>
+                    {[0, 1].map((index) => (
+                      <div key={index} className="border-2 border-dashed border-gray-200 rounded-2xl h-40 flex flex-col items-center justify-center text-gray-400 hover:text-black hover:border-black transition-colors cursor-pointer bg-gray-50 relative overflow-hidden group">
+                        {newScooter.photos[index] ? (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img src={newScooter.photos[index]} alt="Upload preview" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center">
+                            <Plus className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" />
+                            <span className="text-xs font-bold uppercase tracking-wide">Upload Photo {index + 1}</span>
+                          </div>
+                        )}
+                        <input 
+                          type="file" 
+                          className="absolute inset-0 opacity-0 cursor-pointer" 
+                          accept="image/*"
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files[0]) {
+                              const reader = new FileReader()
+                              reader.onloadend = () => {
+                                const newPhotos = [...newScooter.photos]
+                                newPhotos[index] = reader.result as string
+                                setNewScooter({ ...newScooter, photos: newPhotos })
+                              }
+                              reader.readAsDataURL(e.target.files[0])
+                            }
+                          }}
+                        />
                       </div>
-                      <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" />
-                    </div>
-                    <div className="border-2 border-dashed border-gray-200 rounded-2xl h-40 flex flex-col items-center justify-center text-gray-400 hover:text-black hover:border-black transition-colors cursor-pointer bg-gray-50 relative overflow-hidden group">
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <Plus className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" />
-                        <span className="text-xs font-bold uppercase tracking-wide">Upload Photo 2</span>
-                      </div>
-                      <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" />
-                    </div>
+                    ))}
                   </div>
                 </div>
 
@@ -782,14 +831,10 @@ export default function VendorDashboard() {
 
                 <div className="pt-4">
                   <button
-                    onClick={() => {
-                      if (!newScooter.name) return;
-                      setFleet([...fleet, { ...newScooter, id: Date.now(), totalUnits: Number(newScooter.totalUnits) || 1, availableUnits: Number(newScooter.totalUnits) || 1 }]);
-                      setIsAddingScooter(false);
-                      setNewScooter({ name: "", brand: "", cc: "", year: "", price: 0, priceWeekly: 0, priceMonthly: 0, totalUnits: 1, availableUnits: 1, photos: [] });
-                    }}
-                    className="w-full bg-black text-white rounded-[20px] py-4 font-black text-lg hover:scale-[1.01] shadow-xl shadow-black/10 transition-transform">
-                    Publish
+                    disabled={isPublishing}
+                    onClick={handlePublishScooter}
+                    className="w-full bg-black text-white rounded-[20px] py-4 font-black text-lg hover:scale-[1.01] shadow-xl shadow-black/10 transition-transform flex items-center justify-center gap-2 disabled:opacity-50">
+                    {isPublishing ? <Loader2 className="w-6 h-6 animate-spin" /> : "Publish"}
                   </button>
                 </div>
               </div>
