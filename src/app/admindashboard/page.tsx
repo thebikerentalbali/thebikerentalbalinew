@@ -173,10 +173,9 @@ export default function AdminDashboard() {
                 </div>
                 <h3 className="text-[12px] md:text-[13px] font-bold text-gray-500 uppercase tracking-wide leading-tight">Gross Volume</h3>
               </div>
-              <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">Rp 128M</p>
-              <div className="flex items-center gap-1 mt-2 md:mt-3 bg-green-50 text-green-700 w-fit px-2 py-0.5 rounded-full">
-                <TrendingUp className="w-3 h-3" />
-                <span className="text-[10px] md:text-[11px] font-bold">+24% vs last mo</span>
+              <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">Rp 0</p>
+              <div className="flex items-center gap-1 mt-2 md:mt-3 bg-gray-50 text-gray-500 w-fit px-2 py-0.5 rounded-full">
+                <span className="text-[10px] md:text-[11px] font-bold">No data yet</span>
               </div>
             </div>
             
@@ -189,8 +188,8 @@ export default function AdminDashboard() {
                 <h3 className="text-[12px] md:text-[13px] font-bold text-gray-500 uppercase tracking-wide leading-tight hidden md:block">Active Vendors</h3>
               </div>
               <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide md:hidden mb-1">Vendors</p>
-              <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">42</p>
-              <p className="text-[10px] md:text-[11px] font-bold text-green-600 mt-2 md:mt-3">+3 new</p>
+              <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">0</p>
+              <p className="text-[10px] md:text-[11px] font-bold text-gray-400 mt-2 md:mt-3">0 new</p>
             </div>
 
             <div className="bg-white p-4 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group hover:border-gray-200 transition-colors">
@@ -202,7 +201,7 @@ export default function AdminDashboard() {
                 <h3 className="text-[12px] md:text-[13px] font-bold text-gray-500 uppercase tracking-wide leading-tight hidden md:block">Total Fleet</h3>
               </div>
               <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide md:hidden mb-1">Fleet</p>
-              <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">356</p>
+              <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">0</p>
               <p className="text-[10px] md:text-[11px] font-bold text-gray-400 mt-2 md:mt-3">Across Bali</p>
             </div>
 
@@ -214,10 +213,9 @@ export default function AdminDashboard() {
                 </div>
                 <h3 className="text-[12px] md:text-[13px] font-bold text-gray-500 uppercase tracking-wide leading-tight">Total Users</h3>
               </div>
-              <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">1,248</p>
-              <div className="flex items-center gap-1 mt-2 md:mt-3 bg-blue-50 text-blue-700 w-fit px-2 py-0.5 rounded-full">
-                <TrendingUp className="w-3 h-3" />
-                <span className="text-[10px] md:text-[11px] font-bold">+124 this month</span>
+              <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">0</p>
+              <div className="flex items-center gap-1 mt-2 md:mt-3 bg-gray-50 text-gray-500 w-fit px-2 py-0.5 rounded-full">
+                <span className="text-[10px] md:text-[11px] font-bold">No data yet</span>
               </div>
             </div>
           </div>
@@ -234,62 +232,9 @@ export default function AdminDashboard() {
               
               <div className="p-2 md:p-4 flex-1">
                 <div className="space-y-2">
-                  {/* Vendor Item 1 */}
-                  <Link href="#" className="block bg-white hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-all p-3 md:p-4 rounded-[20px] cursor-pointer">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-blue-100 text-blue-700 font-black text-lg flex items-center justify-center shrink-0">
-                        PR
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-start mb-1">
-                          <h4 className="font-bold text-gray-900 text-[14px] md:text-[16px] truncate">Putu Rentals</h4>
-                          <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wide shrink-0">Verified</span>
-                        </div>
-                        <div className="flex justify-between items-end">
-                          <p className="text-[12px] md:text-[13px] font-medium text-gray-500 truncate">12 Scooters • Ubud</p>
-                          <p className="text-[12px] md:text-[13px] font-black text-gray-900 shrink-0">Rp 12.5M</p>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-
-                  {/* Vendor Item 2 */}
-                  <Link href="#" className="block bg-white hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-all p-3 md:p-4 rounded-[20px] cursor-pointer">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-purple-100 text-purple-700 font-black text-lg flex items-center justify-center shrink-0">
-                        WB
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-start mb-1">
-                          <h4 className="font-bold text-gray-900 text-[14px] md:text-[16px] truncate">Wayan Bikes</h4>
-                          <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wide shrink-0">Verified</span>
-                        </div>
-                        <div className="flex justify-between items-end">
-                          <p className="text-[12px] md:text-[13px] font-medium text-gray-500 truncate">24 Scooters • Canggu</p>
-                          <p className="text-[12px] md:text-[13px] font-black text-gray-900 shrink-0">Rp 28.2M</p>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-
-                  {/* Vendor Item 3 */}
-                  <Link href="#" className="block bg-white hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-all p-3 md:p-4 rounded-[20px] cursor-pointer">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-orange-100 text-orange-700 font-black text-lg flex items-center justify-center shrink-0">
-                        MS
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-start mb-1">
-                          <h4 className="font-bold text-gray-900 text-[14px] md:text-[16px] truncate">Made Scooter</h4>
-                          <span className="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wide shrink-0">Pending</span>
-                        </div>
-                        <div className="flex justify-between items-end">
-                          <p className="text-[12px] md:text-[13px] font-medium text-gray-500 truncate">8 Scooters • Seminyak</p>
-                          <p className="text-[12px] md:text-[13px] font-black text-gray-900 shrink-0">Rp 8.1M</p>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
+                  <div className="text-center py-10 text-gray-400 font-medium text-sm">
+                    No top performing vendors yet.
+                  </div>
                 </div>
               </div>
             </div>
@@ -305,19 +250,12 @@ export default function AdminDashboard() {
               </div>
 
               <div className="relative z-10 mt-6 space-y-3">
-                <Link href="#" className="w-full bg-white text-blue-900 p-4 rounded-2xl flex items-center justify-between font-bold text-[14px] hover:bg-gray-50 transition-colors shadow-lg">
+                <Link href="#" onClick={() => setActiveTab('approvals')} className="w-full bg-white text-blue-900 p-4 rounded-2xl flex items-center justify-between font-bold text-[14px] hover:bg-gray-50 transition-colors shadow-lg">
                   <div className="flex items-center gap-3">
-                    <span className="w-2 h-2 rounded-full bg-red-500"></span>
-                    Approve 3 Vendors
+                    <span className={`w-2 h-2 rounded-full ${pendingVendors.length > 0 ? 'bg-red-500' : 'bg-gray-300'}`}></span>
+                    Approve {pendingVendors.length} Vendors
                   </div>
                   <ChevronRight className="w-4 h-4 text-blue-400" />
-                </Link>
-                <Link href="#" className="w-full bg-black/20 text-white p-4 rounded-2xl flex items-center justify-between font-bold text-[14px] hover:bg-black/30 transition-colors border border-white/10">
-                  <div className="flex items-center gap-3">
-                    <span className="w-2 h-2 rounded-full bg-yellow-400"></span>
-                    Review 12 Reports
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-white/50" />
                 </Link>
               </div>
             </div>

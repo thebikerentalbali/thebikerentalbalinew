@@ -185,10 +185,9 @@ export default function VendorDashboard() {
                   </div>
                   <h3 className="text-[13px] md:text-[14px] font-bold text-gray-500 uppercase tracking-wide">Total Earnings</h3>
                 </div>
-                <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">Rp 4.2M</p>
-                <div className="flex items-center gap-1.5 mt-2 md:mt-3 bg-green-50 text-green-700 w-fit px-2.5 py-1 rounded-full">
-                  <TrendingUp className="w-3.5 h-3.5" />
-                  <span className="text-[11px] md:text-xs font-bold">+12.5% vs last week</span>
+                <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">Rp 0</p>
+                <div className="flex items-center gap-1.5 mt-2 md:mt-3 bg-gray-50 text-gray-500 w-fit px-2.5 py-1 rounded-full">
+                  <span className="text-[11px] md:text-xs font-bold">No earnings yet</span>
                 </div>
               </div>
 
@@ -201,12 +200,12 @@ export default function VendorDashboard() {
                   <h3 className="text-[13px] md:text-[14px] font-bold text-gray-500 uppercase tracking-wide">Active Rentals</h3>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">8</p>
-                  <span className="text-sm md:text-base font-bold text-gray-400">/ 12 fleet</span>
+                  <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">0</p>
+                  <span className="text-sm md:text-base font-bold text-gray-400">/ 0 fleet</span>
                 </div>
                 <p className="text-[12px] md:text-[13px] font-semibold text-gray-500 mt-2 md:mt-3 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                  4 available for booking
+                  <span className="w-2 h-2 rounded-full bg-gray-300"></span>
+                  0 available for booking
                 </p>
               </div>
 
@@ -219,10 +218,10 @@ export default function VendorDashboard() {
                   <h3 className="text-[13px] md:text-[14px] font-bold text-gray-500 uppercase tracking-wide">Avg Rating</h3>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">4.9</p>
+                  <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">0.0</p>
                 </div>
                 <p className="text-[12px] md:text-[13px] font-semibold text-gray-500 mt-2 md:mt-3">
-                  Based on <span className="text-black">124 verified reviews</span>
+                  Based on <span className="text-black">0 verified reviews</span>
                 </p>
               </div>
             </div>
@@ -239,58 +238,8 @@ export default function VendorDashboard() {
 
                 <div className="p-2 md:p-4 flex-1">
                   <div className="space-y-2">
-                    {/* Booking Item 1 */}
-                    <div className="bg-white hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-all p-3 md:p-4 rounded-[20px] flex items-center gap-4 cursor-pointer">
-                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gray-100 overflow-hidden shrink-0">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/images/scooter.png" alt="scooter" className="w-full h-full object-cover opacity-80" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-start mb-1">
-                          <h4 className="font-bold text-gray-900 text-[14px] md:text-[16px] truncate">Yamaha NMAX</h4>
-                          <span className="bg-green-100 text-green-700 px-2.5 py-0.5 rounded-lg text-[10px] md:text-[11px] font-black uppercase tracking-wide shrink-0">Active</span>
-                        </div>
-                        <div className="flex justify-between items-end">
-                          <p className="text-[12px] md:text-[13px] font-medium text-gray-500 truncate">Booked by <span className="text-gray-900 font-bold">John Doe</span></p>
-                          <p className="text-[12px] md:text-[13px] font-bold text-gray-900 shrink-0">3 Days</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Booking Item 2 */}
-                    <div className="bg-white hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-all p-3 md:p-4 rounded-[20px] flex items-center gap-4 cursor-pointer">
-                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gray-100 overflow-hidden shrink-0">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/images/scooter.png" alt="scooter" className="w-full h-full object-cover opacity-80" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-start mb-1">
-                          <h4 className="font-bold text-gray-900 text-[14px] md:text-[16px] truncate">Honda Scoopy</h4>
-                          <span className="bg-yellow-100 text-yellow-700 px-2.5 py-0.5 rounded-lg text-[10px] md:text-[11px] font-black uppercase tracking-wide shrink-0">Pending</span>
-                        </div>
-                        <div className="flex justify-between items-end">
-                          <p className="text-[12px] md:text-[13px] font-medium text-gray-500 truncate">Booked by <span className="text-gray-900 font-bold">Sarah Smith</span></p>
-                          <p className="text-[12px] md:text-[13px] font-bold text-gray-900 shrink-0">1 Week</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Booking Item 3 */}
-                    <div className="bg-white hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-all p-3 md:p-4 rounded-[20px] flex items-center gap-4 cursor-pointer">
-                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gray-100 overflow-hidden shrink-0">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/images/scooter.png" alt="scooter" className="w-full h-full object-cover opacity-80" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-start mb-1">
-                          <h4 className="font-bold text-gray-900 text-[14px] md:text-[16px] truncate">Vespa Primavera</h4>
-                          <span className="bg-gray-100 text-gray-600 px-2.5 py-0.5 rounded-lg text-[10px] md:text-[11px] font-black uppercase tracking-wide shrink-0">Done</span>
-                        </div>
-                        <div className="flex justify-between items-end">
-                          <p className="text-[12px] md:text-[13px] font-medium text-gray-500 truncate">Booked by <span className="text-gray-900 font-bold">Michael T.</span></p>
-                          <p className="text-[12px] md:text-[13px] font-bold text-gray-900 shrink-0">Daily</p>
-                        </div>
-                      </div>
+                    <div className="text-center py-10 text-gray-400 font-medium text-sm">
+                      No recent bookings yet.
                     </div>
                   </div>
                 </div>
@@ -307,20 +256,9 @@ export default function VendorDashboard() {
                 </div>
 
                 <div className="relative z-10 mt-6 space-y-3">
-                  <Link href="#" className="w-full bg-white text-black p-4 rounded-2xl flex items-center justify-between font-bold text-[14px] hover:bg-gray-100 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <span className="w-2 h-2 rounded-full bg-red-500"></span>
-                      Accept 1 Pending Booking
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
-                  </Link>
-                  <Link href="#" className="w-full bg-white/10 text-white p-4 rounded-2xl flex items-center justify-between font-bold text-[14px] hover:bg-white/20 transition-colors border border-white/5">
-                    <div className="flex items-center gap-3">
-                      <span className="w-2 h-2 rounded-full bg-yellow-500"></span>
-                      Service Due (2 Bikes)
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-white/50" />
-                  </Link>
+                  <div className="text-center py-4 text-gray-400 text-sm">
+                    No pending actions required.
+                  </div>
                 </div>
               </div>
             </div>
