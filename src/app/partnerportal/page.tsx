@@ -408,12 +408,14 @@ export default function VendorDashboard() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {fleet.filter(s => {
-                if (fleetFilter === "Available") return (s.availableUnits || 1) > 0;
-                if (fleetFilter === "Rented") return (s.availableUnits || 1) < (s.totalUnits || 1);
+                const avail = s.available_units ?? 1;
+                const tot = s.total_units ?? 1;
+                if (fleetFilter === "Available") return avail > 0;
+                if (fleetFilter === "Rented") return avail < tot;
                 return true;
               }).map((scooter) => {
-                const totalUnits = scooter.totalUnits || 1;
-                const availableUnits = scooter.availableUnits || 1;
+                const totalUnits = scooter.total_units ?? 1;
+                const availableUnits = scooter.available_units ?? 1;
                 
                 return (
                   <div key={scooter.id} className="bg-white p-5 md:p-6 rounded-[28px] border border-gray-100 flex flex-col gap-4 shadow-sm hover:shadow-md hover:border-gray-200 transition-all relative group">
@@ -448,16 +450,24 @@ export default function VendorDashboard() {
                     {/* Action Buttons Row */}
                     <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-50">
                       <button
-                        disabled={scooter.availableUnits === scooter.totalUnits}
-                        onClick={() => setFleet(f => f.map(s => s.id === scooter.id ? { ...s, availableUnits: s.availableUnits + 1 } : s))}
-                        className={`py-3 rounded-[14px] font-bold text-sm transition-all ${scooter.availableUnits < scooter.totalUnits ? 'bg-gray-100 text-gray-900 hover:bg-gray-200' : 'bg-gray-50 text-gray-400 opacity-50 cursor-not-allowed'}`}
+                        disabled={availableUnits >= totalUnits}
+                        onClick={async () => {
+                          const newAvail = availableUnits + 1;
+                          setFleet(f => f.map(s => s.id === scooter.id ? { ...s, available_units: newAvail } : s));
+                          await supabase.from('scooters').update({ available_units: newAvail }).eq('id', scooter.id);
+                        }}
+                        className={`py-3 rounded-[14px] font-bold text-sm transition-all ${availableUnits < totalUnits ? 'bg-gray-100 text-gray-900 hover:bg-gray-200' : 'bg-gray-50 text-gray-400 opacity-50 cursor-not-allowed'}`}
                       >
                         Return
                       </button>
                       <button
-                        disabled={scooter.availableUnits === 0}
-                        onClick={() => setFleet(f => f.map(s => s.id === scooter.id ? { ...s, availableUnits: s.availableUnits - 1 } : s))}
-                        className={`py-3 rounded-[14px] font-bold text-sm transition-all ${scooter.availableUnits > 0 ? 'bg-black text-white hover:bg-gray-800 hover:scale-[1.02] shadow-md shadow-black/10' : 'bg-gray-100 text-gray-400 opacity-50 cursor-not-allowed'}`}
+                        disabled={availableUnits === 0}
+                        onClick={async () => {
+                          const newAvail = Math.max(0, availableUnits - 1);
+                          setFleet(f => f.map(s => s.id === scooter.id ? { ...s, available_units: newAvail } : s));
+                          await supabase.from('scooters').update({ available_units: newAvail }).eq('id', scooter.id);
+                        }}
+                        className={`py-3 rounded-[14px] font-bold text-sm transition-all ${availableUnits > 0 ? 'bg-black text-white hover:bg-gray-800 hover:scale-[1.02] shadow-md shadow-black/10' : 'bg-gray-100 text-gray-400 opacity-50 cursor-not-allowed'}`}
                       >
                         Rent Out
                       </button>
@@ -466,7 +476,9 @@ export default function VendorDashboard() {
                 )
               })}
               {fleet.filter(s => {
-                const matchesFilter = fleetFilter === "Available" ? s.availableUnits > 0 : fleetFilter === "Rented" ? s.availableUnits < s.totalUnits : true;
+                const avail = s.available_units ?? 1;
+                const tot = s.total_units ?? 1;
+                const matchesFilter = fleetFilter === "Available" ? avail > 0 : fleetFilter === "Rented" ? avail < tot : true;
                 const matchesSearch = s.name.toLowerCase().includes(fleetSearch.toLowerCase());
                 return matchesFilter && matchesSearch;
               }).length === 0 && (

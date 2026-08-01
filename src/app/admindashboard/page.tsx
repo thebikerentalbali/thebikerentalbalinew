@@ -22,7 +22,7 @@ export default function AdminDashboard() {
     setIsLoadingApprovals(true)
     const { data, error } = await supabase
       .from('vendors')
-      .select('*')
+      .select('*, scooters(*)')
       .order('created_at', { ascending: false })
       
     if (!error && data) {
@@ -379,7 +379,7 @@ export default function AdminDashboard() {
                         <div className="grid grid-cols-2 gap-2 pt-3 border-t border-gray-50">
                           <div>
                             <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">Scooters</p>
-                            <p className="font-black text-gray-900 text-lg">0</p>
+                            <p className="font-black text-gray-900 text-lg">{vendor.scooters?.length || 0}</p>
                           </div>
                           <div>
                             <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">Revenue</p>
@@ -395,19 +395,19 @@ export default function AdminDashboard() {
                             <Bike className="w-4 h-4 text-gray-400" /> Published Fleet
                           </h5>
                           <div className="space-y-2">
-                            {vendor.scootersList?.map((scooter: any) => (
+                            {vendor.scooters?.map((scooter: any) => (
                               <div key={scooter.id} className="bg-white border border-gray-100 p-3 rounded-xl flex items-center justify-between shadow-sm hover:border-gray-200 transition-colors">
                                 <div className="flex items-center gap-3">
                                   <div className="w-10 h-10 bg-gray-50 rounded-lg overflow-hidden shrink-0 border border-gray-50 flex items-center justify-center">
                                     <Bike className="w-5 h-5 text-gray-300" />
                                   </div>
                                   <div>
-                                    <p className="font-bold text-gray-900 text-sm leading-tight">{scooter.model}</p>
-                                    <p className="text-[11px] font-medium text-gray-500 mt-0.5">{scooter.quantity} units available</p>
+                                    <p className="font-bold text-gray-900 text-sm leading-tight">{scooter.name}</p>
+                                    <p className="text-[11px] font-medium text-gray-500 mt-0.5">{scooter.available_units ?? 1} / {scooter.total_units ?? 1} units available</p>
                                   </div>
                                 </div>
                                 <div className="text-right">
-                                  <p className="font-bold text-gray-900 text-sm">{scooter.price}</p>
+                                  <p className="font-bold text-gray-900 text-sm">Rp {(scooter.price_daily || 0).toLocaleString()}</p>
                                 </div>
                               </div>
                             ))}
