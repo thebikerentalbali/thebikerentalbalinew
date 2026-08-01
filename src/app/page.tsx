@@ -53,6 +53,7 @@ export default function Home() {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       if (params.get("showMap") === "true") {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setIsLocationModalOpen(true);
         window.history.replaceState({}, '', '/');
       }

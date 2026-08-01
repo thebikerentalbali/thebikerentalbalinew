@@ -17,10 +17,6 @@ export default function AdminDashboard() {
   const [isLoadingApprovals, setIsLoadingApprovals] = useState(false)
   const supabase = createClient()
 
-  useEffect(() => {
-    fetchPendingVendors()
-  }, [])
-
   const fetchPendingVendors = async () => {
     setIsLoadingApprovals(true)
     const { data, error } = await supabase
@@ -34,6 +30,11 @@ export default function AdminDashboard() {
     }
     setIsLoadingApprovals(false)
   }
+
+  useEffect(() => {
+    fetchPendingVendors()
+  }, [])
+
 
   const handleApprove = async (id: number) => {
     const { error } = await supabase
