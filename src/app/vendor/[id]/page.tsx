@@ -147,6 +147,7 @@ export default function VendorPage() {
       {/* Left Column: Vendor Info & Reviews */}
       <div className="flex flex-col gap-6">
         {/* Header */}
+        {/* Header */}
         <header className="relative bg-white pb-6 shadow-sm rounded-b-3xl md:rounded-3xl z-10 h-fit overflow-hidden">
           {/* Cover Photo */}
           <div className="relative h-32 md:h-48 w-full bg-gray-100">
@@ -162,7 +163,21 @@ export default function VendorPage() {
               <button onClick={handleBack} className="w-10 h-10 md:w-12 md:h-12 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 shadow-sm hover:bg-white transition-colors">
                 <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-gray-800" />
               </button>
+            </div>
+          </div>
 
+          {/* Profile Details - Left Aligned Layout */}
+          <div className="px-5 md:px-6 relative z-10">
+            <div className="flex justify-between items-end -mt-12 md:-mt-14 mb-4">
+              <div className="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden bg-white border-4 border-white shadow-sm shrink-0 flex items-center justify-center">
+                {vendor.logo ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={vendor.logo} alt={vendor.name} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-3xl font-black text-gray-400">{(vendor.name || "V").substring(0, 2).toUpperCase()}</span>
+                )}
+              </div>
+              
               <button 
                 onClick={() => {
                   const vendorSlug = vendor?.name ? vendor.name.toLowerCase().replace(/[^a-z0-9]+/g, '') : 'vendor';
@@ -174,79 +189,94 @@ export default function VendorPage() {
                     alert('Link copied to clipboard!');
                   }
                 }}
-                className="w-10 h-10 md:w-12 md:h-12 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 shadow-sm active:scale-95 transition-transform"
+                className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center border border-gray-200 shadow-sm active:scale-95 transition-transform"
               >
                 <Share className="w-4 h-4 md:w-5 md:h-5 text-gray-800" />
               </button>
             </div>
-          </div>
-
-          {/* Profile Details */}
-          <div className="px-6 flex flex-col items-center -mt-12 relative z-10">
-            <div className="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden bg-white border-4 border-white shadow-md shrink-0 flex items-center justify-center">
-              {vendor.logo ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img src={vendor.logo} alt={vendor.name} className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-3xl font-black text-gray-400">{(vendor.name || "V").substring(0, 2).toUpperCase()}</span>
-              )}
-            </div>
             
-            <div className="mt-3 text-center">
-              <h2 className="text-[22px] md:text-2xl font-bold text-gray-900 mb-2 leading-tight">{vendor.name}</h2>
-              <div className="flex flex-col items-center gap-2">
-                <button onClick={() => setIsReviewModalOpen(true)} className="flex items-center gap-1.5 bg-yellow-50 px-3 py-1 rounded-full border border-yellow-100 w-fit hover:bg-yellow-100 transition-colors shadow-sm">
-                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  <span className="text-sm font-bold text-yellow-700">5.0</span>
-                  <span className="text-sm text-yellow-600/80 font-medium">({reviews.length} reviews)</span>
-                </button>
-                <div className="flex items-center justify-center gap-1.5 text-gray-500 mt-0.5">
-                  <MapPin className="w-4 h-4 shrink-0" />
-                  <span className="text-sm md:text-base text-gray-500">{vendor.address || 'Bali'}</span>
+            <div className="mb-6">
+              <h2 className="text-2xl md:text-[28px] font-bold text-gray-900 mb-1 leading-tight">{vendor.name}</h2>
+              <p className="text-gray-500 text-[15px] md:text-base">{vendor.address || 'Premium scooter rental in Bali'}</p>
+              
+              <div className="flex items-center gap-2 mt-3">
+                <div className="flex items-center gap-1.5 bg-purple-50 text-purple-700 px-2.5 py-1 rounded-full border border-purple-100 w-fit">
+                  <div className="w-4 h-4 rounded-full bg-purple-600 flex items-center justify-center">
+                    <Star className="w-2.5 h-2.5 text-white fill-white" />
+                  </div>
+                  <span className="text-xs font-bold">Verified Partner</span>
                 </div>
               </div>
             </div>
-          </div>
-          
-          {/* Swipeable Reviews directly under vendor info */}
-          <div className="mt-6 -mx-4 sm:-mx-6 px-4 sm:px-6">
-            <style jsx>{`
-              .hide-scrollbar::-webkit-scrollbar { display: none; }
-              .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-            `}</style>
-            <div className="flex overflow-x-auto gap-4 pb-2 snap-x hide-scrollbar">
-              {reviews.slice(0, 5).map(review => (
-                <div key={review.id} className="snap-start shrink-0 w-[280px] bg-white rounded-2xl p-4 shadow-sm border border-gray-50 flex flex-col justify-between">
-                  <div>
-                    <div className="flex gap-0.5 mb-2">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className={`w-3.5 h-3.5 ${i < (review.rating || 5) ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-200 text-gray-200'}`} />
-                      ))}
-                    </div>
-                    <p className="text-[13px] text-gray-600 line-clamp-3 mb-3">"{review.comment}"</p>
-                  </div>
-                  <p className="font-bold text-xs text-gray-900">- {review.user_name || 'User'}</p>
+
+            {/* 3 Column Stats */}
+            <div className="flex items-center justify-between py-4 border-y border-gray-100 max-w-sm mb-6">
+              {/* Rating */}
+              <div className="flex flex-col items-center justify-center flex-1 cursor-pointer" onClick={() => setIsReviewModalOpen(true)}>
+                <div className="flex items-center gap-1">
+                  <Star className="w-4 h-4 text-gray-800 fill-gray-800" />
+                  <span className="font-bold text-lg text-gray-900">5.0</span>
                 </div>
-              ))}
-              {reviews.length === 0 && (
-                <div className="w-full text-center py-4 text-sm text-gray-500">No reviews yet. Be the first!</div>
-              )}
+                <span className="text-[13px] text-gray-500 mt-0.5">rating</span>
+              </div>
+              
+              <div className="w-px h-8 bg-gray-200" />
+
+              {/* Reviews */}
+              <div className="flex flex-col items-center justify-center flex-1 cursor-pointer" onClick={() => setIsReviewModalOpen(true)}>
+                <span className="font-bold text-lg text-gray-900">{reviews.length}+</span>
+                <span className="text-[13px] text-gray-500 mt-0.5">reviews</span>
+              </div>
+
+              <div className="w-px h-8 bg-gray-200" />
+
+              {/* Location */}
+              <div className="flex flex-col items-center justify-center flex-1">
+                <span className="font-bold text-lg text-gray-900 truncate max-w-[90px] px-2">{vendor.address?.split(',')[0] || 'Bali'}</span>
+                <span className="text-[13px] text-gray-500 mt-0.5">location</span>
+              </div>
             </div>
-            <div className="flex items-center gap-3 mt-4">
-              <button 
-                onClick={() => setIsWriteReviewModalOpen(true)}
-                className="flex-1 bg-black text-white font-bold py-2.5 rounded-xl text-sm hover:bg-gray-800 transition-colors shadow-sm"
-              >
-                Write a Review
-              </button>
-              {reviews.length > 0 && (
+
+            {/* Swipeable Reviews directly under vendor info */}
+            <div className="-mx-5 sm:-mx-6 px-5 sm:px-6">
+              <style jsx>{`
+                .hide-scrollbar::-webkit-scrollbar { display: none; }
+                .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+              `}</style>
+              <div className="flex overflow-x-auto gap-4 pb-2 snap-x hide-scrollbar">
+                {reviews.slice(0, 5).map(review => (
+                  <div key={review.id} className="snap-start shrink-0 w-[280px] bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex flex-col justify-between">
+                    <div>
+                      <div className="flex gap-0.5 mb-2">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className={`w-3.5 h-3.5 ${i < (review.rating || 5) ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-200 text-gray-200'}`} />
+                        ))}
+                      </div>
+                      <p className="text-[13px] text-gray-600 line-clamp-3 mb-3">"{review.comment}"</p>
+                    </div>
+                    <p className="font-bold text-xs text-gray-900">- {review.user_name || 'User'}</p>
+                  </div>
+                ))}
+                {reviews.length === 0 && (
+                  <div className="w-full text-center py-4 text-sm text-gray-500">No reviews yet. Be the first!</div>
+                )}
+              </div>
+              <div className="flex items-center gap-3 mt-4">
                 <button 
-                  onClick={() => setIsReviewModalOpen(true)}
-                  className="flex-1 bg-white border border-gray-200 text-black font-bold py-2.5 rounded-xl text-sm hover:bg-gray-50 transition-colors"
+                  onClick={() => setIsWriteReviewModalOpen(true)}
+                  className="flex-1 bg-black text-white font-bold py-3 rounded-[20px] text-[15px] hover:bg-gray-800 transition-colors shadow-sm"
                 >
-                  See More
+                  Write a Review
                 </button>
-              )}
+                {reviews.length > 0 && (
+                  <button 
+                    onClick={() => setIsReviewModalOpen(true)}
+                    className="flex-1 bg-white border border-gray-200 text-black font-bold py-3 rounded-[20px] text-[15px] hover:bg-gray-50 transition-colors"
+                  >
+                    See More
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </header>
