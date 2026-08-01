@@ -101,6 +101,12 @@ export default function VendorDashboard() {
   const handleUpdateScooter = async () => {
     if (!editingScooter) return;
     setIsPublishing(true);
+
+    const oldTotal = editingScooter.total_units || 1;
+    const oldAvailable = editingScooter.available_units ?? 1;
+    const newTotal = editingScooter.totalUnits;
+    const newAvailable = Math.max(0, oldAvailable + (newTotal - oldTotal));
+
     const { data, error } = await supabase.from('scooters').update({
       name: editingScooter.name,
       brand: editingScooter.brand,
@@ -109,7 +115,8 @@ export default function VendorDashboard() {
       price_daily: editingScooter.price,
       price_weekly: editingScooter.priceWeekly || null,
       price_monthly: editingScooter.priceMonthly || null,
-      total_units: editingScooter.totalUnits,
+      total_units: newTotal,
+      available_units: newAvailable,
     }).eq('id', editingScooter.id).select().single()
 
     setIsPublishing(false)
