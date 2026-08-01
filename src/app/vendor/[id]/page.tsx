@@ -155,7 +155,7 @@ export default function VendorPage() {
                 const vendorSlug = vendor?.name ? vendor.name.toLowerCase().replace(/[^a-z0-9]+/g, '') : 'vendor';
                 const url = `${window.location.origin}/${vendorSlug}`;
                 if (navigator.share) {
-                  navigator.share({ title: 'Putu Rentals', url });
+                  navigator.share({ title: vendor.name, url });
                 } else {
                   navigator.clipboard.writeText(url);
                   alert('Link copied to clipboard!');
