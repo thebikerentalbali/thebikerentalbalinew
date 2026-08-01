@@ -14,25 +14,26 @@ export default function AdminDashboard() {
 
   // Real Data
   const [pendingVendors, setPendingVendors] = useState<any[]>([])
+  const [approvedVendors, setApprovedVendors] = useState<any[]>([])
   const [isLoadingApprovals, setIsLoadingApprovals] = useState(false)
   const supabase = createClient()
 
-  const fetchPendingVendors = async () => {
+  const fetchVendors = async () => {
     setIsLoadingApprovals(true)
     const { data, error } = await supabase
       .from('vendors')
       .select('*')
-      .eq('status', 'pending')
       .order('created_at', { ascending: false })
       
     if (!error && data) {
-      setPendingVendors(data)
+      setPendingVendors(data.filter((v: any) => v.status === 'pending'))
+      setApprovedVendors(data.filter((v: any) => v.status === 'approved'))
     }
     setIsLoadingApprovals(false)
   }
 
   useEffect(() => {
-    fetchPendingVendors()
+    fetchVendors()
   }, [])
 
 
@@ -43,7 +44,8 @@ export default function AdminDashboard() {
       .eq('id', id)
       
     if (!error) {
-      setPendingVendors(prev => prev.filter(v => v.id !== id))
+      // Re-fetch to cleanly separate lists
+      fetchVendors()
     } else {
       alert("Error approving vendor: " + error.message)
     }
@@ -188,8 +190,8 @@ export default function AdminDashboard() {
                 <h3 className="text-[12px] md:text-[13px] font-bold text-gray-500 uppercase tracking-wide leading-tight hidden md:block">Active Vendors</h3>
               </div>
               <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide md:hidden mb-1">Vendors</p>
-              <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">0</p>
-              <p className="text-[10px] md:text-[11px] font-bold text-gray-400 mt-2 md:mt-3">0 new</p>
+              <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">{approvedVendors.length}</p>
+              <p className="text-[10px] md:text-[11px] font-bold text-gray-400 mt-2 md:mt-3">Total approved</p>
             </div>
 
             <div className="bg-white p-4 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group hover:border-gray-200 transition-colors">
@@ -338,10 +340,10 @@ export default function AdminDashboard() {
               <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-green-500"></span>
                 Active Vendors
-                <span className="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full ml-2">{mockVendors.length}</span>
+                <span className="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full ml-2">{approvedVendors.length}</span>
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {mockVendors.map(vendor => {
+                {approvedVendors.map(vendor => {
                   const isExpanded = expandedVendorDetailsId === vendor.id;
                   
                   return (
@@ -352,12 +354,12 @@ export default function AdminDashboard() {
                       >
                         <div className="flex justify-between items-start">
                           <div className="flex gap-3 items-center">
-                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg bg-${vendor.color}-100 text-${vendor.color}-700 shrink-0`}>
-                              {vendor.initials}
+                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg bg-blue-100 text-blue-700 shrink-0`}>
+                              {(vendor.name || "V").substring(0, 2).toUpperCase()}
                             </div>
                             <div>
                               <h3 className="font-bold text-gray-900 text-lg leading-tight">{vendor.name}</h3>
-                              <p className="text-sm font-medium text-gray-500 flex items-center gap-1 mt-0.5"><Store className="w-3.5 h-3.5" /> {vendor.location}</p>
+                              <p className="text-sm font-medium text-gray-500 flex items-center gap-1 mt-0.5"><Store className="w-3.5 h-3.5" /> {vendor.address || "Unknown Location"}</p>
                             </div>
                           </div>
                           <div className={`p-1.5 rounded-full transition-transform ${isExpanded ? 'rotate-90 bg-gray-100' : 'bg-gray-50 hover:bg-gray-100'}`}>
@@ -367,11 +369,11 @@ export default function AdminDashboard() {
                         <div className="grid grid-cols-2 gap-2 pt-3 border-t border-gray-50">
                           <div>
                             <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">Scooters</p>
-                            <p className="font-black text-gray-900 text-lg">{vendor.scooters}</p>
+                            <p className="font-black text-gray-900 text-lg">0</p>
                           </div>
                           <div>
                             <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">Revenue</p>
-                            <p className="font-black text-gray-900 text-lg">{vendor.revenue}</p>
+                            <p className="font-black text-gray-900 text-lg">Rp 0</p>
                           </div>
                         </div>
                       </div>
@@ -418,7 +420,7 @@ export default function AdminDashboard() {
             </div>
             
             <div className="space-y-4">
-              {mockVendors.map(vendor => {
+              {approvedVendors.map(vendor => {
                 const vendorBookings = mockBookings.filter(b => b.vendorId === vendor.id);
                 const isExpanded = expandedVendorId === vendor.id;
                 
@@ -429,8 +431,8 @@ export default function AdminDashboard() {
                       className="p-5 md:p-6 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors"
                     >
                       <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg bg-${vendor.color}-100 text-${vendor.color}-700 shrink-0`}>
-                          {vendor.initials}
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg bg-blue-100 text-blue-700 shrink-0`}>
+                          {(vendor.name || "V").substring(0, 2).toUpperCase()}
                         </div>
                         <div>
                           <h4 className="font-bold text-gray-900 text-lg md:text-xl">{vendor.name}</h4>
@@ -440,7 +442,7 @@ export default function AdminDashboard() {
                       <div className="flex items-center gap-4">
                         <div className="hidden md:block text-right">
                           <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">Vendor Revenue</p>
-                          <p className="font-black text-gray-900 text-lg">{vendor.revenue}</p>
+                          <p className="font-black text-gray-900 text-lg">Rp 0</p>
                         </div>
                         <div className={`p-2 rounded-full transition-transform ${isExpanded ? 'rotate-90 bg-gray-100' : 'bg-gray-50 hover:bg-gray-100'}`}>
                           <ChevronRight className="w-5 h-5 text-gray-600" />
