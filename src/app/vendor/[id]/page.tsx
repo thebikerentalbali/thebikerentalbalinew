@@ -22,50 +22,80 @@ export default function VendorPage() {
   return (
     <div className="min-h-screen bg-[#F0F2F5] w-full md:py-8">
       <div className="flex flex-col md:grid md:grid-cols-[350px_1fr] lg:grid-cols-[400px_1fr] md:gap-8 lg:gap-12 min-h-screen md:min-h-0 bg-[#F0F2F5] relative pb-24 md:pb-8 md:max-w-5xl md:mx-auto md:shadow-2xl md:rounded-[40px] md:overflow-hidden md:border md:border-gray-200 md:p-8">
-      {/* Header */}
-      <header className="relative bg-white pt-8 pb-6 px-6 shadow-sm rounded-b-3xl md:rounded-3xl z-10 h-fit">
-        <div className="flex items-center justify-between mb-6">
-          <button onClick={handleBack} className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center border border-gray-100 hover:bg-gray-100 transition-colors">
-            <ChevronLeft className="w-6 h-6 text-gray-800" />
-          </button>
+      {/* Left Column: Vendor Info & Reviews */}
+      <div className="flex flex-col gap-6">
+        {/* Header */}
+        <header className="relative bg-white pt-8 pb-6 px-6 shadow-sm rounded-b-3xl md:rounded-3xl z-10 h-fit">
+          <div className="flex items-center justify-between mb-6">
+            <button onClick={handleBack} className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center border border-gray-100 hover:bg-gray-100 transition-colors">
+              <ChevronLeft className="w-6 h-6 text-gray-800" />
+            </button>
 
-          <button 
-            onClick={() => {
-              const url = `${window.location.origin}/puturentals`;
-              if (navigator.share) {
-                navigator.share({ title: 'Putu Rentals', url });
-              } else {
-                navigator.clipboard.writeText(url);
-                alert('Link copied to clipboard!');
-              }
-            }}
-            className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center border border-gray-100 active:scale-95 transition-transform"
-          >
-            <Share className="w-5 h-5 text-gray-800" />
-          </button>
-        </div>
-
-        <div className="flex items-center gap-5">
-          <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100 border-2 border-white shadow-sm shrink-0">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=200&h=200&fit=crop" alt="Vendor" className="w-full h-full object-cover" />
+            <button 
+              onClick={() => {
+                const url = `${window.location.origin}/puturentals`;
+                if (navigator.share) {
+                  navigator.share({ title: 'Putu Rentals', url });
+                } else {
+                  navigator.clipboard.writeText(url);
+                  alert('Link copied to clipboard!');
+                }
+              }}
+              className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center border border-gray-100 active:scale-95 transition-transform"
+            >
+              <Share className="w-5 h-5 text-gray-800" />
+            </button>
           </div>
-          <div>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-1">Putu Rentals</h2>
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center gap-1.5">
-                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                <span className="text-sm font-medium text-gray-700">4.9</span>
-                <span className="text-sm text-gray-400">(128 reviews)</span>
-              </div>
-              <div className="flex items-center gap-1.5 text-gray-500">
-                <MapPin className="w-4 h-4 shrink-0" />
-                <span className="text-sm truncate">Jl. Monkey Forest No. 12, Ubud</span>
+
+          <div className="flex items-center gap-5">
+            <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100 border-2 border-white shadow-sm shrink-0">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=200&h=200&fit=crop" alt="Vendor" className="w-full h-full object-cover" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-1">Putu Rentals</h2>
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center gap-1.5">
+                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                  <span className="text-sm font-medium text-gray-700">4.9</span>
+                  <span className="text-sm text-gray-400">(128 reviews)</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-gray-500">
+                  <MapPin className="w-4 h-4 shrink-0" />
+                  <span className="text-sm truncate">Jl. Monkey Forest No. 12, Ubud</span>
+                </div>
               </div>
             </div>
           </div>
+        </header>
+
+        {/* Desktop Reviews Section */}
+        <div className="hidden md:block bg-white rounded-3xl p-6 shadow-sm border border-gray-50">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="font-semibold text-gray-900">Recent Reviews</h3>
+            <span className="text-sm font-medium text-blue-600 cursor-pointer">See all</span>
+          </div>
+          <div className="space-y-4">
+            {[
+              { id: 1, name: "Sarah M.", rating: 5, date: "2 days ago", text: "Great service! The scooter was in perfect condition and they delivered it right to our villa." },
+              { id: 2, name: "David L.", rating: 5, date: "1 week ago", text: "Very professional vendor. The helmets provided were clean and new." },
+            ].map((review) => (
+              <div key={review.id} className="border-b border-gray-50 last:border-0 pb-4 last:pb-0">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium text-sm text-gray-900">{review.name}</span>
+                  <span className="text-xs text-gray-400">{review.date}</span>
+                </div>
+                <div className="flex items-center gap-1 mb-2">
+                  {[...Array(review.rating)].map((_, i) => (
+                    <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                  ))}
+                </div>
+                <p className="text-sm text-gray-500 leading-relaxed">{review.text}</p>
+              </div>
+            ))}
+          </div>
         </div>
-      </header>
+      </div>
 
       {/* Available Scooters */}
       <div className="px-6 mt-8 md:mt-0 md:px-0">

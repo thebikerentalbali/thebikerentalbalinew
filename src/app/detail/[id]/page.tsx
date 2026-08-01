@@ -6,7 +6,7 @@ import { ChevronLeft, Heart, Star, MapPin, ChevronRight } from "lucide-react"
 export default function DetailPage() {
   return (
     <div className="min-h-screen bg-[#EBECEF] w-full md:py-8">
-      <div className="flex flex-col min-h-screen md:min-h-0 bg-[#EBECEF] relative pb-28 md:pb-0 md:max-w-2xl md:mx-auto md:shadow-2xl md:rounded-[40px] md:overflow-hidden md:border md:border-gray-200">
+      <div className="flex flex-col min-h-screen md:min-h-0 bg-[#EBECEF] relative pb-28 md:pb-0 md:max-w-5xl md:mx-auto md:shadow-2xl md:rounded-[40px] md:overflow-hidden md:border md:border-gray-200">
         {/* Header */}
         <header className="flex justify-between items-center p-6 pt-8 relative z-10">
           <Link href="/" className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
@@ -20,17 +20,33 @@ export default function DetailPage() {
           </button>
         </header>
 
-        <div className="flex flex-col md:p-8">
+        {/* Desktop Grid Layout */}
+        <div className="flex flex-col md:grid md:grid-cols-[1fr_400px] lg:grid-cols-[1fr_450px] md:gap-8 lg:gap-12 md:p-8">
           
-          {/* Hero Image */}
-          <div className="relative w-full h-[300px] flex items-center justify-center mt-4 mb-8">
-            <div 
-              className="w-full h-full bg-contain bg-center bg-no-repeat drop-shadow-2xl scale-110"
-              style={{ backgroundImage: 'url("/images/scooter.png")' }}
-            />
+          {/* Left Column: Image Gallery */}
+          <div className="flex flex-col">
+            {/* Main Hero Image */}
+            <div className="relative w-full h-[300px] md:h-[400px] flex items-center justify-center mt-4 mb-4 md:mb-6 md:bg-white/40 md:rounded-[32px]">
+              <div 
+                className="w-full h-full bg-contain bg-center bg-no-repeat drop-shadow-2xl scale-110 md:hover:scale-125 transition-transform duration-500"
+                style={{ backgroundImage: 'url("/images/scooter.png")' }}
+              />
+            </div>
+            
+            {/* Thumbnail Gallery (Desktop Only) */}
+            <div className="hidden md:flex items-center gap-4 px-2 mb-6">
+              <button className="w-24 h-24 rounded-2xl bg-white border-2 border-black flex items-center justify-center p-2 shadow-sm overflow-hidden transition-transform hover:-translate-y-1">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/images/scooter.png" alt="View 1" className="w-full h-full object-contain drop-shadow-md" />
+              </button>
+              <button className="w-24 h-24 rounded-2xl bg-white/60 border-2 border-transparent flex items-center justify-center p-2 shadow-sm overflow-hidden hover:bg-white transition-all hover:-translate-y-1">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/images/scooter.png" alt="View 2" className="w-full h-full object-contain drop-shadow-md opacity-80" />
+              </button>
+            </div>
           </div>
 
-          {/* Content Area */}
+          {/* Right Column: Content Area */}
           <div className="px-6 md:px-0 space-y-6 md:pb-8 flex flex-col justify-center">
           
           {/* Vendor Profile */}
