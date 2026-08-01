@@ -105,7 +105,8 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#EBECEF] relative p-6 pb-36">
+    <div className="min-h-screen bg-[#EBECEF] w-full md:py-8">
+      <div className="flex flex-col min-h-screen md:min-h-0 bg-[#EBECEF] relative p-6 pb-36 md:max-w-xl md:mx-auto md:shadow-2xl md:rounded-[40px] md:overflow-hidden md:border md:border-gray-200">
       {/* Header */}
       <header className="flex justify-between items-center pt-2 mb-8 relative">
         <Link href="/detail/1" className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm transition-transform active:scale-95">
@@ -396,7 +397,7 @@ export default function CheckoutPage() {
       </div>
 
       {/* Bottom Button */}
-      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto px-6 py-6 pb-8 sm:pb-6 bg-[#EBECEF]/90 backdrop-blur-xl border-t border-white/50 z-10">
+      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto px-6 py-6 pb-8 sm:pb-6 bg-[#EBECEF]/90 backdrop-blur-xl border-t border-white/50 z-10 md:absolute md:max-w-none md:bg-[#EBECEF] md:border-none md:rounded-b-[40px]">
         <a
           href={getWhatsAppLink()}
           target="_blank"
@@ -446,6 +447,7 @@ export default function CheckoutPage() {
           </div>
         </div>
       )}
+      </div>
     </div>
   )
 }
