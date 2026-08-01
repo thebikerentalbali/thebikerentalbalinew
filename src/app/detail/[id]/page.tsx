@@ -119,7 +119,7 @@ export default function DetailPage() {
           <div className="bg-white rounded-3xl p-6 shadow-sm">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">{scooter.name} Details</h3>
             <p className="text-gray-500 text-sm leading-relaxed mb-6">
-              The {scooter.name} ({scooter.brand}) is a premium choice for riding around Bali.
+              The {scooter.name} by {scooter.brand} delivers a seamless blend of performance, comfort, and reliability. Perfectly suited for navigating the vibrant streets and scenic routes of Bali, this scooter offers an exceptional riding experience with its modern features and elegant design.
             </p>
             
             <div className="space-y-4">
