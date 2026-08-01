@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Heart, Search, SlidersHorizontal, Star, Bike, MapPin, ChevronDown, Menu, X } from "lucide-react"
 import Link from "next/link"
 import dynamic from "next/dynamic"
@@ -61,6 +61,17 @@ export default function Home() {
   // Filter States
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [maxPrice, setMaxPrice] = useState(500000)
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("showMap") === "true") {
+        setIsLocationModalOpen(true);
+        // Optional: clear the url so it doesn't stay if they refresh
+        window.history.replaceState({}, '', '/');
+      }
+    }
+  }, []);
 
   const handleMapSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -495,7 +506,7 @@ export default function Home() {
                   vendors={topVendors}
                   onVendorClick={(id) => {
                     setIsLocationModalOpen(false);
-                    router.push(`/vendor/${id}`);
+                    router.push(`/vendor/${id}?fromMap=true`);
                   }}
                   className="w-full h-full object-cover"
                 />

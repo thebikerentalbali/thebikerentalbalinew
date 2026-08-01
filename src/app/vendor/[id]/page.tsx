@@ -1,17 +1,32 @@
 "use client"
 
-import Link from "next/link"
 import { ChevronLeft, MapPin, Star, Share } from "lucide-react"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
 
 export default function VendorPage() {
+  const router = useRouter();
+
+  const handleBack = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('fromMap') === 'true') {
+        router.push('/?showMap=true');
+      } else {
+        router.back();
+      }
+    }
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-[#F0F2F5] pb-24">
       {/* Header */}
       <header className="relative bg-white pt-8 pb-6 px-6 shadow-sm rounded-b-3xl z-10">
         <div className="flex items-center justify-between mb-6">
-          <Link href="/detail/1" className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center border border-gray-100">
+          <button onClick={handleBack} className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center border border-gray-100 hover:bg-gray-100 transition-colors">
             <ChevronLeft className="w-6 h-6 text-gray-800" />
-          </Link>
+          </button>
 
           <button 
             onClick={() => {
