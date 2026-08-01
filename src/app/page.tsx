@@ -263,7 +263,12 @@ export default function Home() {
                 <div className="p-[2px] md:p-[3px] rounded-full bg-gradient-to-tr from-yellow-400 to-orange-500">
                   <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white p-[2px] md:p-[3px]">
                     <div className="w-full h-full rounded-full bg-gray-100 flex items-center justify-center border border-gray-200 overflow-hidden">
-                      <span className="text-lg md:text-xl font-bold text-gray-600">{vendor.initials}</span>
+                      {vendor.logo ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img src={vendor.logo} alt={vendor.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-lg md:text-xl font-bold text-gray-600">{vendor.initials}</span>
+                      )}
                     </div>
                   </div>
                 </div>

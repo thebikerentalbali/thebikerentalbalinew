@@ -63,6 +63,7 @@ export default function PartnerSignUp() {
         auth_id: authData.user.id,
         name: formData.companyName,
         email: formData.email,
+        phone: formData.phone,
         address: formData.streetAddress,
         lat: formData.lat,
         lng: formData.lng,

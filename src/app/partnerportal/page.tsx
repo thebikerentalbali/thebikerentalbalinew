@@ -63,7 +63,47 @@ export default function VendorDashboard() {
   const [isAddingServiceScooter, setIsAddingServiceScooter] = useState(false)
   const [newServiceScooter, setNewServiceScooter] = useState({ name: "", plate: "", odo: "", oil: "", service: "", nextOil: "", nextService: "" })
   const [editingServiceLog, setEditingServiceLog] = useState<any>(null)
+  
+  // Settings State
+  const [settingsForm, setSettingsForm] = useState({ name: "", phone: "", address: "" })
   const [vendorLogo, setVendorLogo] = useState<string | null>(null)
+  const [isSavingSettings, setIsSavingSettings] = useState(false)
+
+  // Initialize settings when vendorData loads
+  useEffect(() => {
+    if (vendorData) {
+      setSettingsForm({
+        name: vendorData.name || "",
+        phone: vendorData.phone || "",
+        address: vendorData.address || ""
+      })
+      if (vendorData.logo) {
+        setVendorLogo(vendorData.logo)
+      }
+    }
+  }, [vendorData])
+
+  const handleSaveSettings = async () => {
+    setIsSavingSettings(true)
+    const { error } = await supabase
+      .from('vendors')
+      .update({
+        name: settingsForm.name,
+        phone: settingsForm.phone,
+        address: settingsForm.address,
+        lat: vendorLocation[0],
+        lng: vendorLocation[1],
+        logo: vendorLogo
+      })
+      .eq('id', vendorData.id)
+      
+    setIsSavingSettings(false)
+    if (!error) {
+      alert("Settings saved successfully!")
+    } else {
+      alert("Error saving settings: " + error.message)
+    }
+  }
 
   // Bookings State
   const [bookingView, setBookingView] = useState<'list' | 'calendar'>('list')
@@ -614,7 +654,12 @@ export default function VendorDashboard() {
                       accept="image/*"
                       onChange={(e) => {
                         if (e.target.files && e.target.files[0]) {
-                          setVendorLogo(URL.createObjectURL(e.target.files[0]))
+                          const file = e.target.files[0]
+                          const reader = new FileReader()
+                          reader.onloadend = () => {
+                            setVendorLogo(reader.result as string)
+                          }
+                          reader.readAsDataURL(file)
                         }
                       }}
                     />
@@ -628,22 +673,24 @@ export default function VendorDashboard() {
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Vendor Name</label>
-                <input type="text" defaultValue={vendorData?.name || ""} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all" />
+                <input type="text" value={settingsForm.name} onChange={e => setSettingsForm({...settingsForm, name: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">WhatsApp Number</label>
-                <input type="text" defaultValue={vendorData?.phone || ""} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all" />
+                <input type="text" value={settingsForm.phone} onChange={e => setSettingsForm({...settingsForm, phone: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Location / Address</label>
-                <textarea defaultValue={vendorData?.address || ""} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all min-h-[100px] mb-4"></textarea>
+                <textarea value={settingsForm.address} onChange={e => setSettingsForm({...settingsForm, address: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all min-h-[100px] mb-4"></textarea>
                 
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Pin Location on Map</label>
                 <div className="h-[300px] w-full rounded-xl overflow-hidden border border-gray-100 shadow-sm relative z-0">
                   <MapPicker position={vendorLocation} onPositionChange={(lat, lng) => setVendorLocation([lat, lng])} className="w-full h-full" />
                 </div>
               </div>
-              <button className="w-full bg-black text-white rounded-xl py-3.5 font-bold text-sm hover:scale-[1.02] transition-transform">Save Changes</button>
+              <button onClick={handleSaveSettings} disabled={isSavingSettings} className="w-full bg-black text-white rounded-xl py-3.5 font-bold text-sm hover:scale-[1.02] transition-transform disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2">
+                {isSavingSettings ? <Loader2 className="w-5 h-5 animate-spin" /> : "Save Changes"}
+              </button>
             </div>
           </div>
         ) : (
