@@ -372,16 +372,19 @@ export default function VendorDashboard() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {fleet.filter(s => {
-                if (fleetFilter === "Available") return s.availableUnits > 0;
-                if (fleetFilter === "Rented") return s.availableUnits < s.totalUnits;
+                if (fleetFilter === "Available") return (s.availableUnits || 1) > 0;
+                if (fleetFilter === "Rented") return (s.availableUnits || 1) < (s.totalUnits || 1);
                 return true;
               }).map((scooter) => {
+                const totalUnits = scooter.totalUnits || 1;
+                const availableUnits = scooter.availableUnits || 1;
+                
                 return (
                   <div key={scooter.id} className="bg-white p-5 md:p-6 rounded-[28px] border border-gray-100 flex flex-col gap-4 shadow-sm hover:shadow-md hover:border-gray-200 transition-all relative group">
                     <div className="flex items-center gap-5">
                       <div className="w-24 h-24 bg-gray-50 rounded-[20px] p-2 shrink-0">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/images/scooter.png" alt="Scooter" className="w-full h-full object-contain" />
+                        <img src={scooter.image_url || "/images/scooter.png"} alt="Scooter" className="w-full h-full object-contain" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start mb-1">
@@ -390,11 +393,11 @@ export default function VendorDashboard() {
                             <MoreVertical className="w-5 h-5" />
                           </button>
                         </div>
-                        <p className="text-[13px] font-bold text-gray-900 mb-3">Rp {scooter.price.toLocaleString()} <span className="text-gray-500 font-normal">/day</span> • {scooter.year}</p>
+                        <p className="text-[13px] font-bold text-gray-900 mb-3">Rp {(scooter.price_daily || scooter.price || 0).toLocaleString()} <span className="text-gray-500 font-normal">/day</span> • {scooter.year || new Date().getFullYear()}</p>
                         <div className="flex flex-wrap items-center gap-2 mt-1">
-                          <span className={`px-2.5 py-1.5 rounded-[10px] text-[10px] md:text-[11px] font-black uppercase tracking-wide flex items-center gap-1.5 w-fit ${scooter.availableUnits > 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                            {scooter.availableUnits > 0 ? <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span> : null}
-                            {scooter.availableUnits} / {scooter.totalUnits} Available
+                          <span className={`px-2.5 py-1.5 rounded-[10px] text-[10px] md:text-[11px] font-black uppercase tracking-wide flex items-center gap-1.5 w-fit ${availableUnits > 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                            {availableUnits > 0 ? <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span> : null}
+                            {availableUnits} / {totalUnits} Available
                           </span>
                         </div>
                       </div>
