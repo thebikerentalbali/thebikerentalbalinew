@@ -93,23 +93,24 @@ export default function DetailPage() {
               </div>
             </div>
           </div>
-        </div>
-
-        </div>
-
-        {/* Desktop Book Rent Button */}
-        <div className="hidden md:flex items-center justify-between bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mt-6">
-          <div className="flex flex-col">
-            <span className="text-[13px] text-gray-500 font-medium">Rental Price</span>
-            <div className="flex items-end mt-1">
-              <span className="text-2xl font-bold text-gray-900 tracking-tight">$25</span>
-              <span className="text-[13px] text-gray-500 font-medium ml-1 mb-1">/Per Day</span>
+          
+          {/* Desktop Book Rent Button */}
+          <div className="hidden md:flex items-center justify-between bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mt-6">
+            <div className="flex flex-col">
+              <span className="text-[13px] text-gray-500 font-medium">Rental Price</span>
+              <div className="flex items-end mt-1">
+                <span className="text-2xl font-bold text-gray-900 tracking-tight">$25</span>
+                <span className="text-[13px] text-gray-500 font-medium ml-1 mb-1">/Per Day</span>
+              </div>
             </div>
+            <Link href="/checkout" className="bg-black text-white px-8 py-4 rounded-full text-base font-semibold shadow-xl shadow-black/20 hover:scale-105 transition-transform">
+              Book Rent
+            </Link>
           </div>
-          <Link href="/checkout" className="bg-black text-white px-8 py-4 rounded-full text-base font-semibold shadow-xl shadow-black/20 hover:scale-105 transition-transform">
-            Book Rent
-          </Link>
         </div>
+
+        </div>
+
       </div>
       
       {/* Bottom Bar (Mobile Only) */}
@@ -124,7 +125,6 @@ export default function DetailPage() {
         </Link>
       </div>
 
-      </div>
     </div>
   )
 }

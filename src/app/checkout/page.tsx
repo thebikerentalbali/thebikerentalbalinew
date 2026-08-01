@@ -401,7 +401,6 @@ export default function CheckoutPage() {
               </div>
             </div>
           )}
-          )}
         </section>
       </div>
 
