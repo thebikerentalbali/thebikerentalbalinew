@@ -3,9 +3,13 @@
 import { useState, useEffect } from "react"
 import { Bike, DollarSign, CalendarDays, Settings, Bell, Search, Star, Plus, QrCode, Home, Wallet, User, ChevronRight, ChevronLeft, TrendingUp, Wrench, MoreVertical, CheckCircle2, Clock, X, ChevronDown, List, Calendar as CalendarIcon, Camera } from "lucide-react"
 import Link from "next/link"
+import dynamic from "next/dynamic"
+
+const MapPicker = dynamic(() => import('@/components/MapPicker'), { ssr: false })
 
 export default function VendorDashboard() {
   const [activeTab, setActiveTab] = useState("home")
+  const [vendorLocation, setVendorLocation] = useState<[number, number]>([-8.5069, 115.2625])
 
   // Fleet State
   const [fleet, setFleet] = useState([
@@ -122,18 +126,12 @@ export default function VendorDashboard() {
           <div className="p-5 md:px-8 md:pb-12 space-y-6 md:space-y-8">
 
             {/* Quick Actions (App-like) */}
-            <div className="grid grid-cols-2 gap-3 md:hidden">
+            <div className="flex flex-col gap-3 md:hidden">
               <Link href="#" className="bg-black text-white p-4 rounded-[20px] flex flex-col items-center justify-center gap-2 shadow-lg shadow-black/20 active:scale-95 transition-transform">
                 <div className="bg-white/20 p-2 rounded-full">
                   <Plus className="w-5 h-5" />
                 </div>
                 <span className="font-bold text-[13px]">Add Scooter</span>
-              </Link>
-              <Link href="#" className="bg-white text-gray-900 p-4 rounded-[20px] border border-gray-100 flex flex-col items-center justify-center gap-2 shadow-sm active:scale-95 transition-transform">
-                <div className="bg-gray-100 p-2 rounded-full">
-                  <QrCode className="w-5 h-5" />
-                </div>
-                <span className="font-bold text-[13px]">Scan QR</span>
               </Link>
             </div>
 
@@ -660,7 +658,12 @@ export default function VendorDashboard() {
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Location / Address</label>
-                <textarea defaultValue="Jl. Monkey Forest No. 12, Ubud, Bali" className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all min-h-[100px]"></textarea>
+                <textarea defaultValue="Jl. Monkey Forest No. 12, Ubud, Bali" className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all min-h-[100px] mb-4"></textarea>
+                
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Pin Location on Map</label>
+                <div className="h-[300px] w-full rounded-xl overflow-hidden border border-gray-100 shadow-sm relative z-0">
+                  <MapPicker position={vendorLocation} onPositionChange={(lat, lng) => setVendorLocation([lat, lng])} className="w-full h-full" />
+                </div>
               </div>
               <button className="w-full bg-black text-white rounded-xl py-3.5 font-bold text-sm hover:scale-[1.02] transition-transform">Save Changes</button>
             </div>
