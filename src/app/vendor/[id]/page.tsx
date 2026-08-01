@@ -147,31 +147,43 @@ export default function VendorPage() {
       {/* Left Column: Vendor Info & Reviews */}
       <div className="flex flex-col gap-6">
         {/* Header */}
-        <header className="relative bg-white pt-8 pb-6 px-6 shadow-sm rounded-b-3xl md:rounded-3xl z-10 h-fit">
-          <div className="flex items-center justify-between mb-6">
-            <button onClick={handleBack} className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center border border-gray-100 hover:bg-gray-100 transition-colors">
-              <ChevronLeft className="w-6 h-6 text-gray-800" />
-            </button>
+        <header className="relative bg-white pb-6 shadow-sm rounded-b-3xl md:rounded-3xl z-10 h-fit overflow-hidden">
+          {/* Cover Photo */}
+          <div className="relative h-32 md:h-48 w-full bg-gray-100">
+            {vendor.image_url ? (
+               /* eslint-disable-next-line @next/next/no-img-element */
+              <img src={vendor.image_url} alt="Cover" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-r from-gray-200 to-gray-300" />
+            )}
+            
+            {/* Top Buttons floating over cover */}
+            <div className="absolute top-0 left-0 right-0 p-4 md:p-6 flex items-center justify-between z-10">
+              <button onClick={handleBack} className="w-10 h-10 md:w-12 md:h-12 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 shadow-sm hover:bg-white transition-colors">
+                <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-gray-800" />
+              </button>
 
-            <button 
-              onClick={() => {
-                const vendorSlug = vendor?.name ? vendor.name.toLowerCase().replace(/[^a-z0-9]+/g, '') : 'vendor';
-                const url = `${window.location.origin}/${vendorSlug}`;
-                if (navigator.share) {
-                  navigator.share({ title: vendor.name, url });
-                } else {
-                  navigator.clipboard.writeText(url);
-                  alert('Link copied to clipboard!');
-                }
-              }}
-              className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center border border-gray-100 active:scale-95 transition-transform"
-            >
-              <Share className="w-5 h-5 text-gray-800" />
-            </button>
+              <button 
+                onClick={() => {
+                  const vendorSlug = vendor?.name ? vendor.name.toLowerCase().replace(/[^a-z0-9]+/g, '') : 'vendor';
+                  const url = `${window.location.origin}/${vendorSlug}`;
+                  if (navigator.share) {
+                    navigator.share({ title: vendor.name, url });
+                  } else {
+                    navigator.clipboard.writeText(url);
+                    alert('Link copied to clipboard!');
+                  }
+                }}
+                className="w-10 h-10 md:w-12 md:h-12 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 shadow-sm active:scale-95 transition-transform"
+              >
+                <Share className="w-4 h-4 md:w-5 md:h-5 text-gray-800" />
+              </button>
+            </div>
           </div>
 
-          <div className="flex items-center gap-5">
-            <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100 border-2 border-white shadow-sm shrink-0 flex items-center justify-center">
+          {/* Profile Details */}
+          <div className="px-6 flex flex-col items-center -mt-12 relative z-10">
+            <div className="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden bg-white border-4 border-white shadow-md shrink-0 flex items-center justify-center">
               {vendor.logo ? (
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img src={vendor.logo} alt={vendor.name} className="w-full h-full object-cover" />
@@ -179,17 +191,18 @@ export default function VendorPage() {
                 <span className="text-3xl font-black text-gray-400">{(vendor.name || "V").substring(0, 2).toUpperCase()}</span>
               )}
             </div>
-            <div>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-1">{vendor.name}</h2>
-              <div className="flex flex-col gap-1.5">
-                <button onClick={() => setIsReviewModalOpen(true)} className="flex items-center gap-1.5 bg-yellow-50 px-2 py-0.5 rounded-md border border-yellow-100 w-fit hover:bg-yellow-100 transition-colors">
+            
+            <div className="mt-3 text-center">
+              <h2 className="text-[22px] md:text-2xl font-bold text-gray-900 mb-2 leading-tight">{vendor.name}</h2>
+              <div className="flex flex-col items-center gap-2">
+                <button onClick={() => setIsReviewModalOpen(true)} className="flex items-center gap-1.5 bg-yellow-50 px-3 py-1 rounded-full border border-yellow-100 w-fit hover:bg-yellow-100 transition-colors shadow-sm">
                   <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                   <span className="text-sm font-bold text-yellow-700">5.0</span>
                   <span className="text-sm text-yellow-600/80 font-medium">({reviews.length} reviews)</span>
                 </button>
-                <div className="flex items-center gap-1.5 text-gray-500">
+                <div className="flex items-center justify-center gap-1.5 text-gray-500 mt-0.5">
                   <MapPin className="w-4 h-4 shrink-0" />
-                  <span className="text-sm truncate">{vendor.address || 'Bali'}</span>
+                  <span className="text-sm md:text-base text-gray-500">{vendor.address || 'Bali'}</span>
                 </div>
               </div>
             </div>
