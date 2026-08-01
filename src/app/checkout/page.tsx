@@ -29,7 +29,7 @@ export default function CheckoutPage() {
         const formatted = data.map((s: any) => ({
           ...s,
           img: s.image_url || "/images/scooter.png",
-          rating: 4.9,
+          rating: 5.0,
           available: s.available_units,
           daily: s.price_daily || 0,
           weekly: s.price_weekly || (s.price_daily || 0) * 6,

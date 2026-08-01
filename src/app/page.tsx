@@ -78,7 +78,7 @@ export default function Home() {
         price_weekly: s.price_weekly || (s.price_daily || 0) * 6,
         price_monthly: s.price_monthly || (s.price_daily || 0) * 20,
         img: s.image_url || "/images/scooter.png",
-        rating: 4.9 // default rating since it's not in scooter table yet
+        rating: 5.0 // default rating since it's not in scooter table yet
       }))
       
       setPopularScooters(formattedScooters.slice(0, 3))

@@ -101,7 +101,7 @@ export default function DetailPage() {
                     <div className="flex items-center gap-2 mt-1">
                       <div className="flex items-center gap-1">
                         <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
-                        <span className="text-sm font-medium text-gray-700">{vendor.rating}</span>
+                        <span className="text-sm font-medium text-gray-700">{vendor.rating || '5.0'}</span>
                       </div>
                       <div className="flex items-center gap-1 text-gray-500 border-l border-gray-200 pl-2 max-w-[120px]">
                         <MapPin className="w-3 h-3 shrink-0" />
@@ -165,13 +165,13 @@ export default function DetailPage() {
       </div>
       
       {/* Bottom Bar (Mobile Only) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/70 backdrop-blur-xl rounded-t-[40px] px-8 py-5 flex items-center justify-between shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] border-t border-white/50 pb-8 sm:pb-5">
-        <div className="flex items-end">
-          <span className="text-2xl font-bold text-gray-900 tracking-tight">Rp {(scooter.price_daily || 0).toLocaleString()}</span>
-          <span className="text-[13px] text-gray-500 font-medium ml-1 mb-1.5">/Per Day</span>
+      <div className="md:hidden fixed bottom-6 left-6 right-6 mx-auto bg-white/90 backdrop-blur-xl rounded-full px-5 py-3 flex items-center justify-between shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-white/50 z-50">
+        <div className="flex items-baseline gap-1">
+          <span className="text-lg font-bold text-gray-900 tracking-tight">Rp {(scooter.price_daily || 0).toLocaleString()}</span>
+          <span className="text-[11px] text-gray-500 font-medium">/day</span>
         </div>
         
-        <Link href={`/checkout?scooterId=${scooter.id}`} className="bg-black text-white px-8 py-4 rounded-full text-base font-semibold shadow-xl shadow-black/20 hover:scale-105 transition-transform">
+        <Link href={`/checkout?scooterId=${scooter.id}`} className="bg-black text-white px-6 py-2.5 rounded-full text-sm font-semibold shadow-md shadow-black/20 hover:scale-105 transition-transform">
           Book Rent
         </Link>
       </div>
