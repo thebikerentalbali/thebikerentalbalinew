@@ -923,13 +923,13 @@ export default function VendorDashboard() {
 
         {/* Edit Modal */}
         {editingScooter && (
-          <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-[32px] p-6 md:p-8 w-full max-w-md animate-in zoom-in-95 duration-200">
-              <div className="flex justify-between items-center mb-6">
+          <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
+            <div className="bg-white rounded-[32px] p-6 md:p-8 w-full max-w-md max-h-[85vh] flex flex-col animate-in zoom-in-95 duration-200">
+              <div className="flex justify-between items-center mb-6 shrink-0">
                 <h3 className="text-2xl font-black">Edit Scooter</h3>
                 <button onClick={() => setEditingScooter(null)}><X className="w-6 h-6 text-gray-400" /></button>
               </div>
-              <div className="space-y-4 max-h-[70vh] overflow-y-auto px-1 -mx-1">
+              <div className="space-y-4 overflow-y-auto px-1 -mx-1 flex-1">
                 <div>
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Name</label>
                   <input type="text" value={editingScooter.name} onChange={e => setEditingScooter({ ...editingScooter, name: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
@@ -983,12 +983,14 @@ export default function VendorDashboard() {
                   <input type="number" min="1" value={editingScooter.totalUnits} onChange={e => setEditingScooter({ ...editingScooter, totalUnits: e.target.value === '' ? ('' as any) : parseInt(e.target.value) })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
                 </div>
               </div>
-              <button
-                disabled={isPublishing}
-                onClick={handleUpdateScooter}
-                className="w-full mt-8 bg-black disabled:bg-gray-400 text-white rounded-[16px] py-4 font-black text-sm hover:scale-[1.02] shadow-xl shadow-black/10 transition-all">
-                {isPublishing ? 'Saving...' : 'Save Changes'}
-              </button>
+              <div className="shrink-0 pt-4">
+                <button
+                  disabled={isPublishing}
+                  onClick={handleUpdateScooter}
+                  className="w-full bg-black disabled:bg-gray-400 text-white rounded-[16px] py-4 font-black text-sm hover:scale-[1.02] shadow-xl shadow-black/10 transition-all">
+                  {isPublishing ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
             </div>
           </div>
         )}
