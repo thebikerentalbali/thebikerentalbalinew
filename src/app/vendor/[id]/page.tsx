@@ -119,6 +119,9 @@ export default function VendorPage() {
       const params = new URLSearchParams(window.location.search);
       if (params.get('fromMap') === 'true') {
         router.push('/?showMap=true');
+      } else if (window.history.length <= 2) {
+        // If the user came directly from an external link (like WhatsApp), send them to home
+        router.push('/');
       } else {
         router.back();
       }
