@@ -96,9 +96,13 @@ export default function VendorPage() {
             });
           }
           
-          const { data: insertedReviews } = await supabase.from('reviews').insert(generatedReviews).select();
+          const { data: insertedReviews, error } = await supabase.from('reviews').insert(generatedReviews).select();
           if (insertedReviews) {
             loadedReviews = insertedReviews;
+          } else {
+            // Fallback: show in UI even if DB insert fails
+            console.error("Auto-generate reviews failed:", error);
+            loadedReviews = generatedReviews.map((r, idx) => ({ ...r, id: `generated-${idx}` }));
           }
         }
         

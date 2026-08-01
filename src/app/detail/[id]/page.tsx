@@ -94,7 +94,7 @@ export default function DetailPage() {
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 shrink-0">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={vendor.image_url || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=100&h=100&fit=crop"} alt={vendor.name} className="w-full h-full object-cover" />
+                    <img src={vendor.logo || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=100&h=100&fit=crop"} alt={vendor.name} className="w-full h-full object-cover" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900 text-[15px]">{vendor.name}</h3>
