@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight, MapPin, Star, Share, Loader2, X, BadgeCheck,
 import { useRouter, useParams } from "next/navigation"
 import Link from "next/link"
 import { createClient } from '@/lib/supabase/client'
-import { getPlatformSettings, getCustomerPrice } from '@/utils/pricing'
+import { getPlatformSettings, fetchPlatformSettings, getCustomerPrice, subscribeToPlatformSettings } from '@/utils/pricing'
 
 export default function VendorPage() {
   const router = useRouter()
@@ -132,12 +132,13 @@ export default function VendorPage() {
       setLoading(false)
     }
     loadData()
+    fetchPlatformSettings().then(() => loadData())
 
-    const handleSettingsUpdate = () => {
+    const unsubscribe = subscribeToPlatformSettings(() => {
       loadData();
-    }
-    window.addEventListener('platform_settings_updated', handleSettingsUpdate);
-    return () => window.removeEventListener('platform_settings_updated', handleSettingsUpdate);
+    });
+
+    return () => unsubscribe();
   }, [id])
 
   const handleBack = (e: React.MouseEvent) => {

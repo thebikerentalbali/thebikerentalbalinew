@@ -1,3 +1,5 @@
+import { createClient } from '@/lib/supabase/client';
+
 export interface PlatformSettings {
   markup_daily: number;          // IDR markup per day for daily rentals (< 7 days)
   markup_weekly_per_day: number; // IDR markup per day for weekly rentals (7 - 29 days)
@@ -44,6 +46,46 @@ export function getPlatformSettings(): PlatformSettings {
   return DEFAULT_PLATFORM_SETTINGS;
 }
 
+/**
+ * Asynchronously fetches platform settings from Supabase database
+ * and updates local cache & event listeners.
+ */
+export async function fetchPlatformSettings(): Promise<PlatformSettings> {
+  const local = getPlatformSettings();
+  if (typeof window === 'undefined') return local;
+
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from('platform_settings')
+      .select('*')
+      .limit(1)
+      .maybeSingle();
+
+    if (!error && data) {
+      const daily = Number(data.markup_daily) || DEFAULT_PLATFORM_SETTINGS.markup_daily;
+      const weeklyPerDay = Number(data.markup_weekly_per_day) || DEFAULT_PLATFORM_SETTINGS.markup_weekly_per_day;
+      const monthlyPerDay = Number(data.markup_monthly_per_day) || DEFAULT_PLATFORM_SETTINGS.markup_monthly_per_day;
+
+      const remoteSettings: PlatformSettings = {
+        markup_daily: daily,
+        markup_weekly_per_day: weeklyPerDay,
+        markup_monthly_per_day: monthlyPerDay,
+        markup_weekly: weeklyPerDay * 7,
+        markup_monthly: monthlyPerDay * 30,
+      };
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(remoteSettings));
+      window.dispatchEvent(new Event('platform_settings_updated'));
+      return remoteSettings;
+    }
+  } catch (e) {
+    console.warn('Could not load remote platform settings from Supabase, using local fallback:', e);
+  }
+
+  return local;
+}
+
 export function savePlatformSettings(settings: Partial<PlatformSettings>): void {
   if (typeof window === 'undefined') return;
   try {
@@ -60,11 +102,50 @@ export function savePlatformSettings(settings: Partial<PlatformSettings>): void 
       markup_weekly: weeklyPerDay * 7,
       markup_monthly: monthlyPerDay * 30,
     };
+    
+    // Save to localStorage immediately
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     window.dispatchEvent(new Event('platform_settings_updated'));
+
+    // Attempt to upsert to Supabase asynchronously
+    (async () => {
+      try {
+        const supabase = createClient();
+        await supabase
+          .from('platform_settings')
+          .upsert({
+            id: 'default',
+            markup_daily: daily,
+            markup_weekly_per_day: weeklyPerDay,
+            markup_monthly_per_day: monthlyPerDay,
+            updated_at: new Date().toISOString(),
+          });
+      } catch (err) {
+        console.warn('Could not sync platform settings to Supabase table:', err);
+      }
+    })();
   } catch (e) {
     console.error('Failed to save platform settings:', e);
   }
+}
+
+/**
+ * Subscribes to platform settings updates (both intra-tab and cross-tab)
+ */
+export function subscribeToPlatformSettings(callback: (settings: PlatformSettings) => void): () => void {
+  if (typeof window === 'undefined') return () => {};
+
+  const handler = () => {
+    callback(getPlatformSettings());
+  };
+
+  window.addEventListener('platform_settings_updated', handler);
+  window.addEventListener('storage', handler);
+
+  return () => {
+    window.removeEventListener('platform_settings_updated', handler);
+    window.removeEventListener('storage', handler);
+  };
 }
 
 /**

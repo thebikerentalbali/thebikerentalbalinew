@@ -133,7 +133,7 @@ export default function VendorDashboard() {
     }
   }
 
-  const formatIndoDate = (dateStr?: string | Date) => {
+  const formatIndoDate = (dateStr?: string | Date): string => {
     if (!dateStr) return ''
     if (typeof dateStr === 'string' && (dateStr.includes(' to ') || dateStr.includes(' - '))) {
       const parts = dateStr.includes(' to ') ? dateStr.split(' to ') : dateStr.split(' - ')

@@ -6,7 +6,7 @@ import Link from "next/link"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 import { createClient } from '@/lib/supabase/client'
-import { getPlatformSettings, getCustomerPrice } from '@/utils/pricing'
+import { getPlatformSettings, fetchPlatformSettings, getCustomerPrice, subscribeToPlatformSettings } from '@/utils/pricing'
 
 const MapPicker = dynamic(() => import('@/components/MapPicker'), { ssr: false })
 
@@ -122,14 +122,18 @@ export default function Home() {
       }
     }
     
-    loadData()
-
-    const handleSettingsUpdate = () => {
+    loadData();
+    fetchPlatformSettings().then(() => {
       cachedHomeData = null;
       loadData();
-    }
-    window.addEventListener('platform_settings_updated', handleSettingsUpdate);
-    return () => window.removeEventListener('platform_settings_updated', handleSettingsUpdate);
+    });
+
+    const unsubscribe = subscribeToPlatformSettings(() => {
+      cachedHomeData = null;
+      loadData();
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const handleMapSearch = async (e?: React.FormEvent) => {

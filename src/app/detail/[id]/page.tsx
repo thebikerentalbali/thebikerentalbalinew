@@ -5,7 +5,7 @@ import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { ChevronLeft, Heart, Star, MapPin, ChevronRight, Loader2, Clock, Check, X } from "lucide-react"
 import { createClient } from '@/lib/supabase/client'
-import { getPlatformSettings, getCustomerPrice } from '@/utils/pricing'
+import { getPlatformSettings, fetchPlatformSettings, getCustomerPrice, subscribeToPlatformSettings } from '@/utils/pricing'
 
 export default function DetailPage() {
   const params = useParams()
@@ -38,12 +38,13 @@ export default function DetailPage() {
       setLoading(false)
     }
     loadData()
+    fetchPlatformSettings().then(() => loadData())
 
-    const handleSettingsUpdate = () => {
+    const unsubscribe = subscribeToPlatformSettings(() => {
       loadData();
-    }
-    window.addEventListener('platform_settings_updated', handleSettingsUpdate);
-    return () => window.removeEventListener('platform_settings_updated', handleSettingsUpdate);
+    });
+
+    return () => unsubscribe();
   }, [id])
 
   // Helper to get delivery area without parentheses

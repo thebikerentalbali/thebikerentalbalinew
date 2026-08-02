@@ -1,10 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Users, Bike, DollarSign, Settings, Bell, Search, Store, BarChart3, Home, ChevronRight, ChevronLeft, ChevronDown, Calendar, TrendingUp, CalendarDays, MoreVertical, Filter, ArrowUpRight, CheckCircle2, AlertCircle, Menu, UserCheck, MoreHorizontal, Loader2, XCircle, RotateCcw, Clock, Check, Calculator, Sparkles, Coins } from "lucide-react"
+import { Users, Bike, DollarSign, Settings, Bell, Search, Store, BarChart3, Home, ChevronRight, ChevronLeft, ChevronDown, ChevronUp, Calendar, TrendingUp, CalendarDays, MoreVertical, Filter, ArrowUpRight, CheckCircle2, AlertCircle, Menu, UserCheck, MoreHorizontal, Loader2, XCircle, RotateCcw, Clock, Check, Calculator, Sparkles, Coins } from "lucide-react"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
-import { getPlatformSettings, savePlatformSettings, calculateBookingCommission, PlatformSettings, DEFAULT_PLATFORM_SETTINGS } from "@/utils/pricing"
+import { getPlatformSettings, savePlatformSettings, calculateBookingCommission, calculateRentalDays, fetchPlatformSettings, subscribeToPlatformSettings, PlatformSettings, DEFAULT_PLATFORM_SETTINGS } from "@/utils/pricing"
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("home")
@@ -14,6 +14,8 @@ export default function AdminDashboard() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [bookingFilter, setBookingFilter] = useState<'all' | 'pending' | 'confirmed' | 'completed'>('all')
   const [selectedVendorFilter, setSelectedVendorFilter] = useState<string>('all')
+  const [expandedVendorBookingIds, setExpandedVendorBookingIds] = useState<Record<string, boolean>>({})
+  const [vendorSearchQuery, setVendorSearchQuery] = useState<string>('')
   const [processingBookingId, setProcessingBookingId] = useState<string | null>(null)
   const [calendarStartDate, setCalendarStartDate] = useState<Date>(() => {
     const d = new Date()
@@ -113,7 +115,7 @@ export default function AdminDashboard() {
     setIsLoadingApprovals(false)
   }
 
-  const formatIndoDate = (dateStr?: string) => {
+  const formatIndoDate = (dateStr?: string): string => {
     if (!dateStr) return ''
     if (dateStr.includes(' to ') || dateStr.includes(' - ')) {
       const parts = dateStr.includes(' to ') ? dateStr.split(' to ') : dateStr.split(' - ')
@@ -206,24 +208,44 @@ export default function AdminDashboard() {
     setSelectedCalendarDate(todayIso)
   }
 
+  const toggleVendorBookings = (vendorId: string | number) => {
+    const key = String(vendorId)
+    setExpandedVendorBookingIds(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }))
+  }
+
+  const expandAllVendors = () => {
+    const all: Record<string, boolean> = {}
+    approvedVendors.forEach(v => {
+      all[String(v.id)] = true
+    })
+    all['unassigned'] = true
+    setExpandedVendorBookingIds(all)
+  }
+
+  const collapseAllVendors = () => {
+    setExpandedVendorBookingIds({})
+  }
+
   useEffect(() => {
     fetchVendors()
-    const currentSettings = getPlatformSettings()
-    setPlatformSettings(currentSettings)
-    setSettingDailyMarkup(currentSettings.markup_daily)
-    setSettingWeeklyMarkupPerDay(currentSettings.markup_weekly_per_day)
-    setSettingMonthlyMarkupPerDay(currentSettings.markup_monthly_per_day)
-
-    const handleSettingsUpdated = () => {
-      const updated = getPlatformSettings()
+    fetchPlatformSettings().then(updated => {
       setPlatformSettings(updated)
       setSettingDailyMarkup(updated.markup_daily)
       setSettingWeeklyMarkupPerDay(updated.markup_weekly_per_day)
       setSettingMonthlyMarkupPerDay(updated.markup_monthly_per_day)
-    }
+    })
 
-    window.addEventListener('platform_settings_updated', handleSettingsUpdated)
-    return () => window.removeEventListener('platform_settings_updated', handleSettingsUpdated)
+    const unsubscribe = subscribeToPlatformSettings((updated) => {
+      setPlatformSettings(updated)
+      setSettingDailyMarkup(updated.markup_daily)
+      setSettingWeeklyMarkupPerDay(updated.markup_weekly_per_day)
+      setSettingMonthlyMarkupPerDay(updated.markup_monthly_per_day)
+    })
+
+    return () => unsubscribe()
   }, [])
 
   const handleSavePlatformSettings = (e?: React.FormEvent) => {
@@ -838,7 +860,7 @@ export default function AdminDashboard() {
               >
                 <p className={`text-[11px] font-bold uppercase tracking-wide truncate whitespace-nowrap ${bookingFilter === 'all' ? 'text-gray-300' : 'text-gray-400'}`}>Total Bookings</p>
                 <p className="text-xl md:text-2xl font-black mt-1">
-                  {allBookings.filter(b => selectedVendorFilter === 'all' || String(b.vendorId) === String(selectedVendorFilter)).length}
+                  {allBookings.length}
                 </p>
               </div>
 
@@ -854,7 +876,7 @@ export default function AdminDashboard() {
                   <Clock className="w-3.5 h-3.5 shrink-0" /> Pending Review
                 </p>
                 <p className="text-xl md:text-2xl font-black mt-1">
-                  {allBookings.filter(b => (selectedVendorFilter === 'all' || String(b.vendorId) === String(selectedVendorFilter)) && b.rawStatus === 'pending').length}
+                  {allBookings.filter(b => b.rawStatus === 'pending').length}
                 </p>
               </div>
 
@@ -870,7 +892,7 @@ export default function AdminDashboard() {
                   <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> Confirmed
                 </p>
                 <p className="text-xl md:text-2xl font-black mt-1">
-                  {allBookings.filter(b => (selectedVendorFilter === 'all' || String(b.vendorId) === String(selectedVendorFilter)) && b.rawStatus === 'confirmed').length}
+                  {allBookings.filter(b => b.rawStatus === 'confirmed').length}
                 </p>
               </div>
 
@@ -886,37 +908,25 @@ export default function AdminDashboard() {
                   <RotateCcw className="w-3.5 h-3.5 shrink-0" /> Completed
                 </p>
                 <p className="text-xl md:text-2xl font-black mt-1">
-                  {allBookings.filter(b => (selectedVendorFilter === 'all' || String(b.vendorId) === String(selectedVendorFilter)) && b.rawStatus === 'completed').length}
+                  {allBookings.filter(b => b.rawStatus === 'completed').length}
                 </p>
                 <p className={`text-[10px] font-bold mt-0.5 truncate whitespace-nowrap ${bookingFilter === 'completed' ? 'text-gray-300' : 'text-gray-500'}`}>
                   Commission: Rp {allBookings
-                    .filter(b => (selectedVendorFilter === 'all' || String(b.vendorId) === String(selectedVendorFilter)) && (b.rawStatus === 'completed' || b.rawStatus === 'confirmed'))
+                    .filter(b => b.rawStatus === 'completed' || b.rawStatus === 'confirmed')
                     .reduce((sum, b) => sum + calculateBookingCommission(b.startDate, b.endDate, b.quantity, b.price, platformSettings), 0)
                     .toLocaleString()}
                 </p>
               </div>
             </div>
 
-            {/* Section Header with Clean Vendor Dropdown */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+            {/* Section Header with Vendor Search & Accordion Controls */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="text-sm md:text-base font-black text-gray-900 capitalize">
-                  {bookingFilter === 'all' ? 'All Bookings' : bookingFilter === 'pending' ? 'Pending Reviews' : bookingFilter === 'confirmed' ? 'Confirmed Bookings' : 'Completed Bookings'}
+                <h3 className="text-sm md:text-base font-black text-gray-900">
+                  Partner Vendors & Bookings
                 </h3>
                 <span className="text-xs font-bold text-gray-400">
-                  ({allBookings.filter(b => {
-                    if (bookingFilter === 'pending' && b.rawStatus !== 'pending') return false;
-                    if (bookingFilter === 'confirmed' && b.rawStatus !== 'confirmed') return false;
-                    if (bookingFilter === 'completed' && b.rawStatus !== 'completed') return false;
-                    if (selectedVendorFilter !== 'all' && String(b.vendorId) !== String(selectedVendorFilter)) return false;
-                    if (selectedCalendarDate) {
-                      if (!b.startDate || !b.endDate) return false;
-                      const startStr = typeof b.startDate === 'string' ? b.startDate.substring(0, 10) : new Date(b.startDate).toISOString().split('T')[0];
-                      const endStr = typeof b.endDate === 'string' ? b.endDate.substring(0, 10) : new Date(b.endDate).toISOString().split('T')[0];
-                      if (selectedCalendarDate < startStr || selectedCalendarDate > endStr) return false;
-                    }
-                    return true;
-                  }).length})
+                  ({approvedVendors.length} Vendors)
                 </span>
 
                 {selectedCalendarDate && (
@@ -925,7 +935,7 @@ export default function AdminDashboard() {
                     <span>{formatIndoDate(selectedCalendarDate)}</span>
                     <button
                       onClick={() => setSelectedCalendarDate(null)}
-                      className="ml-1 text-black hover:opacity-70 font-bold"
+                      className="ml-1 text-black hover:opacity-70 font-bold cursor-pointer"
                     >
                       ×
                     </button>
@@ -933,210 +943,493 @@ export default function AdminDashboard() {
                 )}
               </div>
 
-              {/* Vendor Selector Dropdown (Clean White & Black Styling) */}
-              <div className="relative flex items-center min-w-[220px] md:min-w-[280px]">
-                <Store className="w-4 h-4 text-black absolute left-3.5 pointer-events-none" />
-                <select
-                  value={selectedVendorFilter}
-                  onChange={(e) => setSelectedVendorFilter(e.target.value)}
-                  className="w-full bg-white border-2 border-black text-xs font-black text-black rounded-2xl pl-10 pr-9 py-2.5 outline-none shadow-xs focus:ring-2 focus:ring-black/20 transition-all cursor-pointer appearance-none"
-                >
-                  <option value="all">All Vendors ({allBookings.length} Bookings)</option>
-                  {approvedVendors.map(v => {
-                    const vCount = allBookings.filter(b => String(b.vendorId) === String(v.id)).length;
-                    return (
-                      <option key={v.id} value={String(v.id)}>{v.name} ({vCount} Bookings)</option>
-                    );
-                  })}
-                </select>
-                <ChevronDown className="w-4 h-4 text-black absolute right-3.5 pointer-events-none" />
+              {/* Vendor Search and Expand / Collapse Controls */}
+              <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                <div className="relative flex items-center min-w-[180px] md:min-w-[220px]">
+                  <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={vendorSearchQuery}
+                    onChange={(e) => setVendorSearchQuery(e.target.value)}
+                    placeholder="Search vendor..."
+                    className="w-full bg-white border border-gray-300 focus:border-black text-xs font-bold text-black rounded-xl pl-9 pr-3 py-2 outline-none shadow-xs transition-all"
+                  />
+                  {vendorSearchQuery && (
+                    <button
+                      onClick={() => setVendorSearchQuery('')}
+                      className="absolute right-2.5 text-gray-400 hover:text-black text-xs font-bold"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    onClick={expandAllVendors}
+                    className="text-xs font-bold px-3 py-2 bg-black text-white rounded-xl hover:bg-neutral-800 transition-colors shadow-xs cursor-pointer"
+                  >
+                    Expand All
+                  </button>
+                  <button
+                    onClick={collapseAllVendors}
+                    className="text-xs font-bold px-3 py-2 bg-white text-black border border-gray-300 hover:bg-gray-100 rounded-xl transition-colors shadow-xs cursor-pointer"
+                  >
+                    Collapse All
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Monochrome Pure White & Black Booking Cards */}
+            {/* Vendor Cards First with Dropdown Logic to view bookings */}
             <div className="space-y-4">
-              {allBookings.filter(b => {
-                if (bookingFilter === 'pending') if (b.rawStatus !== 'pending') return false;
-                if (bookingFilter === 'confirmed') if (b.rawStatus !== 'confirmed') return false;
-                if (bookingFilter === 'completed') if (b.rawStatus !== 'completed') return false;
-                if (selectedVendorFilter !== 'all' && String(b.vendorId) !== String(selectedVendorFilter)) return false;
+              {(() => {
+                const filteredVendors = approvedVendors.filter(v => 
+                  !vendorSearchQuery || 
+                  v.name?.toLowerCase().includes(vendorSearchQuery.toLowerCase()) ||
+                  v.address?.toLowerCase().includes(vendorSearchQuery.toLowerCase())
+                )
 
-                if (selectedCalendarDate) {
-                  if (!b.startDate || !b.endDate) return false;
-                  const startStr = typeof b.startDate === 'string' ? b.startDate.substring(0, 10) : new Date(b.startDate).toISOString().split('T')[0];
-                  const endStr = typeof b.endDate === 'string' ? b.endDate.substring(0, 10) : new Date(b.endDate).toISOString().split('T')[0];
-                  if (selectedCalendarDate < startStr || selectedCalendarDate > endStr) return false;
-                }
-                return true;
-              }).length === 0 ? (
-                <div className="bg-white p-12 text-center text-gray-500 font-bold rounded-3xl border-2 border-gray-200">
-                  No bookings found for the selected filter.
-                </div>
-              ) : (
-                allBookings.filter(b => {
-                  if (bookingFilter === 'pending') if (b.rawStatus !== 'pending') return false;
-                  if (bookingFilter === 'confirmed') if (b.rawStatus !== 'confirmed') return false;
-                  if (bookingFilter === 'completed') if (b.rawStatus !== 'completed') return false;
-                  if (selectedVendorFilter !== 'all' && String(b.vendorId) !== String(selectedVendorFilter)) return false;
+                // Check for unassigned bookings (bookings without matching approved vendor)
+                const unassignedBookings = allBookings.filter(b => 
+                  !approvedVendors.some(v => String(v.id) === String(b.vendorId))
+                )
 
-                  if (selectedCalendarDate) {
-                    if (!b.startDate || !b.endDate) return false;
-                    const startStr = typeof b.startDate === 'string' ? b.startDate.substring(0, 10) : new Date(b.startDate).toISOString().split('T')[0];
-                    const endStr = typeof b.endDate === 'string' ? b.endDate.substring(0, 10) : new Date(b.endDate).toISOString().split('T')[0];
-                    if (selectedCalendarDate < startStr || selectedCalendarDate > endStr) return false;
-                  }
-                  return true;
-                }).map(booking => {
-                  const vendorMatch = approvedVendors.find(v => String(v.id) === String(booking.vendorId))
-                  const bookingCommission = calculateBookingCommission(booking.startDate, booking.endDate, booking.quantity, booking.price, platformSettings)
-
+                if (filteredVendors.length === 0 && unassignedBookings.length === 0) {
                   return (
-                    <div
-                      key={booking.id}
-                      className="bg-white p-5 md:p-6 rounded-3xl border-2 border-black/80 shadow-sm space-y-4 hover:border-black hover:shadow-md transition-all"
-                    >
-                      {/* Top Row: Details & Status */}
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                        <div className="flex items-start gap-4 min-w-0">
-                          <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-50 rounded-2xl overflow-hidden shrink-0 border border-gray-200 p-1.5 flex items-center justify-center">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={booking.scooter_img || "/images/scooter.png"} alt="Scooter" className="w-full h-full object-contain" />
-                          </div>
-                          <div className="min-w-0 space-y-1.5">
-                            {/* Line 1: Scooter Title & Quantity Badge */}
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <h5 className="font-black text-black text-base md:text-xl leading-tight">{booking.scooter}</h5>
-                              <span className="text-[11px] font-bold bg-black text-white px-2.5 py-0.5 rounded-full shrink-0">
-                                {booking.quantity} {booking.quantity > 1 ? 'Units' : 'Unit'}
-                              </span>
-                            </div>
-
-                            {/* Line 2: Vendor Name Badge */}
-                            {vendorMatch && (
-                              <div>
-                                <span className="text-xs font-bold bg-gray-100 text-black border border-gray-300 px-3 py-1 rounded-xl inline-flex items-center gap-1.5">
-                                  <Store className="w-3.5 h-3.5 text-black" />
-                                  <span>{vendorMatch.name}</span>
-                                </span>
-                              </div>
-                            )}
-
-                            {/* Line 3: Customer Title */}
-                            <p className="text-xs md:text-sm font-medium text-black">
-                              Customer: <strong className="text-black font-black">{booking.customer}</strong> {booking.phone ? `(${booking.phone})` : ''}
-                            </p>
-
-                            {/* Line 4: Date */}
-                            <p className="text-xs md:text-sm font-bold text-black flex items-center gap-1.5">
-                              <Calendar className="w-3.5 h-3.5 text-black shrink-0" />
-                              <span>{formatRentalPeriod(booking.startDate, booking.endDate)}</span>
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Status Badge */}
-                        <div className="self-start">
-                          <span className={`px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wide border-2 inline-block ${
-                            booking.rawStatus === 'pending'
-                              ? 'bg-white text-black border-black border-dashed'
-                              : booking.rawStatus === 'confirmed'
-                              ? 'bg-black text-white border-black'
-                              : booking.rawStatus === 'completed'
-                              ? 'bg-gray-100 text-black border-gray-300'
-                              : 'bg-gray-100 text-gray-500 border-gray-300 line-through'
-                          }`}>
-                            {booking.status}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Price and Commission Row */}
-                      <div className="flex flex-row items-center justify-between gap-3 bg-gray-50 rounded-2xl p-4 border border-gray-200">
-                        <div>
-                          <p className="text-[10px] md:text-[11px] font-black text-gray-500 uppercase tracking-wider">Total Customer Price</p>
-                          <p className="font-black text-black text-base md:text-xl">Rp {booking.price.toLocaleString()}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-[10px] md:text-[11px] font-black text-gray-500 uppercase tracking-wider">Your Commission</p>
-                          <div className="mt-0.5">
-                            <span className="bg-black text-white font-black text-xs md:text-sm px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1 shadow-sm">
-                              +Rp {bookingCommission.toLocaleString()}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Enlarged Half and Half (50% / 50%) Action Buttons */}
-                      <div className="grid grid-cols-2 gap-3 w-full pt-1">
-                        {booking.rawStatus === 'pending' && (
-                          <>
-                            <button
-                              onClick={() => handleConfirmBooking(booking)}
-                              disabled={processingBookingId === booking.id}
-                              className="w-full bg-black hover:bg-neutral-800 active:scale-95 text-white text-xs md:text-sm font-black py-4 px-4 rounded-2xl flex items-center justify-center gap-2 shadow-md shadow-black/10 transition-all cursor-pointer disabled:opacity-50"
-                            >
-                              {processingBookingId === booking.id ? (
-                                <Loader2 className="w-4 h-4 animate-spin text-white" />
-                              ) : (
-                                <Check className="w-4 h-4 text-white" />
-                              )}
-                              <span>Confirm Booking</span>
-                            </button>
-                            <button
-                              onClick={() => handleRejectBooking(booking)}
-                              disabled={processingBookingId === booking.id}
-                              className="w-full bg-white hover:bg-gray-100 active:scale-95 text-black border-2 border-black text-xs md:text-sm font-black py-4 px-4 rounded-2xl flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
-                            >
-                              <XCircle className="w-4 h-4 text-black" />
-                              <span>Reject</span>
-                            </button>
-                          </>
-                        )}
-
-                        {booking.rawStatus === 'confirmed' && (
-                          <>
-                            <div className="w-full bg-gray-100 border-2 border-black text-black font-black text-xs md:text-sm py-4 px-4 rounded-2xl flex items-center justify-center gap-2 uppercase tracking-wide">
-                              <CheckCircle2 className="w-4 h-4 text-black" />
-                              <span>CONFIRMED</span>
-                            </div>
-                            <button
-                              onClick={() => handleCompleteBooking(booking)}
-                              disabled={processingBookingId === booking.id}
-                              className="w-full bg-black hover:bg-neutral-800 active:scale-95 text-white text-xs md:text-sm font-black py-4 px-4 rounded-2xl flex items-center justify-center gap-2 shadow-md shadow-black/15 transition-all cursor-pointer disabled:opacity-50"
-                            >
-                              {processingBookingId === booking.id ? (
-                                <Loader2 className="w-4 h-4 animate-spin text-white" />
-                              ) : (
-                                <RotateCcw className="w-4 h-4 text-white" />
-                              )}
-                              <span>Mark Returned</span>
-                            </button>
-                          </>
-                        )}
-
-                        {booking.rawStatus === 'completed' && (
-                          <>
-                            <div className="w-full bg-gray-100 border border-gray-300 text-gray-500 font-black text-xs md:text-sm py-4 px-4 rounded-2xl flex items-center justify-center gap-2 uppercase tracking-wide">
-                              <Check className="w-4 h-4 text-gray-500" />
-                              <span>Completed</span>
-                            </div>
-                            <div className="w-full bg-black text-white font-black text-xs md:text-sm py-4 px-4 rounded-2xl flex items-center justify-center gap-2 shadow-sm">
-                              <span>Profit: +Rp {bookingCommission.toLocaleString()}</span>
-                            </div>
-                          </>
-                        )}
-
-                        {booking.rawStatus === 'rejected' && (
-                          <div className="col-span-2 w-full bg-gray-100 border border-gray-300 text-gray-500 font-bold text-xs md:text-sm py-4 px-4 rounded-2xl flex items-center justify-center gap-2 uppercase tracking-wide">
-                            <XCircle className="w-4 h-4 text-gray-500" />
-                            <span>Rejected Booking</span>
-                          </div>
-                        )}
-                      </div>
+                    <div className="bg-white p-12 text-center text-gray-500 font-bold rounded-3xl border-2 border-gray-200">
+                      No vendors or bookings found.
                     </div>
                   )
-                })
-              )}
+                }
+
+                return (
+                  <>
+                    {filteredVendors.map(vendor => {
+                      const vendorIdStr = String(vendor.id)
+                      const isExpanded = !!expandedVendorBookingIds[vendorIdStr]
+
+                      // All bookings belonging to this vendor
+                      const vendorBookings = allBookings.filter(b => String(b.vendorId) === vendorIdStr)
+
+                      // Bookings matching the status filter and calendar date filter
+                      const filteredBookings = vendorBookings.filter(b => {
+                        if (bookingFilter === 'pending' && b.rawStatus !== 'pending') return false
+                        if (bookingFilter === 'confirmed' && b.rawStatus !== 'confirmed') return false
+                        if (bookingFilter === 'completed' && b.rawStatus !== 'completed') return false
+
+                        if (selectedCalendarDate) {
+                          if (!b.startDate || !b.endDate) return false
+                          const startStr = typeof b.startDate === 'string' ? b.startDate.substring(0, 10) : new Date(b.startDate).toISOString().split('T')[0]
+                          const endStr = typeof b.endDate === 'string' ? b.endDate.substring(0, 10) : new Date(b.endDate).toISOString().split('T')[0]
+                          if (selectedCalendarDate < startStr || selectedCalendarDate > endStr) return false
+                        }
+                        return true
+                      })
+
+                      const pendingCount = vendorBookings.filter(b => b.rawStatus === 'pending').length
+                      const confirmedCount = vendorBookings.filter(b => b.rawStatus === 'confirmed').length
+                      const vendorCommission = vendorBookings
+                        .filter(b => b.rawStatus === 'completed' || b.rawStatus === 'confirmed')
+                        .reduce((sum, b) => sum + calculateBookingCommission(b.startDate, b.endDate, b.quantity, b.price, platformSettings), 0)
+
+                      return (
+                        <div
+                          key={vendor.id}
+                          className="bg-white rounded-3xl border-2 border-black/80 overflow-hidden shadow-sm transition-all hover:border-black"
+                        >
+                          {/* Vendor Card Header (Click to toggle dropdown) */}
+                          <div
+                            onClick={() => toggleVendorBookings(vendor.id)}
+                            className="p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer hover:bg-gray-50/80 transition-colors select-none"
+                          >
+                            <div className="flex items-center gap-3.5 min-w-0">
+                              {/* Vendor Avatar / Initials */}
+                              <div className="w-12 h-12 rounded-2xl bg-black text-white font-black text-sm flex items-center justify-center shrink-0 border border-black overflow-hidden shadow-xs">
+                                {vendor.logo_url ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img src={vendor.logo_url} alt={vendor.name} className="w-full h-full object-cover" />
+                                ) : (
+                                  <span>{vendor.name ? vendor.name.substring(0, 2).toUpperCase() : 'VN'}</span>
+                                )}
+                              </div>
+
+                              <div className="min-w-0 space-y-0.5">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <h4 className="text-base md:text-lg font-black text-black leading-tight truncate">
+                                    {vendor.name}
+                                  </h4>
+                                  {vendor.phone && (
+                                    <span className="text-[11px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-lg border border-gray-200">
+                                      {vendor.phone}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-xs text-gray-500 font-medium truncate flex items-center gap-1.5">
+                                  <Store className="w-3 h-3 text-black shrink-0" />
+                                  <span>{vendor.address || vendor.delivery_area || 'Bali Partner'}</span>
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Vendor Badges and Dropdown Button */}
+                            <div className="flex items-center justify-between md:justify-end gap-2.5 flex-wrap shrink-0">
+                              {/* Total Bookings Count */}
+                              <span className="text-xs font-black bg-gray-100 text-black border border-gray-300 px-3 py-1.5 rounded-xl">
+                                {vendorBookings.length} {vendorBookings.length === 1 ? 'Booking' : 'Bookings'}
+                              </span>
+
+                              {/* Pending Badges if any */}
+                              {pendingCount > 0 && (
+                                <span className="bg-black text-white text-xs font-black px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-xs">
+                                  <Clock className="w-3.5 h-3.5" />
+                                  <span>{pendingCount} Pending</span>
+                                </span>
+                              )}
+
+                              {/* Active/Confirmed Badge */}
+                              {confirmedCount > 0 && (
+                                <span className="bg-white border-2 border-black text-black text-xs font-black px-3 py-1 rounded-xl flex items-center gap-1">
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-black" />
+                                  <span>{confirmedCount} Active</span>
+                                </span>
+                              )}
+
+                              {/* Commission Earned from Vendor */}
+                              <span className="bg-black text-white text-xs font-black px-3.5 py-1.5 rounded-xl shadow-xs">
+                                +Rp {vendorCommission.toLocaleString()}
+                              </span>
+
+                              {/* Dropdown Toggle Action Button */}
+                              <button
+                                type="button"
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-black hover:text-white text-black font-black text-xs transition-colors shrink-0 ml-1 cursor-pointer"
+                              >
+                                <span>{isExpanded ? 'Hide' : 'View'}</span>
+                                {isExpanded ? (
+                                  <ChevronUp className="w-4 h-4" />
+                                ) : (
+                                  <ChevronDown className="w-4 h-4" />
+                                )}
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Expanded Dropdown Area with Booking Cards */}
+                          {isExpanded && (
+                            <div className="border-t-2 border-black/80 bg-gray-50/70 p-4 md:p-6 space-y-4">
+                              {filteredBookings.length === 0 ? (
+                                <div className="bg-white p-8 rounded-2xl border-2 border-dashed border-gray-300 text-center text-gray-500 font-bold text-xs md:text-sm">
+                                  No bookings found for <strong className="text-black">{vendor.name}</strong> under the current filter.
+                                </div>
+                              ) : (
+                                <div className="space-y-4">
+                                  {filteredBookings.map(booking => {
+                                    const bookingCommission = calculateBookingCommission(booking.startDate, booking.endDate, booking.quantity, booking.price, platformSettings)
+                                    const rentalDays = calculateRentalDays(booking.startDate, booking.endDate)
+
+                                    return (
+                                      <div
+                                        key={booking.id}
+                                        className="bg-white p-4 md:p-5 rounded-2xl border-2 border-black/80 shadow-xs space-y-3.5 hover:border-black transition-all"
+                                      >
+                                        {/* Top Row: Details & Status */}
+                                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                                          <div className="flex items-start gap-3.5 min-w-0">
+                                            <div className="w-14 h-14 md:w-16 md:h-16 bg-gray-50 rounded-xl overflow-hidden shrink-0 border border-gray-200 p-1 flex items-center justify-center">
+                                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                                              <img src={booking.scooter_img || "/images/scooter.png"} alt="Scooter" className="w-full h-full object-contain" />
+                                            </div>
+                                            <div className="min-w-0 space-y-1">
+                                              {/* Line 1: Scooter Title & Quantity Badge */}
+                                              <div className="flex items-center gap-2 flex-wrap">
+                                                <h5 className="font-black text-black text-sm md:text-base leading-tight">{booking.scooter}</h5>
+                                                <span className="text-[10px] md:text-[11px] font-black bg-black text-white px-2 py-0.5 rounded-full shrink-0">
+                                                  {booking.quantity} {booking.quantity > 1 ? 'Units' : 'Unit'}
+                                                </span>
+                                              </div>
+
+                                              {/* Line 2: Customer Title */}
+                                              <p className="text-xs font-medium text-black">
+                                                Customer: <strong className="text-black font-black">{booking.customer}</strong> {booking.phone ? `(${booking.phone})` : ''}
+                                              </p>
+
+                                              {/* Line 3: Compact Single-Line Date Section */}
+                                              <div className="flex items-center gap-1.5 text-[11px] md:text-xs font-bold text-gray-700 whitespace-nowrap truncate">
+                                                <Calendar className="w-3.5 h-3.5 text-black shrink-0" />
+                                                <span>{formatRentalPeriod(booking.startDate, booking.endDate)}</span>
+                                              </div>
+                                            </div>
+                                          </div>
+
+                                          {/* Status Badge + Rounded Duration Badge */}
+                                          <div className="flex items-center gap-2 flex-wrap self-start">
+                                            <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border-2 inline-flex items-center gap-1.5 ${
+                                              booking.rawStatus === 'pending'
+                                                ? 'bg-white text-black border-black border-dashed'
+                                                : booking.rawStatus === 'confirmed'
+                                                ? 'bg-black text-white border-black'
+                                                : booking.rawStatus === 'completed'
+                                                ? 'bg-gray-100 text-black border-gray-300'
+                                                : 'bg-gray-100 text-gray-400 border-gray-200 line-through'
+                                            }`}>
+                                              {booking.rawStatus === 'confirmed' && <CheckCircle2 className="w-3 h-3 text-white" />}
+                                              {booking.rawStatus === 'pending' && <Clock className="w-3 h-3 text-black" />}
+                                              {booking.rawStatus === 'completed' && <RotateCcw className="w-3 h-3 text-black" />}
+                                              <span>{booking.status}</span>
+                                            </span>
+
+                                            {/* Rounded Rental Duration Badge */}
+                                            <span className="px-3 py-1 rounded-full text-xs font-black bg-gray-100 text-black border border-gray-300 inline-flex items-center gap-1 shrink-0">
+                                              <span>{rentalDays} {rentalDays > 1 ? 'Days' : 'Day'}</span>
+                                            </span>
+                                          </div>
+                                        </div>
+
+                                        {/* Price and Commission Row */}
+                                        <div className="flex flex-row items-center justify-between gap-3 bg-gray-50 rounded-xl p-3 md:p-3.5 border border-gray-200">
+                                          <div>
+                                            <p className="text-[10px] md:text-[11px] font-black text-gray-500 uppercase tracking-wider">Total Customer Price</p>
+                                            <p className="font-black text-black text-sm md:text-base">Rp {booking.price.toLocaleString()}</p>
+                                          </div>
+                                          <div className="text-right">
+                                            <p className="text-[10px] md:text-[11px] font-black text-gray-500 uppercase tracking-wider">Your Commission</p>
+                                            <div className="mt-0.5">
+                                              <span className="bg-black text-white font-black text-xs md:text-sm px-3 py-1 rounded-xl inline-flex items-center gap-1 shadow-xs">
+                                                +Rp {bookingCommission.toLocaleString()}
+                                              </span>
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                        {/* Enlarged Half and Half (50% / 50%) Action Buttons */}
+                                        <div className="grid grid-cols-2 gap-2.5 w-full pt-1">
+                                          {booking.rawStatus === 'pending' && (
+                                            <>
+                                              <button
+                                                onClick={() => handleConfirmBooking(booking)}
+                                                disabled={processingBookingId === booking.id}
+                                                className="w-full bg-black hover:bg-neutral-800 active:scale-95 text-white text-xs md:text-sm font-black py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer disabled:opacity-50"
+                                              >
+                                                {processingBookingId === booking.id ? (
+                                                  <Loader2 className="w-4 h-4 animate-spin text-white" />
+                                                ) : (
+                                                  <Check className="w-4 h-4 text-white" />
+                                                )}
+                                                <span>Confirm Booking</span>
+                                              </button>
+                                              <button
+                                                onClick={() => handleRejectBooking(booking)}
+                                                disabled={processingBookingId === booking.id}
+                                                className="w-full bg-white hover:bg-gray-100 active:scale-95 text-black border-2 border-black text-xs md:text-sm font-black py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+                                              >
+                                                <XCircle className="w-4 h-4 text-black" />
+                                                <span>Reject</span>
+                                              </button>
+                                            </>
+                                          )}
+
+                                          {booking.rawStatus === 'confirmed' && (
+                                            <>
+                                              <div className="w-full bg-gray-100 border-2 border-black text-black font-black text-xs md:text-sm py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 uppercase tracking-wide">
+                                                <CheckCircle2 className="w-4 h-4 text-black" />
+                                                <span>CONFIRMED</span>
+                                              </div>
+                                              <button
+                                                onClick={() => handleCompleteBooking(booking)}
+                                                disabled={processingBookingId === booking.id}
+                                                className="w-full bg-black hover:bg-neutral-800 active:scale-95 text-white text-xs md:text-sm font-black py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer disabled:opacity-50"
+                                              >
+                                                {processingBookingId === booking.id ? (
+                                                  <Loader2 className="w-4 h-4 animate-spin text-white" />
+                                                ) : (
+                                                  <RotateCcw className="w-4 h-4 text-white" />
+                                                )}
+                                                <span>Mark Returned</span>
+                                              </button>
+                                            </>
+                                          )}
+
+                                          {booking.rawStatus === 'completed' && (
+                                            <>
+                                              <div className="w-full bg-gray-100 border border-gray-300 text-gray-500 font-black text-xs md:text-sm py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 uppercase tracking-wide">
+                                                <Check className="w-4 h-4 text-gray-500" />
+                                                <span>Completed</span>
+                                              </div>
+                                              <div className="w-full bg-black text-white font-black text-xs md:text-sm py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-xs">
+                                                <span>Profit: +Rp {bookingCommission.toLocaleString()}</span>
+                                              </div>
+                                            </>
+                                          )}
+
+                                          {booking.rawStatus === 'rejected' && (
+                                            <div className="col-span-2 w-full bg-gray-100 border border-gray-300 text-gray-500 font-bold text-xs md:text-sm py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 uppercase tracking-wide">
+                                              <XCircle className="w-4 h-4 text-gray-500" />
+                                              <span>Rejected Booking</span>
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    )
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+
+                    {/* Unassigned / Direct Bookings Card */}
+                    {unassignedBookings.length > 0 && (
+                      <div className="bg-white rounded-3xl border-2 border-black/80 overflow-hidden shadow-sm transition-all hover:border-black">
+                        <div
+                          onClick={() => toggleVendorBookings('unassigned')}
+                          className="p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer hover:bg-gray-50/80 transition-colors select-none"
+                        >
+                          <div className="flex items-center gap-3.5 min-w-0">
+                            <div className="w-12 h-12 rounded-2xl bg-black text-white font-black text-sm flex items-center justify-center shrink-0 border border-black shadow-xs">
+                              <Store className="w-5 h-5" />
+                            </div>
+                            <div className="min-w-0">
+                              <h4 className="text-base md:text-lg font-black text-black leading-tight">
+                                Direct & Unassigned Bookings
+                              </h4>
+                              <p className="text-xs text-gray-500 font-medium">Platform Direct Bookings</p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between md:justify-end gap-2.5 flex-wrap shrink-0">
+                            <span className="text-xs font-black bg-gray-100 text-black border border-gray-300 px-3 py-1.5 rounded-xl">
+                              {unassignedBookings.length} Bookings
+                            </span>
+                            <button
+                              type="button"
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-black hover:text-white text-black font-black text-xs transition-colors shrink-0 ml-1 cursor-pointer"
+                            >
+                              <span>{expandedVendorBookingIds['unassigned'] ? 'Hide' : 'View'}</span>
+                              {expandedVendorBookingIds['unassigned'] ? (
+                                <ChevronUp className="w-4 h-4" />
+                              ) : (
+                                <ChevronDown className="w-4 h-4" />
+                              )}
+                            </button>
+                          </div>
+                        </div>
+
+                        {expandedVendorBookingIds['unassigned'] && (
+                          <div className="border-t-2 border-black/80 bg-gray-50/70 p-4 md:p-6 space-y-4">
+                            <div className="space-y-4">
+                              {unassignedBookings.map(booking => {
+                                const bookingCommission = calculateBookingCommission(booking.startDate, booking.endDate, booking.quantity, booking.price, platformSettings)
+                                const rentalDays = calculateRentalDays(booking.startDate, booking.endDate)
+
+                                return (
+                                  <div
+                                    key={booking.id}
+                                    className="bg-white p-4 md:p-5 rounded-2xl border-2 border-black/80 shadow-xs space-y-3.5 hover:border-black transition-all"
+                                  >
+                                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                                      <div className="flex items-start gap-3.5 min-w-0">
+                                        <div className="w-14 h-14 md:w-16 md:h-16 bg-gray-50 rounded-xl overflow-hidden shrink-0 border border-gray-200 p-1 flex items-center justify-center">
+                                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                                          <img src={booking.scooter_img || "/images/scooter.png"} alt="Scooter" className="w-full h-full object-contain" />
+                                        </div>
+                                        <div className="min-w-0 space-y-1">
+                                          <div className="flex items-center gap-2 flex-wrap">
+                                            <h5 className="font-black text-black text-sm md:text-base leading-tight">{booking.scooter}</h5>
+                                            <span className="text-[10px] md:text-[11px] font-black bg-black text-white px-2 py-0.5 rounded-full shrink-0">
+                                              {booking.quantity} {booking.quantity > 1 ? 'Units' : 'Unit'}
+                                            </span>
+                                          </div>
+                                          <p className="text-xs font-medium text-black">
+                                            Customer: <strong className="text-black font-black">{booking.customer}</strong> {booking.phone ? `(${booking.phone})` : ''}
+                                          </p>
+                                          <div className="flex items-center gap-1.5 text-[11px] md:text-xs font-bold text-gray-700 whitespace-nowrap truncate">
+                                            <Calendar className="w-3.5 h-3.5 text-black shrink-0" />
+                                            <span>{formatRentalPeriod(booking.startDate, booking.endDate)}</span>
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      <div className="flex items-center gap-2 flex-wrap self-start">
+                                        <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border-2 inline-flex items-center gap-1.5 ${
+                                          booking.rawStatus === 'pending'
+                                            ? 'bg-white text-black border-black border-dashed'
+                                            : booking.rawStatus === 'confirmed'
+                                            ? 'bg-black text-white border-black'
+                                            : booking.rawStatus === 'completed'
+                                            ? 'bg-gray-100 text-black border-gray-300'
+                                            : 'bg-gray-100 text-gray-400 border-gray-200 line-through'
+                                        }`}>
+                                          <span>{booking.status}</span>
+                                        </span>
+                                        <span className="px-3 py-1 rounded-full text-xs font-black bg-gray-100 text-black border border-gray-300 inline-flex items-center gap-1 shrink-0">
+                                          <span>{rentalDays} {rentalDays > 1 ? 'Days' : 'Day'}</span>
+                                        </span>
+                                      </div>
+                                    </div>
+
+                                    <div className="flex flex-row items-center justify-between gap-3 bg-gray-50 rounded-xl p-3 md:p-3.5 border border-gray-200">
+                                      <div>
+                                        <p className="text-[10px] md:text-[11px] font-black text-gray-500 uppercase tracking-wider">Total Customer Price</p>
+                                        <p className="font-black text-black text-sm md:text-base">Rp {booking.price.toLocaleString()}</p>
+                                      </div>
+                                      <div className="text-right">
+                                        <p className="text-[10px] md:text-[11px] font-black text-gray-500 uppercase tracking-wider">Your Commission</p>
+                                        <div className="mt-0.5">
+                                          <span className="bg-black text-white font-black text-xs md:text-sm px-3 py-1 rounded-xl inline-flex items-center gap-1 shadow-xs">
+                                            +Rp {bookingCommission.toLocaleString()}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-2.5 w-full pt-1">
+                                      {booking.rawStatus === 'pending' && (
+                                        <>
+                                          <button
+                                            onClick={() => handleConfirmBooking(booking)}
+                                            disabled={processingBookingId === booking.id}
+                                            className="w-full bg-black hover:bg-neutral-800 active:scale-95 text-white text-xs md:text-sm font-black py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer disabled:opacity-50"
+                                          >
+                                            <span>Confirm Booking</span>
+                                          </button>
+                                          <button
+                                            onClick={() => handleRejectBooking(booking)}
+                                            disabled={processingBookingId === booking.id}
+                                            className="w-full bg-white hover:bg-gray-100 active:scale-95 text-black border-2 border-black text-xs md:text-sm font-black py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+                                          >
+                                            <span>Reject</span>
+                                          </button>
+                                        </>
+                                      )}
+                                      {booking.rawStatus === 'confirmed' && (
+                                        <>
+                                          <div className="w-full bg-gray-100 border-2 border-black text-black font-black text-xs md:text-sm py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 uppercase tracking-wide">
+                                            <span>CONFIRMED</span>
+                                          </div>
+                                          <button
+                                            onClick={() => handleCompleteBooking(booking)}
+                                            disabled={processingBookingId === booking.id}
+                                            className="w-full bg-black hover:bg-neutral-800 active:scale-95 text-white text-xs md:text-sm font-black py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer disabled:opacity-50"
+                                          >
+                                            <span>Mark Returned</span>
+                                          </button>
+                                        </>
+                                      )}
+                                    </div>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </>
+                )
+              })()}
             </div>
           </div>
         ) : activeTab === 'revenue' ? (

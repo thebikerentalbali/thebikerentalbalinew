@@ -33,3 +33,20 @@ CREATE POLICY "Anyone can insert a booking" ON bookings FOR INSERT WITH CHECK (t
 
 DROP POLICY IF EXISTS "Anyone can update a booking" ON bookings;
 CREATE POLICY "Anyone can update a booking" ON bookings FOR UPDATE USING (true);
+
+-- 3. Create Platform Settings Table if not exists
+CREATE TABLE IF NOT EXISTS platform_settings (
+  id text PRIMARY KEY DEFAULT 'default',
+  markup_daily numeric DEFAULT 25000,
+  markup_weekly_per_day numeric DEFAULT 20000,
+  markup_monthly_per_day numeric DEFAULT 15000,
+  updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE platform_settings ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Platform settings are viewable by everyone" ON platform_settings;
+CREATE POLICY "Platform settings are viewable by everyone" ON platform_settings FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Platform settings are updatable by everyone" ON platform_settings;
+CREATE POLICY "Platform settings are updatable by everyone" ON platform_settings FOR ALL USING (true);
