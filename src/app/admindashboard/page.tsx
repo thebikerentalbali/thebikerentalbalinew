@@ -24,7 +24,7 @@ export default function AdminDashboard() {
       .from('vendors')
       .select('*, scooters(*)')
       .order('created_at', { ascending: false })
-      
+
     if (!error && data) {
       setPendingVendors(data.filter((v: any) => v.status === 'pending'))
       setApprovedVendors(data.filter((v: any) => v.status === 'approved'))
@@ -42,7 +42,7 @@ export default function AdminDashboard() {
       .from('vendors')
       .update({ status: 'approved' })
       .eq('id', id)
-      
+
     if (!error) {
       // Re-fetch to cleanly separate lists
       fetchVendors()
@@ -70,7 +70,7 @@ export default function AdminDashboard() {
             <p className="text-[11px] font-bold text-gray-400 mt-1 uppercase tracking-wider">Admin Console</p>
           </Link>
         </div>
-        
+
         <nav className="flex-1 px-4 py-2 space-y-2">
           <button onClick={() => setActiveTab('home')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors ${activeTab === 'home' ? 'bg-white/10 text-white shadow-sm shadow-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
             <BarChart3 className="w-5 h-5" />
@@ -121,7 +121,7 @@ export default function AdminDashboard() {
         ========================================================================
       */}
       <main className="flex-1 w-full max-w-full md:max-w-4xl lg:max-w-5xl mx-auto flex flex-col min-h-screen">
-        
+
         {/* Mobile App-like Header */}
         <header className="hidden md:flex bg-white/80 backdrop-blur-xl sticky top-0 z-30 px-5 py-4 border-b border-gray-100 items-center justify-between md:py-6 md:px-8 md:bg-transparent md:border-none md:backdrop-blur-none">
           <div className="flex items-center gap-3">
@@ -132,23 +132,23 @@ export default function AdminDashboard() {
             </div>
             <div>
               <h1 className="text-xl md:text-3xl font-bold text-gray-900 leading-tight">
-                {activeTab === 'home' ? 'Platform Overview' : 
-                 activeTab === 'approvals' ? 'Pending Approvals' : 
-                 activeTab === 'vendors' ? 'Vendors Management' : 
-                 activeTab === 'users' ? 'Users Management' : 
-                 activeTab === 'bookings' ? 'Platform Bookings' : 
-                 activeTab === 'revenue' ? 'Revenue Analytics' : 'Platform Settings'}
+                {activeTab === 'home' ? 'Platform Overview' :
+                  activeTab === 'approvals' ? 'Pending Approvals' :
+                    activeTab === 'vendors' ? 'Vendors Management' :
+                      activeTab === 'users' ? 'Users Management' :
+                        activeTab === 'bookings' ? 'Platform Bookings' :
+                          activeTab === 'revenue' ? 'Revenue Analytics' : 'Platform Settings'}
               </h1>
               <p className="text-xs font-medium text-gray-500 md:text-sm md:mt-1 hidden md:block">
-                {activeTab === 'home' ? 'System-wide metrics and performance' : 
-                 activeTab === 'approvals' ? 'Review and manage vendor sign-up applications' : 
-                 activeTab === 'vendors' ? 'Manage and monitor all platform vendors' : 
-                 activeTab === 'users' ? 'Manage platform users and roles' : 
-                 activeTab === 'bookings' ? 'Global overview of all active and past bookings' : 'Configure system settings'}
+                {activeTab === 'home' ? 'System-wide metrics and performance' :
+                  activeTab === 'approvals' ? 'Review and manage vendor sign-up applications' :
+                    activeTab === 'vendors' ? 'Manage and monitor all platform vendors' :
+                      activeTab === 'users' ? 'Manage platform users and roles' :
+                        activeTab === 'bookings' ? 'Global overview of all active and past bookings' : 'Configure system settings'}
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-3 md:gap-5">
             <div className="relative hidden md:block">
               <Search className="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
@@ -163,107 +163,107 @@ export default function AdminDashboard() {
 
         {/* Dashboard Content */}
         {activeTab === 'home' ? (
-        <div className="p-5 md:px-8 md:pb-12 space-y-6 md:space-y-8">
+          <div className="p-5 md:px-8 md:pb-12 space-y-6 md:space-y-8">
 
-          {/* Stats Row */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-            <div className="bg-white p-4 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group hover:border-gray-200 transition-colors col-span-2 lg:col-span-1">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-green-50 to-transparent rounded-bl-full opacity-80"></div>
-              <div className="flex items-center gap-3 mb-2 md:mb-4">
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-green-50 text-green-600 flex items-center justify-center shrink-0">
-                  <DollarSign className="w-5 h-5 md:w-6 md:h-6" />
+            {/* Stats Row */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
+              <div className="bg-white p-4 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group hover:border-gray-200 transition-colors col-span-2 lg:col-span-1">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-green-50 to-transparent rounded-bl-full opacity-80"></div>
+                <div className="flex items-center gap-3 mb-2 md:mb-4">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-green-50 text-green-600 flex items-center justify-center shrink-0">
+                    <DollarSign className="w-5 h-5 md:w-6 md:h-6" />
+                  </div>
+                  <h3 className="text-[12px] md:text-[13px] font-bold text-gray-500 uppercase tracking-wide leading-tight">Gross Volume</h3>
                 </div>
-                <h3 className="text-[12px] md:text-[13px] font-bold text-gray-500 uppercase tracking-wide leading-tight">Gross Volume</h3>
+                <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">Rp 0</p>
+                <div className="flex items-center gap-1 mt-2 md:mt-3 bg-gray-50 text-gray-500 w-fit px-2 py-0.5 rounded-full">
+                  <span className="text-[10px] md:text-[11px] font-bold">No data yet</span>
+                </div>
               </div>
-              <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">Rp 0</p>
-              <div className="flex items-center gap-1 mt-2 md:mt-3 bg-gray-50 text-gray-500 w-fit px-2 py-0.5 rounded-full">
-                <span className="text-[10px] md:text-[11px] font-bold">No data yet</span>
+
+              <div className="bg-white p-4 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group hover:border-gray-200 transition-colors">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-purple-50 to-transparent rounded-bl-full opacity-80"></div>
+                <div className="flex items-center gap-3 mb-2 md:mb-4">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                    <Store className="w-5 h-5 md:w-6 md:h-6" />
+                  </div>
+                  <h3 className="text-[12px] md:text-[13px] font-bold text-gray-500 uppercase tracking-wide leading-tight hidden md:block">Active Vendors</h3>
+                </div>
+                <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide md:hidden mb-1">Vendors</p>
+                <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">{approvedVendors.length}</p>
+                <p className="text-[10px] md:text-[11px] font-bold text-gray-400 mt-2 md:mt-3">Total approved</p>
+              </div>
+
+              <div className="bg-white p-4 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group hover:border-gray-200 transition-colors">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-orange-50 to-transparent rounded-bl-full opacity-80"></div>
+                <div className="flex items-center gap-3 mb-2 md:mb-4">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center shrink-0">
+                    <Bike className="w-5 h-5 md:w-6 md:h-6 fill-orange-500" />
+                  </div>
+                  <h3 className="text-[12px] md:text-[13px] font-bold text-gray-500 uppercase tracking-wide leading-tight hidden md:block">Total Fleet</h3>
+                </div>
+                <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide md:hidden mb-1">Fleet</p>
+                <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">0</p>
+                <p className="text-[10px] md:text-[11px] font-bold text-gray-400 mt-2 md:mt-3">Across Bali</p>
+              </div>
+
+              <div className="bg-white p-4 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group hover:border-gray-200 transition-colors col-span-2 lg:col-span-1">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-blue-50 to-transparent rounded-bl-full opacity-80"></div>
+                <div className="flex items-center gap-3 mb-2 md:mb-4">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                    <Users className="w-5 h-5 md:w-6 md:h-6" />
+                  </div>
+                  <h3 className="text-[12px] md:text-[13px] font-bold text-gray-500 uppercase tracking-wide leading-tight">Total Users</h3>
+                </div>
+                <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">0</p>
+                <div className="flex items-center gap-1 mt-2 md:mt-3 bg-gray-50 text-gray-500 w-fit px-2 py-0.5 rounded-full">
+                  <span className="text-[10px] md:text-[11px] font-bold">No data yet</span>
+                </div>
               </div>
             </div>
-            
-            <div className="bg-white p-4 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group hover:border-gray-200 transition-colors">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-purple-50 to-transparent rounded-bl-full opacity-80"></div>
-              <div className="flex items-center gap-3 mb-2 md:mb-4">
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
-                  <Store className="w-5 h-5 md:w-6 md:h-6" />
-                </div>
-                <h3 className="text-[12px] md:text-[13px] font-bold text-gray-500 uppercase tracking-wide leading-tight hidden md:block">Active Vendors</h3>
-              </div>
-              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide md:hidden mb-1">Vendors</p>
-              <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">{approvedVendors.length}</p>
-              <p className="text-[10px] md:text-[11px] font-bold text-gray-400 mt-2 md:mt-3">Total approved</p>
-            </div>
 
-            <div className="bg-white p-4 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group hover:border-gray-200 transition-colors">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-orange-50 to-transparent rounded-bl-full opacity-80"></div>
-              <div className="flex items-center gap-3 mb-2 md:mb-4">
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center shrink-0">
-                  <Bike className="w-5 h-5 md:w-6 md:h-6 fill-orange-500" />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+              {/* Top Vendors (App-like List for Mobile) */}
+              <div className="bg-white rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm overflow-hidden lg:col-span-2 flex flex-col">
+                <div className="p-5 md:p-6 border-b border-gray-50 flex justify-between items-center">
+                  <h3 className="text-lg md:text-xl font-bold text-gray-900">Top Performing Vendors</h3>
+                  <Link href="#" className="text-[13px] md:text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1">
+                    View All <ChevronRight className="w-4 h-4" />
+                  </Link>
                 </div>
-                <h3 className="text-[12px] md:text-[13px] font-bold text-gray-500 uppercase tracking-wide leading-tight hidden md:block">Total Fleet</h3>
-              </div>
-              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide md:hidden mb-1">Fleet</p>
-              <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">0</p>
-              <p className="text-[10px] md:text-[11px] font-bold text-gray-400 mt-2 md:mt-3">Across Bali</p>
-            </div>
 
-            <div className="bg-white p-4 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group hover:border-gray-200 transition-colors col-span-2 lg:col-span-1">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-blue-50 to-transparent rounded-bl-full opacity-80"></div>
-              <div className="flex items-center gap-3 mb-2 md:mb-4">
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                  <Users className="w-5 h-5 md:w-6 md:h-6" />
-                </div>
-                <h3 className="text-[12px] md:text-[13px] font-bold text-gray-500 uppercase tracking-wide leading-tight">Total Users</h3>
-              </div>
-              <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">0</p>
-              <div className="flex items-center gap-1 mt-2 md:mt-3 bg-gray-50 text-gray-500 w-fit px-2 py-0.5 rounded-full">
-                <span className="text-[10px] md:text-[11px] font-bold">No data yet</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-            {/* Top Vendors (App-like List for Mobile) */}
-            <div className="bg-white rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm overflow-hidden lg:col-span-2 flex flex-col">
-              <div className="p-5 md:p-6 border-b border-gray-50 flex justify-between items-center">
-                <h3 className="text-lg md:text-xl font-bold text-gray-900">Top Performing Vendors</h3>
-                <Link href="#" className="text-[13px] md:text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1">
-                  View All <ChevronRight className="w-4 h-4" />
-                </Link>
-              </div>
-              
-              <div className="p-2 md:p-4 flex-1">
-                <div className="space-y-2">
-                  <div className="text-center py-10 text-gray-400 font-medium text-sm">
-                    No top performing vendors yet.
+                <div className="p-2 md:p-4 flex-1">
+                  <div className="space-y-2">
+                    <div className="text-center py-10 text-gray-400 font-medium text-sm">
+                      No top performing vendors yet.
+                    </div>
                   </div>
                 </div>
               </div>
+
+              {/* Quick Actions Desktop / System Alerts */}
+              <div className="bg-blue-600 rounded-[24px] md:rounded-[32px] p-6 md:p-8 text-white relative overflow-hidden flex flex-col justify-between min-h-[250px]">
+                <div className="absolute -right-8 -top-8 w-40 h-40 bg-white/20 rounded-full blur-2xl"></div>
+                <div className="absolute -left-8 -bottom-8 w-32 h-32 bg-black/20 rounded-full blur-2xl"></div>
+
+                <div className="relative z-10">
+                  <h3 className="text-xl font-bold mb-2">System Alerts</h3>
+                  <p className="text-blue-100 text-sm font-medium">Pending approvals and system notifications.</p>
+                </div>
+
+                <div className="relative z-10 mt-6 space-y-3">
+                  <Link href="#" onClick={() => setActiveTab('approvals')} className="w-full bg-white text-blue-900 p-4 rounded-2xl flex items-center justify-between font-bold text-[14px] hover:bg-gray-50 transition-colors shadow-lg">
+                    <div className="flex items-center gap-3">
+                      <span className={`w-2 h-2 rounded-full ${pendingVendors.length > 0 ? 'bg-red-500' : 'bg-gray-300'}`}></span>
+                      Approve {pendingVendors.length} Vendors
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-blue-400" />
+                  </Link>
+                </div>
+              </div>
             </div>
 
-            {/* Quick Actions Desktop / System Alerts */}
-            <div className="bg-blue-600 rounded-[24px] md:rounded-[32px] p-6 md:p-8 text-white relative overflow-hidden flex flex-col justify-between min-h-[250px]">
-              <div className="absolute -right-8 -top-8 w-40 h-40 bg-white/20 rounded-full blur-2xl"></div>
-              <div className="absolute -left-8 -bottom-8 w-32 h-32 bg-black/20 rounded-full blur-2xl"></div>
-              
-              <div className="relative z-10">
-                <h3 className="text-xl font-bold mb-2">System Alerts</h3>
-                <p className="text-blue-100 text-sm font-medium">Pending approvals and system notifications.</p>
-              </div>
-
-              <div className="relative z-10 mt-6 space-y-3">
-                <Link href="#" onClick={() => setActiveTab('approvals')} className="w-full bg-white text-blue-900 p-4 rounded-2xl flex items-center justify-between font-bold text-[14px] hover:bg-gray-50 transition-colors shadow-lg">
-                  <div className="flex items-center gap-3">
-                    <span className={`w-2 h-2 rounded-full ${pendingVendors.length > 0 ? 'bg-red-500' : 'bg-gray-300'}`}></span>
-                    Approve {pendingVendors.length} Vendors
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-blue-400" />
-                </Link>
-              </div>
-            </div>
           </div>
-
-        </div>
         ) : activeTab === 'approvals' ? (
           <div className="p-5 md:px-8 md:pb-12 animate-in fade-in">
             <div className="space-y-4">
@@ -312,7 +312,7 @@ export default function AdminDashboard() {
                           <button className="flex-1 xl:flex-none bg-gray-100 text-gray-700 px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-200 transition-colors">Reject</button>
                         </div>
                       </div>
-                      
+
                       {isExpanded && (
                         <div className="bg-gray-50/50 p-5 border-t border-gray-100 animate-in slide-in-from-top-2">
                           <h5 className="text-xs font-bold text-gray-900 uppercase tracking-wide mb-4">Vendor Details</h5>
@@ -350,10 +350,10 @@ export default function AdminDashboard() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {approvedVendors.map(vendor => {
                   const isExpanded = expandedVendorDetailsId === vendor.id;
-                  
+
                   return (
                     <div key={vendor.id} className="bg-white rounded-[24px] border border-gray-100 shadow-sm flex flex-col overflow-hidden transition-all duration-300 hover:border-gray-200">
-                      <div 
+                      <div
                         onClick={() => setExpandedVendorDetailsId(isExpanded ? null : vendor.id)}
                         className="p-5 flex flex-col gap-4 cursor-pointer"
                       >
@@ -387,7 +387,7 @@ export default function AdminDashboard() {
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* Published Scooters Accordion */}
                       {isExpanded && (
                         <div className="bg-gray-50/50 p-5 border-t border-gray-100 animate-in slide-in-from-top-2">
@@ -423,20 +423,20 @@ export default function AdminDashboard() {
         ) : activeTab === 'bookings' ? (
           <div className="p-5 md:px-8 md:pb-12 animate-in fade-in space-y-6">
             <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-               <h3 className="font-bold text-gray-900">Vendor Bookings Dashboard</h3>
-               <button className="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-200 transition-colors">
-                 <Filter className="w-4 h-4" /> Filter
-               </button>
+              <h3 className="font-bold text-gray-900">Vendor Bookings Dashboard</h3>
+              <button className="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-200 transition-colors">
+                <Filter className="w-4 h-4" /> Filter
+              </button>
             </div>
-            
+
             <div className="space-y-4">
               {approvedVendors.map(vendor => {
                 const vendorBookings = mockBookings.filter(b => b.vendorId === vendor.id);
                 const isExpanded = expandedVendorId === vendor.id;
-                
+
                 return (
                   <div key={vendor.id} className="bg-white rounded-[24px] border border-gray-100 shadow-sm overflow-hidden transition-all duration-300">
-                    <div 
+                    <div
                       onClick={() => setExpandedVendorId(isExpanded ? null : vendor.id)}
                       className="p-5 md:p-6 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors"
                     >
@@ -464,7 +464,7 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                     </div>
-                    
+
                     {isExpanded && (
                       <div className="border-t border-gray-50 bg-gray-50/50 p-5 md:p-6 space-y-3">
                         {vendorBookings.length === 0 ? (
@@ -487,7 +487,7 @@ export default function AdminDashboard() {
                                   <p className="text-xs font-medium text-gray-500">{booking.customer} • {booking.dates}</p>
                                 </div>
                               </div>
-                              
+
                               <div className="flex items-center justify-between md:justify-end gap-6 border-t md:border-none border-gray-50 pt-3 md:pt-0">
                                 <div className="text-left md:text-right">
                                   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Total Price</p>
@@ -509,14 +509,14 @@ export default function AdminDashboard() {
           </div>
         ) : activeTab === 'revenue' ? (
           <div className="p-5 md:px-8 md:pb-12 flex flex-col items-center justify-center flex-1 min-h-[50vh] text-center animate-in fade-in">
-             <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mb-4">
-               <DollarSign className="w-10 h-10 text-green-500" />
-             </div>
-             <h2 className="text-2xl font-bold text-gray-900 mb-2">Revenue Analytics</h2>
-             <p className="text-gray-500 max-w-sm mb-6">Detailed revenue reports, platform commissions, and payout schedules are being processed.</p>
-             <button className="bg-black text-white px-6 py-3 rounded-xl font-bold hover:scale-[1.02] transition-transform shadow-md">
-               Download CSV Report
-             </button>
+            <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mb-4">
+              <DollarSign className="w-10 h-10 text-green-500" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Revenue Analytics</h2>
+            <p className="text-gray-500 max-w-sm mb-6">Detailed revenue reports, platform commissions, and payout schedules are being processed.</p>
+            <button className="bg-black text-white px-6 py-3 rounded-xl font-bold hover:scale-[1.02] transition-transform shadow-md">
+              Download CSV Report
+            </button>
           </div>
         ) : activeTab === 'settings' ? (
           <div className="p-5 md:px-8 md:pb-12 animate-in fade-in max-w-2xl">
@@ -570,7 +570,7 @@ export default function AdminDashboard() {
             </div>
             <span className="text-[10px] font-bold">Home</span>
           </button>
-          
+
           <button onClick={() => { setActiveTab('approvals'); setIsMobileMenuOpen(false); }} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group relative ${activeTab === 'approvals' ? 'text-blue-600' : 'text-gray-400 hover:text-black'}`}>
             <div className={`${activeTab === 'approvals' ? 'bg-blue-50' : 'group-hover:bg-gray-50'} p-1.5 rounded-full transition-colors`}>
               <UserCheck className="w-6 h-6" />
@@ -582,39 +582,39 @@ export default function AdminDashboard() {
               </span>
             )}
           </button>
-          
+
           <button onClick={() => { setActiveTab('vendors'); setIsMobileMenuOpen(false); }} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group ${activeTab === 'vendors' ? 'text-blue-600' : 'text-gray-400 hover:text-black'}`}>
             <div className={`${activeTab === 'vendors' ? 'bg-blue-50' : 'group-hover:bg-gray-50'} p-1.5 rounded-full transition-colors`}>
               <Store className="w-6 h-6" />
             </div>
             <span className="text-[10px] font-bold">Vendors</span>
           </button>
-          
+
           <button onClick={() => { setActiveTab('bookings'); setIsMobileMenuOpen(false); }} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group ${activeTab === 'bookings' ? 'text-blue-600' : 'text-gray-400 hover:text-black'}`}>
             <div className={`${activeTab === 'bookings' ? 'bg-blue-50' : 'group-hover:bg-gray-50'} p-1.5 rounded-full transition-colors`}>
               <CalendarDays className="w-6 h-6" />
             </div>
             <span className="text-[10px] font-bold">Bookings</span>
           </button>
-          
+
           <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group ${isMobileMenuOpen ? 'text-blue-600' : 'text-gray-400 hover:text-black'}`}>
             <div className={`${isMobileMenuOpen ? 'bg-blue-50' : 'group-hover:bg-gray-50'} p-1.5 rounded-full transition-colors`}>
               <Menu className="w-6 h-6" />
             </div>
             <span className="text-[10px] font-bold">More</span>
           </button>
-          
+
           {/* Mobile Dropdown Menu */}
           {isMobileMenuOpen && (
             <div className="absolute bottom-full right-4 mb-2 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden w-48 animate-in slide-in-from-bottom-2 fade-in">
               <div className="flex flex-col">
-                <button 
+                <button
                   onClick={() => { setActiveTab('revenue'); setIsMobileMenuOpen(false); }}
                   className={`flex items-center gap-3 px-4 py-3 text-sm font-bold transition-colors ${activeTab === 'revenue' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`}
                 >
                   <DollarSign className="w-4 h-4" /> Revenue
                 </button>
-                <button 
+                <button
                   onClick={() => { setActiveTab('settings'); setIsMobileMenuOpen(false); }}
                   className={`flex items-center gap-3 px-4 py-3 text-sm font-bold transition-colors border-t border-gray-50 ${activeTab === 'settings' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`}
                 >

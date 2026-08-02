@@ -50,6 +50,7 @@ export default function Home() {
   // Filter States
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [maxPrice, setMaxPrice] = useState(500000)
+  const [selectedYear, setSelectedYear] = useState<string>("All")
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -89,7 +90,7 @@ export default function Home() {
 
 
       // format vendor initials if missing
-      const formattedVendors = (vendors || []).map(v => ({
+      const formattedVendors = (vendors || []).map((v: any) => ({
         ...v,
         initials: v.name ? v.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() : 'V',
         location: v.address || 'Bali',
@@ -97,7 +98,7 @@ export default function Home() {
       }))
       setTopVendors(formattedVendors)
       
-      const formattedScooters = (scooters || []).map(s => ({
+      const formattedScooters = (scooters || []).map((s: any) => ({
         ...s,
         price: (s.price_daily || 0).toLocaleString(),
         price_daily: s.price_daily || 0,
@@ -195,8 +196,13 @@ export default function Home() {
     const brandMatch = scooter.brand && scooter.brand.toLowerCase().includes(brandLower);
     return nameMatch || brandMatch;
   }
+  const filterByYear = (scooter: any) => {
+    if (!selectedYear || selectedYear === "All") return true;
+    const sYear = scooter.year ? String(scooter.year) : "2024";
+    return sYear === selectedYear;
+  }
   
-  const allFiltered = allScooters.filter(s => filterByPrice(s.price) && filterByBrand(s))
+  const allFiltered = allScooters.filter(s => filterByPrice(s.price) && filterByBrand(s) && filterByYear(s))
   const filteredPopular = allFiltered.slice(0, 3)
   const filteredRecommended = allFiltered.slice(3)
 
@@ -287,9 +293,12 @@ export default function Home() {
           </div>
           <button 
             onClick={() => setIsFilterOpen(true)}
-            className="w-14 h-14 md:w-16 md:h-16 bg-white rounded-full flex items-center justify-center shadow-sm shrink-0 border border-gray-100 transition-transform hover:scale-105"
+            className="w-14 h-14 md:w-16 md:h-16 bg-white rounded-full flex items-center justify-center shadow-sm shrink-0 border border-gray-100 transition-transform hover:scale-105 relative"
           >
             <SlidersHorizontal className="w-5 h-5 md:w-6 md:h-6 text-gray-800" />
+            {(maxPrice < 500000 || selectedYear !== "All") && (
+              <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-black rounded-full border-2 border-white"></span>
+            )}
           </button>
         </div>
 
@@ -385,10 +394,9 @@ export default function Home() {
           <div className="flex gap-4 md:gap-6 overflow-x-auto md:grid md:grid-cols-2 lg:grid-cols-3 md:overflow-visible pb-4 scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0 snap-x snap-mandatory md:snap-none">
             {filteredPopular.map(scooter => (
               <Link key={scooter.id} href={`/detail/${scooter.id}`} className="min-w-full md:min-w-0 sm:min-w-[340px] shrink-0 block relative bg-white rounded-[32px] md:rounded-[40px] p-4 md:p-5 shadow-sm border border-gray-50 snap-center md:snap-align-none transition-transform hover:-translate-y-1 hover:shadow-md">
-                {/* Rating & Save */}
-                <div className="absolute top-6 left-6 md:top-8 md:left-8 bg-white/90 backdrop-blur-sm px-3 md:px-4 py-1.5 md:py-2 rounded-full flex items-center gap-1.5 z-10 shadow-sm border border-yellow-100">
-                  <Star className="w-3.5 h-3.5 md:w-4 md:h-4 fill-yellow-400 text-yellow-400" />
-                  <span className="text-sm md:text-base font-bold text-gray-900">5.0</span>
+                {/* Year & Save */}
+                <div className="absolute top-6 left-6 md:top-8 md:left-8 bg-white/90 backdrop-blur-sm px-3 md:px-4 py-1.5 md:py-2 rounded-full flex items-center gap-1.5 z-10 shadow-sm border border-gray-100">
+                  <span className="text-xs md:text-sm font-extrabold text-gray-900">{scooter.year || '2024'}</span>
                 </div>
                 <button 
                   onClick={(e) => toggleSaveScooter(e, scooter.id)}
@@ -438,9 +446,8 @@ export default function Home() {
                   >
                     <Heart className={`w-3.5 h-3.5 md:w-4 md:h-4 ${savedScooters.includes(scooter.id) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
                   </button>
-                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-2 md:px-3 py-1 md:py-1.5 rounded-full flex items-center gap-1 md:gap-1.5 z-10 shadow-sm border border-yellow-100">
-                    <Star className="w-3 h-3 md:w-3.5 md:h-3.5 fill-yellow-400 text-yellow-400" />
-                    <span className="text-[11px] md:text-[13px] font-bold text-gray-900">5.0</span>
+                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-2.5 md:px-3 py-1 md:py-1.5 rounded-full flex items-center gap-1 md:gap-1.5 z-10 shadow-sm border border-gray-100">
+                    <span className="text-[11px] md:text-[13px] font-extrabold text-gray-900">{scooter.year || '2024'}</span>
                   </div>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={scooter.img} alt={scooter.name} className="w-full h-full object-contain drop-shadow-md transition-transform group-hover:scale-110" />
@@ -467,6 +474,7 @@ export default function Home() {
               </div>
 
               <div className="space-y-6">
+                {/* Max Price Filter */}
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <label className="font-bold text-gray-900 text-[15px]">Max Price (Daily)</label>
@@ -487,6 +495,41 @@ export default function Home() {
                       <span>Rp 100k</span>
                       <span>Rp 500k</span>
                     </div>
+                  </div>
+                </div>
+
+                {/* Scooter Year Filter */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="font-bold text-gray-900 text-[15px]">Scooter Year</label>
+                    {selectedYear !== "All" && (
+                      <button 
+                        type="button" 
+                        onClick={() => setSelectedYear("All")} 
+                        className="text-xs text-gray-500 font-semibold hover:text-black transition-colors"
+                      >
+                        Reset
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {["All", "2025", "2024", "2023", "2022", "2021", "2020"].map((year) => {
+                      const isSelected = selectedYear === year;
+                      return (
+                        <button
+                          key={year}
+                          type="button"
+                          onClick={() => setSelectedYear(year)}
+                          className={`px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all ${
+                            isSelected 
+                              ? "bg-black text-white shadow-sm scale-105" 
+                              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          }`}
+                        >
+                          {year === "All" ? "All Years" : year}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -525,7 +568,7 @@ export default function Home() {
                     <p className="text-sm text-gray-500 mt-1">Tap the heart icon on a scooter to save it for later.</p>
                   </div>
                 ) : (
-                  [...popularScooters, ...recommendedScooters].filter(s => savedScooters.includes(s.id)).map(scooter => (
+                  allScooters.filter((s: any) => savedScooters.includes(s.id)).map((scooter: any) => (
                     <Link key={scooter.id} href={`/detail/${scooter.id}`} className="bg-gray-50 p-3 rounded-2xl flex items-center gap-4 hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-200">
                       <div className="w-16 h-16 bg-white rounded-xl overflow-hidden shrink-0 shadow-sm p-1">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -534,9 +577,8 @@ export default function Home() {
                       <div className="flex-1">
                         <div className="flex justify-between items-start">
                           <h4 className="font-bold text-gray-900 text-[14px]">{scooter.name}</h4>
-                          <div className="flex items-center gap-1 bg-yellow-50 px-1.5 py-0.5 rounded flex-shrink-0">
-                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                            <span className="text-[11px] font-bold text-yellow-700">5.0</span>
+                          <div className="flex items-center gap-1 bg-gray-100 px-2 py-0.5 rounded-full flex-shrink-0">
+                            <span className="text-[11px] font-bold text-gray-700">{scooter.year || '2024'}</span>
                           </div>
                         </div>
                         <p className="text-[13px] font-extrabold text-gray-900 mt-1">Rp {durationFilter === 'Weekly' ? scooter.price_weekly.toLocaleString() : durationFilter === 'Monthly' ? scooter.price_monthly.toLocaleString() : scooter.price_daily.toLocaleString()} <span className="text-gray-500 font-medium text-[11px]">/{durationFilter}</span></p>
