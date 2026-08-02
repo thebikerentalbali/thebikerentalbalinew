@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Bike, DollarSign, CalendarDays, Settings, Bell, Search, Star, Plus, QrCode, Home, Wallet, User, ChevronRight, ChevronLeft, TrendingUp, Wrench, MoreVertical, CheckCircle2, Clock, X, ChevronDown, List, Calendar as CalendarIcon, Camera, Loader2, LogOut } from "lucide-react"
+import { Bike, DollarSign, CalendarDays, Settings, Bell, Search, Star, Plus, QrCode, Home, Wallet, User, ChevronRight, ChevronLeft, TrendingUp, Wrench, MoreVertical, CheckCircle2, Clock, X, ChevronDown, List, Calendar as CalendarIcon, Camera, Loader2, LogOut, RotateCcw } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import dynamic from "next/dynamic"
@@ -14,9 +14,64 @@ export default function VendorDashboard() {
   const [vendorLocation, setVendorLocation] = useState<[number, number]>([-8.5069, 115.2625])
   const [vendorData, setVendorData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [processingBookingId, setProcessingBookingId] = useState<string | null>(null)
   
   const router = useRouter()
   const supabase = createClient()
+
+  const refreshData = async (vData: any) => {
+    // Fetch Fleet
+    const { data: scootersData } = await supabase.from('scooters').select('*').eq('vendor_id', vData.id)
+    if (scootersData) {
+      setFleet(scootersData)
+    }
+
+    // Fetch Bookings
+    const { data: bookingsData } = await supabase
+      .from('bookings')
+      .select('*, scooters(*)')
+      .eq('vendor_id', vData.id)
+      .order('created_at', { ascending: false })
+
+    if (bookingsData) {
+      const today = new Date().toISOString().split('T')[0]
+      const formatted = await Promise.all(bookingsData.map(async (b: any) => {
+        let rawStatus = (b.status || 'pending').toLowerCase()
+
+        // Smart return check: if confirmed and end_date < today, auto-complete and restore availability
+        if (rawStatus === 'confirmed' && b.end_date && b.end_date < today) {
+          rawStatus = 'completed'
+          await supabase.from('bookings').update({ status: 'completed' }).eq('id', b.id)
+          if (b.scooter_id && b.scooters) {
+            const currentAvail = b.scooters.available_units ?? 0
+            const totalUnits = b.scooters.total_units ?? 1
+            const qty = Number(b.quantity) || 1
+            const newAvail = Math.min(totalUnits, currentAvail + qty)
+            await supabase.from('scooters').update({ available_units: newAvail }).eq('id', b.scooter_id)
+          }
+        }
+
+        return {
+          id: b.id,
+          scooterId: b.scooter_id,
+          scooter: b.scooters?.name || 'Scooter Rental',
+          scooter_img: b.scooters?.image_url || '/images/scooter.png',
+          customer: b.customer_name || 'Guest Customer',
+          phone: b.customer_phone || '',
+          email: b.customer_email || '',
+          quantity: Number(b.quantity) || 1,
+          status: rawStatus === 'confirmed' ? 'Confirmed' : rawStatus === 'completed' ? 'Completed' : rawStatus === 'rejected' ? 'Rejected' : 'Pending',
+          rawStatus: rawStatus,
+          startDate: new Date(b.start_date || b.created_at),
+          endDate: new Date(b.end_date || b.created_at),
+          price: Number(b.total_price) || 0,
+          created_at: b.created_at,
+          scooter_obj: b.scooters
+        }
+      }))
+      setBookingsList(formatted)
+    }
+  }
 
   useEffect(() => {
     async function checkAuth() {
@@ -39,41 +94,44 @@ export default function VendorDashboard() {
       }
       
       setVendorData(data)
-      
-      // Fetch Fleet
-      const { data: scootersData } = await supabase.from('scooters').select('*').eq('vendor_id', data.id)
-      if (scootersData) {
-        setFleet(scootersData)
-      }
-
-      // Fetch Bookings
-      const { data: bookingsData } = await supabase
-        .from('bookings')
-        .select('*, scooters(*)')
-        .eq('vendor_id', data.id)
-        .order('created_at', { ascending: false })
-
-      if (bookingsData) {
-        const formatted = bookingsData.map((b: any) => ({
-          id: b.id,
-          scooter: b.scooters?.name || 'Scooter Rental',
-          scooter_img: b.scooters?.image_url || '/images/scooter.png',
-          customer: b.customer_name || 'Guest Customer',
-          phone: b.customer_phone || '',
-          email: b.customer_email || '',
-          status: b.status === 'confirmed' ? 'Confirmed' : b.status || 'Confirmed',
-          startDate: new Date(b.start_date || b.created_at),
-          endDate: new Date(b.end_date || b.created_at),
-          price: Number(b.total_price) || 0,
-          created_at: b.created_at
-        }))
-        setBookingsList(formatted)
-      }
-      
+      await refreshData(data)
       setIsLoading(false)
     }
     checkAuth()
   }, [router, supabase])
+
+  const handleCompleteBooking = async (booking: any) => {
+    setProcessingBookingId(booking.id)
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status: 'completed' })
+        .eq('id', booking.id)
+
+      if (!error) {
+        if (booking.scooterId) {
+          const { data: sData } = await supabase
+            .from('scooters')
+            .select('available_units, total_units')
+            .eq('id', booking.scooterId)
+            .single()
+
+          if (sData) {
+            const currentAvail = sData.available_units ?? 0
+            const totalUnits = sData.total_units ?? 1
+            const qty = booking.quantity || 1
+            const newAvail = Math.min(totalUnits, currentAvail + qty)
+            await supabase.from('scooters').update({ available_units: newAvail }).eq('id', booking.scooterId)
+          }
+        }
+        if (vendorData) {
+          await refreshData(vendorData)
+        }
+      }
+    } finally {
+      setProcessingBookingId(null)
+    }
+  }
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -582,24 +640,55 @@ export default function VendorDashboard() {
                   </div>
                 ) : (
                   bookingsList.map((booking) => (
-                    <div key={booking.id} className="bg-white p-4 rounded-3xl border border-gray-100 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
-                      <div className="w-14 h-14 bg-gray-50 rounded-2xl overflow-hidden shrink-0">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={booking.scooter_img} alt="Scooter" className="w-full h-full object-cover" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-start mb-1">
-                          <h4 className="font-bold text-gray-900 text-[15px] truncate">{booking.scooter}</h4>
-                          <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide shrink-0 ${booking.status === 'Confirmed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
-                            {booking.status}
-                          </span>
+                    <div key={booking.id} className="bg-white p-4 md:p-5 rounded-3xl border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 bg-gray-50 rounded-2xl overflow-hidden shrink-0 border border-gray-100 p-1">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={booking.scooter_img} alt="Scooter" className="w-full h-full object-contain" />
                         </div>
-                        <p className="text-[13px] font-medium text-gray-500">
-                          {booking.startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {booking.endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} • <span className="text-gray-900 font-bold">Rp {booking.price.toLocaleString()}</span>
-                        </p>
-                        <p className="text-[12px] text-gray-500 mt-0.5">
-                          Customer: <strong className="text-gray-800">{booking.customer}</strong> {booking.phone ? `(${booking.phone})` : ''}
-                        </p>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2 mb-1">
+                            <h4 className="font-bold text-gray-900 text-[15px] truncate">{booking.scooter}</h4>
+                            <span className="text-[11px] font-semibold bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                              {booking.quantity} {booking.quantity > 1 ? 'Units' : 'Unit'}
+                            </span>
+                          </div>
+                          <p className="text-[13px] font-medium text-gray-500">
+                            {booking.startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {booking.endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} • <span className="text-gray-900 font-bold">Rp {booking.price.toLocaleString()}</span>
+                          </p>
+                          <p className="text-[12px] text-gray-500 mt-0.5">
+                            Customer: <strong className="text-gray-800">{booking.customer}</strong> {booking.phone ? `(${booking.phone})` : ''}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between md:justify-end gap-3 border-t md:border-none border-gray-50 pt-3 md:pt-0">
+                        <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide shrink-0 border ${
+                          booking.rawStatus === 'pending'
+                            ? 'bg-amber-50 text-amber-800 border-amber-200'
+                            : booking.rawStatus === 'confirmed'
+                            ? 'bg-green-50 text-green-700 border-green-200'
+                            : booking.rawStatus === 'completed'
+                            ? 'bg-blue-50 text-blue-700 border-blue-200'
+                            : 'bg-red-50 text-red-700 border-red-200'
+                        }`}>
+                          {booking.status}
+                        </span>
+
+                        {booking.rawStatus === 'confirmed' && (
+                          <button
+                            onClick={() => handleCompleteBooking(booking)}
+                            disabled={processingBookingId === booking.id}
+                            className="bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all cursor-pointer disabled:opacity-50"
+                          >
+                            {processingBookingId === booking.id ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <RotateCcw className="w-3.5 h-3.5" />
+                            )}
+                            <span>Mark Returned</span>
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))

@@ -241,16 +241,18 @@ export default function CheckoutPage() {
         if (item.durationMode === "monthly") base = item.monthly
         const itemTotal = base * item.quantity * item.durationCount
 
+        const vendorId = item.vendor_id || (item.vendors && (item.vendors as any).id) || null
         const { error } = await supabase.from('bookings').insert({
           scooter_id: item.id,
-          vendor_id: item.vendor_id,
+          vendor_id: vendorId,
           customer_name: `${firstName} ${lastName}`.trim() || 'Guest Customer',
-          customer_phone: customerPhone || '',
-          customer_email: customerEmail || '',
+          customer_phone: '',
+          customer_email: '',
           start_date: startDate || new Date().toISOString().split('T')[0],
           end_date: endDate || new Date().toISOString().split('T')[0],
           total_price: itemTotal,
-          status: 'confirmed'
+          quantity: item.quantity || 1,
+          status: 'pending'
         })
 
         if (error) {

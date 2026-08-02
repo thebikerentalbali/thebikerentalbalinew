@@ -12,10 +12,15 @@ CREATE TABLE IF NOT EXISTS bookings (
   customer_email text,
   start_date text,
   end_date text,
+  quantity integer DEFAULT 1,
   total_price numeric,
-  status text DEFAULT 'confirmed',
+  status text DEFAULT 'pending',
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+-- Add quantity and status update for existing tables
+ALTER TABLE bookings ADD COLUMN IF NOT EXISTS quantity integer DEFAULT 1;
+ALTER TABLE bookings ALTER COLUMN status SET DEFAULT 'pending';
 
 -- Enable RLS and create open policies
 ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
