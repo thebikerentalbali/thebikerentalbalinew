@@ -1,11 +1,19 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Bike, DollarSign, CalendarDays, Settings, Bell, Search, Star, Plus, QrCode, Home, Wallet, User, ChevronRight, ChevronLeft, TrendingUp, Wrench, MoreVertical, CheckCircle2, Clock, X, ChevronDown, List, Calendar as CalendarIcon, Camera, Loader2, LogOut, RotateCcw } from "lucide-react"
+import { Bike, DollarSign, CalendarDays, Settings, Bell, Search, Star, Plus, QrCode, Home, Wallet, User, ChevronRight, ChevronLeft, TrendingUp, Wrench, MoreVertical, CheckCircle2, Clock, X, ChevronDown, List, Calendar as CalendarIcon, Camera, Loader2, LogOut, RotateCcw, Check, XCircle, Store, Calendar, ArrowUpRight } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import dynamic from "next/dynamic"
 import { createClient } from "@/lib/supabase/client"
+import { 
+  PlatformSettings, 
+  DEFAULT_PLATFORM_SETTINGS, 
+  fetchPlatformSettings, 
+  subscribeToPlatformSettings, 
+  calculateBookingCommission, 
+  calculateRentalDays 
+} from "@/utils/pricing"
 
 const MapPicker = dynamic(() => import('@/components/MapPicker'), { ssr: false })
 
@@ -99,6 +107,79 @@ export default function VendorDashboard() {
     }
     checkAuth()
   }, [router, supabase])
+
+  const handleConfirmBooking = async (booking: any) => {
+    setProcessingBookingId(booking.id)
+    try {
+      const { error: bErr } = await supabase
+        .from('bookings')
+        .update({ status: 'confirmed' })
+        .eq('id', booking.id)
+
+      if (bErr) {
+        alert("Error confirming booking: " + bErr.message)
+        return
+      }
+
+      if (booking.scooterId) {
+        const { data: sData } = await supabase
+          .from('scooters')
+          .select('available_units, total_units')
+          .eq('id', booking.scooterId)
+          .single()
+
+        if (sData) {
+          const currentAvail = sData.available_units ?? 1
+          const qty = booking.quantity || 1
+          const newAvail = Math.max(0, currentAvail - qty)
+          await supabase.from('scooters').update({ available_units: newAvail }).eq('id', booking.scooterId)
+        }
+      }
+
+      if (vendorData) {
+        await refreshData(vendorData)
+      }
+    } catch (err) {
+      console.error("Confirm error:", err)
+    } finally {
+      setProcessingBookingId(null)
+    }
+  }
+
+  const handleRejectBooking = async (booking: any) => {
+    setProcessingBookingId(booking.id)
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status: 'rejected' })
+        .eq('id', booking.id)
+
+      if (!error) {
+        if (booking.rawStatus === 'confirmed' && booking.scooterId) {
+          const { data: sData } = await supabase
+            .from('scooters')
+            .select('available_units, total_units')
+            .eq('id', booking.scooterId)
+            .single()
+
+          if (sData) {
+            const currentAvail = sData.available_units ?? 0
+            const totalUnits = sData.total_units ?? 1
+            const qty = booking.quantity || 1
+            const newAvail = Math.min(totalUnits, currentAvail + qty)
+            await supabase.from('scooters').update({ available_units: newAvail }).eq('id', booking.scooterId)
+          }
+        }
+        if (vendorData) {
+          await refreshData(vendorData)
+        }
+      } else {
+        alert("Error rejecting booking: " + error.message)
+      }
+    } finally {
+      setProcessingBookingId(null)
+    }
+  }
 
   const handleCompleteBooking = async (booking: any) => {
     setProcessingBookingId(booking.id)
@@ -321,24 +402,130 @@ export default function VendorDashboard() {
     }
   }
 
-  // Bookings State
-  const [bookingView, setBookingView] = useState<'list' | 'calendar'>('list')
-  const [currentDate, setCurrentDate] = useState(new Date())
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
+  // Platform Settings State
+  const [platformSettings, setPlatformSettings] = useState<PlatformSettings>(DEFAULT_PLATFORM_SETTINGS)
 
+  // Bookings & Smart Month Navigation State
   const [bookingsList, setBookingsList] = useState<any[]>([])
+  const [activeMonthDate, setActiveMonthDate] = useState<Date>(new Date())
+  const [calendarStartDate, setCalendarStartDate] = useState<Date>(() => {
+    const d = new Date()
+    d.setDate(d.getDate() - 2)
+    return d
+  })
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(null)
+  const [bookingFilter, setBookingFilter] = useState<'all' | 'pending' | 'confirmed' | 'completed'>('all')
+  const [bookingSearchQuery, setBookingSearchQuery] = useState('')
 
-  // Calendar Helpers
-  const daysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
-  const firstDayOfMonth = (year: number, month: number) => new Date(year, month, 1).getDay();
+  useEffect(() => {
+    fetchPlatformSettings().then(updated => {
+      setPlatformSettings(updated)
+    })
+    const unsubscribe = subscribeToPlatformSettings((updated) => {
+      setPlatformSettings(updated)
+    })
+    return () => unsubscribe()
+  }, [])
 
   const handlePrevMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
-  };
+    const prevMonth = new Date(activeMonthDate.getFullYear(), activeMonthDate.getMonth() - 1, 1)
+    setActiveMonthDate(prevMonth)
+    setSelectedCalendarDate(null)
+    const newCalStart = new Date(prevMonth.getFullYear(), prevMonth.getMonth(), 1)
+    newCalStart.setDate(newCalStart.getDate() - 1)
+    setCalendarStartDate(newCalStart)
+  }
 
   const handleNextMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
-  };
+    const nextMonth = new Date(activeMonthDate.getFullYear(), activeMonthDate.getMonth() + 1, 1)
+    setActiveMonthDate(nextMonth)
+    setSelectedCalendarDate(null)
+    const newCalStart = new Date(nextMonth.getFullYear(), nextMonth.getMonth(), 1)
+    newCalStart.setDate(newCalStart.getDate() - 1)
+    setCalendarStartDate(newCalStart)
+  }
+
+  const handleThisMonth = () => {
+    const now = new Date()
+    const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    setActiveMonthDate(thisMonth)
+    setSelectedCalendarDate(null)
+    const d = new Date()
+    d.setDate(d.getDate() - 2)
+    setCalendarStartDate(d)
+  }
+
+  const handlePrevWeek = () => {
+    const d = new Date(calendarStartDate)
+    d.setDate(d.getDate() - 7)
+    setCalendarStartDate(d)
+  }
+
+  const handleNextWeek = () => {
+    const d = new Date(calendarStartDate)
+    d.setDate(d.getDate() + 7)
+    setCalendarStartDate(d)
+  }
+
+  const handleToday = () => {
+    const d = new Date()
+    d.setDate(d.getDate() - 2)
+    setCalendarStartDate(d)
+    const now = new Date()
+    const todayIso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+    setSelectedCalendarDate(todayIso)
+  }
+
+  const get7Days = (start: Date) => {
+    const days = []
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(start)
+      d.setDate(d.getDate() + i)
+      days.push(d)
+    }
+    return days
+  }
+
+  const formatMonthYear = (date: Date): string => {
+    const monthNames = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ]
+    return `${monthNames[date.getMonth()]} ${date.getFullYear()}`
+  }
+
+  const isBookingInActivePeriod = (b: any) => {
+    const monthStart = new Date(activeMonthDate.getFullYear(), activeMonthDate.getMonth(), 1, 0, 0, 0, 0)
+    const monthEnd = new Date(activeMonthDate.getFullYear(), activeMonthDate.getMonth() + 1, 0, 23, 59, 59, 999)
+
+    let bStart = new Date(b.startDate)
+    let bEnd = new Date(b.endDate)
+
+    if (isNaN(bStart.getTime())) bStart = new Date()
+    if (isNaN(bEnd.getTime())) bEnd = bStart
+
+    bStart.setHours(0, 0, 0, 0)
+    bEnd.setHours(23, 59, 59, 999)
+
+    if (selectedCalendarDate) {
+      const [sy, sm, sd] = selectedCalendarDate.split('-').map(Number)
+      const targetDate = new Date(sy, sm - 1, sd, 0, 0, 0, 0)
+      return targetDate >= bStart && targetDate <= bEnd
+    }
+
+    return bStart <= monthEnd && bEnd >= monthStart
+  }
+
+  const getBookingsCountForDate = (d: Date) => {
+    const targetDate = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0)
+    return bookingsList.filter(b => {
+      const bStart = new Date(b.startDate)
+      const bEnd = new Date(b.endDate)
+      bStart.setHours(0, 0, 0, 0)
+      bEnd.setHours(23, 59, 59, 999)
+      return targetDate >= bStart && targetDate <= bEnd
+    }).length
+  }
 
   if (isLoading) {
     return (
@@ -432,55 +619,72 @@ export default function VendorDashboard() {
             </div>
 
             {/* Stats Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              <div className="bg-white p-5 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group hover:border-gray-200 transition-colors">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-green-50 to-transparent rounded-bl-full opacity-50"></div>
-                <div className="flex items-center gap-3 mb-3 md:mb-4">
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-green-50 text-green-600 flex items-center justify-center">
-                    <Wallet className="w-5 h-5 md:w-6 md:h-6" />
-                  </div>
-                  <h3 className="text-[13px] md:text-[14px] font-bold text-gray-500 uppercase tracking-wide">Total Earnings</h3>
-                </div>
-                <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">Rp 0</p>
-                <div className="flex items-center gap-1.5 mt-2 md:mt-3 bg-gray-50 text-gray-500 w-fit px-2.5 py-1 rounded-full">
-                  <span className="text-[11px] md:text-xs font-bold">No earnings yet</span>
-                </div>
-              </div>
+            {(() => {
+              const confirmedOrCompleted = bookingsList.filter(b => b.rawStatus === 'confirmed' || b.rawStatus === 'completed')
+              const totalNetEarnings = confirmedOrCompleted.reduce((sum, b) => {
+                const comm = calculateBookingCommission(b.startDate, b.endDate, b.quantity, b.price, platformSettings)
+                return sum + Math.max(0, b.price - comm)
+              }, 0)
+              const activeRentalsCount = bookingsList.filter(b => b.rawStatus === 'confirmed').length
+              const totalFleetUnits = fleet.reduce((sum, s) => sum + (Number(s.total_units) || 1), 0)
+              const availableFleetUnits = fleet.reduce((sum, s) => sum + (Number(s.available_units) ?? 1), 0)
 
-              <div className="bg-white p-5 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group hover:border-gray-200 transition-colors">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-50 to-transparent rounded-bl-full opacity-50"></div>
-                <div className="flex items-center gap-3 mb-3 md:mb-4">
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
-                    <Bike className="w-5 h-5 md:w-6 md:h-6" />
+              return (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                  <div className="bg-white p-5 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group hover:border-gray-200 transition-colors">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-green-50 to-transparent rounded-bl-full opacity-50"></div>
+                    <div className="flex items-center gap-3 mb-3 md:mb-4">
+                      <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-green-50 text-green-600 flex items-center justify-center">
+                        <Wallet className="w-5 h-5 md:w-6 md:h-6" />
+                      </div>
+                      <h3 className="text-[13px] md:text-[14px] font-bold text-gray-500 uppercase tracking-wide">Total Earnings</h3>
+                    </div>
+                    <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">
+                      Rp {totalNetEarnings.toLocaleString()}
+                    </p>
+                    <div className="flex items-center gap-1.5 mt-2 md:mt-3 bg-gray-50 text-gray-500 w-fit px-2.5 py-1 rounded-full">
+                      <span className="text-[11px] md:text-xs font-bold">
+                        {confirmedOrCompleted.length} {confirmedOrCompleted.length === 1 ? 'booking' : 'bookings'} total
+                      </span>
+                    </div>
                   </div>
-                  <h3 className="text-[13px] md:text-[14px] font-bold text-gray-500 uppercase tracking-wide">Active Rentals</h3>
-                </div>
-                <div className="flex items-baseline gap-2">
-                  <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">0</p>
-                  <span className="text-sm md:text-base font-bold text-gray-400">/ 0 fleet</span>
-                </div>
-                <p className="text-[12px] md:text-[13px] font-semibold text-gray-500 mt-2 md:mt-3 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-gray-300"></span>
-                  0 available for booking
-                </p>
-              </div>
 
-              <div className="bg-white p-5 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group hover:border-gray-200 transition-colors sm:col-span-2 lg:col-span-1">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-orange-50 to-transparent rounded-bl-full opacity-50"></div>
-                <div className="flex items-center gap-3 mb-3 md:mb-4">
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center">
-                    <Star className="w-5 h-5 md:w-6 md:h-6 fill-orange-500" />
+                  <div className="bg-white p-5 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group hover:border-gray-200 transition-colors">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-50 to-transparent rounded-bl-full opacity-50"></div>
+                    <div className="flex items-center gap-3 mb-3 md:mb-4">
+                      <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
+                        <Bike className="w-5 h-5 md:w-6 md:h-6" />
+                      </div>
+                      <h3 className="text-[13px] md:text-[14px] font-bold text-gray-500 uppercase tracking-wide">Active Rentals</h3>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">{activeRentalsCount}</p>
+                      <span className="text-sm md:text-base font-bold text-gray-400">/ {totalFleetUnits} units</span>
+                    </div>
+                    <p className="text-[12px] md:text-[13px] font-semibold text-gray-500 mt-2 md:mt-3 flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                      {availableFleetUnits} available for booking
+                    </p>
                   </div>
-                  <h3 className="text-[13px] md:text-[14px] font-bold text-gray-500 uppercase tracking-wide">Avg Rating</h3>
+
+                  <div className="bg-white p-5 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group hover:border-gray-200 transition-colors sm:col-span-2 lg:col-span-1">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-orange-50 to-transparent rounded-bl-full opacity-50"></div>
+                    <div className="flex items-center gap-3 mb-3 md:mb-4">
+                      <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center">
+                        <Star className="w-5 h-5 md:w-6 md:h-6 fill-orange-500" />
+                      </div>
+                      <h3 className="text-[13px] md:text-[14px] font-bold text-gray-500 uppercase tracking-wide">Avg Rating</h3>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">5.0</p>
+                    </div>
+                    <p className="text-[12px] md:text-[13px] font-semibold text-gray-500 mt-2 md:mt-3">
+                      Based on <span className="text-black">Verified partner reviews</span>
+                    </p>
+                  </div>
                 </div>
-                <div className="flex items-baseline gap-2">
-                  <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">0.0</p>
-                </div>
-                <p className="text-[12px] md:text-[13px] font-semibold text-gray-500 mt-2 md:mt-3">
-                  Based on <span className="text-black">0 verified reviews</span>
-                </p>
-              </div>
-            </div>
+              )
+            })()}
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
               {/* Active Bookings (App-like List for Mobile, Table-like for Desktop) */}
@@ -658,226 +862,485 @@ export default function VendorDashboard() {
             </div>
           </div>
         ) : activeTab === 'bookings' ? (
-          <div className="p-5 md:px-8 pb-12 animate-in fade-in">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">All Bookings</h2>
-              <div className="bg-gray-100 p-1 rounded-xl flex items-center">
-                <button
-                  onClick={() => setBookingView('list')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-[13px] transition-all ${bookingView === 'list' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black'}`}
-                >
-                  <List className="w-4 h-4" /> List View
-                </button>
-                <button
-                  onClick={() => setBookingView('calendar')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-[13px] transition-all ${bookingView === 'calendar' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black'}`}
-                >
-                  <CalendarIcon className="w-4 h-4" /> Calendar
-                </button>
-              </div>
-            </div>
-
-            {bookingView === 'list' ? (
-              <div className="space-y-3">
-                {bookingsList.length === 0 ? (
-                  <div className="bg-white p-12 text-center text-gray-400 font-medium rounded-3xl border border-gray-100">
-                    No bookings recorded yet.
+          <div className="p-5 md:px-8 pb-12 animate-in fade-in space-y-6">
+            {/* Top Navigation & Smart Calendar Header */}
+            <div className="bg-white rounded-3xl border-2 border-black/80 shadow-sm p-4 md:p-6 space-y-5">
+              {/* Month Navigator Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-black text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <Calendar className="w-5 h-5" />
                   </div>
-                ) : (
-                  bookingsList.map((booking) => (
-                    <div key={booking.id} className="bg-white p-4 md:p-5 rounded-3xl border border-gray-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-gray-200 transition-all">
-                      <div className="flex items-center gap-3.5 md:gap-4 min-w-0">
-                        <div className="w-14 h-14 bg-gray-50 rounded-2xl overflow-hidden shrink-0 border border-gray-100 p-1 flex items-center justify-center">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={booking.scooter_img || "/images/scooter.png"} alt="Scooter" className="w-full h-full object-contain" />
-                        </div>
-                        <div className="min-w-0 space-y-0.5">
-                          <div className="flex items-center gap-2 flex-nowrap">
-                            <h5 className="font-bold text-gray-900 text-sm md:text-base truncate whitespace-nowrap">{booking.scooter}</h5>
-                            <span className="text-[10px] md:text-[11px] font-semibold bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap">
-                              {booking.quantity} {booking.quantity > 1 ? 'Units' : 'Unit'}
-                            </span>
-                          </div>
-                          <p className="text-xs font-medium text-gray-500 truncate">
-                            Customer: <strong className="text-gray-800">{booking.customer}</strong> {booking.phone ? `(${booking.phone})` : ''}
-                          </p>
-                          <p className="text-[11px] md:text-xs font-semibold text-gray-700 flex items-center gap-1.5">
-                            <CalendarIcon className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                            <span>{formatRentalPeriod(booking.startDate, booking.endDate)}</span>
-                          </p>
-                        </div>
-                      </div>
+                  <div>
+                    <h2 className="text-xl md:text-2xl font-black text-gray-900 capitalize tracking-tight">
+                      {formatMonthYear(activeMonthDate)}
+                    </h2>
+                    <p className="text-xs font-bold text-gray-500">
+                      Smart Period Bookings & Net Profit Overview
+                    </p>
+                  </div>
+                </div>
 
-                      <div className="flex flex-wrap items-center justify-between md:justify-end gap-3 md:gap-4 border-t md:border-none border-gray-50 pt-3 md:pt-0 shrink-0">
-                        <div className="text-left md:text-right">
-                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide truncate whitespace-nowrap">Total Price</p>
-                          <p className="font-black text-gray-900 text-sm md:text-base whitespace-nowrap">Rp {booking.price.toLocaleString()}</p>
-                        </div>
-
-                        <div className="flex items-center gap-2 shrink-0">
-                          <span className={`px-3 py-1.5 rounded-[12px] text-xs font-bold uppercase tracking-wide shrink-0 border ${
-                            booking.rawStatus === 'pending'
-                              ? 'bg-amber-50 text-amber-800 border-amber-200'
-                              : booking.rawStatus === 'confirmed'
-                              ? 'bg-green-50 text-green-700 border-green-200'
-                              : booking.rawStatus === 'completed'
-                              ? 'bg-blue-50 text-blue-700 border-blue-200'
-                              : 'bg-red-50 text-red-700 border-red-200'
-                          }`}>
-                            {booking.status}
-                          </span>
-
-                          {booking.rawStatus === 'confirmed' && (
-                            <button
-                              onClick={() => handleCompleteBooking(booking)}
-                              disabled={processingBookingId === booking.id}
-                              className="bg-blue-50 hover:bg-blue-100 active:scale-95 text-blue-700 text-xs md:text-sm font-bold px-4 py-2.5 rounded-[14px] flex items-center gap-1.5 transition-all cursor-pointer ml-1 disabled:opacity-50 whitespace-nowrap border border-blue-200"
-                            >
-                              {processingBookingId === booking.id ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                              ) : (
-                                <RotateCcw className="w-4 h-4" />
-                              )}
-                              <span>Mark Returned</span>
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
+                {/* Month Controls */}
+                <div className="flex items-center gap-2 self-start sm:self-auto">
+                  <button
+                    onClick={handlePrevMonth}
+                    title="Previous Month"
+                    className="p-2.5 rounded-xl border-2 border-black hover:bg-black hover:text-white transition-colors cursor-pointer text-black"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={handleThisMonth}
+                    className="px-3.5 py-2 rounded-xl text-xs font-black border-2 border-black bg-white hover:bg-black hover:text-white transition-colors cursor-pointer text-black"
+                  >
+                    This Month
+                  </button>
+                  <button
+                    onClick={handleNextMonth}
+                    title="Next Month"
+                    className="p-2.5 rounded-xl border-2 border-black hover:bg-black hover:text-white transition-colors cursor-pointer text-black"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-            ) : (
-              <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-5 md:p-6 animate-in slide-in-from-bottom-4">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-lg font-black text-gray-900">
-                    {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                  </h3>
+
+              {/* 7-Day Quick Strip Navigator with booking count indicator badges */}
+              <div className="pt-2 border-t border-gray-200">
+                <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <button onClick={handlePrevMonth} className="p-2 rounded-full hover:bg-gray-100 transition-colors">
-                      <ChevronLeft className="w-5 h-5 text-gray-600" />
+                    <span className="text-xs font-black uppercase tracking-wider text-black">
+                      7-Day Strip
+                    </span>
+                    {selectedCalendarDate && (
+                      <span className="text-[11px] font-bold text-gray-500">
+                        (Filtered on {formatIndoDate(selectedCalendarDate)})
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={handlePrevWeek}
+                      className="p-1.5 rounded-lg border border-gray-300 hover:border-black text-black hover:bg-black hover:text-white transition-colors cursor-pointer"
+                      title="Previous 7 Days"
+                    >
+                      <ChevronLeft className="w-3.5 h-3.5" />
                     </button>
-                    <button onClick={handleNextMonth} className="p-2 rounded-full hover:bg-gray-100 transition-colors">
-                      <ChevronRight className="w-5 h-5 text-gray-600" />
+                    <button
+                      onClick={handleToday}
+                      className="px-2.5 py-1 rounded-lg text-[11px] font-black border border-gray-300 hover:border-black text-black hover:bg-black hover:text-white transition-colors cursor-pointer"
+                    >
+                      Today
+                    </button>
+                    <button
+                      onClick={handleNextWeek}
+                      className="p-1.5 rounded-lg border border-gray-300 hover:border-black text-black hover:bg-black hover:text-white transition-colors cursor-pointer"
+                      title="Next 7 Days"
+                    >
+                      <ChevronRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-7 gap-1 md:gap-2 mb-2">
-                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                    <div key={day} className="text-center text-[11px] font-bold text-gray-400 uppercase tracking-wider py-2">
-                      {day}
-                    </div>
-                  ))}
-                </div>
+                <div className="grid grid-cols-7 gap-1.5 sm:gap-2.5">
+                  {get7Days(calendarStartDate).map((dateObj, idx) => {
+                    const year = dateObj.getFullYear()
+                    const month = String(dateObj.getMonth() + 1).padStart(2, '0')
+                    const day = String(dateObj.getDate()).padStart(2, '0')
+                    const isoDate = `${year}-${month}-${day}`
 
-                <div className="grid grid-cols-7 gap-1 md:gap-2">
-                  {Array.from({ length: firstDayOfMonth(currentDate.getFullYear(), currentDate.getMonth()) }).map((_, i) => (
-                    <div key={`empty-${i}`} className="aspect-square rounded-2xl bg-gray-50/50" />
-                  ))}
-
-                  {Array.from({ length: daysInMonth(currentDate.getFullYear(), currentDate.getMonth()) }).map((_, i) => {
-                    const date = i + 1;
-                    const currentDateObj = new Date(currentDate.getFullYear(), currentDate.getMonth(), date);
-                    const isToday = new Date().toDateString() === currentDateObj.toDateString();
-                    const isSelected = selectedDate?.toDateString() === currentDateObj.toDateString();
-
-                    const dayBookings = bookingsList.filter(b => {
-                      const d = new Date(currentDateObj);
-                      d.setHours(0, 0, 0, 0);
-                      const start = new Date(b.startDate);
-                      start.setHours(0, 0, 0, 0);
-                      const end = new Date(b.endDate);
-                      end.setHours(0, 0, 0, 0);
-                      return d >= start && d <= end;
-                    });
+                    const isSelected = selectedCalendarDate === isoDate
+                    const isToday = new Date().toDateString() === dateObj.toDateString()
+                    const count = getBookingsCountForDate(dateObj)
+                    const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' })
 
                     return (
                       <button
-                        key={date}
-                        onClick={() => setSelectedDate(currentDateObj)}
-                        className={`aspect-square rounded-2xl flex flex-col items-center justify-center relative transition-all hover:scale-[1.02] ${isSelected ? 'bg-black text-white shadow-md shadow-black/20' :
-                            isToday ? 'bg-blue-50 text-blue-700 font-bold border border-blue-100' :
-                              'bg-white text-gray-700 hover:bg-gray-50 border border-transparent'
-                          }`}
+                        key={idx}
+                        onClick={() => {
+                          if (isSelected) {
+                            setSelectedCalendarDate(null)
+                          } else {
+                            setSelectedCalendarDate(isoDate)
+                            if (dateObj.getMonth() !== activeMonthDate.getMonth() || dateObj.getFullYear() !== activeMonthDate.getFullYear()) {
+                              setActiveMonthDate(new Date(dateObj.getFullYear(), dateObj.getMonth(), 1))
+                            }
+                          }
+                        }}
+                        className={`flex flex-col items-center justify-center p-2 sm:p-3 rounded-2xl border-2 transition-all cursor-pointer relative ${
+                          isSelected
+                            ? 'bg-black text-white border-black shadow-md scale-[1.02]'
+                            : isToday
+                            ? 'bg-gray-100 text-black border-black font-black'
+                            : 'bg-white text-gray-800 border-gray-200 hover:border-black'
+                        }`}
                       >
-                        <span className={`text-sm md:text-base ${isSelected ? 'font-bold' : 'font-semibold'}`}>{date}</span>
-                        {dayBookings.length > 0 && (
-                          <div className="flex gap-0.5 mt-1">
-                            {dayBookings.slice(0, 3).map((b, idx) => (
-                              <div key={idx} className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white/80' : b.status === 'In Progress' ? 'bg-yellow-400' : b.status === 'Completed' ? 'bg-green-400' : 'bg-blue-400'}`} />
-                            ))}
-                            {dayBookings.length > 3 && <div className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white/80' : 'bg-gray-300'}`} />}
-                          </div>
+                        <span className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider ${isSelected ? 'text-gray-300' : 'text-gray-500'}`}>
+                          {dayName}
+                        </span>
+                        <span className="text-sm sm:text-base font-black my-0.5">
+                          {dateObj.getDate()}
+                        </span>
+
+                        {count > 0 ? (
+                          <span className={`text-[9px] sm:text-[10px] font-black px-1.5 py-0.2 rounded-full mt-0.5 ${
+                            isSelected
+                              ? 'bg-white text-black'
+                              : 'bg-black text-white'
+                          }`}>
+                            {count} {count > 1 ? 'bks' : 'bk'}
+                          </span>
+                        ) : (
+                          <span className={`text-[9px] sm:text-[10px] font-bold ${isSelected ? 'text-gray-400' : 'text-gray-300'}`}>
+                            -
+                          </span>
                         )}
                       </button>
                     )
                   })}
                 </div>
+              </div>
+            </div>
 
-                {/* Day Details */}
-                {selectedDate && (
-                  <div className="mt-8 pt-6 border-t border-gray-100 animate-in fade-in">
-                    <h4 className="font-bold text-gray-900 mb-4 flex items-center justify-between">
-                      Bookings on {selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                      <span className="bg-gray-100 text-gray-600 px-2.5 py-1 rounded-lg text-xs">
-                        {bookingsList.filter(b => {
-                          const d = new Date(selectedDate);
-                          d.setHours(0, 0, 0, 0);
-                          const start = new Date(b.startDate);
-                          start.setHours(0, 0, 0, 0);
-                          const end = new Date(b.endDate);
-                          end.setHours(0, 0, 0, 0);
-                          return d >= start && d <= end;
-                        }).length} Bookings
+            {/* Smart Active Period Analytics & Filter Banners */}
+            {(() => {
+              const periodBookings = bookingsList.filter(isBookingInActivePeriod)
+              const periodPending = periodBookings.filter(b => b.rawStatus === 'pending')
+              const periodConfirmed = periodBookings.filter(b => b.rawStatus === 'confirmed')
+              const periodCompleted = periodBookings.filter(b => b.rawStatus === 'completed')
+
+              const periodTotalCustomerPrice = periodBookings.reduce((sum, b) => sum + (Number(b.price) || 0), 0)
+              const periodCommission = periodBookings
+                .filter(b => b.rawStatus === 'completed' || b.rawStatus === 'confirmed')
+                .reduce((sum, b) => sum + calculateBookingCommission(b.startDate, b.endDate, b.quantity, b.price, platformSettings), 0)
+
+              const periodNetProfit = periodBookings
+                .filter(b => b.rawStatus === 'completed' || b.rawStatus === 'confirmed')
+                .reduce((sum, b) => {
+                  const comm = calculateBookingCommission(b.startDate, b.endDate, b.quantity, b.price, platformSettings)
+                  return sum + Math.max(0, b.price - comm)
+                }, 0)
+
+              const filteredList = periodBookings.filter(b => {
+                if (bookingFilter === 'pending' && b.rawStatus !== 'pending') return false
+                if (bookingFilter === 'confirmed' && b.rawStatus !== 'confirmed') return false
+                if (bookingFilter === 'completed' && b.rawStatus !== 'completed') return false
+                
+                if (bookingSearchQuery) {
+                  const q = bookingSearchQuery.toLowerCase()
+                  const matchCustomer = b.customer?.toLowerCase().includes(q)
+                  const matchScooter = b.scooter?.toLowerCase().includes(q)
+                  const matchPhone = b.phone?.toLowerCase().includes(q)
+                  if (!matchCustomer && !matchScooter && !matchPhone) return false
+                }
+                return true
+              })
+
+              return (
+                <div className="space-y-6">
+                  {/* Top 4 Summary Cards (Interactive Filters) */}
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                    <div
+                      onClick={() => setBookingFilter('all')}
+                      className={`p-4 rounded-2xl border-2 transition-all cursor-pointer ${
+                        bookingFilter === 'all'
+                          ? 'ring-2 ring-black bg-black text-white border-black shadow-md'
+                          : 'bg-white border-black/80 text-gray-900 hover:border-black shadow-xs'
+                      }`}
+                    >
+                      <p className={`text-[11px] font-bold uppercase tracking-wide flex items-center gap-1 truncate whitespace-nowrap ${bookingFilter === 'all' ? 'text-gray-300' : 'text-gray-500'}`}>
+                        <CalendarDays className="w-3.5 h-3.5 shrink-0" /> Total Bookings
+                      </p>
+                      <p className="text-xl md:text-2xl font-black mt-1">
+                        {periodBookings.length}
+                      </p>
+                      <p className={`text-[10px] font-bold mt-0.5 truncate whitespace-nowrap ${bookingFilter === 'all' ? 'text-gray-300' : 'text-gray-500'}`}>
+                        Gross: Rp {periodTotalCustomerPrice.toLocaleString()}
+                      </p>
+                    </div>
+
+                    <div
+                      onClick={() => setBookingFilter('pending')}
+                      className={`p-4 rounded-2xl border-2 transition-all cursor-pointer ${
+                        bookingFilter === 'pending'
+                          ? 'ring-2 ring-black bg-black text-white border-black shadow-md'
+                          : 'bg-white border-black/80 text-gray-900 hover:border-black shadow-xs'
+                      }`}
+                    >
+                      <p className={`text-[11px] font-bold uppercase tracking-wide flex items-center gap-1 truncate whitespace-nowrap ${bookingFilter === 'pending' ? 'text-gray-300' : 'text-gray-500'}`}>
+                        <Clock className="w-3.5 h-3.5 shrink-0" /> Pending Review
+                      </p>
+                      <p className="text-xl md:text-2xl font-black mt-1">
+                        {periodPending.length}
+                      </p>
+                    </div>
+
+                    <div
+                      onClick={() => setBookingFilter('confirmed')}
+                      className={`p-4 rounded-2xl border-2 transition-all cursor-pointer ${
+                        bookingFilter === 'confirmed'
+                          ? 'ring-2 ring-black bg-black text-white border-black shadow-md'
+                          : 'bg-white border-black/80 text-gray-900 hover:border-black shadow-xs'
+                      }`}
+                    >
+                      <p className={`text-[11px] font-bold uppercase tracking-wide flex items-center gap-1 truncate whitespace-nowrap ${bookingFilter === 'confirmed' ? 'text-gray-300' : 'text-gray-500'}`}>
+                        <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> Confirmed
+                      </p>
+                      <p className="text-xl md:text-2xl font-black mt-1">
+                        {periodConfirmed.length}
+                      </p>
+                    </div>
+
+                    <div
+                      onClick={() => setBookingFilter('completed')}
+                      className={`p-4 rounded-2xl border-2 transition-all cursor-pointer ${
+                        bookingFilter === 'completed'
+                          ? 'ring-2 ring-black bg-black text-white border-black shadow-md'
+                          : 'bg-white border-black/80 text-gray-900 hover:border-black shadow-xs'
+                      }`}
+                    >
+                      <p className={`text-[11px] font-bold uppercase tracking-wide flex items-center gap-1 truncate whitespace-nowrap ${bookingFilter === 'completed' ? 'text-gray-300' : 'text-gray-500'}`}>
+                        <RotateCcw className="w-3.5 h-3.5 shrink-0" /> Completed
+                      </p>
+                      <p className="text-xl md:text-2xl font-black mt-1">
+                        {periodCompleted.length}
+                      </p>
+                      <p className={`text-[10px] font-bold mt-0.5 truncate whitespace-nowrap ${bookingFilter === 'completed' ? 'text-gray-300' : 'text-gray-500'}`}>
+                        Your Net Profit: Rp {periodNetProfit.toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Section Header with Search */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="text-sm md:text-base font-black text-gray-900">
+                        Bookings List
+                      </h3>
+                      <span className="text-xs font-bold text-gray-500">
+                        ({filteredList.length} {filteredList.length === 1 ? 'Booking' : 'Bookings'})
                       </span>
-                    </h4>
 
-                    <div className="space-y-3">
-                      {bookingsList.filter(b => {
-                        const d = new Date(selectedDate);
-                        d.setHours(0, 0, 0, 0);
-                        const start = new Date(b.startDate);
-                        start.setHours(0, 0, 0, 0);
-                        const end = new Date(b.endDate);
-                        end.setHours(0, 0, 0, 0);
-                        return d >= start && d <= end;
-                      }).length === 0 ? (
-                        <div className="text-center py-6 text-gray-400 font-medium bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                          No bookings scheduled for this date.
+                      {selectedCalendarDate && (
+                        <div className="flex items-center gap-1.5 text-xs font-semibold text-black bg-gray-100 px-2.5 py-1 rounded-xl border border-gray-300 ml-1">
+                          <Calendar className="w-3 h-3 text-black" />
+                          <span>{formatIndoDate(selectedCalendarDate)}</span>
+                          <button
+                            onClick={() => setSelectedCalendarDate(null)}
+                            className="ml-1 text-black hover:opacity-70 font-bold cursor-pointer"
+                          >
+                            ×
+                          </button>
                         </div>
-                      ) : (
-                        bookingsList.filter(b => {
-                          const d = new Date(selectedDate);
-                          d.setHours(0, 0, 0, 0);
-                          const start = new Date(b.startDate);
-                          start.setHours(0, 0, 0, 0);
-                          const end = new Date(b.endDate);
-                          end.setHours(0, 0, 0, 0);
-                          return d >= start && d <= end;
-                        }).map((booking) => (
-                          <div key={`detail-${booking.id}`} className="bg-gray-50 p-4 rounded-2xl flex items-center gap-4">
-                            <div className="w-10 h-10 bg-white rounded-xl overflow-hidden shrink-0 shadow-sm border border-gray-100">
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img src="/images/scooter.png" alt="Scooter" className="w-full h-full object-cover opacity-80" />
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex justify-between items-start">
-                                <h5 className="font-bold text-gray-900 text-sm">{booking.scooter}</h5>
-                                <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide ${booking.status === 'In Progress' ? 'bg-yellow-100 text-yellow-700' : booking.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
-                                  {booking.status}
-                                </span>
-                              </div>
-                              <p className="text-[12px] font-medium text-gray-500 mt-0.5">{booking.customer} • Rp {booking.price.toLocaleString()}</p>
-                            </div>
-                          </div>
-                        ))
+                      )}
+                    </div>
+
+                    <div className="relative flex items-center min-w-[200px] sm:min-w-[260px]">
+                      <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3 pointer-events-none" />
+                      <input
+                        type="text"
+                        value={bookingSearchQuery}
+                        onChange={(e) => setBookingSearchQuery(e.target.value)}
+                        placeholder="Search scooter, customer..."
+                        className="w-full bg-white border border-gray-300 focus:border-black text-xs font-bold text-black rounded-xl pl-9 pr-3 py-2 outline-none shadow-xs transition-all"
+                      />
+                      {bookingSearchQuery && (
+                        <button
+                          onClick={() => setBookingSearchQuery('')}
+                          className="absolute right-2.5 text-gray-400 hover:text-black text-xs font-bold"
+                        >
+                          ×
+                        </button>
                       )}
                     </div>
                   </div>
-                )}
-              </div>
-            )}
+
+                  {/* Bookings List Cards (100% same card design as admin dashboard) */}
+                  <div className="space-y-4">
+                    {filteredList.length === 0 ? (
+                      <div className="bg-white p-12 text-center text-gray-500 font-bold rounded-3xl border-2 border-gray-200">
+                        No bookings found for this filter in the active period.
+                      </div>
+                    ) : (
+                      filteredList.map((booking) => {
+                        const bookingCommission = calculateBookingCommission(booking.startDate, booking.endDate, booking.quantity, booking.price, platformSettings)
+                        const vendorNetProfit = Math.max(0, booking.price - bookingCommission)
+                        const rentalDays = calculateRentalDays(booking.startDate, booking.endDate)
+
+                        return (
+                          <div
+                            key={booking.id}
+                            className="bg-white p-4 md:p-5 rounded-3xl border-2 border-black/80 shadow-sm space-y-3.5 hover:border-black transition-all"
+                          >
+                            {/* Top Row: Scooter, Company Profile, Customer & Status */}
+                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                              <div className="flex items-start gap-3.5 min-w-0">
+                                <div className="w-14 h-14 md:w-16 md:h-16 bg-gray-50 rounded-2xl overflow-hidden shrink-0 border border-gray-200 p-1 flex items-center justify-center">
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img src={booking.scooter_img || "/images/scooter.png"} alt="Scooter" className="w-full h-full object-contain" />
+                                </div>
+                                <div className="min-w-0 space-y-1.5">
+                                  {/* Line 1: Scooter Title & Quantity Badge */}
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <h5 className="font-black text-black text-sm md:text-base leading-tight">{booking.scooter}</h5>
+                                    <span className="text-[10px] md:text-[11px] font-black bg-black text-white px-2 py-0.5 rounded-full shrink-0">
+                                      {booking.quantity} {booking.quantity > 1 ? 'Units' : 'Unit'}
+                                    </span>
+                                  </div>
+
+                                  {/* Line 2: Company Profile Image and Customer Badge */}
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <div className="flex items-center gap-1.5 bg-gray-100 border border-gray-300 px-2 py-0.5 rounded-lg w-fit">
+                                      <div className="w-4 h-4 rounded-md bg-black text-white text-[8px] font-black flex items-center justify-center shrink-0 overflow-hidden">
+                                        {vendorData?.logo_url || vendorData?.logo || vendorData?.image_url ? (
+                                          // eslint-disable-next-line @next/next/no-img-element
+                                          <img src={vendorData?.logo_url || vendorData?.logo || vendorData?.image_url} alt="Vendor" className="w-full h-full object-cover" />
+                                        ) : (
+                                          <span>{vendorData?.name ? vendorData.name.substring(0, 2).toUpperCase() : 'VN'}</span>
+                                        )}
+                                      </div>
+                                      <span className="text-[10px] md:text-[11px] font-black text-black truncate max-w-[140px] sm:max-w-[200px]">
+                                        {vendorData?.name || 'Partner Vendor'}
+                                      </span>
+                                    </div>
+
+                                    {/* Customer info */}
+                                    <p className="text-xs font-medium text-black truncate">
+                                      Customer: <strong className="text-black font-black">{booking.customer}</strong> {booking.phone ? `(${booking.phone})` : ''}
+                                    </p>
+                                  </div>
+
+                                  {/* Line 3: Compact Single-Line Date Section */}
+                                  <div className="flex items-center gap-1.5 text-[11px] md:text-xs font-bold text-gray-700 whitespace-nowrap truncate">
+                                    <Calendar className="w-3.5 h-3.5 text-black shrink-0" />
+                                    <span>{formatRentalPeriod(booking.startDate, booking.endDate)}</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Status Badge + Rounded Duration Badge */}
+                              <div className="flex items-center gap-2 flex-wrap self-start">
+                                <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border-2 inline-flex items-center gap-1.5 ${
+                                  booking.rawStatus === 'pending'
+                                    ? 'bg-white text-black border-black border-dashed'
+                                    : booking.rawStatus === 'confirmed'
+                                    ? 'bg-black text-white border-black'
+                                    : booking.rawStatus === 'completed'
+                                    ? 'bg-gray-100 text-black border-gray-300'
+                                    : 'bg-gray-100 text-gray-400 border-gray-200 line-through'
+                                }`}>
+                                  {booking.rawStatus === 'confirmed' && <CheckCircle2 className="w-3 h-3 text-white" />}
+                                  {booking.rawStatus === 'pending' && <Clock className="w-3 h-3 text-black" />}
+                                  {booking.rawStatus === 'completed' && <RotateCcw className="w-3 h-3 text-black" />}
+                                  <span>{booking.status}</span>
+                                </span>
+
+                                {/* Rounded Rental Duration Badge */}
+                                <span className="px-3 py-1 rounded-full text-xs font-black bg-gray-100 text-black border border-gray-300 inline-flex items-center gap-1 shrink-0">
+                                  <span>{rentalDays} {rentalDays > 1 ? 'Days' : 'Day'}</span>
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Price and Net Price / Commission Row */}
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-gray-50 rounded-2xl p-3 md:p-3.5 border border-gray-200">
+                              <div>
+                                <p className="text-[10px] md:text-[11px] font-black text-gray-500 uppercase tracking-wider">Total Customer Price</p>
+                                <p className="font-black text-black text-sm md:text-base">Rp {booking.price.toLocaleString()}</p>
+                              </div>
+
+                              <div className="flex items-center gap-3 justify-between sm:justify-end">
+                                <div className="text-left sm:text-right">
+                                  <p className="text-[10px] md:text-[11px] font-black text-gray-500 uppercase tracking-wider">Pay Commission</p>
+                                  <p className="text-xs md:text-sm font-black text-red-600">-Rp {bookingCommission.toLocaleString()}</p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-[10px] md:text-[11px] font-black text-gray-500 uppercase tracking-wider">Your Profit (Net Price)</p>
+                                  <div className="mt-0.5">
+                                    <span className="bg-black text-white font-black text-xs md:text-sm px-3 py-1 rounded-xl inline-flex items-center gap-1 shadow-xs">
+                                      Rp {vendorNetProfit.toLocaleString()}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Enlarged Half and Half (50% / 50%) Action Buttons */}
+                            <div className="grid grid-cols-2 gap-2.5 w-full pt-1">
+                              {booking.rawStatus === 'pending' && (
+                                <>
+                                  <button
+                                    onClick={() => handleConfirmBooking(booking)}
+                                    disabled={processingBookingId === booking.id}
+                                    className="w-full bg-black hover:bg-neutral-800 active:scale-95 text-white text-xs md:text-sm font-black py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer disabled:opacity-50"
+                                  >
+                                    {processingBookingId === booking.id ? (
+                                      <Loader2 className="w-4 h-4 animate-spin text-white" />
+                                    ) : (
+                                      <Check className="w-4 h-4 text-white" />
+                                    )}
+                                    <span>Confirm Booking</span>
+                                  </button>
+                                  <button
+                                    onClick={() => handleRejectBooking(booking)}
+                                    disabled={processingBookingId === booking.id}
+                                    className="w-full bg-white hover:bg-gray-100 active:scale-95 text-black border-2 border-black text-xs md:text-sm font-black py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+                                  >
+                                    <XCircle className="w-4 h-4 text-black" />
+                                    <span>Reject</span>
+                                  </button>
+                                </>
+                              )}
+
+                              {booking.rawStatus === 'confirmed' && (
+                                <>
+                                  <div className="w-full bg-gray-100 border-2 border-black text-black font-black text-xs md:text-sm py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 uppercase tracking-wide">
+                                    <CheckCircle2 className="w-4 h-4 text-black" />
+                                    <span>CONFIRMED</span>
+                                  </div>
+                                  <button
+                                    onClick={() => handleCompleteBooking(booking)}
+                                    disabled={processingBookingId === booking.id}
+                                    className="w-full bg-black hover:bg-neutral-800 active:scale-95 text-white text-xs md:text-sm font-black py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer disabled:opacity-50"
+                                  >
+                                    {processingBookingId === booking.id ? (
+                                      <Loader2 className="w-4 h-4 animate-spin text-white" />
+                                    ) : (
+                                      <RotateCcw className="w-4 h-4 text-white" />
+                                    )}
+                                    <span>Mark Returned</span>
+                                  </button>
+                                </>
+                              )}
+
+                              {booking.rawStatus === 'completed' && (
+                                <>
+                                  <div className="w-full bg-gray-100 border border-gray-300 text-gray-500 font-black text-xs md:text-sm py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 uppercase tracking-wide">
+                                    <Check className="w-4 h-4 text-gray-500" />
+                                    <span>Completed</span>
+                                  </div>
+                                  <div className="w-full bg-black text-white font-black text-xs md:text-sm py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-xs">
+                                    <span>Your Profit: Rp {vendorNetProfit.toLocaleString()}</span>
+                                  </div>
+                                </>
+                              )}
+
+                              {booking.rawStatus === 'rejected' && (
+                                <div className="col-span-2 w-full bg-gray-100 border border-gray-300 text-gray-500 font-bold text-xs md:text-sm py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 uppercase tracking-wide">
+                                  <XCircle className="w-4 h-4 text-gray-500" />
+                                  <span>Rejected Booking</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      })
+                    )}
+                  </div>
+                </div>
+              )
+            })()}
           </div>
         ) : activeTab === 'maintenance' ? (
           <div className="p-5 md:px-8 pb-12 animate-in fade-in">
