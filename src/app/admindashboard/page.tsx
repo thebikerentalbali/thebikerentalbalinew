@@ -165,6 +165,7 @@ export default function AdminDashboard() {
   const getBookingsCountForDate = (dateObj: Date) => {
     const targetDateStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`
     return allBookings.filter(b => {
+      if (selectedVendorFilter !== 'all' && String(b.vendorId) !== String(selectedVendorFilter)) return false
       if (!b.startDate || !b.endDate) return false
       const startStr = typeof b.startDate === 'string' ? b.startDate.substring(0, 10) : new Date(b.startDate).toISOString().split('T')[0]
       const endStr = typeof b.endDate === 'string' ? b.endDate.substring(0, 10) : new Date(b.endDate).toISOString().split('T')[0]
@@ -786,11 +787,10 @@ export default function AdminDashboard() {
                     : 'bg-white border-gray-100 hover:border-gray-300'
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide truncate whitespace-nowrap">Total Bookings</p>
-                  {bookingFilter === 'all' && <span className="text-[10px] font-bold bg-black text-white px-1.5 py-0.5 rounded-md">Active</span>}
-                </div>
-                <p className="text-xl md:text-2xl font-black text-gray-900 mt-1">{allBookings.length}</p>
+                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide truncate whitespace-nowrap">Total Bookings</p>
+                <p className="text-xl md:text-2xl font-black text-gray-900 mt-1">
+                  {allBookings.filter(b => selectedVendorFilter === 'all' || String(b.vendorId) === String(selectedVendorFilter)).length}
+                </p>
               </div>
 
               <div
@@ -798,18 +798,17 @@ export default function AdminDashboard() {
                 className={`p-4 rounded-2xl border shadow-sm transition-all cursor-pointer ${
                   bookingFilter === 'pending'
                     ? 'ring-2 ring-amber-500 bg-amber-50 border-amber-300'
-                    : allBookings.filter(b => b.rawStatus === 'pending').length > 0
+                    : allBookings.filter(b => (selectedVendorFilter === 'all' || String(b.vendorId) === String(selectedVendorFilter)) && b.rawStatus === 'pending').length > 0
                     ? 'bg-amber-50/70 border-amber-200 hover:border-amber-300'
                     : 'bg-white border-gray-100 hover:border-gray-300'
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <p className="text-[11px] font-bold text-amber-700 uppercase tracking-wide flex items-center gap-1 truncate whitespace-nowrap">
-                    <Clock className="w-3 h-3 shrink-0" /> Pending Review
-                  </p>
-                  {bookingFilter === 'pending' && <span className="text-[10px] font-bold bg-amber-500 text-white px-1.5 py-0.5 rounded-md">Active</span>}
-                </div>
-                <p className="text-xl md:text-2xl font-black text-amber-900 mt-1">{allBookings.filter(b => b.rawStatus === 'pending').length}</p>
+                <p className="text-[11px] font-bold text-amber-700 uppercase tracking-wide flex items-center gap-1 truncate whitespace-nowrap">
+                  <Clock className="w-3.5 h-3.5 shrink-0" /> Pending Review
+                </p>
+                <p className="text-xl md:text-2xl font-black text-amber-900 mt-1">
+                  {allBookings.filter(b => (selectedVendorFilter === 'all' || String(b.vendorId) === String(selectedVendorFilter)) && b.rawStatus === 'pending').length}
+                </p>
               </div>
 
               <div
@@ -820,35 +819,30 @@ export default function AdminDashboard() {
                     : 'bg-white border-gray-100 hover:border-gray-300'
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <p className="text-[11px] font-bold text-green-600 uppercase tracking-wide flex items-center gap-1 truncate whitespace-nowrap">
-                    <CheckCircle2 className="w-3 h-3 shrink-0" /> Confirmed
-                  </p>
-                  {bookingFilter === 'confirmed' && <span className="text-[10px] font-bold bg-green-600 text-white px-1.5 py-0.5 rounded-md">Active</span>}
-                </div>
-                <p className="text-xl md:text-2xl font-black text-gray-900 mt-1">{allBookings.filter(b => b.rawStatus === 'confirmed').length}</p>
+                <p className="text-[11px] font-bold text-green-600 uppercase tracking-wide flex items-center gap-1 truncate whitespace-nowrap">
+                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> Confirmed
+                </p>
+                <p className="text-xl md:text-2xl font-black text-gray-900 mt-1">
+                  {allBookings.filter(b => (selectedVendorFilter === 'all' || String(b.vendorId) === String(selectedVendorFilter)) && b.rawStatus === 'confirmed').length}
+                </p>
               </div>
 
               <div
-                onClick={() => setBookingFilter(bookingFilter === 'completed' ? 'all' : 'completed')}
+                onClick={() => setBookingFilter('completed')}
                 className={`p-4 rounded-2xl border shadow-sm transition-all cursor-pointer ${
                   bookingFilter === 'completed'
                     ? 'ring-2 ring-blue-600 bg-blue-50 border-blue-300'
                     : 'bg-white border-gray-100 hover:border-gray-300'
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide truncate whitespace-nowrap">Platform Revenue</p>
-                  {bookingFilter === 'completed' ? (
-                    <span className="text-[10px] font-bold bg-blue-600 text-white px-1.5 py-0.5 rounded-md">Completed</span>
-                  ) : (
-                    <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
-                      {allBookings.filter(b => b.rawStatus === 'completed').length} completed
-                    </span>
-                  )}
-                </div>
-                <p className="text-sm md:text-base lg:text-lg font-black text-gray-900 mt-1 truncate whitespace-nowrap">
-                  Rp {allBookings.reduce((sum, b) => sum + (b.price || 0), 0).toLocaleString()}
+                <p className="text-[11px] font-bold text-blue-600 uppercase tracking-wide flex items-center gap-1 truncate whitespace-nowrap">
+                  <RotateCcw className="w-3.5 h-3.5 shrink-0" /> Completed
+                </p>
+                <p className="text-xl md:text-2xl font-black text-gray-900 mt-1">
+                  {allBookings.filter(b => (selectedVendorFilter === 'all' || String(b.vendorId) === String(selectedVendorFilter)) && b.rawStatus === 'completed').length}
+                </p>
+                <p className="text-[11px] font-bold text-gray-400 mt-0.5 truncate whitespace-nowrap">
+                  Rp {allBookings.filter(b => (selectedVendorFilter === 'all' || String(b.vendorId) === String(selectedVendorFilter)) && (b.rawStatus === 'completed' || b.rawStatus === 'confirmed')).reduce((sum, b) => sum + (b.price || 0), 0).toLocaleString()}
                 </p>
               </div>
             </div>
@@ -896,19 +890,22 @@ export default function AdminDashboard() {
                   <select
                     value={selectedVendorFilter}
                     onChange={(e) => setSelectedVendorFilter(e.target.value)}
-                    className="w-full bg-white border border-gray-200 text-xs font-bold text-gray-800 rounded-xl pl-8 pr-7 py-2 outline-none shadow-xs focus:border-black transition-all cursor-pointer appearance-none"
+                    className="w-full bg-white border border-gray-200 text-xs font-bold text-gray-800 rounded-xl pl-8 pr-7 py-2.5 outline-none shadow-xs focus:border-black transition-all cursor-pointer appearance-none"
                   >
-                    <option value="all">All Vendors</option>
-                    {approvedVendors.map(v => (
-                      <option key={v.id} value={String(v.id)}>{v.name}</option>
-                    ))}
+                    <option value="all">All Vendors ({allBookings.length})</option>
+                    {approvedVendors.map(v => {
+                      const vCount = allBookings.filter(b => String(b.vendorId) === String(v.id)).length;
+                      return (
+                        <option key={v.id} value={String(v.id)}>{v.name} ({vCount})</option>
+                      );
+                    })}
                   </select>
                   <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-2.5 pointer-events-none" />
                 </div>
 
                 <button
                   onClick={() => setBookingFilter(bookingFilter === 'by_vendor' ? 'all' : 'by_vendor')}
-                  className={`px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs border ${
+                  className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs border ${
                     bookingFilter === 'by_vendor'
                       ? 'bg-black text-white border-black'
                       : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
@@ -963,23 +960,31 @@ export default function AdminDashboard() {
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={booking.scooter_img || "/images/scooter.png"} alt="Scooter" className="w-full h-full object-contain" />
                           </div>
-                          <div className="min-w-0 space-y-0.5">
+                          <div className="min-w-0 space-y-1">
+                            {/* Line 1: Scooter Title & Quantity */}
                             <div className="flex items-center gap-2 flex-nowrap">
-                              <h5 className="font-bold text-gray-900 text-sm md:text-base truncate whitespace-nowrap">{booking.scooter}</h5>
-                              <span className="text-[10px] md:text-[11px] font-semibold bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap">
+                              <h5 className="font-black text-gray-900 text-base md:text-lg truncate whitespace-nowrap">{booking.scooter}</h5>
+                              <span className="text-[10px] md:text-[11px] font-bold bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap">
                                 {booking.quantity} {booking.quantity > 1 ? 'Units' : 'Unit'}
                               </span>
-                              {vendorMatch && (
-                                <span className="text-[10px] md:text-[11px] font-semibold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full flex items-center gap-1 shrink-0 whitespace-nowrap">
-                                  <Store className="w-3 h-3" /> {vendorMatch.name}
-                                </span>
-                              )}
                             </div>
-                            {/* Customer Title */}
+
+                            {/* Line 2: Vendor Name BELLOW Scooter Title */}
+                            {vendorMatch && (
+                              <div>
+                                <span className="text-[11px] md:text-xs font-bold bg-blue-50 text-blue-700 px-2.5 py-0.5 rounded-lg inline-flex items-center gap-1.5 w-fit">
+                                  <Store className="w-3.5 h-3.5 shrink-0" />
+                                  <span className="truncate">{vendorMatch.name}</span>
+                                </span>
+                              </div>
+                            )}
+
+                            {/* Line 3: Customer Title */}
                             <p className="text-xs font-medium text-gray-500 truncate">
                               Customer: <strong className="text-gray-800">{booking.customer}</strong> {booking.phone ? `(${booking.phone})` : ''}
                             </p>
-                            {/* Date BELLOW Customer Title */}
+
+                            {/* Line 4: Date BELLOW Customer Title */}
                             <p className="text-[11px] md:text-xs font-semibold text-gray-700 flex items-center gap-1.5">
                               <Calendar className="w-3.5 h-3.5 text-gray-400 shrink-0" />
                               <span>{formatRentalPeriod(booking.startDate, booking.endDate)}</span>
@@ -994,7 +999,7 @@ export default function AdminDashboard() {
                           </div>
 
                           <div className="flex items-center gap-2 shrink-0">
-                            <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide shrink-0 border ${
+                            <span className={`px-3 py-1.5 rounded-[12px] text-xs font-bold uppercase tracking-wide shrink-0 border ${
                               booking.rawStatus === 'pending'
                                 ? 'bg-amber-50 text-amber-800 border-amber-200'
                                 : booking.rawStatus === 'confirmed'
@@ -1006,27 +1011,27 @@ export default function AdminDashboard() {
                               {booking.status}
                             </span>
 
-                            {/* Action Buttons for Admin */}
+                            {/* Action Buttons for Admin - Generous size matching vendor portal */}
                             {booking.rawStatus === 'pending' && (
-                              <div className="flex items-center gap-1.5 ml-1">
+                              <div className="flex items-center gap-2 ml-1">
                                 <button
                                   onClick={() => handleConfirmBooking(booking)}
                                   disabled={processingBookingId === booking.id}
-                                  className="bg-green-600 hover:bg-green-700 active:scale-95 text-white text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-sm transition-all cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                                  className="bg-green-600 hover:bg-green-700 active:scale-95 text-white text-xs md:text-sm font-bold px-4 py-2.5 rounded-[14px] flex items-center gap-1.5 shadow-md shadow-green-600/20 transition-all cursor-pointer disabled:opacity-50 whitespace-nowrap"
                                 >
                                   {processingBookingId === booking.id ? (
-                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    <Loader2 className="w-4 h-4 animate-spin" />
                                   ) : (
-                                    <Check className="w-3.5 h-3.5" />
+                                    <Check className="w-4 h-4" />
                                   )}
                                   <span>Confirm Booking</span>
                                 </button>
                                 <button
                                   onClick={() => handleRejectBooking(booking)}
                                   disabled={processingBookingId === booking.id}
-                                  className="bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold px-2.5 py-1.5 rounded-xl flex items-center gap-1 transition-all cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                                  className="bg-red-50 hover:bg-red-100 text-red-600 text-xs md:text-sm font-bold px-3.5 py-2.5 rounded-[14px] flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 whitespace-nowrap"
                                 >
-                                  <XCircle className="w-3.5 h-3.5" />
+                                  <XCircle className="w-4 h-4" />
                                   <span>Reject</span>
                                 </button>
                               </div>
@@ -1036,12 +1041,12 @@ export default function AdminDashboard() {
                               <button
                                 onClick={() => handleCompleteBooking(booking)}
                                 disabled={processingBookingId === booking.id}
-                                className="bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all cursor-pointer ml-1 disabled:opacity-50 whitespace-nowrap"
+                                className="bg-blue-50 hover:bg-blue-100 active:scale-95 text-blue-700 text-xs md:text-sm font-bold px-4 py-2.5 rounded-[14px] flex items-center gap-1.5 transition-all cursor-pointer ml-1 disabled:opacity-50 whitespace-nowrap border border-blue-200"
                               >
                                 {processingBookingId === booking.id ? (
-                                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                  <Loader2 className="w-4 h-4 animate-spin" />
                                 ) : (
-                                  <RotateCcw className="w-3.5 h-3.5" />
+                                  <RotateCcw className="w-4 h-4" />
                                 )}
                                 <span>Mark Returned</span>
                               </button>
@@ -1073,7 +1078,11 @@ export default function AdminDashboard() {
                   return (
                     <div key={vendor.id} className="bg-white rounded-[24px] border border-gray-100 shadow-sm overflow-hidden transition-all duration-300">
                       <div
-                        onClick={() => setExpandedVendorId(isExpanded ? null : vendor.id)}
+                        onClick={() => {
+                          const willExpand = !isExpanded;
+                          setExpandedVendorId(willExpand ? vendor.id : null);
+                          setSelectedVendorFilter(willExpand ? String(vendor.id) : 'all');
+                        }}
                         className="p-5 md:p-6 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors"
                       >
                         <div className="flex items-center gap-4 min-w-0">
@@ -1092,7 +1101,7 @@ export default function AdminDashboard() {
                         </div>
                         <div className="flex items-center gap-4 shrink-0">
                           <div className="hidden md:block text-right">
-                            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide truncate whitespace-nowrap">Vendor Revenue</p>
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide truncate whitespace-nowrap">Vendor Revenue</p>
                             <p className="font-black text-gray-900 text-base">Rp {vendorRevenue.toLocaleString()}</p>
                           </div>
                           <div className={`p-2 rounded-full transition-transform ${isExpanded ? 'rotate-90 bg-gray-100' : 'bg-gray-50 hover:bg-gray-100'}`}>
@@ -1109,16 +1118,17 @@ export default function AdminDashboard() {
                             </div>
                           ) : (
                             vendorBookings.map(booking => (
-                              <div key={booking.id} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-blue-200 transition-colors">
+                              <div key={booking.id} className="bg-white p-4 md:p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-blue-200 transition-colors">
                                 <div className="flex items-start md:items-center gap-3.5 min-w-0">
                                   <div className="w-12 h-12 bg-gray-50 rounded-xl overflow-hidden shrink-0 p-1 flex items-center justify-center mt-0.5 md:mt-0">
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img src={booking.scooter_img || "/images/scooter.png"} alt="Scooter" className="w-full h-full object-contain" />
                                   </div>
-                                  <div className="min-w-0 space-y-0.5">
+                                  <div className="min-w-0 space-y-1">
+                                    {/* Line 1: Scooter Title & Quantity */}
                                     <div className="flex items-center gap-2 flex-nowrap">
-                                      <h5 className="font-bold text-gray-900 text-sm truncate whitespace-nowrap">{booking.scooter}</h5>
-                                      <span className="text-[10px] font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded shrink-0 whitespace-nowrap">
+                                      <h5 className="font-bold text-gray-900 text-sm md:text-base truncate whitespace-nowrap">{booking.scooter}</h5>
+                                      <span className="text-[10px] font-bold text-gray-700 bg-gray-100 px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap">
                                         {booking.quantity} {booking.quantity > 1 ? 'Units' : 'Unit'}
                                       </span>
                                     </div>
@@ -1137,7 +1147,7 @@ export default function AdminDashboard() {
                                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide truncate whitespace-nowrap">Total Price</p>
                                     <p className="font-bold text-gray-900 text-sm md:text-base whitespace-nowrap">Rp {booking.price.toLocaleString()}</p>
                                   </div>
-                                  <span className={`px-2.5 py-1 rounded text-[11px] font-bold uppercase tracking-wide shrink-0 ${
+                                  <span className={`px-3 py-1.5 rounded-[12px] text-[11px] font-bold uppercase tracking-wide shrink-0 ${
                                     booking.rawStatus === 'pending'
                                       ? 'bg-amber-100 text-amber-800'
                                       : booking.rawStatus === 'confirmed'
@@ -1148,21 +1158,23 @@ export default function AdminDashboard() {
                                   </span>
 
                                   {booking.rawStatus === 'pending' && (
-                                    <button
-                                      onClick={() => handleConfirmBooking(booking)}
-                                      disabled={processingBookingId === booking.id}
-                                      className="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 cursor-pointer disabled:opacity-50 whitespace-nowrap"
-                                    >
-                                      <Check className="w-3.5 h-3.5" /> Confirm
-                                    </button>
+                                    <div className="flex items-center gap-2 ml-1">
+                                      <button
+                                        onClick={() => handleConfirmBooking(booking)}
+                                        disabled={processingBookingId === booking.id}
+                                        className="bg-green-600 hover:bg-green-700 text-white text-xs md:text-sm font-bold px-4 py-2.5 rounded-[14px] flex items-center gap-1.5 cursor-pointer disabled:opacity-50 whitespace-nowrap shadow-sm"
+                                      >
+                                        <Check className="w-4 h-4" /> Confirm
+                                      </button>
+                                    </div>
                                   )}
                                   {booking.rawStatus === 'confirmed' && (
                                     <button
                                       onClick={() => handleCompleteBooking(booking)}
                                       disabled={processingBookingId === booking.id}
-                                      className="bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                                      className="bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs md:text-sm font-bold px-4 py-2.5 rounded-[14px] flex items-center gap-1.5 cursor-pointer disabled:opacity-50 whitespace-nowrap border border-blue-200"
                                     >
-                                      <RotateCcw className="w-3.5 h-3.5" /> Return
+                                      <RotateCcw className="w-4 h-4" /> Return
                                     </button>
                                   )}
                                 </div>
@@ -1172,7 +1184,7 @@ export default function AdminDashboard() {
                         </div>
                       )}
                     </div>
-                  )
+                  );
                 })}
               </div>
             )}
