@@ -691,15 +691,19 @@ export default function VendorDashboard() {
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={booking.scooter_img || "/images/scooter.png"} alt="Scooter" className="w-full h-full object-contain" />
                         </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2 mb-1 flex-nowrap">
+                        <div className="min-w-0 space-y-0.5">
+                          <div className="flex items-center gap-2 flex-nowrap">
                             <h5 className="font-bold text-gray-900 text-sm md:text-base truncate whitespace-nowrap">{booking.scooter}</h5>
                             <span className="text-[10px] md:text-[11px] font-semibold bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap">
                               {booking.quantity} {booking.quantity > 1 ? 'Units' : 'Unit'}
                             </span>
                           </div>
-                          <p className="text-xs font-medium text-gray-500 truncate whitespace-nowrap">
-                            Customer: <strong className="text-gray-800">{booking.customer}</strong> {booking.phone ? `(${booking.phone})` : ''} • Dates: <span className="text-gray-700 font-semibold">{formatRentalPeriod(booking.startDate, booking.endDate)}</span>
+                          <p className="text-xs font-medium text-gray-500 truncate">
+                            Customer: <strong className="text-gray-800">{booking.customer}</strong> {booking.phone ? `(${booking.phone})` : ''}
+                          </p>
+                          <p className="text-[11px] md:text-xs font-semibold text-gray-700 flex items-center gap-1.5">
+                            <CalendarIcon className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                            <span>{formatRentalPeriod(booking.startDate, booking.endDate)}</span>
                           </p>
                         </div>
                       </div>

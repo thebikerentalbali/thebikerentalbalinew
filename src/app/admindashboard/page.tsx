@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Users, Bike, DollarSign, Settings, Bell, Search, Store, BarChart3, Home, ChevronRight, TrendingUp, CalendarDays, MoreVertical, Filter, ArrowUpRight, CheckCircle2, AlertCircle, Menu, UserCheck, MoreHorizontal, Loader2, XCircle, RotateCcw, Clock, Check } from "lucide-react"
+import { Users, Bike, DollarSign, Settings, Bell, Search, Store, BarChart3, Home, ChevronRight, ChevronLeft, Calendar, TrendingUp, CalendarDays, MoreVertical, Filter, ArrowUpRight, CheckCircle2, AlertCircle, Menu, UserCheck, MoreHorizontal, Loader2, XCircle, RotateCcw, Clock, Check } from "lucide-react"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 
@@ -13,6 +13,12 @@ export default function AdminDashboard() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [bookingFilter, setBookingFilter] = useState<'all' | 'pending' | 'confirmed' | 'completed' | 'by_vendor'>('all')
   const [processingBookingId, setProcessingBookingId] = useState<string | null>(null)
+  const [calendarStartDate, setCalendarStartDate] = useState<Date>(() => {
+    const d = new Date()
+    d.setDate(d.getDate() - 2) // center 7-day strip around today
+    return d
+  })
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(null)
 
   // Real Data
   const [pendingVendors, setPendingVendors] = useState<any[]>([])
@@ -135,6 +141,55 @@ export default function AdminDashboard() {
     if (startStr && !endStr) return formatIndoDate(startStr)
     if (!startStr && endStr) return formatIndoDate(endStr)
     return `${formatIndoDate(startStr)} – ${formatIndoDate(endStr)}`
+  }
+
+  const formatMonthYear = (d: Date) => {
+    const monthNames = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ]
+    return `${monthNames[d.getMonth()]} ${d.getFullYear()}`
+  }
+
+  const get7Days = (baseDate: Date) => {
+    const days = []
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(baseDate)
+      d.setDate(baseDate.getDate() + i)
+      days.push(d)
+    }
+    return days
+  }
+
+  const getBookingsCountForDate = (dateObj: Date) => {
+    const targetDateStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`
+    return allBookings.filter(b => {
+      if (!b.startDate || !b.endDate) return false
+      const startStr = typeof b.startDate === 'string' ? b.startDate.substring(0, 10) : new Date(b.startDate).toISOString().split('T')[0]
+      const endStr = typeof b.endDate === 'string' ? b.endDate.substring(0, 10) : new Date(b.endDate).toISOString().split('T')[0]
+      return targetDateStr >= startStr && targetDateStr <= endStr
+    }).length
+  }
+
+  const handlePrevWeek = () => {
+    const next = new Date(calendarStartDate)
+    next.setDate(next.getDate() - 7)
+    setCalendarStartDate(next)
+  }
+
+  const handleNextWeek = () => {
+    const next = new Date(calendarStartDate)
+    next.setDate(next.getDate() + 7)
+    setCalendarStartDate(next)
+  }
+
+  const handleToday = () => {
+    const d = new Date()
+    d.setDate(d.getDate() - 2)
+    setCalendarStartDate(d)
+    const now = new Date()
+    const todayIso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+    setSelectedCalendarDate(todayIso)
   }
 
   useEffect(() => {
@@ -614,7 +669,112 @@ export default function AdminDashboard() {
             </div>
           </div>
         ) : activeTab === 'bookings' ? (
-          <div className="p-5 md:px-8 md:pb-12 animate-in fade-in space-y-6">
+          <div className="p-4 md:p-8 md:pb-12 animate-in fade-in space-y-5">
+            {/* Floating 7-Days Calendar Bar */}
+            <div className="bg-white/95 backdrop-blur-md p-4 md:p-5 rounded-3xl border border-gray-100 shadow-sm space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-9 h-9 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                    <Calendar className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="text-[10px] md:text-[11px] font-bold text-gray-400 uppercase tracking-wider truncate">Schedule & Availability</h4>
+                    <p className="text-sm md:text-base font-black text-gray-900 truncate">
+                      {formatMonthYear(calendarStartDate)}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1 shrink-0">
+                  {selectedCalendarDate && (
+                    <button
+                      onClick={() => setSelectedCalendarDate(null)}
+                      className="text-[11px] font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-2.5 py-1.5 rounded-xl transition-colors cursor-pointer mr-1"
+                    >
+                      Show All Dates
+                    </button>
+                  )}
+                  <button
+                    onClick={handlePrevWeek}
+                    className="p-1.5 md:p-2 rounded-xl hover:bg-gray-100 text-gray-600 transition-colors cursor-pointer"
+                    title="Previous 7 Days"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={handleToday}
+                    className="px-2.5 py-1 text-xs font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-colors cursor-pointer"
+                  >
+                    Today
+                  </button>
+                  <button
+                    onClick={handleNextWeek}
+                    className="p-1.5 md:p-2 rounded-xl hover:bg-gray-100 text-gray-600 transition-colors cursor-pointer"
+                    title="Next 7 Days"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* 7-Days Strip */}
+              <div className="grid grid-cols-7 gap-1.5 md:gap-3">
+                {get7Days(calendarStartDate).map((d) => {
+                  const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+                  const isSelected = selectedCalendarDate === dateStr
+                  const now = new Date()
+                  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+                  const isToday = dateStr === todayStr
+                  const count = getBookingsCountForDate(d)
+                  const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab']
+                  const dayName = dayNames[d.getDay()]
+                  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
+                  const monthName = monthNames[d.getMonth()]
+
+                  return (
+                    <button
+                      key={dateStr}
+                      onClick={() => setSelectedCalendarDate(isSelected ? null : dateStr)}
+                      className={`flex flex-col items-center justify-between p-2 md:p-3 rounded-2xl transition-all cursor-pointer border ${
+                        isSelected
+                          ? 'bg-black text-white border-black shadow-md scale-[1.02]'
+                          : isToday
+                          ? 'bg-blue-50/70 text-blue-900 border-blue-200 hover:bg-blue-100'
+                          : 'bg-gray-50/70 text-gray-700 border-gray-100 hover:bg-gray-100'
+                      }`}
+                    >
+                      <span className={`text-[9px] md:text-[10px] font-bold uppercase ${isSelected ? 'text-gray-300' : 'text-gray-400'}`}>
+                        {dayName}
+                      </span>
+                      <span className="text-sm md:text-base font-black my-0.5">
+                        {String(d.getDate()).padStart(2, '0')}
+                      </span>
+                      <span className={`text-[9px] font-semibold hidden md:inline ${isSelected ? 'text-gray-300' : 'text-gray-400'}`}>
+                        {monthName}
+                      </span>
+
+                      {/* Booking Data Badge */}
+                      <div className="mt-1 w-full flex justify-center">
+                        {count > 0 ? (
+                          <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-bold shrink-0 ${
+                            isSelected
+                              ? 'bg-white text-black'
+                              : 'bg-emerald-500 text-white shadow-xs'
+                          }`}>
+                            {count} {count > 1 ? 'B' : 'B'}
+                          </span>
+                        ) : (
+                          <span className={`text-[9px] font-bold ${isSelected ? 'text-gray-400' : 'text-gray-300'}`}>
+                            -
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
             {/* Top Summary Banner */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
               <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
@@ -675,37 +835,64 @@ export default function AdminDashboard() {
                   Grouped by Vendor
                 </button>
               </div>
+
+              {selectedCalendarDate && (
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-100">
+                  <Calendar className="w-3.5 h-3.5" />
+                  <span>Date: {formatIndoDate(selectedCalendarDate)}</span>
+                  <button
+                    onClick={() => setSelectedCalendarDate(null)}
+                    className="ml-1 text-blue-900 hover:text-blue-700 font-bold"
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Content based on Filter */}
             {bookingFilter !== 'by_vendor' ? (
               <div className="space-y-3">
                 {allBookings.filter(b => {
-                  if (bookingFilter === 'pending') return b.rawStatus === 'pending';
-                  if (bookingFilter === 'confirmed') return b.rawStatus === 'confirmed';
-                  if (bookingFilter === 'completed') return b.rawStatus === 'completed';
+                  if (bookingFilter === 'pending') if (b.rawStatus !== 'pending') return false;
+                  if (bookingFilter === 'confirmed') if (b.rawStatus !== 'confirmed') return false;
+                  if (bookingFilter === 'completed') if (b.rawStatus !== 'completed') return false;
+
+                  if (selectedCalendarDate) {
+                    if (!b.startDate || !b.endDate) return false;
+                    const startStr = typeof b.startDate === 'string' ? b.startDate.substring(0, 10) : new Date(b.startDate).toISOString().split('T')[0];
+                    const endStr = typeof b.endDate === 'string' ? b.endDate.substring(0, 10) : new Date(b.endDate).toISOString().split('T')[0];
+                    if (selectedCalendarDate < startStr || selectedCalendarDate > endStr) return false;
+                  }
                   return true;
                 }).length === 0 ? (
                   <div className="bg-white p-12 text-center text-gray-400 font-medium rounded-3xl border border-gray-100">
-                    No bookings found for this filter.
+                    No bookings found for this {selectedCalendarDate ? 'selected date' : 'filter'}.
                   </div>
                 ) : (
                   allBookings.filter(b => {
-                    if (bookingFilter === 'pending') return b.rawStatus === 'pending';
-                    if (bookingFilter === 'confirmed') return b.rawStatus === 'confirmed';
-                    if (bookingFilter === 'completed') return b.rawStatus === 'completed';
+                    if (bookingFilter === 'pending') if (b.rawStatus !== 'pending') return false;
+                    if (bookingFilter === 'confirmed') if (b.rawStatus !== 'confirmed') return false;
+                    if (bookingFilter === 'completed') if (b.rawStatus !== 'completed') return false;
+
+                    if (selectedCalendarDate) {
+                      if (!b.startDate || !b.endDate) return false;
+                      const startStr = typeof b.startDate === 'string' ? b.startDate.substring(0, 10) : new Date(b.startDate).toISOString().split('T')[0];
+                      const endStr = typeof b.endDate === 'string' ? b.endDate.substring(0, 10) : new Date(b.endDate).toISOString().split('T')[0];
+                      if (selectedCalendarDate < startStr || selectedCalendarDate > endStr) return false;
+                    }
                     return true;
                   }).map(booking => {
                     const vendorMatch = approvedVendors.find(v => String(v.id) === String(booking.vendorId))
                     return (
                       <div key={booking.id} className="bg-white p-4 md:p-5 rounded-3xl border border-gray-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-gray-200 transition-all">
-                        <div className="flex items-center gap-3.5 md:gap-4 min-w-0">
-                          <div className="w-14 h-14 bg-gray-50 rounded-2xl overflow-hidden shrink-0 border border-gray-100 p-1 flex items-center justify-center">
+                        <div className="flex items-start md:items-center gap-3.5 md:gap-4 min-w-0">
+                          <div className="w-14 h-14 bg-gray-50 rounded-2xl overflow-hidden shrink-0 border border-gray-100 p-1 flex items-center justify-center mt-0.5 md:mt-0">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={booking.scooter_img || "/images/scooter.png"} alt="Scooter" className="w-full h-full object-contain" />
                           </div>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2 mb-1 flex-nowrap">
+                          <div className="min-w-0 space-y-0.5">
+                            <div className="flex items-center gap-2 flex-nowrap">
                               <h5 className="font-bold text-gray-900 text-sm md:text-base truncate whitespace-nowrap">{booking.scooter}</h5>
                               <span className="text-[10px] md:text-[11px] font-semibold bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap">
                                 {booking.quantity} {booking.quantity > 1 ? 'Units' : 'Unit'}
@@ -716,8 +903,14 @@ export default function AdminDashboard() {
                                 </span>
                               )}
                             </div>
-                            <p className="text-xs font-medium text-gray-500 truncate whitespace-nowrap">
-                              Customer: <strong className="text-gray-800">{booking.customer}</strong> • Dates: <span className="text-gray-700 font-semibold">{formatRentalPeriod(booking.startDate, booking.endDate)}</span>
+                            {/* Customer Title */}
+                            <p className="text-xs font-medium text-gray-500 truncate">
+                              Customer: <strong className="text-gray-800">{booking.customer}</strong> {booking.phone ? `(${booking.phone})` : ''}
+                            </p>
+                            {/* Date BELLOW Customer Title */}
+                            <p className="text-[11px] md:text-xs font-semibold text-gray-700 flex items-center gap-1.5">
+                              <Calendar className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                              <span>{formatRentalPeriod(booking.startDate, booking.endDate)}</span>
                             </p>
                           </div>
                         </div>
@@ -792,7 +985,16 @@ export default function AdminDashboard() {
               /* Grouped by Vendor Accordion */
               <div className="space-y-4">
                 {approvedVendors.map(vendor => {
-                  const vendorBookings = allBookings.filter(b => String(b.vendorId) === String(vendor.id));
+                  const vendorBookings = allBookings.filter(b => {
+                    if (String(b.vendorId) !== String(vendor.id)) return false;
+                    if (selectedCalendarDate) {
+                      if (!b.startDate || !b.endDate) return false;
+                      const startStr = typeof b.startDate === 'string' ? b.startDate.substring(0, 10) : new Date(b.startDate).toISOString().split('T')[0];
+                      const endStr = typeof b.endDate === 'string' ? b.endDate.substring(0, 10) : new Date(b.endDate).toISOString().split('T')[0];
+                      if (selectedCalendarDate < startStr || selectedCalendarDate > endStr) return false;
+                    }
+                    return true;
+                  });
                   const vendorRevenue = vendorBookings.reduce((sum, b) => sum + (b.price || 0), 0);
                   const isExpanded = expandedVendorId === vendor.id;
 
@@ -836,20 +1038,24 @@ export default function AdminDashboard() {
                           ) : (
                             vendorBookings.map(booking => (
                               <div key={booking.id} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-blue-200 transition-colors">
-                                <div className="flex items-center gap-3.5 min-w-0">
-                                  <div className="w-12 h-12 bg-gray-50 rounded-xl overflow-hidden shrink-0 p-1 flex items-center justify-center">
+                                <div className="flex items-start md:items-center gap-3.5 min-w-0">
+                                  <div className="w-12 h-12 bg-gray-50 rounded-xl overflow-hidden shrink-0 p-1 flex items-center justify-center mt-0.5 md:mt-0">
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img src={booking.scooter_img || "/images/scooter.png"} alt="Scooter" className="w-full h-full object-contain" />
                                   </div>
-                                  <div className="min-w-0">
-                                    <div className="flex items-center gap-2 mb-1 flex-nowrap">
+                                  <div className="min-w-0 space-y-0.5">
+                                    <div className="flex items-center gap-2 flex-nowrap">
                                       <h5 className="font-bold text-gray-900 text-sm truncate whitespace-nowrap">{booking.scooter}</h5>
                                       <span className="text-[10px] font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded shrink-0 whitespace-nowrap">
                                         {booking.quantity} {booking.quantity > 1 ? 'Units' : 'Unit'}
                                       </span>
                                     </div>
-                                    <p className="text-xs font-medium text-gray-500 truncate whitespace-nowrap">
-                                      Customer: <strong className="text-gray-800">{booking.customer}</strong> • Dates: <span className="text-gray-700 font-semibold">{formatRentalPeriod(booking.startDate, booking.endDate)}</span>
+                                    <p className="text-xs font-medium text-gray-500 truncate">
+                                      Customer: <strong className="text-gray-800">{booking.customer}</strong>
+                                    </p>
+                                    <p className="text-[11px] md:text-xs font-semibold text-gray-700 flex items-center gap-1.5">
+                                      <Calendar className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                                      <span>{formatRentalPeriod(booking.startDate, booking.endDate)}</span>
                                     </p>
                                   </div>
                                 </div>
