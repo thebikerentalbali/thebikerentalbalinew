@@ -225,7 +225,7 @@ export default function CheckoutPage() {
     });
     message = message.trimEnd() + `\n\n*TOTAL PRICE:* Rp ${getTotalPrice().toLocaleString()}`;
 
-    return `https://wa.me/${targetPhone}?text=${encodeURIComponent(message)}`;
+    return `https://api.whatsapp.com/send?phone=${targetPhone}&text=${encodeURIComponent(message)}`;
   }
 
   const handleConfirmBooking = async (e: React.MouseEvent) => {
@@ -262,7 +262,7 @@ export default function CheckoutPage() {
     } finally {
       setIsSubmitting(false)
       const waUrl = getWhatsAppLink()
-      window.open(waUrl, '_blank')
+      window.location.href = waUrl
     }
   }
 
@@ -488,28 +488,6 @@ export default function CheckoutPage() {
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   placeholder="Last Name"
-                  className="w-full h-14 bg-white/60 border-none rounded-2xl px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none text-gray-800 transition-shadow"
-                />
-              </div>
-            </div>
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <label className="block text-[14px] text-gray-700 font-medium mb-1.5 pl-1">WhatsApp / Phone Number</label>
-                <input
-                  type="tel"
-                  value={customerPhone}
-                  onChange={(e) => setCustomerPhone(e.target.value)}
-                  placeholder="+62 812-3456-7890"
-                  className="w-full h-14 bg-white/60 border-none rounded-2xl px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none text-gray-800 transition-shadow"
-                />
-              </div>
-              <div className="flex-1">
-                <label className="block text-[14px] text-gray-700 font-medium mb-1.5 pl-1">Email (Optional)</label>
-                <input
-                  type="email"
-                  value={customerEmail}
-                  onChange={(e) => setCustomerEmail(e.target.value)}
-                  placeholder="name@email.com"
                   className="w-full h-14 bg-white/60 border-none rounded-2xl px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none text-gray-800 transition-shadow"
                 />
               </div>
