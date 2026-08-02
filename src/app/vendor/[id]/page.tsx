@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ChevronLeft, ChevronRight, MapPin, Star, Share, Loader2, X, BadgeCheck, ShieldCheck, CheckCircle2, Bike, Sparkles, Clock, MessageCircle, Check } from "lucide-react"
+import { ChevronLeft, ChevronRight, MapPin, Star, Share, Loader2, X, BadgeCheck, MessageCircle, Check } from "lucide-react"
 import { useRouter, useParams } from "next/navigation"
 import Link from "next/link"
 import { createClient } from '@/lib/supabase/client'
@@ -343,7 +343,7 @@ export default function VendorPage() {
       </div>
 
       {/* ======================================================== */}
-      {/* DESKTOP LAYOUT (MD AND UP) - ENHANCED RESPONSIVE DESIGN */}
+      {/* DESKTOP LAYOUT (MD AND UP) - CLEAN & SIMPLE LIKE MOBILE */}
       {/* ======================================================== */}
       <div className="hidden md:block w-full max-w-7xl mx-auto px-6 lg:px-8 py-8 space-y-8">
         
@@ -366,102 +366,65 @@ export default function VendorPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* WhatsApp Chat Button */}
-            <a 
-              href={getWhatsAppUrl()}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-white border border-emerald-200 text-emerald-700 hover:bg-emerald-50 px-4 py-2.5 rounded-full text-sm font-semibold flex items-center gap-2 shadow-xs transition-all"
-            >
-              <MessageCircle className="w-4 h-4 text-emerald-600" />
-              <span>WhatsApp Chat</span>
-            </a>
-
-            {/* Share Button */}
             <button 
               onClick={handleShare}
               className="bg-white border border-gray-200 text-gray-800 hover:bg-gray-50 px-4 py-2.5 rounded-full text-sm font-semibold flex items-center gap-2 shadow-xs transition-all active:scale-95"
             >
               {copiedLink ? <Check className="w-4 h-4 text-emerald-600" /> : <Share className="w-4 h-4 text-gray-600" />}
-              <span>{copiedLink ? "Link Copied!" : "Share Profile"}</span>
-            </button>
-
-            {/* Write Review Button */}
-            <button 
-              onClick={() => setIsWriteReviewModalOpen(true)}
-              className="bg-black text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-800 shadow-xs transition-all"
-            >
-              Write a Review
+              <span>{copiedLink ? "Link Copied!" : "Share"}</span>
             </button>
           </div>
         </div>
 
-        {/* Panoramic Cover & Vendor Header Banner */}
-        <div className="bg-white rounded-[32px] overflow-hidden shadow-sm border border-gray-100">
-          {/* Panoramic Cover */}
-          <div className="relative h-64 lg:h-72 w-full bg-gradient-to-r from-gray-200 to-gray-300">
+        {/* Vendor Header Card */}
+        <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100">
+          {/* Cover Photo */}
+          <div className="relative h-60 lg:h-72 w-full bg-gray-100">
             {vendor.image_url ? (
               /* eslint-disable-next-line @next/next/no-img-element */
               <img src={vendor.image_url} alt={vendor.name} className="w-full h-full object-cover" />
             ) : (
-              <div className="w-full h-full bg-gradient-to-r from-slate-800 via-zinc-800 to-neutral-900" />
+              <div className="w-full h-full bg-gradient-to-r from-gray-200 to-gray-300" />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10" />
-
-            {/* Floating Top Badge */}
-            <div className="absolute top-6 right-6 bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full flex items-center gap-2 shadow-md border border-white/40">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span className="text-xs font-bold text-gray-900 tracking-wider uppercase">Verified Partner • Bali</span>
-            </div>
           </div>
 
-          {/* Profile Details Bar */}
-          <div className="px-8 pb-8 pt-0 relative">
+          {/* Profile Details */}
+          <div className="px-8 pb-8 pt-0">
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 -mt-14 relative z-10 mb-6">
               
               {/* Avatar & Title */}
               <div className="flex items-end gap-5">
-                <div className="w-28 h-28 lg:w-32 lg:h-32 rounded-3xl overflow-hidden bg-white border-4 border-white shadow-xl shrink-0 flex items-center justify-center">
+                <div className="w-28 h-28 lg:w-32 lg:h-32 rounded-full overflow-hidden bg-white border-4 border-white shadow-md shrink-0 flex items-center justify-center">
                   {vendor.logo ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img src={vendor.logo} alt={vendor.name} className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-4xl font-black text-gray-400">{(vendor.name || "V").substring(0, 2).toUpperCase()}</span>
+                    <span className="text-3xl font-bold text-gray-400">{(vendor.name || "V").substring(0, 2).toUpperCase()}</span>
                   )}
                 </div>
 
                 <div className="pb-1">
-                  <div className="flex items-center gap-2.5 mb-1">
-                    <h1 className="text-3xl lg:text-4xl font-black text-gray-900 tracking-tight">{vendor.name}</h1>
-                    <BadgeCheck className="w-7 h-7 text-white fill-blue-500 shrink-0" />
+                  <div className="flex items-center gap-2 mb-1">
+                    <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 leading-tight">{vendor.name}</h1>
+                    <BadgeCheck className="w-6 h-6 text-white fill-blue-500 shrink-0" />
                   </div>
-                  <div className="flex items-center gap-3 text-gray-500 text-sm">
-                    <div className="flex items-center gap-1.5">
-                      <MapPin className="w-4 h-4 text-gray-400 shrink-0" />
-                      <span className="font-medium text-gray-700">{vendor.address || 'Bali, Indonesia'}</span>
-                    </div>
-                    <span>•</span>
-                    <span className="text-emerald-700 font-bold bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/60 text-xs">
-                      100% Inspected Fleet
-                    </span>
-                  </div>
+                  <p className="text-gray-500 text-sm">{vendor.address || 'Premium scooter rental in Bali'}</p>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center gap-3 self-start lg:self-end">
+              <div className="flex items-center gap-3">
                 <button 
                   onClick={() => setIsWriteReviewModalOpen(true)}
-                  className="bg-black text-white font-bold px-6 py-3 rounded-full hover:bg-gray-800 shadow-sm transition-transform hover:scale-105 flex items-center gap-2 text-sm"
+                  className="bg-black text-white font-bold px-6 py-3 rounded-full hover:bg-gray-800 shadow-sm transition-colors text-sm"
                 >
-                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  Write Review
+                  Write a Review
                 </button>
                 <a 
                   href={getWhatsAppUrl()}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-emerald-600 text-white font-bold px-6 py-3 rounded-full hover:bg-emerald-700 shadow-sm transition-transform hover:scale-105 flex items-center gap-2 text-sm"
+                  className="bg-[#25D366] text-white font-bold px-6 py-3 rounded-full hover:bg-[#20bd5a] shadow-sm transition-colors flex items-center gap-2 text-sm"
                 >
                   <MessageCircle className="w-4 h-4" />
                   Inquire on WhatsApp
@@ -469,85 +432,50 @@ export default function VendorPage() {
               </div>
             </div>
 
-            {/* 4 Stat Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 pt-6 border-t border-gray-100">
-              
+            {/* 3 Column Stats - Simple & Clean just like Mobile */}
+            <div className="flex items-center gap-8 py-4 border-t border-gray-100 max-w-md">
               {/* Rating */}
-              <div 
-                onClick={() => setIsReviewModalOpen(true)}
-                className="bg-gray-50/80 hover:bg-gray-100/80 transition-colors p-4 rounded-2xl cursor-pointer border border-gray-100 flex items-center gap-3.5"
-              >
-                <div className="w-11 h-11 rounded-xl bg-yellow-400/10 border border-yellow-400/20 flex items-center justify-center shrink-0">
-                  <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+              <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setIsReviewModalOpen(true)}>
+                <div className="flex items-center gap-1">
+                  <Star className="w-4 h-4 text-gray-800 fill-gray-800" />
+                  <span className="font-bold text-lg text-gray-900">5.0</span>
                 </div>
-                <div>
-                  <div className="flex items-center gap-1">
-                    <span className="font-black text-lg text-gray-900">5.0</span>
-                    <span className="text-[10px] text-yellow-700 font-bold bg-yellow-100 px-1.5 py-0.5 rounded">Top Rated</span>
-                  </div>
-                  <p className="text-xs text-gray-500 font-medium mt-0.5">Average Customer Rating</p>
-                </div>
+                <span className="text-sm text-gray-500">rating</span>
               </div>
+              
+              <div className="w-px h-6 bg-gray-200" />
 
               {/* Reviews */}
-              <div 
-                onClick={() => setIsReviewModalOpen(true)}
-                className="bg-gray-50/80 hover:bg-gray-100/80 transition-colors p-4 rounded-2xl cursor-pointer border border-gray-100 flex items-center gap-3.5"
-              >
-                <div className="w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
-                  <Sparkles className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <span className="font-black text-lg text-gray-900">{reviews.length}+</span>
-                  <p className="text-xs text-gray-500 font-medium mt-0.5">Verified Reviews</p>
-                </div>
+              <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setIsReviewModalOpen(true)}>
+                <span className="font-bold text-lg text-gray-900">{reviews.length}+</span>
+                <span className="text-sm text-gray-500">reviews</span>
               </div>
 
-              {/* Scooters Fleet */}
-              <div className="bg-gray-50/80 p-4 rounded-2xl border border-gray-100 flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center shrink-0">
-                  <Bike className="w-5 h-5 text-purple-600" />
-                </div>
-                <div>
-                  <span className="font-black text-lg text-gray-900">{scooters.reduce((sum, scooter) => sum + (scooter.total_units || 1), 0)}</span>
-                  <p className="text-xs text-gray-500 font-medium mt-0.5">Scooters in Fleet</p>
-                </div>
-              </div>
+              <div className="w-px h-6 bg-gray-200" />
 
-              {/* Instant Delivery */}
-              <div className="bg-gray-50/80 p-4 rounded-2xl border border-gray-100 flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0">
-                  <ShieldCheck className="w-5 h-5 text-emerald-600" />
-                </div>
-                <div>
-                  <span className="font-black text-lg text-gray-900">Instant</span>
-                  <p className="text-xs text-gray-500 font-medium mt-0.5">Booking & Hotel Delivery</p>
-                </div>
+              {/* Scooters Count */}
+              <div className="flex items-center gap-2.5">
+                <span className="font-bold text-lg text-gray-900">{scooters.reduce((sum, scooter) => sum + (scooter.total_units || 1), 0)}</span>
+                <span className="text-sm text-gray-500">scooters</span>
               </div>
-
             </div>
           </div>
         </div>
 
-        {/* 2-Column Responsive Layout */}
+        {/* 2-Column Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
           {/* Main 8 Columns (Fleet & Reviews) */}
           <div className="lg:col-span-8 space-y-8">
             
-            {/* Scooters Fleet Card */}
-            <div className="bg-white rounded-[32px] p-6 lg:p-8 shadow-sm border border-gray-100">
+            {/* Scooters Fleet */}
+            <div className="bg-white rounded-3xl p-6 lg:p-8 shadow-sm border border-gray-100">
               
               {/* Header with Brand Filter */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <div className="flex items-center justify-between mb-6">
                 <div>
-                  <div className="flex items-center gap-2.5">
-                    <h2 className="text-2xl font-black text-gray-900">Available Scooters</h2>
-                    <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
-                      {scooters.length} Models Live
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-500 mt-1">Select a bike to view full details and book online.</p>
+                  <h2 className="text-xl font-bold text-gray-900">Available Scooters</h2>
+                  <p className="text-sm text-gray-500 mt-0.5">{scooters.length} bikes available</p>
                 </div>
 
                 {/* Brand Filter Chips */}
@@ -559,7 +487,7 @@ export default function VendorPage() {
                         onClick={() => setSelectedBrand(brand)}
                         className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
                           selectedBrand === brand
-                            ? "bg-black text-white shadow-xs"
+                            ? "bg-black text-white"
                             : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                         }`}
                       >
@@ -573,37 +501,32 @@ export default function VendorPage() {
               {/* Scooter Grid */}
               {filteredScooters.length === 0 ? (
                 <div className="bg-gray-50 rounded-2xl p-12 text-center flex flex-col items-center justify-center">
-                  <Bike className="w-12 h-12 text-gray-300 mb-3" />
-                  <h3 className="text-base font-bold text-gray-700">No scooters match the selected brand</h3>
-                  <p className="text-xs text-gray-500 mt-1">Try selecting 'All' to view all available inventory.</p>
+                  <p className="text-sm font-semibold text-gray-700">No scooters match the selected brand</p>
                   <button 
                     onClick={() => setSelectedBrand("All")}
-                    className="mt-4 px-4 py-2 bg-black text-white text-xs font-semibold rounded-full"
+                    className="mt-3 px-4 py-2 bg-black text-white text-xs font-semibold rounded-full"
                   >
                     Reset Filter
                   </button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {filteredScooters.map((scooter) => (
                     <Link 
                       key={scooter.id} 
                       href={`/detail/${scooter.id}`}
-                      className="group bg-white rounded-3xl p-5 border border-gray-100 shadow-sm hover:shadow-xl hover:border-gray-200 transition-all duration-300 flex flex-col justify-between"
+                      className="bg-white rounded-3xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
                     >
                       <div>
-                        {/* Image Backdrop with Badges */}
-                        <div className="relative w-full h-44 bg-[#F8F9FA] rounded-2xl flex items-center justify-center p-4 mb-4 overflow-hidden group-hover:bg-[#F3F4F6] transition-colors">
-                          {/* Brand Pill */}
-                          <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-full text-[11px] font-extrabold tracking-wider uppercase text-gray-700 border border-gray-100 shadow-xs">
+                        {/* Image Backdrop */}
+                        <div className="relative w-full h-44 bg-[#F8F9FA] rounded-2xl flex items-center justify-center p-3 mb-3">
+                          <span className="absolute top-3 left-3 text-[10px] font-semibold tracking-wider uppercase text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">
                             {scooter.brand || 'Scooter'}
                           </span>
-
-                          {/* Available Units Pill */}
-                          <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <span className="text-[10px] font-extrabold text-emerald-600 uppercase tracking-wider">
-                              {scooter.available_units || 2} Available
+                          <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-[#00A86B]/10 px-2 py-0.5 rounded-full border border-[#00A86B]/20">
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#00A86B]"></div>
+                            <span className="text-[10px] font-bold text-[#00A86B] uppercase tracking-wider">
+                              {scooter.available_units || 2} AVAILABLE
                             </span>
                           </div>
 
@@ -611,50 +534,27 @@ export default function VendorPage() {
                           <img 
                             src={scooter.image_url || "/images/scooter.png"} 
                             alt={scooter.name} 
-                            className="w-full h-full object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-300" 
+                            className="w-full h-full object-contain drop-shadow-md" 
                           />
                         </div>
 
                         {/* Title */}
-                        <h3 className="font-bold text-gray-900 text-lg group-hover:text-black transition-colors mb-2">
+                        <h3 className="font-semibold text-gray-900 text-base mb-1">
                           {scooter.name}
                         </h3>
-
-                        {/* Specifications Pills */}
-                        <div className="flex flex-wrap gap-1.5 mb-4">
-                          {scooter.engine && (
-                            <span className="text-[11px] font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md">
-                              {scooter.engine}
-                            </span>
-                          )}
-                          {scooter.transmission && (
-                            <span className="text-[11px] font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md">
-                              {scooter.transmission}
-                            </span>
-                          )}
-                          {scooter.year && (
-                            <span className="text-[11px] font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md">
-                              {scooter.year}
-                            </span>
-                          )}
-                        </div>
                       </div>
 
-                      {/* Price & Rent CTA */}
-                      <div className="pt-4 border-t border-gray-100 flex items-center justify-between mt-auto">
-                        <div className="flex flex-col">
-                          <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Daily Rate</span>
-                          <div className="flex items-baseline">
-                            <span className="text-xl font-black text-gray-900">
-                              Rp {scooter.price_daily?.toLocaleString('id-ID') || scooter.price_daily}
-                            </span>
-                            <span className="text-xs text-gray-500 font-medium ml-1">/day</span>
-                          </div>
+                      {/* Price & CTA */}
+                      <div className="pt-3 border-t border-gray-50 flex items-center justify-between mt-3">
+                        <div>
+                          <span className="text-lg font-bold text-gray-900 leading-none">
+                            Rp {scooter.price_daily?.toLocaleString('id-ID') || scooter.price_daily}
+                          </span>
+                          <span className="text-xs text-gray-500 font-medium ml-1">/day</span>
                         </div>
-
-                        <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center group-hover:bg-gray-800 transition-colors shadow-sm">
-                          <ChevronRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
-                        </div>
+                        <span className="text-xs font-semibold bg-black text-white px-4 py-2 rounded-full hover:bg-gray-800 transition-colors">
+                          Book
+                        </span>
                       </div>
                     </Link>
                   ))}
@@ -662,82 +562,47 @@ export default function VendorPage() {
               )}
             </div>
 
-            {/* Customer Reviews Section (Desktop) */}
-            <div className="bg-white rounded-[32px] p-6 lg:p-8 shadow-sm border border-gray-100">
+            {/* Customer Reviews Section */}
+            <div className="bg-white rounded-3xl p-6 lg:p-8 shadow-sm border border-gray-100">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-2xl font-black text-gray-900">Verified Reviews</h2>
-                  <p className="text-sm text-gray-500 mt-1">Real feedback from travelers who rented from {vendor.name}.</p>
+                  <h2 className="text-xl font-bold text-gray-900">Reviews ({reviews.length})</h2>
                 </div>
                 <button 
                   onClick={() => setIsWriteReviewModalOpen(true)}
-                  className="text-sm font-bold bg-black text-white px-5 py-2.5 rounded-full hover:bg-gray-800 transition-colors shadow-sm"
+                  className="text-xs font-bold bg-black text-white px-4 py-2 rounded-full hover:bg-gray-800 transition-colors"
                 >
                   Write a Review
                 </button>
               </div>
 
-              {/* Rating Scorecard */}
-              <div className="bg-gradient-to-r from-gray-50 to-gray-100/60 rounded-2xl p-6 mb-6 border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div className="flex items-center gap-5">
-                  <div className="text-4xl lg:text-5xl font-black text-gray-900">5.0</div>
-                  <div>
-                    <div className="flex items-center gap-1 mb-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                      ))}
-                    </div>
-                    <p className="text-xs text-gray-600 font-semibold">100% of customers recommend this vendor</p>
-                  </div>
-                </div>
-
-                <div className="text-right">
-                  <span className="text-sm font-bold text-gray-900">{reviews.length} Verified Reviews</span>
-                  <p className="text-xs text-gray-500 mt-0.5">Top-tier service & clean fleet reliability</p>
-                </div>
-              </div>
-
-              {/* Reviews Grid (2 columns on desktop) */}
+              {/* Reviews Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {reviews.slice(0, 6).map((review) => (
-                  <div key={review.id} className="bg-gray-50/70 rounded-2xl p-5 border border-gray-100 flex flex-col justify-between hover:bg-gray-50 transition-colors">
+                  <div key={review.id} className="bg-[#F8F9FA] rounded-2xl p-4 flex flex-col justify-between">
                     <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-gray-800 to-black text-white font-bold text-xs flex items-center justify-center shadow-xs">
-                            {(review.user_name || 'R')[0]}
-                          </div>
-                          <div>
-                            <h4 className="font-bold text-sm text-gray-900">{review.user_name || 'Bali Traveler'}</h4>
-                            <div className="flex items-center gap-1 text-[11px] text-emerald-600 font-semibold">
-                              <CheckCircle2 className="w-3 h-3" />
-                              <span>Verified Rental</span>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-0.5">
-                          {[...Array(review.rating || 5)].map((_, i) => (
-                            <Star key={i} className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
-                          ))}
-                        </div>
+                      <div className="flex items-center gap-0.5 mb-2">
+                        {[...Array(review.rating || 5)].map((_, i) => (
+                          <Star key={i} className={`w-3.5 h-3.5 ${i < (review.rating || 5) ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-200 text-gray-200'}`} />
+                        ))}
                       </div>
-
-                      <p className="text-sm text-gray-600 leading-relaxed italic">
-                        "{review.comment || 'Smooth rental process and well-maintained bike.'}"
-                      </p>
+                      <p className="text-sm text-gray-600 mb-3">"{review.comment || 'Smooth rental process and well-maintained bike.'}"</p>
                     </div>
+                    <p className="font-bold text-xs text-gray-900">- {review.user_name || 'User'}</p>
                   </div>
                 ))}
+                {reviews.length === 0 && (
+                  <div className="col-span-2 text-center py-8 text-sm text-gray-500">No reviews yet. Be the first!</div>
+                )}
               </div>
 
               {reviews.length > 6 && (
                 <div className="mt-6 text-center">
                   <button 
                     onClick={() => setIsReviewModalOpen(true)}
-                    className="px-6 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-900 font-bold rounded-full text-sm shadow-sm transition-all"
+                    className="px-6 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-900 font-bold rounded-full text-xs transition-all"
                   >
-                    View All {reviews.length} Reviews
+                    See All Reviews
                   </button>
                 </div>
               )}
@@ -748,103 +613,47 @@ export default function VendorPage() {
           {/* Sticky Sidebar (4 Columns) */}
           <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-8 self-start">
             
-            {/* Free Inclusions Card */}
-            <div className="bg-white rounded-[32px] p-6 shadow-sm border border-gray-100">
-              <h3 className="font-bold text-gray-900 text-base mb-4 flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-emerald-600" />
-                Included in Every Rental
-              </h3>
-              <ul className="space-y-3.5 text-sm text-gray-600">
-                <li className="flex items-start gap-3">
-                  <span className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5 font-bold text-xs">✓</span>
-                  <div>
-                    <strong className="text-gray-900 font-semibold block">2 Sanitized Helmets</strong>
-                    <span className="text-xs text-gray-500">Standard & XL clean helmets for rider & passenger</span>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5 font-bold text-xs">✓</span>
-                  <div>
-                    <strong className="text-gray-900 font-semibold block">Rain Ponchos & Medical Kit</strong>
-                    <span className="text-xs text-gray-500">Prepared for sudden tropical rain showers</span>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5 font-bold text-xs">✓</span>
-                  <div>
-                    <strong className="text-gray-900 font-semibold block">Secure Phone Holder</strong>
-                    <span className="text-xs text-gray-500">Ready for Google Maps & navigation</span>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5 font-bold text-xs">✓</span>
-                  <div>
-                    <strong className="text-gray-900 font-semibold block">Full/Half Tank Fuel Ready</strong>
-                    <span className="text-xs text-gray-500">Hit the road immediately upon delivery</span>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5 font-bold text-xs">✓</span>
-                  <div>
-                    <strong className="text-gray-900 font-semibold block">24/7 Bali Roadside Assistance</strong>
-                    <span className="text-xs text-gray-500">Immediate bike swap if any technical issue</span>
-                  </div>
-                </li>
-              </ul>
-            </div>
-
-            {/* Service Area & Hours */}
-            <div className="bg-white rounded-[32px] p-6 shadow-sm border border-gray-100">
-              <h3 className="font-bold text-gray-900 text-base mb-4 flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-gray-700" />
-                Location & Delivery Coverage
-              </h3>
+            {/* Location & Hours */}
+            <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+              <h3 className="font-bold text-gray-900 text-base mb-4">Location & Hours</h3>
               
-              <div className="space-y-4 text-sm">
+              <div className="space-y-3 text-sm">
                 <div>
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Base Location</span>
-                  <p className="font-semibold text-gray-900">{vendor.address || 'Bali, Indonesia'}</p>
+                  <span className="text-xs text-gray-400 font-medium block">Address</span>
+                  <p className="font-medium text-gray-800">{vendor.address || 'Bali, Indonesia'}</p>
                 </div>
 
-                <div className="pt-3 border-t border-gray-100">
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Operating Hours</span>
-                  <div className="flex items-center gap-2 text-gray-700 font-medium">
-                    <Clock className="w-4 h-4 text-gray-400" />
-                    <span>08:00 AM – 08:00 PM (Daily)</span>
-                  </div>
+                <div className="pt-2 border-t border-gray-100">
+                  <span className="text-xs text-gray-400 font-medium block">Operating Hours</span>
+                  <p className="font-medium text-gray-800">08:00 AM – 08:00 PM Daily</p>
                 </div>
 
-                <div className="pt-3 border-t border-gray-100">
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Delivery Zones</span>
+                <div className="pt-2 border-t border-gray-100">
+                  <span className="text-xs text-gray-400 font-medium block">Delivery Areas</span>
                   <p className="text-xs text-gray-500 leading-relaxed">
-                    Hotel & villa drop-off available to Canggu, Seminyak, Kuta, Legian, Sanur, Ubud, Uluwatu, and DPS Airport.
+                    Canggu, Seminyak, Kuta, Legian, Sanur, Ubud, Uluwatu & Airport.
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Direct WhatsApp Concierge Card */}
-            <div className="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-[32px] p-6 text-white shadow-lg shadow-emerald-700/15">
-              <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center mb-3">
-                <MessageCircle className="w-5 h-5 text-white" />
-              </div>
-              <h3 className="text-lg font-black leading-tight mb-2">Need Help or Custom Delivery?</h3>
-              <p className="text-xs text-white/80 leading-relaxed mb-5">
-                Chat directly with {vendor.name} on WhatsApp for delivery coordination, monthly discounts, or instant questions.
-              </p>
+            {/* Direct WhatsApp Card */}
+            <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+              <h3 className="font-bold text-gray-900 text-base mb-2">Need Assistance?</h3>
+              <p className="text-xs text-gray-500 mb-4">Chat directly with {vendor.name} on WhatsApp for questions or custom delivery arrangements.</p>
               <a 
                 href={getWhatsAppUrl()}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full bg-white text-emerald-800 font-bold py-3 px-4 rounded-2xl text-sm flex items-center justify-center gap-2 hover:bg-emerald-50 transition-colors shadow-md"
+                className="w-full bg-[#25D366] text-white font-bold py-3 px-4 rounded-2xl text-sm flex items-center justify-center gap-2 hover:bg-[#20bd5a] transition-colors"
               >
-                <MessageCircle className="w-4 h-4 text-emerald-600" />
-                <span>WhatsApp Chat</span>
+                <MessageCircle className="w-4 h-4" />
+                <span>Chat on WhatsApp</span>
               </a>
             </div>
 
             {/* Rental Requirements */}
-            <div className="bg-white rounded-[32px] p-6 shadow-sm border border-gray-100 text-xs text-gray-500 space-y-2">
+            <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 text-xs text-gray-500 space-y-2">
               <h4 className="font-bold text-gray-900 text-sm mb-2">Rental Requirements</h4>
               <p>• Valid Passport or National ID copy</p>
               <p>• International or National Driving License</p>
