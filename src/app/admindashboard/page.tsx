@@ -1151,325 +1151,282 @@ export default function AdminDashboard() {
             </button>
           </div>
         ) : activeTab === 'settings' ? (
-          <div className="p-5 md:px-8 md:pb-12 animate-in fade-in max-w-4xl">
+          <div className="p-4 sm:p-6 md:p-8 animate-in fade-in max-w-3xl mx-auto">
             <div className="space-y-6">
               
-              {/* Header Card */}
-              <div className="bg-white rounded-3xl p-6 md:p-8 border border-gray-200 shadow-sm">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              {/* Header */}
+              <div className="bg-white rounded-2xl p-5 sm:p-6 border border-black/10 shadow-xs">
+                <div className="flex items-start justify-between gap-4">
                   <div>
-                    <h3 className="font-black text-gray-900 text-xl md:text-2xl flex items-center gap-2">
-                      <Settings className="w-6 h-6 text-black" />
-                      Platform Commission & Pricing Markup
-                    </h3>
-                    <p className="text-sm text-gray-500 mt-1">
-                      Set your platform profit markup independently per day for daily, weekly, and monthly bookings. The main customer website automatically displays vendor net price + your markup.
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black text-white text-[11px] font-bold uppercase tracking-wider mb-2">
+                      <Settings className="w-3.5 h-3.5" />
+                      Platform Settings
+                    </div>
+                    <h3 className="text-xl sm:text-2xl font-black text-black">Commission & Markup</h3>
+                    <p className="text-xs sm:text-sm text-gray-500 mt-1 leading-relaxed">
+                      Set your markup per day independently for each rental period. The main website displays vendor net rate + your markup.
                     </p>
-                  </div>
-                  <div className="shrink-0 flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-xl text-xs font-bold text-gray-700">
-                    <Coins className="w-4 h-4 text-black" />
-                    Independent Tiers
                   </div>
                 </div>
 
                 {settingsSaveSuccess && (
-                  <div className="mt-6 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center gap-3 text-emerald-800 text-sm font-bold animate-in fade-in">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-                    <span>Platform commission settings saved successfully! Customer pricing and dashboard profit calculations have been updated.</span>
+                  <div className="mt-4 p-3.5 bg-black text-white rounded-xl flex items-center gap-2.5 text-xs sm:text-sm font-bold animate-in fade-in">
+                    <CheckCircle2 className="w-4 h-4 text-white shrink-0" />
+                    <span>Platform commission settings saved successfully.</span>
                   </div>
                 )}
               </div>
 
-              {/* Form with 3 Independent Sections */}
-              <form onSubmit={handleSavePlatformSettings} className="space-y-6">
+              {/* Form */}
+              <form onSubmit={handleSavePlatformSettings} className="space-y-5">
                 
-                {/* 1. Daily Markup (< 7 days) */}
-                <div className="bg-white rounded-3xl p-6 md:p-8 border border-gray-200 shadow-sm space-y-5">
-                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 border-b border-gray-100 pb-4">
+                {/* 1. Daily Markup */}
+                <div className="bg-white rounded-2xl p-5 sm:p-6 border border-black/10 shadow-xs space-y-4">
+                  <div className="flex items-center justify-between">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="w-6 h-6 rounded-full bg-black text-white text-xs font-black flex items-center justify-center">1</span>
-                        <h4 className="font-black text-gray-900 text-lg">Daily Rental Markup</h4>
-                        <span className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-700 text-xs font-bold">1 – 6 Days</span>
+                        <span className="w-5 h-5 rounded-full bg-black text-white text-xs font-black flex items-center justify-center">1</span>
+                        <h4 className="text-base sm:text-lg font-black text-black">Daily Markup</h4>
+                        <span className="px-2 py-0.5 rounded bg-gray-100 text-black text-[11px] font-bold">1–6 Days</span>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Independent markup applied per day for short-term daily bookings.
-                      </p>
+                      <p className="text-xs text-gray-500 mt-0.5">Applied per day for short-term rentals</p>
                     </div>
-                    <div className="text-right sm:block hidden">
-                      <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Unit</span>
-                      <span className="text-xs font-black text-gray-900">Per Day</span>
-                    </div>
+                    <span className="text-xs font-bold text-gray-400 hidden sm:block">Per Day</span>
                   </div>
 
-                  <div className="space-y-3">
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
-                      Commission Markup Rate (Rp / Day)
-                    </label>
+                  <div className="space-y-2.5">
                     <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-gray-500 text-base">Rp</span>
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-gray-400 text-sm">Rp</span>
                       <input
                         type="number"
                         min="0"
                         step="1000"
                         value={settingDailyMarkup}
                         onChange={(e) => setSettingDailyMarkup(Number(e.target.value))}
-                        className="w-full bg-gray-50/50 border border-gray-200 rounded-2xl pl-12 pr-28 py-3.5 text-lg font-black text-gray-900 outline-none focus:bg-white focus:border-black focus:ring-1 focus:ring-black transition-all"
+                        className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-11 pr-20 py-3 text-base sm:text-lg font-black text-black outline-none focus:bg-white focus:border-black transition-all"
                         placeholder="25000"
                       />
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-xs text-gray-400 bg-white px-2 py-1 rounded-lg border border-gray-200">
+                      <span className="absolute right-3.5 top-1/2 -translate-y-1/2 font-bold text-xs text-gray-500">
                         / day
                       </span>
                     </div>
 
-                    {/* Independent Daily Presets */}
-                    <div className="flex items-center gap-2 flex-wrap pt-1">
-                      <span className="text-[11px] font-bold text-gray-400 uppercase">Quick Presets:</span>
+                    {/* Presets */}
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-[10px] font-bold text-gray-400 uppercase mr-1">Presets:</span>
                       {[15000, 20000, 25000, 35000, 50000].map(val => (
                         <button
                           type="button"
                           key={val}
                           onClick={() => setSettingDailyMarkup(val)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                             settingDailyMarkup === val
-                              ? 'bg-black text-white shadow-sm'
+                              ? 'bg-black text-white'
                               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                           }`}
                         >
-                          Rp {val.toLocaleString()}/day
+                          Rp {val.toLocaleString()}
                         </button>
                       ))}
                     </div>
                   </div>
 
-                  {/* Built-in Daily Calculator */}
-                  <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200/80 space-y-2">
-                    <div className="text-xs font-bold text-gray-600 flex items-center gap-1.5">
+                  {/* Calculator */}
+                  <div className="p-3.5 bg-gray-50 rounded-xl border border-gray-200/80 space-y-2">
+                    <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
                       <Calculator className="w-3.5 h-3.5 text-black" />
-                      Daily Earnings Calculator:
+                      Daily Earnings
                     </div>
-                    <div className="grid grid-cols-3 gap-2 text-center pt-1">
-                      <div className="p-2.5 bg-white rounded-xl border border-gray-200 shadow-xs">
-                        <div className="text-[11px] font-semibold text-gray-500">1 Day Rental</div>
-                        <div className="text-sm font-black text-gray-900 mt-0.5">Rp {Number(settingDailyMarkup || 0).toLocaleString()}</div>
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div className="p-2 bg-white rounded-lg border border-gray-200">
+                        <div className="text-[10px] font-semibold text-gray-500">1 Day</div>
+                        <div className="text-xs sm:text-sm font-black text-black mt-0.5">Rp {Number(settingDailyMarkup || 0).toLocaleString()}</div>
                       </div>
-                      <div className="p-2.5 bg-white rounded-xl border border-gray-200 shadow-xs">
-                        <div className="text-[11px] font-semibold text-gray-500">3 Days Rental</div>
-                        <div className="text-sm font-black text-gray-900 mt-0.5">Rp {(3 * Number(settingDailyMarkup || 0)).toLocaleString()}</div>
+                      <div className="p-2 bg-white rounded-lg border border-gray-200">
+                        <div className="text-[10px] font-semibold text-gray-500">3 Days</div>
+                        <div className="text-xs sm:text-sm font-black text-black mt-0.5">Rp {(3 * Number(settingDailyMarkup || 0)).toLocaleString()}</div>
                       </div>
-                      <div className="p-2.5 bg-white rounded-xl border border-gray-200 shadow-xs">
-                        <div className="text-[11px] font-semibold text-gray-500">5 Days Rental</div>
-                        <div className="text-sm font-black text-gray-900 mt-0.5">Rp {(5 * Number(settingDailyMarkup || 0)).toLocaleString()}</div>
+                      <div className="p-2 bg-white rounded-lg border border-gray-200">
+                        <div className="text-[10px] font-semibold text-gray-500">5 Days</div>
+                        <div className="text-xs sm:text-sm font-black text-black mt-0.5">Rp {(5 * Number(settingDailyMarkup || 0)).toLocaleString()}</div>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* 2. Weekly Markup (7 – 29 days) */}
-                <div className="bg-white rounded-3xl p-6 md:p-8 border border-gray-200 shadow-sm space-y-5">
-                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 border-b border-gray-100 pb-4">
+                {/* 2. Weekly Markup */}
+                <div className="bg-white rounded-2xl p-5 sm:p-6 border border-black/10 shadow-xs space-y-4">
+                  <div className="flex items-center justify-between">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="w-6 h-6 rounded-full bg-black text-white text-xs font-black flex items-center justify-center">2</span>
-                        <h4 className="font-black text-gray-900 text-lg">Weekly Rental Markup</h4>
-                        <span className="px-2 py-0.5 rounded-md bg-blue-50 text-blue-800 text-xs font-bold border border-blue-200">7 – 29 Days</span>
+                        <span className="w-5 h-5 rounded-full bg-black text-white text-xs font-black flex items-center justify-center">2</span>
+                        <h4 className="text-base sm:text-lg font-black text-black">Weekly Markup</h4>
+                        <span className="px-2 py-0.5 rounded bg-gray-100 text-black text-[11px] font-bold">7–29 Days</span>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Independent markup per day for weekly bookings. Calculated automatically per week and multiple weeks.
-                      </p>
+                      <p className="text-xs text-gray-500 mt-0.5">Applied per day for weekly rentals</p>
                     </div>
-                    <div className="text-right sm:block hidden">
-                      <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Unit</span>
-                      <span className="text-xs font-black text-gray-900">Per Day (x7 = 1 Wk)</span>
-                    </div>
+                    <span className="text-xs font-bold text-gray-400 hidden sm:block">Per Day (x7 / Wk)</span>
                   </div>
 
-                  <div className="space-y-3">
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
-                      Commission Markup Rate (Rp / Day for Weekly Bookings)
-                    </label>
+                  <div className="space-y-2.5">
                     <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-gray-500 text-base">Rp</span>
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-gray-400 text-sm">Rp</span>
                       <input
                         type="number"
                         min="0"
                         step="1000"
                         value={settingWeeklyMarkupPerDay}
                         onChange={(e) => setSettingWeeklyMarkupPerDay(Number(e.target.value))}
-                        className="w-full bg-gray-50/50 border border-gray-200 rounded-2xl pl-12 pr-28 py-3.5 text-lg font-black text-gray-900 outline-none focus:bg-white focus:border-black focus:ring-1 focus:ring-black transition-all"
+                        className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-11 pr-20 py-3 text-base sm:text-lg font-black text-black outline-none focus:bg-white focus:border-black transition-all"
                         placeholder="20000"
                       />
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-xs text-gray-400 bg-white px-2 py-1 rounded-lg border border-gray-200">
+                      <span className="absolute right-3.5 top-1/2 -translate-y-1/2 font-bold text-xs text-gray-500">
                         / day
                       </span>
                     </div>
 
-                    {/* Independent Weekly Presets */}
-                    <div className="flex items-center gap-2 flex-wrap pt-1">
-                      <span className="text-[11px] font-bold text-gray-400 uppercase">Quick Presets:</span>
+                    {/* Presets */}
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-[10px] font-bold text-gray-400 uppercase mr-1">Presets:</span>
                       {[10000, 15000, 20000, 25000, 30000].map(val => (
                         <button
                           type="button"
                           key={val}
                           onClick={() => setSettingWeeklyMarkupPerDay(val)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                             settingWeeklyMarkupPerDay === val
-                              ? 'bg-black text-white shadow-sm'
+                              ? 'bg-black text-white'
                               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                           }`}
                         >
-                          Rp {val.toLocaleString()}/day
+                          Rp {val.toLocaleString()}
                         </button>
                       ))}
                     </div>
                   </div>
 
-                  {/* Weekly Calculator & Breakdown */}
-                  <div className="p-4.5 bg-blue-50/60 rounded-2xl border border-blue-200 space-y-3">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <div className="text-xs font-bold text-blue-950 flex items-center gap-1.5">
-                        <Calculator className="w-4 h-4 text-blue-700" />
-                        Weekly Earnings Calculator:
+                  {/* Calculator */}
+                  <div className="p-3.5 bg-gray-50 rounded-xl border border-gray-200/80 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                        <Calculator className="w-3.5 h-3.5 text-black" />
+                        Weekly Earnings
                       </div>
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-600 text-white rounded-xl text-xs font-black shadow-xs">
-                        <span>1 Week (7 Days):</span>
-                        <span>Rp {(7 * Number(settingWeeklyMarkupPerDay || 0)).toLocaleString()} Profit</span>
-                      </div>
+                      <span className="text-[11px] font-black text-black">
+                        1 Wk (7 Days) = Rp {(7 * Number(settingWeeklyMarkupPerDay || 0)).toLocaleString()}
+                      </span>
                     </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
-                      <div className="p-3 bg-white rounded-xl border border-blue-200/80 shadow-xs">
-                        <div className="text-[11px] font-bold text-blue-900/70">1 Week (7 Days)</div>
-                        <div className="text-base font-black text-gray-900 mt-0.5">Rp {(7 * Number(settingWeeklyMarkupPerDay || 0)).toLocaleString()}</div>
-                        <div className="text-[10px] text-gray-400 mt-0.5">7 days × Rp {Number(settingWeeklyMarkupPerDay || 0).toLocaleString()}</div>
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div className="p-2 bg-white rounded-lg border border-gray-200">
+                        <div className="text-[10px] font-semibold text-gray-500">1 Week (7d)</div>
+                        <div className="text-xs sm:text-sm font-black text-black mt-0.5">Rp {(7 * Number(settingWeeklyMarkupPerDay || 0)).toLocaleString()}</div>
                       </div>
-                      <div className="p-3 bg-white rounded-xl border border-blue-200/80 shadow-xs">
-                        <div className="text-[11px] font-bold text-blue-900/70">2 Weeks (14 Days)</div>
-                        <div className="text-base font-black text-gray-900 mt-0.5">Rp {(14 * Number(settingWeeklyMarkupPerDay || 0)).toLocaleString()}</div>
-                        <div className="text-[10px] text-gray-400 mt-0.5">14 days × Rp {Number(settingWeeklyMarkupPerDay || 0).toLocaleString()}</div>
+                      <div className="p-2 bg-white rounded-lg border border-gray-200">
+                        <div className="text-[10px] font-semibold text-gray-500">2 Weeks (14d)</div>
+                        <div className="text-xs sm:text-sm font-black text-black mt-0.5">Rp {(14 * Number(settingWeeklyMarkupPerDay || 0)).toLocaleString()}</div>
                       </div>
-                      <div className="p-3 bg-white rounded-xl border border-blue-200/80 shadow-xs">
-                        <div className="text-[11px] font-bold text-blue-900/70">3 Weeks (21 Days)</div>
-                        <div className="text-base font-black text-gray-900 mt-0.5">Rp {(21 * Number(settingWeeklyMarkupPerDay || 0)).toLocaleString()}</div>
-                        <div className="text-[10px] text-gray-400 mt-0.5">21 days × Rp {Number(settingWeeklyMarkupPerDay || 0).toLocaleString()}</div>
+                      <div className="p-2 bg-white rounded-lg border border-gray-200">
+                        <div className="text-[10px] font-semibold text-gray-500">3 Weeks (21d)</div>
+                        <div className="text-xs sm:text-sm font-black text-black mt-0.5">Rp {(21 * Number(settingWeeklyMarkupPerDay || 0)).toLocaleString()}</div>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* 3. Monthly Markup (30+ days) */}
-                <div className="bg-white rounded-3xl p-6 md:p-8 border border-gray-200 shadow-sm space-y-5">
-                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 border-b border-gray-100 pb-4">
+                {/* 3. Monthly Markup */}
+                <div className="bg-white rounded-2xl p-5 sm:p-6 border border-black/10 shadow-xs space-y-4">
+                  <div className="flex items-center justify-between">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="w-6 h-6 rounded-full bg-black text-white text-xs font-black flex items-center justify-center">3</span>
-                        <h4 className="font-black text-gray-900 text-lg">Monthly Rental Markup</h4>
-                        <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200">30+ Days</span>
+                        <span className="w-5 h-5 rounded-full bg-black text-white text-xs font-black flex items-center justify-center">3</span>
+                        <h4 className="text-base sm:text-lg font-black text-black">Monthly Markup</h4>
+                        <span className="px-2 py-0.5 rounded bg-gray-100 text-black text-[11px] font-bold">30+ Days</span>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Independent markup per day for monthly bookings. Calculated automatically per month and multiple months.
-                      </p>
+                      <p className="text-xs text-gray-500 mt-0.5">Applied per day for monthly rentals</p>
                     </div>
-                    <div className="text-right sm:block hidden">
-                      <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Unit</span>
-                      <span className="text-xs font-black text-gray-900">Per Day (x30 = 1 Mo)</span>
-                    </div>
+                    <span className="text-xs font-bold text-gray-400 hidden sm:block">Per Day (x30 / Mo)</span>
                   </div>
 
-                  <div className="space-y-3">
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
-                      Commission Markup Rate (Rp / Day for Monthly Bookings)
-                    </label>
+                  <div className="space-y-2.5">
                     <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-gray-500 text-base">Rp</span>
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-gray-400 text-sm">Rp</span>
                       <input
                         type="number"
                         min="0"
                         step="1000"
                         value={settingMonthlyMarkupPerDay}
                         onChange={(e) => setSettingMonthlyMarkupPerDay(Number(e.target.value))}
-                        className="w-full bg-gray-50/50 border border-gray-200 rounded-2xl pl-12 pr-28 py-3.5 text-lg font-black text-gray-900 outline-none focus:bg-white focus:border-black focus:ring-1 focus:ring-black transition-all"
+                        className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-11 pr-20 py-3 text-base sm:text-lg font-black text-black outline-none focus:bg-white focus:border-black transition-all"
                         placeholder="15000"
                       />
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-xs text-gray-400 bg-white px-2 py-1 rounded-lg border border-gray-200">
+                      <span className="absolute right-3.5 top-1/2 -translate-y-1/2 font-bold text-xs text-gray-500">
                         / day
                       </span>
                     </div>
 
-                    {/* Independent Monthly Presets */}
-                    <div className="flex items-center gap-2 flex-wrap pt-1">
-                      <span className="text-[11px] font-bold text-gray-400 uppercase">Quick Presets:</span>
+                    {/* Presets */}
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-[10px] font-bold text-gray-400 uppercase mr-1">Presets:</span>
                       {[5000, 10000, 15000, 20000, 25000].map(val => (
                         <button
                           type="button"
                           key={val}
                           onClick={() => setSettingMonthlyMarkupPerDay(val)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                             settingMonthlyMarkupPerDay === val
-                              ? 'bg-black text-white shadow-sm'
+                              ? 'bg-black text-white'
                               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                           }`}
                         >
-                          Rp {val.toLocaleString()}/day
+                          Rp {val.toLocaleString()}
                         </button>
                       ))}
                     </div>
                   </div>
 
-                  {/* Monthly Calculator & Breakdown */}
-                  <div className="p-4.5 bg-emerald-50/60 rounded-2xl border border-emerald-200 space-y-3">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <div className="text-xs font-bold text-emerald-950 flex items-center gap-1.5">
-                        <Calculator className="w-4 h-4 text-emerald-700" />
-                        Monthly Earnings Calculator:
+                  {/* Calculator */}
+                  <div className="p-3.5 bg-gray-50 rounded-xl border border-gray-200/80 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                        <Calculator className="w-3.5 h-3.5 text-black" />
+                        Monthly Earnings
                       </div>
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-700 text-white rounded-xl text-xs font-black shadow-xs">
-                        <span>1 Month (30 Days):</span>
-                        <span>Rp {(30 * Number(settingMonthlyMarkupPerDay || 0)).toLocaleString()} Profit</span>
-                      </div>
+                      <span className="text-[11px] font-black text-black">
+                        1 Mo (30 Days) = Rp {(30 * Number(settingMonthlyMarkupPerDay || 0)).toLocaleString()}
+                      </span>
                     </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
-                      <div className="p-3 bg-white rounded-xl border border-emerald-200/80 shadow-xs">
-                        <div className="text-[11px] font-bold text-emerald-900/70">1 Month (30 Days)</div>
-                        <div className="text-base font-black text-gray-900 mt-0.5">Rp {(30 * Number(settingMonthlyMarkupPerDay || 0)).toLocaleString()}</div>
-                        <div className="text-[10px] text-gray-400 mt-0.5">30 days × Rp {Number(settingMonthlyMarkupPerDay || 0).toLocaleString()}</div>
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div className="p-2 bg-white rounded-lg border border-gray-200">
+                        <div className="text-[10px] font-semibold text-gray-500">1 Month (30d)</div>
+                        <div className="text-xs sm:text-sm font-black text-black mt-0.5">Rp {(30 * Number(settingMonthlyMarkupPerDay || 0)).toLocaleString()}</div>
                       </div>
-                      <div className="p-3 bg-white rounded-xl border border-emerald-200/80 shadow-xs">
-                        <div className="text-[11px] font-bold text-emerald-900/70">2 Months (60 Days)</div>
-                        <div className="text-base font-black text-gray-900 mt-0.5">Rp {(60 * Number(settingMonthlyMarkupPerDay || 0)).toLocaleString()}</div>
-                        <div className="text-[10px] text-gray-400 mt-0.5">60 days × Rp {Number(settingMonthlyMarkupPerDay || 0).toLocaleString()}</div>
+                      <div className="p-2 bg-white rounded-lg border border-gray-200">
+                        <div className="text-[10px] font-semibold text-gray-500">2 Months (60d)</div>
+                        <div className="text-xs sm:text-sm font-black text-black mt-0.5">Rp {(60 * Number(settingMonthlyMarkupPerDay || 0)).toLocaleString()}</div>
                       </div>
-                      <div className="p-3 bg-white rounded-xl border border-emerald-200/80 shadow-xs">
-                        <div className="text-[11px] font-bold text-emerald-900/70">3 Months (90 Days)</div>
-                        <div className="text-base font-black text-gray-900 mt-0.5">Rp {(90 * Number(settingMonthlyMarkupPerDay || 0)).toLocaleString()}</div>
-                        <div className="text-[10px] text-gray-400 mt-0.5">90 days × Rp {Number(settingMonthlyMarkupPerDay || 0).toLocaleString()}</div>
+                      <div className="p-2 bg-white rounded-lg border border-gray-200">
+                        <div className="text-[10px] font-semibold text-gray-500">3 Months (90d)</div>
+                        <div className="text-xs sm:text-sm font-black text-black mt-0.5">Rp {(90 * Number(settingMonthlyMarkupPerDay || 0)).toLocaleString()}</div>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* 4. Interactive Live Profit Simulator & Calculator Sandbox */}
-                <div className="bg-gradient-to-br from-gray-900 via-black to-gray-950 text-white rounded-3xl p-6 md:p-8 border border-gray-800 shadow-xl space-y-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="w-5 h-5 text-yellow-400" />
-                        <h4 className="font-black text-white text-lg">Interactive Booking Profit Simulator</h4>
-                      </div>
-                      <p className="text-xs text-gray-400 mt-1">
-                        Test any rental duration and see how the independent markup tiers calculate your exact profit.
-                      </p>
+                {/* 4. Live Profit Simulator (Pure Black & White) */}
+                <div className="bg-black text-white rounded-2xl p-5 sm:p-6 border border-black shadow-md space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Coins className="w-4 h-4 text-white" />
+                      <h4 className="text-sm sm:text-base font-black text-white">Profit Simulator</h4>
                     </div>
-                    <span className="text-xs font-bold px-3 py-1 bg-white/10 text-white rounded-xl border border-white/10 w-fit">
-                      Live Simulation
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-white/10 rounded text-gray-300">
+                      Live Preview
                     </span>
                   </div>
 
-                  {/* Simulator Controls */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-gray-300">Rental Duration (Days)</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-gray-400 uppercase">Duration (Days)</label>
                       <div className="flex items-center gap-2">
                         <input
                           type="number"
@@ -1477,48 +1434,47 @@ export default function AdminDashboard() {
                           max="365"
                           value={calcRentalDays}
                           onChange={(e) => setCalcRentalDays(Math.max(1, Number(e.target.value) || 1))}
-                          className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-base font-bold text-white outline-none focus:border-white focus:bg-white/20 transition-all"
+                          className="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-sm font-bold text-white outline-none focus:bg-white/20 focus:border-white transition-all"
                         />
-                        <span className="text-xs font-bold text-gray-400 shrink-0">Days</span>
+                        <span className="text-xs font-bold text-gray-400">Days</span>
                       </div>
-                      {/* Duration Preset Chips */}
-                      <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                      <div className="flex items-center gap-1 flex-wrap pt-0.5">
                         {[1, 3, 7, 14, 30, 60].map(d => (
                           <button
                             type="button"
                             key={d}
                             onClick={() => setCalcRentalDays(d)}
-                            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                            className={`px-2 py-0.5 rounded text-[11px] font-bold transition-all cursor-pointer ${
                               calcRentalDays === d
                                 ? 'bg-white text-black font-black'
                                 : 'bg-white/10 text-gray-300 hover:bg-white/20'
                             }`}
                           >
-                            {d === 7 ? '7d (1 Wk)' : d === 14 ? '14d (2 Wks)' : d === 30 ? '30d (1 Mo)' : d === 60 ? '60d (2 Mos)' : `${d}d`}
+                            {d}d
                           </button>
                         ))}
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-gray-300">Vendor Base Net Rate (Rp / Day)</label>
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-gray-400 uppercase">Vendor Rate (Rp / Day)</label>
                       <div className="relative">
-                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-bold text-gray-400 text-sm">Rp</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-gray-400 text-xs">Rp</span>
                         <input
                           type="number"
                           min="10000"
                           step="10000"
                           value={calcVendorDailyRate}
                           onChange={(e) => setCalcVendorDailyRate(Number(e.target.value) || 0)}
-                          className="w-full bg-white/10 border border-white/20 rounded-xl pl-11 pr-4 py-2.5 text-base font-bold text-white outline-none focus:border-white focus:bg-white/20 transition-all"
+                          className="w-full bg-white/10 border border-white/20 rounded-xl pl-9 pr-3 py-2 text-sm font-bold text-white outline-none focus:bg-white/20 focus:border-white transition-all"
                           placeholder="100000"
                         />
                       </div>
-                      <span className="text-[11px] text-gray-400 block">Typical scooter net price: Rp 100,000 / day</span>
+                      <span className="text-[10px] text-gray-400">Default: Rp 100,000 / day</span>
                     </div>
                   </div>
 
-                  {/* Simulator Live Calculation Output */}
+                  {/* Output */}
                   {(() => {
                     const days = Math.max(1, Number(calcRentalDays) || 1);
                     const vendorDaily = Math.max(0, Number(calcVendorDailyRate) || 0);
@@ -1528,42 +1484,29 @@ export default function AdminDashboard() {
                         ? Number(settingWeeklyMarkupPerDay || 0)
                         : Number(settingDailyMarkup || 0);
 
-                    const tierName = days >= 30 ? 'Monthly Tier (30+ Days)' : days >= 7 ? 'Weekly Tier (7–29 Days)' : 'Daily Tier (1–6 Days)';
-                    const tierBadgeClass = days >= 30 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : days >= 7 ? 'bg-blue-500/20 text-blue-300 border-blue-500/30' : 'bg-gray-500/20 text-gray-300 border-gray-500/30';
-
+                    const tierName = days >= 30 ? 'Monthly Tier' : days >= 7 ? 'Weekly Tier' : 'Daily Tier';
                     const totalPlatformCommission = days * appliedDailyMarkup;
                     const totalVendorPayout = days * vendorDaily;
                     const totalCustomerPays = totalVendorPayout + totalPlatformCommission;
 
                     return (
-                      <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-4">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs text-gray-400 font-medium">Applied Markup Tier:</span>
-                            <span className={`px-2.5 py-0.5 rounded-lg text-xs font-bold border ${tierBadgeClass}`}>
-                              {tierName} (Rp {appliedDailyMarkup.toLocaleString()} / day)
-                            </span>
-                          </div>
-                          <span className="text-xs text-gray-400">Duration: <strong>{days} Days</strong></span>
+                      <div className="pt-2 border-t border-white/10 space-y-2">
+                        <div className="flex items-center justify-between text-[11px] text-gray-400">
+                          <span>Applied: <strong>{tierName} (Rp {appliedDailyMarkup.toLocaleString()}/day)</strong></span>
+                          <span>{days} Days</span>
                         </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                          <div className="p-3.5 bg-white/5 rounded-xl border border-white/10">
-                            <span className="text-[11px] font-bold text-gray-400 block">Customer Total Price</span>
-                            <span className="text-lg font-black text-white mt-1 block">Rp {totalCustomerPays.toLocaleString()}</span>
-                            <span className="text-[10px] text-gray-400">Rp {(vendorDaily + appliedDailyMarkup).toLocaleString()} / day</span>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                          <div className="p-2.5 bg-white/5 rounded-xl border border-white/10">
+                            <span className="text-[10px] font-bold text-gray-400 block">Customer Pays</span>
+                            <span className="text-sm sm:text-base font-black text-white mt-0.5 block">Rp {totalCustomerPays.toLocaleString()}</span>
                           </div>
-
-                          <div className="p-3.5 bg-white/5 rounded-xl border border-white/10">
-                            <span className="text-[11px] font-bold text-gray-400 block">Vendor Receives</span>
-                            <span className="text-lg font-black text-gray-300 mt-1 block">Rp {totalVendorPayout.toLocaleString()}</span>
-                            <span className="text-[10px] text-gray-400">Rp {vendorDaily.toLocaleString()} / day</span>
+                          <div className="p-2.5 bg-white/5 rounded-xl border border-white/10">
+                            <span className="text-[10px] font-bold text-gray-400 block">Vendor Receives</span>
+                            <span className="text-sm sm:text-base font-black text-gray-300 mt-0.5 block">Rp {totalVendorPayout.toLocaleString()}</span>
                           </div>
-
-                          <div className="p-3.5 bg-emerald-500/10 rounded-xl border border-emerald-500/30">
-                            <span className="text-[11px] font-bold text-emerald-400 block">Your Platform Profit</span>
-                            <span className="text-xl font-black text-emerald-300 mt-1 block">Rp {totalPlatformCommission.toLocaleString()}</span>
-                            <span className="text-[10px] text-emerald-400/80">{days} days × Rp {appliedDailyMarkup.toLocaleString()}/day</span>
+                          <div className="p-2.5 bg-white text-black rounded-xl border border-white">
+                            <span className="text-[10px] font-black text-gray-600 block uppercase">Your Profit</span>
+                            <span className="text-sm sm:text-base font-black text-black mt-0.5 block">Rp {totalPlatformCommission.toLocaleString()}</span>
                           </div>
                         </div>
                       </div>
@@ -1574,7 +1517,7 @@ export default function AdminDashboard() {
                 {/* Save Button */}
                 <button
                   type="submit"
-                  className="w-full bg-black text-white hover:bg-gray-800 rounded-2xl py-4.5 font-black text-base shadow-xl shadow-black/15 active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full bg-black text-white hover:bg-neutral-800 rounded-xl py-4 font-black text-base active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2 border border-black shadow-sm"
                 >
                   <Check className="w-5 h-5" />
                   Save Platform Settings
