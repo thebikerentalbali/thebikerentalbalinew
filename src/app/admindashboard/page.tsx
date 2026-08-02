@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Users, Bike, DollarSign, Settings, Bell, Search, Store, BarChart3, Home, ChevronRight, ChevronLeft, Calendar, TrendingUp, CalendarDays, MoreVertical, Filter, ArrowUpRight, CheckCircle2, AlertCircle, Menu, UserCheck, MoreHorizontal, Loader2, XCircle, RotateCcw, Clock, Check } from "lucide-react"
+import { Users, Bike, DollarSign, Settings, Bell, Search, Store, BarChart3, Home, ChevronRight, ChevronLeft, ChevronDown, Calendar, TrendingUp, CalendarDays, MoreVertical, Filter, ArrowUpRight, CheckCircle2, AlertCircle, Menu, UserCheck, MoreHorizontal, Loader2, XCircle, RotateCcw, Clock, Check } from "lucide-react"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 
@@ -12,6 +12,7 @@ export default function AdminDashboard() {
   const [expandedPendingVendorId, setExpandedPendingVendorId] = useState<number | null>(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [bookingFilter, setBookingFilter] = useState<'all' | 'pending' | 'confirmed' | 'completed' | 'by_vendor'>('all')
+  const [selectedVendorFilter, setSelectedVendorFilter] = useState<string>('all')
   const [processingBookingId, setProcessingBookingId] = useState<string | null>(null)
   const [calendarStartDate, setCalendarStartDate] = useState<Date>(() => {
     const d = new Date()
@@ -775,79 +776,148 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* Top Summary Banner */}
+            {/* Top Summary Banner as Interactive Filters */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-              <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide truncate whitespace-nowrap">Total Bookings</p>
+              <div
+                onClick={() => setBookingFilter('all')}
+                className={`p-4 rounded-2xl border shadow-sm transition-all cursor-pointer ${
+                  bookingFilter === 'all'
+                    ? 'ring-2 ring-black bg-gray-50/80 border-black'
+                    : 'bg-white border-gray-100 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide truncate whitespace-nowrap">Total Bookings</p>
+                  {bookingFilter === 'all' && <span className="text-[10px] font-bold bg-black text-white px-1.5 py-0.5 rounded-md">Active</span>}
+                </div>
                 <p className="text-xl md:text-2xl font-black text-gray-900 mt-1">{allBookings.length}</p>
               </div>
-              <div className={`p-4 rounded-2xl border shadow-sm transition-colors ${allBookings.filter(b => b.rawStatus === 'pending').length > 0 ? 'bg-amber-50/70 border-amber-200' : 'bg-white border-gray-100'}`}>
-                <p className="text-[11px] font-bold text-amber-700 uppercase tracking-wide flex items-center gap-1 truncate whitespace-nowrap">
-                  <Clock className="w-3 h-3 shrink-0" /> Pending Review
-                </p>
+
+              <div
+                onClick={() => setBookingFilter('pending')}
+                className={`p-4 rounded-2xl border shadow-sm transition-all cursor-pointer ${
+                  bookingFilter === 'pending'
+                    ? 'ring-2 ring-amber-500 bg-amber-50 border-amber-300'
+                    : allBookings.filter(b => b.rawStatus === 'pending').length > 0
+                    ? 'bg-amber-50/70 border-amber-200 hover:border-amber-300'
+                    : 'bg-white border-gray-100 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] font-bold text-amber-700 uppercase tracking-wide flex items-center gap-1 truncate whitespace-nowrap">
+                    <Clock className="w-3 h-3 shrink-0" /> Pending Review
+                  </p>
+                  {bookingFilter === 'pending' && <span className="text-[10px] font-bold bg-amber-500 text-white px-1.5 py-0.5 rounded-md">Active</span>}
+                </div>
                 <p className="text-xl md:text-2xl font-black text-amber-900 mt-1">{allBookings.filter(b => b.rawStatus === 'pending').length}</p>
               </div>
-              <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-                <p className="text-[11px] font-bold text-green-600 uppercase tracking-wide flex items-center gap-1 truncate whitespace-nowrap">
-                  <CheckCircle2 className="w-3 h-3 shrink-0" /> Confirmed
-                </p>
+
+              <div
+                onClick={() => setBookingFilter('confirmed')}
+                className={`p-4 rounded-2xl border shadow-sm transition-all cursor-pointer ${
+                  bookingFilter === 'confirmed'
+                    ? 'ring-2 ring-green-600 bg-green-50 border-green-300'
+                    : 'bg-white border-gray-100 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] font-bold text-green-600 uppercase tracking-wide flex items-center gap-1 truncate whitespace-nowrap">
+                    <CheckCircle2 className="w-3 h-3 shrink-0" /> Confirmed
+                  </p>
+                  {bookingFilter === 'confirmed' && <span className="text-[10px] font-bold bg-green-600 text-white px-1.5 py-0.5 rounded-md">Active</span>}
+                </div>
                 <p className="text-xl md:text-2xl font-black text-gray-900 mt-1">{allBookings.filter(b => b.rawStatus === 'confirmed').length}</p>
               </div>
-              <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide truncate whitespace-nowrap">Platform Revenue</p>
+
+              <div
+                onClick={() => setBookingFilter(bookingFilter === 'completed' ? 'all' : 'completed')}
+                className={`p-4 rounded-2xl border shadow-sm transition-all cursor-pointer ${
+                  bookingFilter === 'completed'
+                    ? 'ring-2 ring-blue-600 bg-blue-50 border-blue-300'
+                    : 'bg-white border-gray-100 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide truncate whitespace-nowrap">Platform Revenue</p>
+                  {bookingFilter === 'completed' ? (
+                    <span className="text-[10px] font-bold bg-blue-600 text-white px-1.5 py-0.5 rounded-md">Completed</span>
+                  ) : (
+                    <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
+                      {allBookings.filter(b => b.rawStatus === 'completed').length} completed
+                    </span>
+                  )}
+                </div>
                 <p className="text-sm md:text-base lg:text-lg font-black text-gray-900 mt-1 truncate whitespace-nowrap">
                   Rp {allBookings.reduce((sum, b) => sum + (b.price || 0), 0).toLocaleString()}
                 </p>
               </div>
             </div>
 
-            {/* Filter Navigation */}
-            <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-gray-100 shadow-sm">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <button
-                  onClick={() => setBookingFilter('all')}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${bookingFilter === 'all' ? 'bg-black text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'}`}
-                >
-                  All ({allBookings.length})
-                </button>
-                <button
-                  onClick={() => setBookingFilter('pending')}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${bookingFilter === 'pending' ? 'bg-amber-500 text-white shadow-sm' : 'text-amber-700 bg-amber-50 hover:bg-amber-100'}`}
-                >
-                  Pending ({allBookings.filter(b => b.rawStatus === 'pending').length})
-                </button>
-                <button
-                  onClick={() => setBookingFilter('confirmed')}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${bookingFilter === 'confirmed' ? 'bg-green-600 text-white shadow-sm' : 'text-green-700 bg-green-50 hover:bg-green-100'}`}
-                >
-                  Confirmed ({allBookings.filter(b => b.rawStatus === 'confirmed').length})
-                </button>
-                <button
-                  onClick={() => setBookingFilter('completed')}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${bookingFilter === 'completed' ? 'bg-blue-600 text-white shadow-sm' : 'text-blue-700 bg-blue-50 hover:bg-blue-100'}`}
-                >
-                  Completed ({allBookings.filter(b => b.rawStatus === 'completed').length})
-                </button>
-                <button
-                  onClick={() => setBookingFilter('by_vendor')}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${bookingFilter === 'by_vendor' ? 'bg-gray-900 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'}`}
-                >
-                  Grouped by Vendor
-                </button>
+            {/* Section Header with Right Vendor Navigation */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-sm md:text-base font-black text-gray-900 capitalize">
+                  {bookingFilter === 'all' ? 'All Bookings' : bookingFilter === 'pending' ? 'Pending Reviews' : bookingFilter === 'confirmed' ? 'Confirmed Bookings' : bookingFilter === 'completed' ? 'Completed Bookings' : 'Grouped by Vendor'}
+                </h3>
+                <span className="text-xs font-bold text-gray-400">
+                  ({bookingFilter === 'by_vendor' ? approvedVendors.length : allBookings.filter(b => {
+                    if (bookingFilter === 'pending' && b.rawStatus !== 'pending') return false;
+                    if (bookingFilter === 'confirmed' && b.rawStatus !== 'confirmed') return false;
+                    if (bookingFilter === 'completed' && b.rawStatus !== 'completed') return false;
+                    if (selectedVendorFilter !== 'all' && String(b.vendorId) !== String(selectedVendorFilter)) return false;
+                    if (selectedCalendarDate) {
+                      if (!b.startDate || !b.endDate) return false;
+                      const startStr = typeof b.startDate === 'string' ? b.startDate.substring(0, 10) : new Date(b.startDate).toISOString().split('T')[0];
+                      const endStr = typeof b.endDate === 'string' ? b.endDate.substring(0, 10) : new Date(b.endDate).toISOString().split('T')[0];
+                      if (selectedCalendarDate < startStr || selectedCalendarDate > endStr) return false;
+                    }
+                    return true;
+                  }).length})
+                </span>
+
+                {selectedCalendarDate && (
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-xl border border-blue-100 ml-1">
+                    <Calendar className="w-3 h-3" />
+                    <span>{formatIndoDate(selectedCalendarDate)}</span>
+                    <button
+                      onClick={() => setSelectedCalendarDate(null)}
+                      className="ml-1 text-blue-900 hover:text-blue-700 font-bold"
+                    >
+                      ×
+                    </button>
+                  </div>
+                )}
               </div>
 
-              {selectedCalendarDate && (
-                <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-100">
-                  <Calendar className="w-3.5 h-3.5" />
-                  <span>Date: {formatIndoDate(selectedCalendarDate)}</span>
-                  <button
-                    onClick={() => setSelectedCalendarDate(null)}
-                    className="ml-1 text-blue-900 hover:text-blue-700 font-bold"
+              {/* Right Vendor Navigation */}
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="relative flex items-center min-w-[170px]">
+                  <Store className="w-3.5 h-3.5 text-gray-400 absolute left-3 pointer-events-none" />
+                  <select
+                    value={selectedVendorFilter}
+                    onChange={(e) => setSelectedVendorFilter(e.target.value)}
+                    className="w-full bg-white border border-gray-200 text-xs font-bold text-gray-800 rounded-xl pl-8 pr-7 py-2 outline-none shadow-xs focus:border-black transition-all cursor-pointer appearance-none"
                   >
-                    ×
-                  </button>
+                    <option value="all">All Vendors</option>
+                    {approvedVendors.map(v => (
+                      <option key={v.id} value={String(v.id)}>{v.name}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-2.5 pointer-events-none" />
                 </div>
-              )}
+
+                <button
+                  onClick={() => setBookingFilter(bookingFilter === 'by_vendor' ? 'all' : 'by_vendor')}
+                  className={`px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs border ${
+                    bookingFilter === 'by_vendor'
+                      ? 'bg-black text-white border-black'
+                      : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  <Store className="w-3.5 h-3.5" />
+                  <span>Group by Vendor</span>
+                </button>
+              </div>
             </div>
 
             {/* Content based on Filter */}
@@ -857,6 +927,7 @@ export default function AdminDashboard() {
                   if (bookingFilter === 'pending') if (b.rawStatus !== 'pending') return false;
                   if (bookingFilter === 'confirmed') if (b.rawStatus !== 'confirmed') return false;
                   if (bookingFilter === 'completed') if (b.rawStatus !== 'completed') return false;
+                  if (selectedVendorFilter !== 'all' && String(b.vendorId) !== String(selectedVendorFilter)) return false;
 
                   if (selectedCalendarDate) {
                     if (!b.startDate || !b.endDate) return false;
@@ -867,13 +938,14 @@ export default function AdminDashboard() {
                   return true;
                 }).length === 0 ? (
                   <div className="bg-white p-12 text-center text-gray-400 font-medium rounded-3xl border border-gray-100">
-                    No bookings found for this {selectedCalendarDate ? 'selected date' : 'filter'}.
+                    No bookings found for this filter.
                   </div>
                 ) : (
                   allBookings.filter(b => {
                     if (bookingFilter === 'pending') if (b.rawStatus !== 'pending') return false;
                     if (bookingFilter === 'confirmed') if (b.rawStatus !== 'confirmed') return false;
                     if (bookingFilter === 'completed') if (b.rawStatus !== 'completed') return false;
+                    if (selectedVendorFilter !== 'all' && String(b.vendorId) !== String(selectedVendorFilter)) return false;
 
                     if (selectedCalendarDate) {
                       if (!b.startDate || !b.endDate) return false;
@@ -984,7 +1056,7 @@ export default function AdminDashboard() {
             ) : (
               /* Grouped by Vendor Accordion */
               <div className="space-y-4">
-                {approvedVendors.map(vendor => {
+                {approvedVendors.filter(v => selectedVendorFilter === 'all' || String(v.id) === String(selectedVendorFilter)).map(vendor => {
                   const vendorBookings = allBookings.filter(b => {
                     if (String(b.vendorId) !== String(vendor.id)) return false;
                     if (selectedCalendarDate) {
