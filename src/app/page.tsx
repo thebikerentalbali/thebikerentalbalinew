@@ -6,6 +6,7 @@ import Link from "next/link"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 import { createClient } from '@/lib/supabase/client'
+import { getPlatformSettings, getCustomerPrice } from '@/utils/pricing'
 
 const MapPicker = dynamic(() => import('@/components/MapPicker'), { ssr: false })
 
@@ -97,17 +98,20 @@ export default function Home() {
         reviewCount: getReviewCount(v.id, reviewCounts[v.id] || 0)
       }))
       setTopVendors(formattedVendors)
-      
-      const formattedScooters = (scooters || []).map((s: any) => ({
-        ...s,
-        price: (s.price_daily || 0).toLocaleString(),
-        price_daily: s.price_daily || 0,
-        price_weekly: s.price_weekly || (s.price_daily || 0) * 6,
-        price_monthly: s.price_monthly || (s.price_daily || 0) * 20,
-        img: s.image_url || "/images/scooter.png",
-        rating: 5.0, // default rating since it's not in scooter table yet
-        reviewCount: getReviewCount(s.vendor_id, reviewCounts[s.vendor_id] || 0)
-      }))
+      const settings = getPlatformSettings()
+      const formattedScooters = (scooters || []).map((s: any) => {
+        const prices = getCustomerPrice(s.price_daily || 0, s.price_weekly, s.price_monthly, settings)
+        return {
+          ...s,
+          price: prices.daily.toLocaleString(),
+          price_daily: prices.daily,
+          price_weekly: prices.weekly,
+          price_monthly: prices.monthly,
+          img: s.image_url || "/images/scooter.png",
+          rating: 5.0, // default rating since it's not in scooter table yet
+          reviewCount: getReviewCount(s.vendor_id, reviewCounts[s.vendor_id] || 0)
+        }
+      })
       
       setAllScooters(formattedScooters)
 
@@ -119,6 +123,13 @@ export default function Home() {
     }
     
     loadData()
+
+    const handleSettingsUpdate = () => {
+      cachedHomeData = null;
+      loadData();
+    }
+    window.addEventListener('platform_settings_updated', handleSettingsUpdate);
+    return () => window.removeEventListener('platform_settings_updated', handleSettingsUpdate);
   }, []);
 
   const handleMapSearch = async (e?: React.FormEvent) => {

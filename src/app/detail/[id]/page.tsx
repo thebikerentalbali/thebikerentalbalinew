@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { ChevronLeft, Heart, Star, MapPin, ChevronRight, Loader2, Clock, Check, X } from "lucide-react"
 import { createClient } from '@/lib/supabase/client'
+import { getPlatformSettings, getCustomerPrice } from '@/utils/pricing'
 
 export default function DetailPage() {
   const params = useParams()
@@ -23,13 +24,26 @@ export default function DetailPage() {
       
       const { data: sData } = await supabase.from('scooters').select('*').eq('id', id).single()
       if (sData) {
-        setScooter(sData)
+        const settings = getPlatformSettings()
+        const prices = getCustomerPrice(sData.price_daily || 0, sData.price_weekly, sData.price_monthly, settings)
+        setScooter({
+          ...sData,
+          price_daily: prices.daily,
+          price_weekly: prices.weekly,
+          price_monthly: prices.monthly
+        })
         const { data: vData } = await supabase.from('vendors').select('*').eq('id', sData.vendor_id).single()
         setVendor(vData)
       }
       setLoading(false)
     }
     loadData()
+
+    const handleSettingsUpdate = () => {
+      loadData();
+    }
+    window.addEventListener('platform_settings_updated', handleSettingsUpdate);
+    return () => window.removeEventListener('platform_settings_updated', handleSettingsUpdate);
   }, [id])
 
   // Helper to get delivery area without parentheses

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { ChevronLeft, Bell, Star, MapPin, Map, Info, Minus, Plus, PlusCircle, X, Trash2, Loader2 } from "lucide-react"
 import { createClient } from '@/lib/supabase/client'
+import { getPlatformSettings, getCustomerPrice } from '@/utils/pricing'
 
 export default function CheckoutPage() {
   const [deliveryMethod, setDeliveryMethod] = useState<"pickup" | "delivery">("pickup")
@@ -57,15 +58,19 @@ export default function CheckoutPage() {
 
       const { data } = await supabase.from('scooters').select('*, vendors(id, name, phone, address)')
       if (data) {
-        const formatted = data.map((s: any) => ({
-          ...s,
-          img: s.image_url || "/images/scooter.png",
-          rating: 5.0,
-          available: s.available_units,
-          daily: s.price_daily || 0,
-          weekly: s.price_weekly || (s.price_daily || 0) * 6,
-          monthly: s.price_monthly || (s.price_daily || 0) * 20
-        }))
+        const settings = getPlatformSettings()
+        const formatted = data.map((s: any) => {
+          const prices = getCustomerPrice(s.price_daily || 0, s.price_weekly, s.price_monthly, settings)
+          return {
+            ...s,
+            img: s.image_url || "/images/scooter.png",
+            rating: 5.0,
+            available: s.available_units,
+            daily: prices.daily,
+            weekly: prices.weekly,
+            monthly: prices.monthly
+          }
+        })
         setVendorScooters(formatted)
 
         if (typeof window !== 'undefined') {
@@ -87,6 +92,12 @@ export default function CheckoutPage() {
       setLoading(false)
     }
     loadData()
+
+    const handleSettingsUpdate = () => {
+      loadData();
+    }
+    window.addEventListener('platform_settings_updated', handleSettingsUpdate);
+    return () => window.removeEventListener('platform_settings_updated', handleSettingsUpdate);
   }, [])
 
   const handleStartDateChange = (newStart: string) => {

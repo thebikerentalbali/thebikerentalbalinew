@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, MapPin, Star, Share, Loader2, X, BadgeCheck,
 import { useRouter, useParams } from "next/navigation"
 import Link from "next/link"
 import { createClient } from '@/lib/supabase/client'
+import { getPlatformSettings, getCustomerPrice } from '@/utils/pricing'
 
 export default function VendorPage() {
   const router = useRouter()
@@ -62,7 +63,17 @@ export default function VendorPage() {
 
       if (vData) {
         setVendor(vData)
-        setScooters(sData || [])
+        const settings = getPlatformSettings()
+        const formatted = (sData || []).map((s: any) => {
+          const prices = getCustomerPrice(s.price_daily || 0, s.price_weekly, s.price_monthly, settings)
+          return {
+            ...s,
+            price_daily: prices.daily,
+            price_weekly: prices.weekly,
+            price_monthly: prices.monthly
+          }
+        })
+        setScooters(formatted)
         let loadedReviews = rData || [];
         
         // Deterministic mock reviews algorithm
@@ -121,6 +132,12 @@ export default function VendorPage() {
       setLoading(false)
     }
     loadData()
+
+    const handleSettingsUpdate = () => {
+      loadData();
+    }
+    window.addEventListener('platform_settings_updated', handleSettingsUpdate);
+    return () => window.removeEventListener('platform_settings_updated', handleSettingsUpdate);
   }, [id])
 
   const handleBack = (e: React.MouseEvent) => {
