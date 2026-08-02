@@ -2,18 +2,20 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { useParams } from "next/navigation"
-import { ChevronLeft, Heart, Star, MapPin, ChevronRight, Loader2 } from "lucide-react"
+import { useParams, useRouter } from "next/navigation"
+import { ChevronLeft, Heart, Star, MapPin, ChevronRight, Loader2, Clock, Check, X } from "lucide-react"
 import { createClient } from '@/lib/supabase/client'
 
 export default function DetailPage() {
   const params = useParams()
+  const router = useRouter()
   const id = params?.id as string
   const supabase = createClient()
   
   const [scooter, setScooter] = useState<any>(null)
   const [vendor, setVendor] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [activeInfoModal, setActiveInfoModal] = useState<'hours' | 'delivery' | 'requirements' | null>(null)
 
   useEffect(() => {
     async function loadData() {
@@ -29,6 +31,28 @@ export default function DetailPage() {
     }
     loadData()
   }, [id])
+
+  // Helper to get delivery area without parentheses
+  const getDeliveryArea = (address?: string) => {
+    if (!address) return "Ubud & Greater Bali Area"
+    const lower = address.toLowerCase()
+    if (lower.includes("ubud") || lower.includes("gianyar") || lower.includes("cempaka") || lower.includes("mas")) {
+      return "Ubud area only - Central Ubud, Mas, Sayan, Campuhan, Penestanan & Tegallalang"
+    }
+    if (lower.includes("canggu") || lower.includes("pererenan") || lower.includes("berawa") || lower.includes("tibubeneng")) {
+      return "Canggu area only - Batu Bolong, Echo Beach, Berawa, Pererenan & Umalas"
+    }
+    if (lower.includes("seminyak") || lower.includes("kerobokan") || lower.includes("kuta")) {
+      return "Seminyak & Kuta area only - Petitenget, Double Six, Legian & Sunset Road"
+    }
+    if (lower.includes("uluwatu") || lower.includes("bukit") || lower.includes("ungasan") || lower.includes("jimbaran") || lower.includes("pecatu")) {
+      return "South Bali Bukit area only - Uluwatu, Padang Padang, Bingin, Balangan & Jimbaran"
+    }
+    if (lower.includes("sanur")) {
+      return "Sanur area only - Sanur Beach, Renon & Denpasar Timur"
+    }
+    return `${address} and surrounding 10km radius`
+  }
 
   if (loading) {
     return <div className="min-h-screen bg-[#EBECEF] flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-gray-400" /></div>
@@ -47,13 +71,13 @@ export default function DetailPage() {
       <div className="flex flex-col min-h-screen md:min-h-0 bg-[#EBECEF] relative pb-28 md:pb-0 md:max-w-5xl md:mx-auto md:shadow-2xl md:rounded-[40px] md:overflow-hidden md:border md:border-gray-200">
         {/* Header */}
         <header className="flex justify-between items-center p-6 pt-8 relative z-10">
-          <Link href="/" className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
+          <button onClick={() => router.back()} className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm hover:bg-gray-50 transition-colors">
             <ChevronLeft className="w-6 h-6 text-gray-800" />
-          </Link>
+          </button>
           <h1 className="text-xl font-medium text-gray-900 absolute left-1/2 -translate-x-1/2">
             Scooter Detail
           </h1>
-          <button className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
+          <button className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm hover:bg-gray-50 transition-colors">
             <Heart className="w-5 h-5 text-gray-800" />
           </button>
         </header>
@@ -115,18 +139,55 @@ export default function DetailPage() {
             </Link>
           )}
 
+          {/* Quick Info Pill Buttons (Black background, white title) */}
+          {vendor && (
+            <div 
+              className="flex items-center gap-2 overflow-x-auto scrollbar-hide hide-scrollbar -mx-1 px-1"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
+            >
+              <button 
+                onClick={() => setActiveInfoModal('hours')}
+                className="bg-black hover:bg-neutral-800 active:scale-95 transition-all text-white text-xs font-semibold px-4 py-2.5 rounded-full shrink-0 flex items-center gap-2 shadow-sm cursor-pointer"
+              >
+                <Clock className="w-3.5 h-3.5 text-white" />
+                <span>Operating Hours</span>
+              </button>
+
+              <button 
+                onClick={() => setActiveInfoModal('delivery')}
+                className="bg-black hover:bg-neutral-800 active:scale-95 transition-all text-white text-xs font-semibold px-4 py-2.5 rounded-full shrink-0 flex items-center gap-2 shadow-sm cursor-pointer"
+              >
+                <MapPin className="w-3.5 h-3.5 text-white" />
+                <span>Delivery Areas</span>
+              </button>
+
+              <button 
+                onClick={() => setActiveInfoModal('requirements')}
+                className="bg-black hover:bg-neutral-800 active:scale-95 transition-all text-white text-xs font-semibold px-4 py-2.5 rounded-full shrink-0 flex items-center gap-2 shadow-sm cursor-pointer"
+              >
+                <Check className="w-3.5 h-3.5 text-white" />
+                <span>Rental Requirements</span>
+              </button>
+            </div>
+          )}
+
           {/* Scooter Details */}
           <div className="bg-white rounded-3xl p-6 shadow-sm">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">{scooter.name} Details</h3>
-            <p className="text-gray-500 text-sm leading-relaxed mb-6">
-              The {scooter.name} by {scooter.brand} delivers a seamless blend of performance, comfort, and reliability. Perfectly suited for navigating the vibrant streets and scenic routes of Bali, this scooter offers an exceptional riding experience with its modern features and elegant design.
-            </p>
             
             <div className="space-y-4">
               <div className="flex items-center justify-between py-3 border-b border-gray-50">
                 <span className="text-gray-500 text-sm">Available</span>
                 <span className="font-bold text-white bg-black px-3 py-1 rounded-full text-xs tracking-wide">{scooter.available_units} Units</span>
               </div>
+
+              {/* Enhanced description placed cleanly below the Available row */}
+              <div className="py-2 border-b border-gray-50">
+                <p className="text-gray-500 text-sm leading-relaxed">
+                  The {scooter.name} delivers a smooth and effortless ride with exceptional comfort, fuel efficiency, and reliability. Perfectly suited for navigating the vibrant streets and scenic routes of Bali, this scooter offers an exceptional riding experience with modern features and elegant design.
+                </p>
+              </div>
+
               <div className="flex items-center justify-between py-3 border-b border-gray-50">
                 <span className="text-gray-500 text-sm">Engine</span>
                 <span className="font-medium text-gray-900 text-sm">{scooter.engine || 'N/A'}</span>
@@ -165,7 +226,7 @@ export default function DetailPage() {
       </div>
       
       {/* Bottom Bar (Mobile Only) */}
-      <div className="md:hidden fixed bottom-6 left-6 right-6 mx-auto bg-white/90 backdrop-blur-xl rounded-full px-5 py-3 flex items-center justify-between shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-white/50 z-50">
+      <div className="md:hidden fixed bottom-6 left-6 right-6 mx-auto bg-white/90 backdrop-blur-xl rounded-full px-5 py-3 flex items-center justify-between shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-white/50 z-40">
         <div className="flex items-baseline gap-1">
           <span className="text-lg font-bold text-gray-900 tracking-tight">Rp {(scooter.price_daily || 0).toLocaleString()}</span>
           <span className="text-[11px] text-gray-500 font-medium">/day</span>
@@ -175,6 +236,147 @@ export default function DetailPage() {
           Book Rent
         </Link>
       </div>
+
+      {/* Info Modals (Operating Hours, Delivery Areas, Rental Requirements) */}
+      {activeInfoModal && vendor && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-150"
+          onClick={() => setActiveInfoModal(null)}
+        >
+          <div 
+            className="bg-white w-full sm:max-w-md rounded-t-[32px] sm:rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom duration-200"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-4 border-b border-gray-100 mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-800 font-bold">
+                  {activeInfoModal === 'hours' && <Clock className="w-4 h-4" />}
+                  {activeInfoModal === 'delivery' && <MapPin className="w-4 h-4" />}
+                  {activeInfoModal === 'requirements' && <Check className="w-4 h-4" />}
+                </div>
+                <h3 className="font-bold text-lg text-gray-900">
+                  {activeInfoModal === 'hours' && 'Operating Hours'}
+                  {activeInfoModal === 'delivery' && 'Delivery Areas'}
+                  {activeInfoModal === 'requirements' && 'Rental Requirements'}
+                </h3>
+              </div>
+              <button 
+                onClick={() => setActiveInfoModal(null)}
+                className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+              >
+                <X className="w-4 h-4 text-gray-600" />
+              </button>
+            </div>
+
+            {activeInfoModal === 'hours' && (
+              <div className="space-y-4">
+                <div className="bg-neutral-900 text-white rounded-2xl p-4">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[11px] text-gray-400 font-medium uppercase tracking-wider">Working Schedule</span>
+                    <span className="text-[11px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-semibold">Open Daily</span>
+                  </div>
+                  <p className="font-bold text-xl text-white">{vendor.opening_hours || '08:00 AM – 08:00 PM'}</p>
+                  <p className="text-xs text-gray-300 mt-1">Monday through Sunday (WITA Bali Time)</p>
+                </div>
+
+                <div className="bg-gray-50 rounded-2xl p-4 space-y-3">
+                  <h4 className="font-bold text-xs text-gray-900 uppercase tracking-wider">Service Details</h4>
+                  <div className="space-y-2.5 text-xs text-gray-600">
+                    <div className="flex items-start gap-2.5">
+                      <div className="w-5 h-5 rounded-full bg-black text-white flex items-center justify-center shrink-0 text-[10px] font-bold">1</div>
+                      <p><strong className="text-gray-900">Instant Delivery:</strong> Drop-off directly to your hotel or villa during open hours.</p>
+                    </div>
+                    <div className="flex items-start gap-2.5">
+                      <div className="w-5 h-5 rounded-full bg-black text-white flex items-center justify-center shrink-0 text-[10px] font-bold">2</div>
+                      <p><strong className="text-gray-900">Direct Shop Pickup:</strong> Free collection and return at the vendor location.</p>
+                    </div>
+                    <div className="flex items-start gap-2.5">
+                      <div className="w-5 h-5 rounded-full bg-black text-white flex items-center justify-center shrink-0 text-[10px] font-bold">3</div>
+                      <p><strong className="text-gray-900">Continuous Support:</strong> Responsive customer service & assistance throughout the day.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeInfoModal === 'delivery' && (
+              <div className="space-y-4">
+                <div className="bg-neutral-900 text-white rounded-2xl p-4">
+                  <span className="text-[11px] text-gray-400 font-medium uppercase tracking-wider block mb-1.5">Delivery Coverage</span>
+                  <p className="font-bold text-base text-white leading-snug">{vendor.delivery_area || getDeliveryArea(vendor.address)}</p>
+                  <p className="text-xs text-gray-300 mt-2 flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                    <span>Dispatched from: {vendor.address || 'Bali, Indonesia'}</span>
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 rounded-2xl p-4 space-y-3">
+                  <h4 className="font-bold text-xs text-gray-900 uppercase tracking-wider">Delivery Policy</h4>
+                  <div className="space-y-2 text-xs text-gray-600">
+                    <div className="flex items-start gap-2.5">
+                      <Check className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
+                      <p><strong className="text-gray-900">To Your Accommodation:</strong> Delivered straight to your hotel, villa, or Airbnb.</p>
+                    </div>
+                    <div className="flex items-start gap-2.5">
+                      <Check className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
+                      <p><strong className="text-gray-900">Free Delivery Radius:</strong> Free delivery within 5km from shop location.</p>
+                    </div>
+                    <div className="flex items-start gap-2.5">
+                      <Check className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
+                      <p><strong className="text-gray-900">Included Equipment:</strong> 2 sanitized helmets & phone holder.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeInfoModal === 'requirements' && (
+              <div className="space-y-4">
+                <div className="bg-neutral-900 text-white rounded-2xl p-4">
+                  <span className="text-[11px] text-gray-400 font-medium uppercase tracking-wider block mb-1.5">Required Documents</span>
+                  <div className="space-y-2 text-xs text-gray-200">
+                    <div className="flex items-center gap-2">
+                      <Check className="w-4 h-4 text-green-400 shrink-0" />
+                      <span className="font-semibold text-white">Valid Passport or National ID copy</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Check className="w-4 h-4 text-green-400 shrink-0" />
+                      <span className="font-semibold text-white">International or National Driving License</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 rounded-2xl p-4 space-y-3">
+                  <h4 className="font-bold text-xs text-gray-900 uppercase tracking-wider">What's Included & Policies</h4>
+                  <div className="space-y-2 text-xs text-gray-600">
+                    <div className="flex items-start gap-2.5">
+                      <Check className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
+                      <p><strong className="text-gray-900">Free Cancellation:</strong> 100% free cancellation up to 24h before rental date.</p>
+                    </div>
+                    <div className="flex items-start gap-2.5">
+                      <Check className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
+                      <p><strong className="text-gray-900">2 Sanitized Helmets:</strong> Clean and sanitized before every handover.</p>
+                    </div>
+                    <div className="flex items-start gap-2.5">
+                      <Check className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
+                      <p><strong className="text-gray-900">Safety Inspected:</strong> Fully inspected for tires, brakes, and lights prior to delivery.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="mt-6">
+              <button 
+                onClick={() => setActiveInfoModal(null)}
+                className="w-full bg-black text-white font-bold py-3.5 rounded-2xl hover:bg-gray-800 transition-colors text-sm"
+              >
+                Got It
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   )

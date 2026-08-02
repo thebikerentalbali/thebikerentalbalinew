@@ -322,7 +322,10 @@ export default function VendorPage() {
             </div>
 
             {/* Quick Info Pill Buttons (Black background, white title) */}
-            <div className="flex items-center gap-2 mb-6 overflow-x-auto hide-scrollbar -mx-5 px-5">
+            <div 
+              className="flex items-center gap-2 mb-6 overflow-x-auto scrollbar-hide hide-scrollbar -mx-5 px-5"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
+            >
               <button 
                 onClick={() => setActiveInfoModal('hours')}
                 className="bg-black hover:bg-neutral-800 active:scale-95 transition-all text-white text-xs font-semibold px-4 py-2.5 rounded-full shrink-0 flex items-center gap-2 shadow-sm"
