@@ -1,13 +1,17 @@
 export interface PlatformSettings {
-  markup_daily: number;    // IDR markup added per day
-  markup_weekly: number;   // IDR markup added per week
-  markup_monthly: number;  // IDR markup added per month
+  markup_daily: number;          // IDR markup per day for daily rentals (< 7 days)
+  markup_weekly_per_day: number; // IDR markup per day for weekly rentals (7 - 29 days)
+  markup_monthly_per_day: number;// IDR markup per day for monthly rentals (30+ days)
+  markup_weekly?: number;        // Total weekly markup (markup_weekly_per_day * 7)
+  markup_monthly?: number;       // Total monthly markup (markup_monthly_per_day * 30)
 }
 
 export const DEFAULT_PLATFORM_SETTINGS: PlatformSettings = {
   markup_daily: 25000,
-  markup_weekly: 150000,
-  markup_monthly: 500000,
+  markup_weekly_per_day: 20000,
+  markup_monthly_per_day: 15000,
+  markup_weekly: 140000,
+  markup_monthly: 450000,
 };
 
 const STORAGE_KEY = 'platform_commission_settings';
@@ -18,10 +22,20 @@ export function getPlatformSettings(): PlatformSettings {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
+      const daily = Number(parsed.markup_daily) || DEFAULT_PLATFORM_SETTINGS.markup_daily;
+      
+      const weeklyPerDay = Number(parsed.markup_weekly_per_day) || 
+        (parsed.markup_weekly ? Math.round(Number(parsed.markup_weekly) / 7) : DEFAULT_PLATFORM_SETTINGS.markup_weekly_per_day);
+        
+      const monthlyPerDay = Number(parsed.markup_monthly_per_day) || 
+        (parsed.markup_monthly ? Math.round(Number(parsed.markup_monthly) / 30) : DEFAULT_PLATFORM_SETTINGS.markup_monthly_per_day);
+
       return {
-        markup_daily: Number(parsed.markup_daily) || DEFAULT_PLATFORM_SETTINGS.markup_daily,
-        markup_weekly: Number(parsed.markup_weekly) || DEFAULT_PLATFORM_SETTINGS.markup_weekly,
-        markup_monthly: Number(parsed.markup_monthly) || DEFAULT_PLATFORM_SETTINGS.markup_monthly,
+        markup_daily: daily,
+        markup_weekly_per_day: weeklyPerDay,
+        markup_monthly_per_day: monthlyPerDay,
+        markup_weekly: Number(parsed.markup_weekly) || (weeklyPerDay * 7),
+        markup_monthly: Number(parsed.markup_monthly) || (monthlyPerDay * 30),
       };
     }
   } catch (e) {
@@ -30,10 +44,23 @@ export function getPlatformSettings(): PlatformSettings {
   return DEFAULT_PLATFORM_SETTINGS;
 }
 
-export function savePlatformSettings(settings: PlatformSettings): void {
+export function savePlatformSettings(settings: Partial<PlatformSettings>): void {
   if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    const daily = Number(settings.markup_daily) || DEFAULT_PLATFORM_SETTINGS.markup_daily;
+    const weeklyPerDay = Number(settings.markup_weekly_per_day) || 
+      (settings.markup_weekly ? Math.round(Number(settings.markup_weekly) / 7) : DEFAULT_PLATFORM_SETTINGS.markup_weekly_per_day);
+    const monthlyPerDay = Number(settings.markup_monthly_per_day) || 
+      (settings.markup_monthly ? Math.round(Number(settings.markup_monthly) / 30) : DEFAULT_PLATFORM_SETTINGS.markup_monthly_per_day);
+
+    const payload: PlatformSettings = {
+      markup_daily: daily,
+      markup_weekly_per_day: weeklyPerDay,
+      markup_monthly_per_day: monthlyPerDay,
+      markup_weekly: weeklyPerDay * 7,
+      markup_monthly: monthlyPerDay * 30,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     window.dispatchEvent(new Event('platform_settings_updated'));
   } catch (e) {
     console.error('Failed to save platform settings:', e);
@@ -49,13 +76,22 @@ export function getCustomerPrice(
   vendorNetMonthly?: number,
   settings: PlatformSettings = DEFAULT_PLATFORM_SETTINGS
 ) {
-  const daily = vendorNetDaily + settings.markup_daily;
+  const dailyMarkup = Number(settings.markup_daily) || DEFAULT_PLATFORM_SETTINGS.markup_daily;
+  const weeklyMarkupPerDay = Number(settings.markup_weekly_per_day) || 
+    (settings.markup_weekly ? Math.round(Number(settings.markup_weekly) / 7) : DEFAULT_PLATFORM_SETTINGS.markup_weekly_per_day);
+  const monthlyMarkupPerDay = Number(settings.markup_monthly_per_day) || 
+    (settings.markup_monthly ? Math.round(Number(settings.markup_monthly) / 30) : DEFAULT_PLATFORM_SETTINGS.markup_monthly_per_day);
+
+  const totalWeeklyMarkup = weeklyMarkupPerDay * 7;
+  const totalMonthlyMarkup = monthlyMarkupPerDay * 30;
+
+  const daily = vendorNetDaily + dailyMarkup;
   const weekly = (vendorNetWeekly && vendorNetWeekly > 0)
-    ? vendorNetWeekly + settings.markup_weekly
-    : (vendorNetDaily + settings.markup_daily) * 6;
+    ? vendorNetWeekly + totalWeeklyMarkup
+    : (vendorNetDaily * 6) + totalWeeklyMarkup;
   const monthly = (vendorNetMonthly && vendorNetMonthly > 0)
-    ? vendorNetMonthly + settings.markup_monthly
-    : (vendorNetDaily + settings.markup_daily) * 20;
+    ? vendorNetMonthly + totalMonthlyMarkup
+    : (vendorNetDaily * 20) + totalMonthlyMarkup;
 
   return {
     daily,
@@ -119,18 +155,20 @@ export function calculateBookingCommission(
 ): number {
   const days = calculateRentalDays(startDate, endDate);
   const qty = Math.max(1, Number(quantity) || 1);
-  let commission = 0;
 
+  const dailyMarkup = Number(settings.markup_daily) || DEFAULT_PLATFORM_SETTINGS.markup_daily;
+  const weeklyMarkupPerDay = Number(settings.markup_weekly_per_day) || 
+    (settings.markup_weekly ? Math.round(Number(settings.markup_weekly) / 7) : DEFAULT_PLATFORM_SETTINGS.markup_weekly_per_day);
+  const monthlyMarkupPerDay = Number(settings.markup_monthly_per_day) || 
+    (settings.markup_monthly ? Math.round(Number(settings.markup_monthly) / 30) : DEFAULT_PLATFORM_SETTINGS.markup_monthly_per_day);
+
+  let commission = 0;
   if (days >= 30) {
-    const months = Math.floor(days / 30);
-    const remDays = days % 30;
-    commission = (months * settings.markup_monthly + remDays * settings.markup_daily) * qty;
+    commission = days * monthlyMarkupPerDay * qty;
   } else if (days >= 7) {
-    const weeks = Math.floor(days / 7);
-    const remDays = days % 7;
-    commission = (weeks * settings.markup_weekly + remDays * settings.markup_daily) * qty;
+    commission = days * weeklyMarkupPerDay * qty;
   } else {
-    commission = (days * settings.markup_daily) * qty;
+    commission = days * dailyMarkup * qty;
   }
 
   // Safety safeguard: commission should not exceed total price
