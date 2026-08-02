@@ -56,7 +56,7 @@ export default function VendorPage() {
         { data: sData },
         { data: rData }
       ] = await Promise.all([
-        supabase.from('vendors').select('*').eq('id', id).single(),
+        supabase.from('vendors').select('*').eq('id', id).eq('status', 'approved').single(),
         supabase.from('scooters').select('*').eq('vendor_id', id),
         supabase.from('reviews').select('*').eq('vendor_id', id)
       ])

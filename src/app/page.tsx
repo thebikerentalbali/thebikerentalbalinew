@@ -70,7 +70,7 @@ export default function Home() {
         { data: scooters }
       ] = await Promise.all([
         supabase.from('reviews').select('vendor_id'),
-        supabase.from('vendors').select('*').limit(6),
+        supabase.from('vendors').select('*').eq('status', 'approved').limit(6),
         supabase.from('scooters').select('*')
       ])
 

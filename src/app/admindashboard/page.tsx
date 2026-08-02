@@ -422,6 +422,34 @@ export default function AdminDashboard() {
     }
   }
 
+  const handleSuspendVendor = async (id: number) => {
+    if (!confirm("Are you sure you want to suspend this vendor? They will no longer appear on the main website.")) return
+    const { error } = await supabase
+      .from('vendors')
+      .update({ status: 'suspended' })
+      .eq('id', id)
+
+    if (!error) {
+      fetchVendors()
+    } else {
+      alert("Error suspending vendor: " + error.message)
+    }
+  }
+
+  const handleRemoveVendor = async (id: number) => {
+    if (!confirm("Are you sure you want to remove this vendor permanently?")) return
+    const { error } = await supabase
+      .from('vendors')
+      .update({ status: 'removed' })
+      .eq('id', id)
+
+    if (!error) {
+      fetchVendors()
+    } else {
+      alert("Error removing vendor: " + error.message)
+    }
+  }
+
   const mockVendors: any[] = []
 
   const mockUsers = []
@@ -697,18 +725,29 @@ export default function AdminDashboard() {
                       {isExpanded && (
                         <div className="bg-gray-50/50 p-5 border-t border-gray-100 animate-in slide-in-from-top-2">
                           <h5 className="text-xs font-bold text-gray-900 uppercase tracking-wide mb-4">Vendor Details</h5>
+                          
+                          {vendor.image_url && (
+                            <div className="mb-6 rounded-xl overflow-hidden h-32 md:h-40 relative border border-gray-200">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={vendor.image_url} alt="Cover" className="w-full h-full object-cover" />
+                              <div className="absolute inset-0 bg-black/20 flex items-end p-3">
+                                <span className="text-white text-xs font-bold bg-black/50 px-2 py-1 rounded-md">Cover Image</span>
+                              </div>
+                            </div>
+                          )}
+
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div>
                               <p className="text-xs font-medium text-gray-500 mb-1">Contact Phone</p>
-                              <p className="font-semibold text-gray-900 text-sm">N/A</p>
+                              <p className="font-semibold text-gray-900 text-sm">{vendor.phone || "N/A"}</p>
                             </div>
                             <div>
                               <p className="text-xs font-medium text-gray-500 mb-1">Document Status</p>
-                              <p className="font-semibold text-sm text-yellow-600">Pending</p>
+                              <p className="font-semibold text-sm text-yellow-600">Pending Review</p>
                             </div>
                             <div>
-                              <p className="text-xs font-medium text-gray-500 mb-1">Intended Fleet</p>
-                              <p className="font-semibold text-gray-900 text-sm">Unknown</p>
+                              <p className="text-xs font-medium text-gray-500 mb-1">Address Details</p>
+                              <p className="font-semibold text-gray-900 text-sm">{vendor.address || "Unknown"}</p>
                             </div>
                           </div>
                         </div>
@@ -775,7 +814,7 @@ export default function AdminDashboard() {
                           <h5 className="text-xs font-bold text-gray-900 uppercase tracking-wide mb-3 flex items-center gap-2">
                             <Bike className="w-4 h-4 text-gray-400" /> Published Fleet
                           </h5>
-                          <div className="space-y-2">
+                          <div className="space-y-2 mb-6">
                             {vendor.scooters?.map((scooter: any) => (
                               <div key={scooter.id} className="bg-white border border-gray-100 p-3 rounded-xl flex items-center justify-between shadow-sm hover:border-gray-200 transition-colors">
                                 <div className="flex items-center gap-3">
@@ -792,6 +831,24 @@ export default function AdminDashboard() {
                                 </div>
                               </div>
                             ))}
+                            {(!vendor.scooters || vendor.scooters.length === 0) && (
+                              <p className="text-sm text-gray-500">No scooters published yet.</p>
+                            )}
+                          </div>
+                          
+                          <div className="pt-4 border-t border-gray-200 flex flex-col sm:flex-row gap-3">
+                            <button 
+                              onClick={() => handleSuspendVendor(vendor.id)}
+                              className="flex-1 bg-yellow-50 hover:bg-yellow-100 text-yellow-700 border border-yellow-200 font-bold py-2.5 px-4 rounded-xl text-sm transition-colors text-center"
+                            >
+                              Suspend Vendor
+                            </button>
+                            <button 
+                              onClick={() => handleRemoveVendor(vendor.id)}
+                              className="flex-1 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-bold py-2.5 px-4 rounded-xl text-sm transition-colors text-center"
+                            >
+                              Remove Vendor
+                            </button>
                           </div>
                         </div>
                       )}

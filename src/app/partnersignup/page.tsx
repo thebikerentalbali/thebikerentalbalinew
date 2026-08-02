@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { ChevronRight, Store, User, Mail, Phone, Lock, Bike, MapPin, CheckCircle2, Loader2 } from "lucide-react"
+import { ChevronRight, Store, User, Mail, Phone, Lock, Bike, MapPin, CheckCircle2, Loader2, Camera } from "lucide-react"
 import dynamic from "next/dynamic"
 import { createClient } from "@/lib/supabase/client"
 
@@ -22,9 +22,13 @@ export default function PartnerSignUp() {
     lat: 0,
     lng: 0
   })
+  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [coverFile, setCoverFile] = useState<File | null>(null)
+  const [logoPreview, setLogoPreview] = useState<string>("")
+  const [coverPreview, setCoverPreview] = useState<string>("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMsg, setErrorMsg] = useState("")
-
+  
   const supabase = createClient()
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -58,6 +62,33 @@ export default function PartnerSignUp() {
     }
 
     if (authData.user) {
+      let logoUrl = ""
+      let coverUrl = ""
+
+      if (logoFile) {
+        const fileExt = logoFile.name.split('.').pop()
+        const fileName = `${Math.random()}.${fileExt}`
+        const filePath = `vendors/${authData.user.id}/logo-${fileName}`
+        
+        const { error: uploadError } = await supabase.storage.from('scooter-image').upload(filePath, logoFile)
+        if (!uploadError) {
+          const { data: { publicUrl } } = supabase.storage.from('scooter-image').getPublicUrl(filePath)
+          logoUrl = publicUrl
+        }
+      }
+
+      if (coverFile) {
+        const fileExt = coverFile.name.split('.').pop()
+        const fileName = `${Math.random()}.${fileExt}`
+        const filePath = `vendors/${authData.user.id}/cover-${fileName}`
+        
+        const { error: uploadError } = await supabase.storage.from('scooter-image').upload(filePath, coverFile)
+        if (!uploadError) {
+          const { data: { publicUrl } } = supabase.storage.from('scooter-image').getPublicUrl(filePath)
+          coverUrl = publicUrl
+        }
+      }
+
       // 2. Insert vendor profile
       const { error: insertError } = await supabase.from('vendors').insert({
         auth_id: authData.user.id,
@@ -67,6 +98,8 @@ export default function PartnerSignUp() {
         address: formData.streetAddress,
         lat: formData.lat,
         lng: formData.lng,
+        logo: logoUrl || null,
+        image_url: coverUrl || null,
         status: 'pending'
       })
 
@@ -283,11 +316,72 @@ export default function PartnerSignUp() {
                 <button onClick={() => setStep(1)} className="text-sm font-bold text-gray-500 hover:text-black mb-4 flex items-center gap-1">
                   &larr; Back
                 </button>
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">Location & Security</h2>
-                <p className="text-gray-500">Pin your exact business location for delivery logistics.</p>
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">Location & Branding</h2>
+                <p className="text-gray-500">Pin your exact business location and upload your branding.</p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Branding Section */}
+                <div className="space-y-4 pb-4 border-b border-gray-100">
+                  <h3 className="text-sm font-bold text-gray-700">Branding Images</h3>
+                  <div className="flex flex-col sm:flex-row gap-6">
+                    <div className="flex-1 space-y-2">
+                      <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Vendor Logo</label>
+                      <div className="relative group w-24 h-24 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-gray-50 hover:bg-gray-100 transition-colors">
+                        {logoPreview ? (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img src={logoPreview} alt="Logo preview" className="w-full h-full object-cover" />
+                        ) : (
+                          <Camera className="w-8 h-8 text-gray-400 group-hover:scale-110 transition-transform" />
+                        )}
+                        <label className="absolute inset-0 cursor-pointer flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 bg-black/50 transition-opacity">
+                          <span className="text-white text-[10px] font-bold">Upload</span>
+                          <input 
+                            type="file" 
+                            className="hidden" 
+                            accept="image/*"
+                            onChange={(e) => {
+                              if (e.target.files && e.target.files[0]) {
+                                setLogoFile(e.target.files[0])
+                                const reader = new FileReader()
+                                reader.onloadend = () => setLogoPreview(reader.result as string)
+                                reader.readAsDataURL(e.target.files[0])
+                              }
+                            }}
+                          />
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="flex-[2] space-y-2">
+                      <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Cover Image</label>
+                      <div className="relative group w-full h-24 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-gray-50 hover:bg-gray-100 transition-colors">
+                        {coverPreview ? (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img src={coverPreview} alt="Cover preview" className="w-full h-full object-cover" />
+                        ) : (
+                          <Camera className="w-8 h-8 text-gray-400 group-hover:scale-110 transition-transform" />
+                        )}
+                        <label className="absolute inset-0 cursor-pointer flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 bg-black/50 transition-opacity">
+                          <span className="text-white text-xs font-bold">Upload Cover</span>
+                          <input 
+                            type="file" 
+                            className="hidden" 
+                            accept="image/*"
+                            onChange={(e) => {
+                              if (e.target.files && e.target.files[0]) {
+                                setCoverFile(e.target.files[0])
+                                const reader = new FileReader()
+                                reader.onloadend = () => setCoverPreview(reader.result as string)
+                                reader.readAsDataURL(e.target.files[0])
+                              }
+                            }}
+                          />
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 <div className="space-y-1.5">
                   <label className="text-sm font-bold text-gray-700 flex items-center justify-between">
                     Exact Location Pin

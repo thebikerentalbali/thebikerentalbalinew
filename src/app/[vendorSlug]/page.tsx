@@ -15,7 +15,7 @@ export async function generateMetadata(
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
   const supabase = createClient(supabaseUrl, supabaseKey);
 
-  const { data: vendors } = await supabase.from('vendors').select('id, name, logo');
+  const { data: vendors } = await supabase.from('vendors').select('id, name, logo').eq('status', 'approved');
   if (vendors) {
     const vendor = vendors.find(v => v.name.toLowerCase().replace(/[^a-z0-9]+/g, '') === params.vendorSlug);
     if (vendor) {
@@ -43,7 +43,7 @@ export default async function VendorSlugPage(props: Props) {
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
   const supabase = createClient(supabaseUrl, supabaseKey);
 
-  const { data: vendors } = await supabase.from('vendors').select('id, name');
+  const { data: vendors } = await supabase.from('vendors').select('id, name').eq('status', 'approved');
   
   if (vendors) {
     const vendor = vendors.find(v => v.name.toLowerCase().replace(/[^a-z0-9]+/g, '') === params.vendorSlug);
