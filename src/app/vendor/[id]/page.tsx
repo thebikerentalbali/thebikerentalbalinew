@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ChevronLeft, ChevronRight, MapPin, Star, Share, Loader2, X, BadgeCheck, MessageCircle, Check } from "lucide-react"
+import { ChevronLeft, ChevronRight, MapPin, Star, Share, Loader2, X, BadgeCheck, MessageCircle, Check, Clock } from "lucide-react"
 import { useRouter, useParams } from "next/navigation"
 import Link from "next/link"
 import { createClient } from '@/lib/supabase/client'
@@ -22,6 +22,7 @@ export default function VendorPage() {
   const [isSubmittingReview, setIsSubmittingReview] = useState(false)
   const [selectedBrand, setSelectedBrand] = useState<string>("All")
   const [copiedLink, setCopiedLink] = useState(false)
+  const [activeInfoModal, setActiveInfoModal] = useState<'hours' | 'delivery' | 'requirements' | null>(null)
 
   const handleSubmitReview = async () => {
     if (!newReview.name || !newReview.comment) {
@@ -292,31 +293,77 @@ export default function VendorPage() {
               <p className="text-gray-500 text-[15px]">{vendor.address || 'Premium scooter rental in Bali'}</p>
             </div>
 
-            {/* 3 Column Stats */}
-            <div className="flex items-center justify-between py-4 border-y border-gray-100 max-w-sm mb-6">
-              {/* Rating */}
-              <div className="flex flex-col items-center justify-center flex-1 cursor-pointer" onClick={() => setIsReviewModalOpen(true)}>
-                <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 text-gray-800 fill-gray-800" />
-                  <span className="font-bold text-lg text-gray-900">5.0</span>
+            {/* Swipeable Info & Stats Strip (Hours, Delivery, Requirements, Rating, Reviews, Scooters) */}
+            <div className="-mx-5 px-5 mb-6">
+              <div className="flex items-center gap-4 overflow-x-auto py-3.5 border-y border-gray-100 hide-scrollbar snap-x">
+                
+                {/* Operating Hours */}
+                <div 
+                  onClick={() => setActiveInfoModal('hours')}
+                  className="flex flex-col items-center justify-center shrink-0 min-w-[95px] snap-start cursor-pointer active:scale-95 transition-transform"
+                >
+                  <span className="font-bold text-[15px] text-gray-900 leading-tight">08:00 - 20:00</span>
+                  <span className="text-[12px] text-gray-500 mt-0.5">hours</span>
                 </div>
-                <span className="text-[13px] text-gray-500 mt-0.5">rating</span>
-              </div>
-              
-              <div className="w-px h-8 bg-gray-200" />
 
-              {/* Reviews */}
-              <div className="flex flex-col items-center justify-center flex-1 cursor-pointer" onClick={() => setIsReviewModalOpen(true)}>
-                <span className="font-bold text-lg text-gray-900">{reviews.length}+</span>
-                <span className="text-[13px] text-gray-500 mt-0.5">reviews</span>
-              </div>
+                <div className="w-px h-7 bg-gray-200 shrink-0" />
 
-              <div className="w-px h-8 bg-gray-200" />
+                {/* Delivery Areas */}
+                <div 
+                  onClick={() => setActiveInfoModal('delivery')}
+                  className="flex flex-col items-center justify-center shrink-0 min-w-[95px] snap-start cursor-pointer active:scale-95 transition-transform"
+                >
+                  <span className="font-bold text-[15px] text-gray-900 leading-tight">
+                    {vendor.address?.toLowerCase().includes('ubud') || vendor.address?.toLowerCase().includes('mas') ? 'Ubud Only' : 'Coverage'}
+                  </span>
+                  <span className="text-[12px] text-gray-500 mt-0.5">delivery area</span>
+                </div>
 
-              {/* Scooters Count */}
-              <div className="flex flex-col items-center justify-center flex-1">
-                <span className="font-bold text-lg text-gray-900">{scooters.reduce((sum, scooter) => sum + (scooter.total_units || 1), 0)}</span>
-                <span className="text-[13px] text-gray-500 mt-0.5">scooters</span>
+                <div className="w-px h-7 bg-gray-200 shrink-0" />
+
+                {/* Rental Requirements */}
+                <div 
+                  onClick={() => setActiveInfoModal('requirements')}
+                  className="flex flex-col items-center justify-center shrink-0 min-w-[95px] snap-start cursor-pointer active:scale-95 transition-transform"
+                >
+                  <span className="font-bold text-[15px] text-gray-900 leading-tight">Requirements</span>
+                  <span className="text-[12px] text-gray-500 mt-0.5">ID & license</span>
+                </div>
+
+                <div className="w-px h-7 bg-gray-200 shrink-0" />
+
+                {/* Rating */}
+                <div 
+                  onClick={() => setIsReviewModalOpen(true)}
+                  className="flex flex-col items-center justify-center shrink-0 min-w-[75px] snap-start cursor-pointer active:scale-95 transition-transform"
+                >
+                  <div className="flex items-center gap-1">
+                    <Star className="w-3.5 h-3.5 text-gray-800 fill-gray-800" />
+                    <span className="font-bold text-[15px] text-gray-900 leading-tight">5.0</span>
+                  </div>
+                  <span className="text-[12px] text-gray-500 mt-0.5">rating</span>
+                </div>
+                
+                <div className="w-px h-7 bg-gray-200 shrink-0" />
+
+                {/* Reviews */}
+                <div 
+                  onClick={() => setIsReviewModalOpen(true)}
+                  className="flex flex-col items-center justify-center shrink-0 min-w-[75px] snap-start cursor-pointer active:scale-95 transition-transform"
+                >
+                  <span className="font-bold text-[15px] text-gray-900 leading-tight">{reviews.length}+</span>
+                  <span className="text-[12px] text-gray-500 mt-0.5">reviews</span>
+                </div>
+
+                <div className="w-px h-7 bg-gray-200 shrink-0" />
+
+                {/* Scooters Count */}
+                <div className="flex flex-col items-center justify-center shrink-0 min-w-[75px] snap-start">
+                  <span className="font-bold text-[15px] text-gray-900 leading-tight">
+                    {scooters.reduce((sum, scooter) => sum + (scooter.total_units || 1), 0)}
+                  </span>
+                  <span className="text-[12px] text-gray-500 mt-0.5">scooters</span>
+                </div>
               </div>
             </div>
 
@@ -363,32 +410,6 @@ export default function VendorPage() {
             </div>
           </div>
         </header>
-
-        {/* Location & Delivery Coverage on Mobile */}
-        <div className="px-5 mt-6">
-          <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
-            <h3 className="font-bold text-gray-900 text-[15px] mb-3">Location & Delivery</h3>
-            
-            <div className="space-y-3 text-xs">
-              <div>
-                <span className="text-gray-400 font-medium block text-[11px]">Address</span>
-                <p className="font-semibold text-gray-800 text-[13px] mt-0.5">{vendor.address || 'Bali, Indonesia'}</p>
-              </div>
-
-              <div className="pt-2.5 border-t border-gray-100">
-                <span className="text-gray-400 font-medium block text-[11px]">Operating Hours</span>
-                <p className="font-semibold text-gray-800 text-[13px] mt-0.5">08:00 AM – 08:00 PM Daily</p>
-              </div>
-
-              <div className="pt-2.5 border-t border-gray-100">
-                <span className="text-gray-400 font-medium block text-[11px]">Delivery Areas</span>
-                <p className="font-semibold text-gray-800 text-[13px] mt-0.5 leading-relaxed">
-                  {getDeliveryArea(vendor.address)}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Available Scooters on Mobile */}
         <div className="px-6 mt-8">
@@ -849,6 +870,100 @@ export default function VendorPage() {
                 className="w-full flex justify-center items-center bg-black disabled:bg-gray-400 text-white font-bold py-4 rounded-2xl hover:scale-[1.02] shadow-xl shadow-black/10 transition-all"
               >
                 {isSubmittingReview ? <Loader2 className="w-6 h-6 animate-spin text-white" /> : "Submit Review"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Details Pop-up Modal for Hours, Delivery, and Requirements */}
+      {activeInfoModal && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-150"
+          onClick={() => setActiveInfoModal(null)}
+        >
+          <div 
+            className="bg-white w-full sm:max-w-md rounded-t-[32px] sm:rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom duration-200"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-4 border-b border-gray-100 mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-800 font-bold">
+                  {activeInfoModal === 'hours' && <Clock className="w-4 h-4" />}
+                  {activeInfoModal === 'delivery' && <MapPin className="w-4 h-4" />}
+                  {activeInfoModal === 'requirements' && <Check className="w-4 h-4" />}
+                </div>
+                <h3 className="font-bold text-lg text-gray-900">
+                  {activeInfoModal === 'hours' && 'Operating Hours'}
+                  {activeInfoModal === 'delivery' && 'Delivery Areas'}
+                  {activeInfoModal === 'requirements' && 'Rental Requirements'}
+                </h3>
+              </div>
+              <button 
+                onClick={() => setActiveInfoModal(null)}
+                className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+              >
+                <X className="w-4 h-4 text-gray-600" />
+              </button>
+            </div>
+
+            {activeInfoModal === 'hours' && (
+              <div className="space-y-4 text-sm">
+                <div className="bg-gray-50 rounded-2xl p-4">
+                  <span className="text-xs text-gray-400 font-medium block">Daily Schedule</span>
+                  <p className="font-bold text-gray-900 text-base mt-1">08:00 AM – 08:00 PM</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Open 7 days a week (Monday to Sunday)</p>
+                </div>
+                <p className="text-xs text-gray-600 leading-relaxed px-1">
+                  Scooter delivery, pick-up, and vendor customer support are active throughout these hours.
+                </p>
+              </div>
+            )}
+
+            {activeInfoModal === 'delivery' && (
+              <div className="space-y-4 text-sm">
+                <div className="bg-gray-50 rounded-2xl p-4">
+                  <span className="text-xs text-gray-400 font-medium block">Coverage Zone</span>
+                  <p className="font-bold text-gray-900 text-base mt-1">{getDeliveryArea(vendor.address)}</p>
+                </div>
+                <div className="bg-gray-50 rounded-2xl p-4 space-y-2 text-xs text-gray-600">
+                  <p className="font-semibold text-gray-900">Delivery Policy</p>
+                  <p>• Delivery straight to your hotel, villa, or guesthouse.</p>
+                  <p>• Free delivery up to 5km from {vendor.name}.</p>
+                  <p>• Fast and convenient drop-off with 2 helmets included.</p>
+                </div>
+              </div>
+            )}
+
+            {activeInfoModal === 'requirements' && (
+              <div className="space-y-4 text-sm">
+                <div className="bg-gray-50 rounded-2xl p-4 space-y-2.5 text-xs text-gray-700">
+                  <div className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
+                    <span>Valid Passport or National ID copy</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
+                    <span>International Driving Permit (IDP) or National Driving License</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
+                    <span>2 Clean sanitized helmets & phone holder included</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
+                    <span>Free cancellation up to 24 hours prior to rental date</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="mt-6">
+              <button 
+                onClick={() => setActiveInfoModal(null)}
+                className="w-full bg-black text-white font-bold py-3.5 rounded-2xl hover:bg-gray-800 transition-colors text-sm"
+              >
+                Got It
               </button>
             </div>
           </div>
