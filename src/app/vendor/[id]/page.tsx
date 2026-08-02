@@ -293,77 +293,68 @@ export default function VendorPage() {
               <p className="text-gray-500 text-[15px]">{vendor.address || 'Premium scooter rental in Bali'}</p>
             </div>
 
-            {/* Swipeable Info & Stats Strip (Hours, Delivery, Requirements, Rating, Reviews, Scooters) */}
+            {/* Swipeable Rounded Black Info Cards (Hours, Delivery, Requirements, Rating, Reviews, Scooters) */}
             <div className="-mx-5 px-5 mb-6">
-              <div className="flex items-center gap-4 overflow-x-auto py-3.5 border-y border-gray-100 hide-scrollbar snap-x">
+              <div className="flex items-center gap-2.5 overflow-x-auto py-1 hide-scrollbar snap-x">
                 
-                {/* Operating Hours */}
+                {/* Operating Hours Card */}
                 <div 
                   onClick={() => setActiveInfoModal('hours')}
-                  className="flex flex-col items-center justify-center shrink-0 min-w-[95px] snap-start cursor-pointer active:scale-95 transition-transform"
+                  className="bg-black text-white rounded-2xl px-4 py-3 shrink-0 flex flex-col items-center justify-center snap-start cursor-pointer active:scale-95 transition-all min-w-[110px] shadow-sm"
                 >
-                  <span className="font-bold text-[15px] text-gray-900 leading-tight">08:00 - 20:00</span>
-                  <span className="text-[12px] text-gray-500 mt-0.5">hours</span>
+                  <span className="font-bold text-[14px] text-white leading-tight">08:00 - 20:00</span>
+                  <span className="text-[11px] text-gray-400 mt-0.5 font-medium">hours</span>
                 </div>
 
-                <div className="w-px h-7 bg-gray-200 shrink-0" />
-
-                {/* Delivery Areas */}
+                {/* Delivery Areas Card */}
                 <div 
                   onClick={() => setActiveInfoModal('delivery')}
-                  className="flex flex-col items-center justify-center shrink-0 min-w-[95px] snap-start cursor-pointer active:scale-95 transition-transform"
+                  className="bg-black text-white rounded-2xl px-4 py-3 shrink-0 flex flex-col items-center justify-center snap-start cursor-pointer active:scale-95 transition-all min-w-[110px] shadow-sm"
                 >
-                  <span className="font-bold text-[15px] text-gray-900 leading-tight">
+                  <span className="font-bold text-[14px] text-white leading-tight">
                     {vendor.address?.toLowerCase().includes('ubud') || vendor.address?.toLowerCase().includes('mas') ? 'Ubud Only' : 'Coverage'}
                   </span>
-                  <span className="text-[12px] text-gray-500 mt-0.5">delivery area</span>
+                  <span className="text-[11px] text-gray-400 mt-0.5 font-medium">delivery area</span>
                 </div>
 
-                <div className="w-px h-7 bg-gray-200 shrink-0" />
-
-                {/* Rental Requirements */}
+                {/* Rental Requirements Card */}
                 <div 
                   onClick={() => setActiveInfoModal('requirements')}
-                  className="flex flex-col items-center justify-center shrink-0 min-w-[95px] snap-start cursor-pointer active:scale-95 transition-transform"
+                  className="bg-black text-white rounded-2xl px-4 py-3 shrink-0 flex flex-col items-center justify-center snap-start cursor-pointer active:scale-95 transition-all min-w-[115px] shadow-sm"
                 >
-                  <span className="font-bold text-[15px] text-gray-900 leading-tight">Requirements</span>
-                  <span className="text-[12px] text-gray-500 mt-0.5">ID & license</span>
+                  <span className="font-bold text-[14px] text-white leading-tight">Requirements</span>
+                  <span className="text-[11px] text-gray-400 mt-0.5 font-medium">ID & license</span>
                 </div>
 
-                <div className="w-px h-7 bg-gray-200 shrink-0" />
-
-                {/* Rating */}
+                {/* Rating Card */}
                 <div 
                   onClick={() => setIsReviewModalOpen(true)}
-                  className="flex flex-col items-center justify-center shrink-0 min-w-[75px] snap-start cursor-pointer active:scale-95 transition-transform"
+                  className="bg-black text-white rounded-2xl px-4 py-3 shrink-0 flex flex-col items-center justify-center snap-start cursor-pointer active:scale-95 transition-all min-w-[85px] shadow-sm"
                 >
                   <div className="flex items-center gap-1">
-                    <Star className="w-3.5 h-3.5 text-gray-800 fill-gray-800" />
-                    <span className="font-bold text-[15px] text-gray-900 leading-tight">5.0</span>
+                    <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
+                    <span className="font-bold text-[14px] text-white leading-tight">5.0</span>
                   </div>
-                  <span className="text-[12px] text-gray-500 mt-0.5">rating</span>
+                  <span className="text-[11px] text-gray-400 mt-0.5 font-medium">rating</span>
                 </div>
-                
-                <div className="w-px h-7 bg-gray-200 shrink-0" />
 
-                {/* Reviews */}
+                {/* Reviews Card */}
                 <div 
                   onClick={() => setIsReviewModalOpen(true)}
-                  className="flex flex-col items-center justify-center shrink-0 min-w-[75px] snap-start cursor-pointer active:scale-95 transition-transform"
+                  className="bg-black text-white rounded-2xl px-4 py-3 shrink-0 flex flex-col items-center justify-center snap-start cursor-pointer active:scale-95 transition-all min-w-[85px] shadow-sm"
                 >
-                  <span className="font-bold text-[15px] text-gray-900 leading-tight">{reviews.length}+</span>
-                  <span className="text-[12px] text-gray-500 mt-0.5">reviews</span>
+                  <span className="font-bold text-[14px] text-white leading-tight">{reviews.length}+</span>
+                  <span className="text-[11px] text-gray-400 mt-0.5 font-medium">reviews</span>
                 </div>
 
-                <div className="w-px h-7 bg-gray-200 shrink-0" />
-
-                {/* Scooters Count */}
-                <div className="flex flex-col items-center justify-center shrink-0 min-w-[75px] snap-start">
-                  <span className="font-bold text-[15px] text-gray-900 leading-tight">
+                {/* Scooters Count Card */}
+                <div className="bg-black text-white rounded-2xl px-4 py-3 shrink-0 flex flex-col items-center justify-center snap-start min-w-[85px] shadow-sm">
+                  <span className="font-bold text-[14px] text-white leading-tight">
                     {scooters.reduce((sum, scooter) => sum + (scooter.total_units || 1), 0)}
                   </span>
-                  <span className="text-[12px] text-gray-500 mt-0.5">scooters</span>
+                  <span className="text-[11px] text-gray-400 mt-0.5 font-medium">scooters</span>
                 </div>
+
               </div>
             </div>
 
@@ -725,17 +716,12 @@ export default function VendorPage() {
           {/* Sticky Sidebar (4 Columns) */}
           <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-8 self-start">
             
-            {/* Location & Hours */}
+            {/* Hours & Delivery */}
             <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
-              <h3 className="font-bold text-gray-900 text-base mb-4">Location & Hours</h3>
+              <h3 className="font-bold text-gray-900 text-base mb-4">Hours & Delivery</h3>
               
               <div className="space-y-3 text-sm">
                 <div>
-                  <span className="text-xs text-gray-400 font-medium block">Address</span>
-                  <p className="font-medium text-gray-800">{vendor.address || 'Bali, Indonesia'}</p>
-                </div>
-
-                <div className="pt-2 border-t border-gray-100">
                   <span className="text-xs text-gray-400 font-medium block">Operating Hours</span>
                   <p className="font-medium text-gray-800">08:00 AM – 08:00 PM Daily</p>
                 </div>
