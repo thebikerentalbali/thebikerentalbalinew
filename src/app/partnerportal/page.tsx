@@ -139,7 +139,13 @@ export default function VendorDashboard() {
   const [editingServiceLog, setEditingServiceLog] = useState<any>(null)
   
   // Settings State
-  const [settingsForm, setSettingsForm] = useState({ name: "", phone: "", address: "" })
+  const [settingsForm, setSettingsForm] = useState({ 
+    name: "", 
+    phone: "", 
+    address: "",
+    opening_hours: "",
+    delivery_area: ""
+  })
   const [vendorLogo, setVendorLogo] = useState<string | null>(null)
   const [vendorCover, setVendorCover] = useState<string | null>(null)
   const [isSavingSettings, setIsSavingSettings] = useState(false)
@@ -150,7 +156,9 @@ export default function VendorDashboard() {
       setSettingsForm({
         name: vendorData.name || "",
         phone: vendorData.phone || "",
-        address: vendorData.address || ""
+        address: vendorData.address || "",
+        opening_hours: vendorData.opening_hours || "08:00 AM – 08:00 PM Daily",
+        delivery_area: vendorData.delivery_area || ""
       })
       if (vendorData.logo) {
         setVendorLogo(vendorData.logo)
@@ -169,6 +177,8 @@ export default function VendorDashboard() {
         name: settingsForm.name,
         phone: settingsForm.phone,
         address: settingsForm.address,
+        opening_hours: settingsForm.opening_hours,
+        delivery_area: settingsForm.delivery_area,
         lat: vendorLocation[0],
         lng: vendorLocation[1],
         logo: vendorLogo,
@@ -820,8 +830,27 @@ export default function VendorDashboard() {
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Location / Address</label>
-                <textarea value={settingsForm.address} onChange={e => setSettingsForm({...settingsForm, address: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all min-h-[100px] mb-4"></textarea>
+                <textarea value={settingsForm.address} onChange={e => setSettingsForm({...settingsForm, address: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all min-h-[80px] mb-4"></textarea>
                 
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Opening / Operating Hours</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. 08:00 AM – 08:00 PM Daily" 
+                  value={settingsForm.opening_hours} 
+                  onChange={e => setSettingsForm({...settingsForm, opening_hours: e.target.value})} 
+                  className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all mb-1" 
+                />
+                <p className="text-xs text-gray-400 mb-4">Displayed on your profile for customer drop-off & pickup schedule.</p>
+
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Delivery Coverage Areas</label>
+                <textarea 
+                  placeholder="e.g. Ubud area only - Central Ubud, Mas, Sayan, Campuhan, Penestanan & Tegallalang (Leave blank to use auto-detected coverage based on your address)" 
+                  value={settingsForm.delivery_area} 
+                  onChange={e => setSettingsForm({...settingsForm, delivery_area: e.target.value})} 
+                  className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all min-h-[80px] mb-1"
+                ></textarea>
+                <p className="text-xs text-gray-400 mb-4">Specify custom covered zones and areas for hotel/villa delivery.</p>
+
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Pin Location on Map</label>
                 <div className="h-[300px] w-full rounded-xl overflow-hidden border border-gray-100 shadow-sm relative z-0">
                   <MapPicker position={vendorLocation} onPositionChange={(lat, lng) => setVendorLocation([lat, lng])} className="w-full h-full" />

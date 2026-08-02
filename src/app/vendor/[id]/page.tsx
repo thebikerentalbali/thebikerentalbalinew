@@ -169,7 +169,7 @@ export default function VendorPage() {
       addr.includes('lodtunduh') ||
       addr.includes('pengosekan')
     ) {
-      return "Ubud area only (Central Ubud, Mas, Sayan, Campuhan, Penestanan & Tegallalang)"
+      return "Ubud area only - Central Ubud, Mas, Sayan, Campuhan, Penestanan & Tegallalang"
     }
     if (
       addr.includes('canggu') || 
@@ -713,13 +713,13 @@ export default function VendorPage() {
               <div className="space-y-3 text-sm">
                 <div>
                   <span className="text-xs text-gray-400 font-medium block">Operating Hours</span>
-                  <p className="font-medium text-gray-800">08:00 AM – 08:00 PM Daily</p>
+                  <p className="font-medium text-gray-800">{vendor.opening_hours || '08:00 AM – 08:00 PM Daily'}</p>
                 </div>
 
                 <div className="pt-2 border-t border-gray-100">
                   <span className="text-xs text-gray-400 font-medium block">Delivery Areas</span>
                   <p className="text-xs text-gray-600 font-medium leading-relaxed">
-                    {getDeliveryArea(vendor.address)}
+                    {vendor.delivery_area || getDeliveryArea(vendor.address)}
                   </p>
                 </div>
               </div>
@@ -890,7 +890,7 @@ export default function VendorPage() {
                     <span className="text-[11px] text-gray-400 font-medium uppercase tracking-wider">Working Schedule</span>
                     <span className="text-[11px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-semibold">Open Daily</span>
                   </div>
-                  <p className="font-bold text-xl text-white">08:00 AM – 08:00 PM</p>
+                  <p className="font-bold text-xl text-white">{vendor.opening_hours || '08:00 AM – 08:00 PM'}</p>
                   <p className="text-xs text-gray-300 mt-1">Monday through Sunday (WITA Bali Time)</p>
                 </div>
 
@@ -918,7 +918,7 @@ export default function VendorPage() {
               <div className="space-y-4">
                 <div className="bg-neutral-900 text-white rounded-2xl p-4">
                   <span className="text-[11px] text-gray-400 font-medium uppercase tracking-wider block mb-1.5">Delivery Coverage</span>
-                  <p className="font-bold text-base text-white leading-snug">{getDeliveryArea(vendor.address)}</p>
+                  <p className="font-bold text-base text-white leading-snug">{vendor.delivery_area || getDeliveryArea(vendor.address)}</p>
                   <p className="text-xs text-gray-300 mt-2 flex items-center gap-1.5">
                     <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
                     <span>Dispatched from: {vendor.address || 'Bali, Indonesia'}</span>
@@ -938,7 +938,7 @@ export default function VendorPage() {
                     </div>
                     <div className="flex items-start gap-2.5">
                       <Check className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
-                      <p><strong className="text-gray-900">Included Equipment:</strong> 2 sanitized helmets, phone holder & rain ponchos.</p>
+                      <p><strong className="text-gray-900">Included Equipment:</strong> 2 sanitized helmets & phone holder.</p>
                     </div>
                   </div>
                 </div>
