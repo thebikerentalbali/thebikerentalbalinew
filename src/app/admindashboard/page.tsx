@@ -428,13 +428,13 @@ export default function AdminDashboard() {
 
   const mockBookings: any[] = []
   return (
-    <div className="min-h-screen bg-[#F5F7FA] md:flex pb-28 md:pb-0">
+    <div className="min-h-screen bg-[#F5F7FA] md:flex md:pl-64 pb-28 md:pb-0">
       {/* 
         ========================================================================
         DESKTOP SIDEBAR
         ========================================================================
       */}
-      <aside className="w-64 bg-black border-r border-gray-800 hidden md:flex flex-col sticky top-0 h-screen shrink-0 self-start z-40 shadow-xl">
+      <aside className="w-64 bg-black border-r border-gray-800 hidden md:flex flex-col fixed top-0 left-0 h-screen z-40 shadow-xl">
         <div className="p-6">
           <Link href="/" className="inline-block">
             <h2 className="text-xl font-black text-white tracking-tight leading-none">THE BIKE RENTAL</h2>
@@ -1371,15 +1371,10 @@ export default function AdminDashboard() {
                                                 )}
 
                                                 {booking.rawStatus === 'completed' && (
-                                                  <>
-                                                    <div className="w-full bg-gray-100 border border-gray-300 text-gray-500 font-black text-xs md:text-sm py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 uppercase tracking-wide">
-                                                      <Check className="w-4 h-4 text-gray-500" />
-                                                      <span>Completed</span>
-                                                    </div>
-                                                    <div className="w-full bg-black text-white font-black text-xs md:text-sm py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-xs">
-                                                      <span>Profit: +Rp {bookingCommission.toLocaleString()}</span>
-                                                    </div>
-                                                  </>
+                                                  <div className="col-span-2 w-full bg-gray-100 border border-gray-300 text-gray-500 font-black text-xs md:text-sm py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 uppercase tracking-wide">
+                                                    <Check className="w-4 h-4 text-gray-500" />
+                                                    <span>Completed</span>
+                                                  </div>
                                                 )}
 
                                                 {booking.rawStatus === 'rejected' && (
@@ -1551,14 +1546,9 @@ export default function AdminDashboard() {
                                               </>
                                             )}
                                             {booking.rawStatus === 'completed' && (
-                                              <>
-                                                <div className="w-full bg-gray-100 border border-gray-300 text-gray-500 font-black text-xs md:text-sm py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 uppercase tracking-wide">
-                                                  <span>Completed</span>
-                                                </div>
-                                                <div className="w-full bg-black text-white font-black text-xs md:text-sm py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-xs">
-                                                  <span>Profit: +Rp {bookingCommission.toLocaleString()}</span>
-                                                </div>
-                                              </>
+                                              <div className="col-span-2 w-full bg-gray-100 border border-gray-300 text-gray-500 font-black text-xs md:text-sm py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 uppercase tracking-wide">
+                                                <span>Completed</span>
+                                              </div>
                                             )}
                                             {booking.rawStatus === 'rejected' && (
                                               <div className="col-span-2 w-full bg-gray-100 border border-gray-300 text-gray-500 font-bold text-xs md:text-sm py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 uppercase tracking-wide">
