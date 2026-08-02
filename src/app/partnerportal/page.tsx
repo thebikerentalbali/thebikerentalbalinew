@@ -45,6 +45,30 @@ export default function VendorDashboard() {
       if (scootersData) {
         setFleet(scootersData)
       }
+
+      // Fetch Bookings
+      const { data: bookingsData } = await supabase
+        .from('bookings')
+        .select('*, scooters(*)')
+        .eq('vendor_id', data.id)
+        .order('created_at', { ascending: false })
+
+      if (bookingsData) {
+        const formatted = bookingsData.map((b: any) => ({
+          id: b.id,
+          scooter: b.scooters?.name || 'Scooter Rental',
+          scooter_img: b.scooters?.image_url || '/images/scooter.png',
+          customer: b.customer_name || 'Guest Customer',
+          phone: b.customer_phone || '',
+          email: b.customer_email || '',
+          status: b.status === 'confirmed' ? 'Confirmed' : b.status || 'Confirmed',
+          startDate: new Date(b.start_date || b.created_at),
+          endDate: new Date(b.end_date || b.created_at),
+          price: Number(b.total_price) || 0,
+          created_at: b.created_at
+        }))
+        setBookingsList(formatted)
+      }
       
       setIsLoading(false)
     }
@@ -360,17 +384,40 @@ export default function VendorDashboard() {
               <div className="bg-white rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm overflow-hidden lg:col-span-2 flex flex-col">
                 <div className="p-5 md:p-6 border-b border-gray-50 flex justify-between items-center">
                   <h3 className="text-lg md:text-xl font-bold text-gray-900">Recent Bookings</h3>
-                  <Link href="#" className="text-[13px] md:text-sm font-bold text-gray-500 hover:text-black transition-colors flex items-center gap-1">
+                  <button onClick={() => setActiveTab('bookings')} className="text-[13px] md:text-sm font-bold text-gray-500 hover:text-black transition-colors flex items-center gap-1">
                     View All <ChevronRight className="w-4 h-4" />
-                  </Link>
+                  </button>
                 </div>
 
-                <div className="p-2 md:p-4 flex-1">
-                  <div className="space-y-2">
+                <div className="p-3 md:p-4 flex-1">
+                  {bookingsList.length === 0 ? (
                     <div className="text-center py-10 text-gray-400 font-medium text-sm">
                       No recent bookings yet.
                     </div>
-                  </div>
+                  ) : (
+                    <div className="space-y-2.5">
+                      {bookingsList.slice(0, 5).map((booking) => (
+                        <div key={booking.id} className="p-3 md:p-4 rounded-2xl hover:bg-gray-50 transition-colors flex items-center justify-between gap-4 border border-gray-50">
+                          <div className="flex items-center gap-3.5 min-w-0">
+                            <div className="w-11 h-11 bg-gray-100 rounded-xl overflow-hidden shrink-0">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={booking.scooter_img} alt="Scooter" className="w-full h-full object-cover" />
+                            </div>
+                            <div className="min-w-0">
+                              <h4 className="font-bold text-gray-900 text-sm truncate">{booking.scooter}</h4>
+                              <p className="text-xs text-gray-500 truncate">{booking.customer} {booking.phone ? `• ${booking.phone}` : ''}</p>
+                            </div>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className="font-black text-gray-900 text-sm">Rp {booking.price.toLocaleString()}</p>
+                            <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${booking.status === 'Confirmed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
+                              {booking.status}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -529,26 +576,34 @@ export default function VendorDashboard() {
 
             {bookingView === 'list' ? (
               <div className="space-y-3">
-                {bookingsList.map((booking) => (
-                  <div key={booking.id} className="bg-white p-4 rounded-3xl border border-gray-100 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
-                    <div className="w-12 h-12 bg-gray-50 rounded-2xl overflow-hidden shrink-0">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/images/scooter.png" alt="Scooter" className="w-full h-full object-cover opacity-80" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start mb-1">
-                        <h4 className="font-bold text-gray-900 text-[15px]">{booking.scooter}</h4>
-                        <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide ${booking.status === 'In Progress' ? 'bg-yellow-100 text-yellow-700' : booking.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
-                          {booking.status}
-                        </span>
-                      </div>
-                      <p className="text-[13px] font-medium text-gray-500">
-                        {booking.startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {booking.endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} • <span className="text-gray-900 font-bold">Rp {booking.price.toLocaleString()}</span>
-                      </p>
-                      <p className="text-[11px] text-gray-400 mt-0.5">Booked by {booking.customer}</p>
-                    </div>
+                {bookingsList.length === 0 ? (
+                  <div className="bg-white p-12 text-center text-gray-400 font-medium rounded-3xl border border-gray-100">
+                    No bookings recorded yet.
                   </div>
-                ))}
+                ) : (
+                  bookingsList.map((booking) => (
+                    <div key={booking.id} className="bg-white p-4 rounded-3xl border border-gray-100 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="w-14 h-14 bg-gray-50 rounded-2xl overflow-hidden shrink-0">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={booking.scooter_img} alt="Scooter" className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start mb-1">
+                          <h4 className="font-bold text-gray-900 text-[15px] truncate">{booking.scooter}</h4>
+                          <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide shrink-0 ${booking.status === 'Confirmed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
+                            {booking.status}
+                          </span>
+                        </div>
+                        <p className="text-[13px] font-medium text-gray-500">
+                          {booking.startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {booking.endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} • <span className="text-gray-900 font-bold">Rp {booking.price.toLocaleString()}</span>
+                        </p>
+                        <p className="text-[12px] text-gray-500 mt-0.5">
+                          Customer: <strong className="text-gray-800">{booking.customer}</strong> {booking.phone ? `(${booking.phone})` : ''}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             ) : (
               <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-5 md:p-6 animate-in slide-in-from-bottom-4">

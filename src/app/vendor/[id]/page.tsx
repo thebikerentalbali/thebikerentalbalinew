@@ -238,12 +238,12 @@ export default function VendorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F0F2F5] w-full">
+    <div className="min-h-screen bg-[#F0F2F5] w-full max-w-full overflow-x-hidden touch-pan-y">
       
       {/* ======================================================== */}
       {/* MOBILE LAYOUT (< MD) - PRESERVED EXACTLY AS ORIGINAL */}
       {/* ======================================================== */}
-      <div className="block md:hidden relative pb-24">
+      <div className="block md:hidden relative pb-24 w-full max-w-full overflow-x-hidden">
         {/* Header */}
         <header className="relative bg-white pb-6 shadow-sm rounded-b-3xl z-10 h-fit overflow-hidden">
           {/* Cover Photo */}

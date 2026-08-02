@@ -144,6 +144,14 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+    touch-action: pan-y;
+  }
+  input, select, textarea {
+    font-size: 16px;
+  }
   body {
     @apply bg-background text-foreground font-sans antialiased;
   }

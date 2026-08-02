@@ -15,6 +15,8 @@ export default function AdminDashboard() {
   // Real Data
   const [pendingVendors, setPendingVendors] = useState<any[]>([])
   const [approvedVendors, setApprovedVendors] = useState<any[]>([])
+  const [allBookings, setAllBookings] = useState<any[]>([])
+  const [totalFleetCount, setTotalFleetCount] = useState(0)
   const [isLoadingApprovals, setIsLoadingApprovals] = useState(false)
   const supabase = createClient()
 
@@ -28,7 +30,37 @@ export default function AdminDashboard() {
     if (!error && data) {
       setPendingVendors(data.filter((v: any) => v.status === 'pending'))
       setApprovedVendors(data.filter((v: any) => v.status === 'approved'))
+      
+      let fleetSum = 0
+      data.forEach((v: any) => {
+        if (v.scooters) {
+          fleetSum += v.scooters.length
+        }
+      })
+      setTotalFleetCount(fleetSum)
     }
+
+    // Fetch All Bookings
+    const { data: bData } = await supabase
+      .from('bookings')
+      .select('*, vendors(*), scooters(*)')
+      .order('created_at', { ascending: false })
+
+    if (bData) {
+      const formatted = bData.map((b: any) => ({
+        id: b.id,
+        vendorId: b.vendor_id,
+        scooter: b.scooters?.name || 'Scooter Rental',
+        scooter_img: b.scooters?.image_url || '/images/scooter.png',
+        customer: b.customer_name || 'Guest Customer',
+        phone: b.customer_phone || '',
+        dates: `${b.start_date || ''} - ${b.end_date || ''}`,
+        price: Number(b.total_price) || 0,
+        status: b.status === 'confirmed' ? 'Confirmed' : b.status || 'Confirmed'
+      }))
+      setAllBookings(formatted)
+    }
+
     setIsLoadingApprovals(false)
   }
 
@@ -175,9 +207,11 @@ export default function AdminDashboard() {
                   </div>
                   <h3 className="text-[12px] md:text-[13px] font-bold text-gray-500 uppercase tracking-wide leading-tight">Gross Volume</h3>
                 </div>
-                <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">Rp 0</p>
-                <div className="flex items-center gap-1 mt-2 md:mt-3 bg-gray-50 text-gray-500 w-fit px-2 py-0.5 rounded-full">
-                  <span className="text-[10px] md:text-[11px] font-bold">No data yet</span>
+                <p className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">
+                  Rp {allBookings.reduce((sum, b) => sum + (b.price || 0), 0).toLocaleString()}
+                </p>
+                <div className="flex items-center gap-1 mt-2 md:mt-3 bg-green-50 text-green-700 w-fit px-2 py-0.5 rounded-full">
+                  <span className="text-[10px] md:text-[11px] font-bold">{allBookings.length} Bookings</span>
                 </div>
               </div>
 
@@ -203,7 +237,7 @@ export default function AdminDashboard() {
                   <h3 className="text-[12px] md:text-[13px] font-bold text-gray-500 uppercase tracking-wide leading-tight hidden md:block">Total Fleet</h3>
                 </div>
                 <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide md:hidden mb-1">Fleet</p>
-                <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">0</p>
+                <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">{totalFleetCount}</p>
                 <p className="text-[10px] md:text-[11px] font-bold text-gray-400 mt-2 md:mt-3">Across Bali</p>
               </div>
 
@@ -431,7 +465,8 @@ export default function AdminDashboard() {
 
             <div className="space-y-4">
               {approvedVendors.map(vendor => {
-                const vendorBookings = mockBookings.filter(b => b.vendorId === vendor.id);
+                const vendorBookings = allBookings.filter(b => b.vendorId === vendor.id);
+                const vendorRevenue = vendorBookings.reduce((sum, b) => sum + (b.price || 0), 0);
                 const isExpanded = expandedVendorId === vendor.id;
 
                 return (
@@ -457,7 +492,7 @@ export default function AdminDashboard() {
                       <div className="flex items-center gap-4">
                         <div className="hidden md:block text-right">
                           <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">Vendor Revenue</p>
-                          <p className="font-black text-gray-900 text-lg">Rp 0</p>
+                          <p className="font-black text-gray-900 text-lg">Rp {vendorRevenue.toLocaleString()}</p>
                         </div>
                         <div className={`p-2 rounded-full transition-transform ${isExpanded ? 'rotate-90 bg-gray-100' : 'bg-gray-50 hover:bg-gray-100'}`}>
                           <ChevronRight className="w-5 h-5 text-gray-600" />
@@ -477,14 +512,16 @@ export default function AdminDashboard() {
                               <div className="flex items-center gap-4">
                                 <div className="w-10 h-10 bg-gray-50 rounded-xl overflow-hidden shrink-0">
                                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                                  <img src="/images/scooter.png" alt="Scooter" className="w-full h-full object-cover opacity-80" />
+                                  <img src={booking.scooter_img || "/images/scooter.png"} alt="Scooter" className="w-full h-full object-cover" />
                                 </div>
                                 <div>
                                   <div className="flex items-center gap-2 mb-1">
                                     <h5 className="font-bold text-gray-900">{booking.scooter}</h5>
-                                    <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">{booking.id}</span>
+                                    <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded truncate max-w-[120px]">{booking.id}</span>
                                   </div>
-                                  <p className="text-xs font-medium text-gray-500">{booking.customer} • {booking.dates}</p>
+                                  <p className="text-xs font-medium text-gray-500">
+                                    {booking.customer} {booking.phone ? `(${booking.phone})` : ''} • {booking.dates}
+                                  </p>
                                 </div>
                               </div>
 

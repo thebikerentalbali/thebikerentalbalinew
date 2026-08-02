@@ -67,8 +67,8 @@ export default function DetailPage() {
     )
   }
   return (
-    <div className="min-h-screen bg-[#EBECEF] w-full md:py-8">
-      <div className="flex flex-col min-h-screen md:min-h-0 bg-[#EBECEF] relative pb-28 md:pb-0 md:max-w-5xl md:mx-auto md:shadow-2xl md:rounded-[40px] md:overflow-hidden md:border md:border-gray-200">
+    <div className="min-h-screen bg-[#EBECEF] w-full max-w-full overflow-x-hidden md:py-8 touch-pan-y">
+      <div className="flex flex-col min-h-screen md:min-h-0 bg-[#EBECEF] relative pb-28 md:pb-0 md:max-w-5xl md:mx-auto md:shadow-2xl md:rounded-[40px] md:overflow-hidden md:border md:border-gray-200 w-full max-w-full overflow-x-hidden">
         {/* Header */}
         <header className="flex justify-between items-center p-6 pt-8 relative z-10">
           <button onClick={() => router.back()} className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm hover:bg-gray-50 transition-colors">
@@ -83,14 +83,14 @@ export default function DetailPage() {
         </header>
 
         {/* Desktop Grid Layout */}
-        <div className="flex flex-col md:grid md:grid-cols-[1fr_400px] lg:grid-cols-[1fr_450px] md:gap-8 lg:gap-12 md:p-8">
+        <div className="flex flex-col md:grid md:grid-cols-[1fr_400px] lg:grid-cols-[1fr_450px] md:gap-8 lg:gap-12 md:p-8 w-full max-w-full overflow-x-hidden">
           
           {/* Left Column: Image Gallery */}
-          <div className="flex flex-col">
+          <div className="flex flex-col w-full max-w-full overflow-hidden">
             {/* Main Hero Image */}
-            <div className="relative w-full h-[300px] md:h-[400px] flex items-center justify-center mt-4 mb-4 md:mb-6 md:bg-white/40 md:rounded-[32px]">
+            <div className="relative w-full h-[280px] md:h-[400px] flex items-center justify-center mt-2 mb-4 md:mb-6 md:bg-white/40 md:rounded-[32px] overflow-hidden">
               <div 
-                className="w-full h-full bg-contain bg-center bg-no-repeat drop-shadow-2xl scale-110 md:hover:scale-125 transition-transform duration-500"
+                className="w-full h-full bg-contain bg-center bg-no-repeat drop-shadow-xl md:hover:scale-105 transition-transform duration-500"
                 style={{ backgroundImage: `url("${scooter.image_url || '/images/scooter.png'}")` }}
               />
             </div>
@@ -109,7 +109,7 @@ export default function DetailPage() {
           </div>
 
           {/* Right Column: Content Area */}
-          <div className="px-6 md:px-0 space-y-6 md:pb-8 flex flex-col justify-center">
+          <div className="px-6 md:px-0 space-y-6 md:pb-8 flex flex-col justify-center w-full max-w-full overflow-x-hidden">
           
           {/* Vendor Profile */}
           {vendor && (
@@ -139,10 +139,10 @@ export default function DetailPage() {
             </Link>
           )}
 
-          {/* Quick Info Pill Buttons (Black background, white title) */}
+          {/* Quick Info Pill Buttons (Only this container allows horizontal swiping) */}
           {vendor && (
             <div 
-              className="flex items-center gap-2 overflow-x-auto scrollbar-hide hide-scrollbar -mx-1 px-1"
+              className="flex items-center gap-2 overflow-x-auto scrollbar-hide hide-scrollbar w-full max-w-full touch-pan-x py-1"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
             >
               <button 
@@ -171,36 +171,40 @@ export default function DetailPage() {
             </div>
           )}
 
-          {/* Scooter Details */}
-          <div className="bg-white rounded-3xl p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">{scooter.name} Details</h3>
-            
-            <div className="space-y-4">
-              <div className="flex items-center justify-between py-3 border-b border-gray-50">
-                <span className="text-gray-500 text-sm">Available</span>
-                <span className="font-bold text-white bg-black px-3 py-1 rounded-full text-xs tracking-wide">{scooter.available_units} Units</span>
-              </div>
+          {/* Scooter Details Card */}
+          <div className="bg-white rounded-3xl p-6 shadow-sm space-y-5">
+            {/* Description Section */}
+            <div>
+              <h3 className="text-base font-bold text-gray-900 mb-2">Description</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">
+                The {scooter.name} delivers a smooth and effortless ride with exceptional comfort, fuel efficiency, and reliability. Perfectly suited for navigating the vibrant streets and scenic routes of Bali, this scooter offers an exceptional riding experience with modern features and elegant design.
+              </p>
+            </div>
 
-              {/* Enhanced description placed cleanly below the Available row */}
-              <div className="py-2 border-b border-gray-50">
-                <p className="text-gray-500 text-sm leading-relaxed">
-                  The {scooter.name} delivers a smooth and effortless ride with exceptional comfort, fuel efficiency, and reliability. Perfectly suited for navigating the vibrant streets and scenic routes of Bali, this scooter offers an exceptional riding experience with modern features and elegant design.
-                </p>
-              </div>
+            {/* Available Title & Units Row (Positioned directly below description) */}
+            <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
+              <span className="text-base font-bold text-gray-900">Available</span>
+              <span className="font-bold text-white bg-black px-3.5 py-1 rounded-full text-xs tracking-wide shadow-sm">
+                {scooter.available_units} Units
+              </span>
+            </div>
 
-              <div className="flex items-center justify-between py-3 border-b border-gray-50">
+            {/* Specifications Section */}
+            <div className="pt-4 border-t border-gray-100 space-y-3">
+              <h4 className="text-sm font-bold text-gray-900 mb-1">Specifications</h4>
+              <div className="flex items-center justify-between py-2 border-b border-gray-50">
                 <span className="text-gray-500 text-sm">Engine</span>
                 <span className="font-medium text-gray-900 text-sm">{scooter.engine || 'N/A'}</span>
               </div>
-              <div className="flex items-center justify-between py-3 border-b border-gray-50">
+              <div className="flex items-center justify-between py-2 border-b border-gray-50">
                 <span className="text-gray-500 text-sm">Year</span>
                 <span className="font-medium text-gray-900 text-sm">{scooter.year || 'N/A'}</span>
               </div>
-              <div className="flex items-center justify-between py-3 border-b border-gray-50">
+              <div className="flex items-center justify-between py-2 border-b border-gray-50">
                 <span className="text-gray-500 text-sm">Fuel Capacity</span>
                 <span className="font-medium text-gray-900 text-sm">{scooter.fuel_capacity || 'N/A'}</span>
               </div>
-              <div className="flex items-center justify-between py-3">
+              <div className="flex items-center justify-between py-2">
                 <span className="text-gray-500 text-sm">Transmission</span>
                 <span className="font-medium text-gray-900 text-sm">{scooter.transmission || 'N/A'}</span>
               </div>

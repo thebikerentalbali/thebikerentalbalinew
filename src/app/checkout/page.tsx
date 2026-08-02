@@ -10,10 +10,13 @@ export default function CheckoutPage() {
   const [helmets, setHelmets] = useState<number>(1)
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
+  const [customerPhone, setCustomerPhone] = useState("")
+  const [customerEmail, setCustomerEmail] = useState("")
   const [deliveryAddress, setDeliveryAddress] = useState("")
   const [agreedToFee, setAgreedToFee] = useState(false)
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const [cart, setCart] = useState<any[]>([])
   const [vendorScooters, setVendorScooters] = useState<any[]>([])
@@ -22,9 +25,37 @@ export default function CheckoutPage() {
 
   const supabase = createClient()
 
+  // Helper date formatting
+  const formatIsoDate = (d: Date) => {
+    const year = d.getFullYear()
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
+  const getDaysFromCart = (cartItems: any[]) => {
+    if (!cartItems || cartItems.length === 0) return 1
+    const item = cartItems[0]
+    if (item.durationMode === "weekly") return (item.durationCount || 1) * 7
+    if (item.durationMode === "monthly") return (item.durationCount || 1) * 30
+    return item.durationCount || 1
+  }
+
+  const addDaysToDate = (dateStr: string, days: number) => {
+    if (!dateStr) return ""
+    const [y, m, d] = dateStr.split('-').map(Number)
+    if (!y || !m || !d) return ""
+    const date = new Date(y, m - 1, d)
+    date.setDate(date.getDate() + days)
+    return formatIsoDate(date)
+  }
+
   useEffect(() => {
     async function loadData() {
-      const { data } = await supabase.from('scooters').select('*')
+      const today = formatIsoDate(new Date())
+      setStartDate(prev => prev || today)
+
+      const { data } = await supabase.from('scooters').select('*, vendors(id, name, phone, address)')
       if (data) {
         const formatted = data.map((s: any) => ({
           ...s,
@@ -43,8 +74,13 @@ export default function CheckoutPage() {
           if (sId) {
             const selected = formatted.find((s: any) => s.id.toString() === sId)
             if (selected) {
-              setCart([{ ...selected, quantity: 1, durationMode: "daily", durationCount: 1 }])
+              const initialCart = [{ ...selected, quantity: 1, durationMode: "daily", durationCount: 1 }]
+              setCart(initialCart)
+              const days = getDaysFromCart(initialCart)
+              setEndDate(addDaysToDate(today, days))
             }
+          } else {
+            setEndDate(addDaysToDate(today, 1))
           }
         }
       }
@@ -53,26 +89,67 @@ export default function CheckoutPage() {
     loadData()
   }, [])
 
+  const handleStartDateChange = (newStart: string) => {
+    setStartDate(newStart)
+    if (newStart) {
+      const days = getDaysFromCart(cart)
+      setEndDate(addDaysToDate(newStart, days))
+    }
+  }
+
+  const handleEndDateChange = (newEnd: string) => {
+    setEndDate(newEnd)
+    if (startDate && newEnd) {
+      const [sy, sm, sd] = startDate.split('-').map(Number)
+      const [ey, em, ed] = newEnd.split('-').map(Number)
+      const s = new Date(sy, sm - 1, sd)
+      const e = new Date(ey, em - 1, ed)
+      const diffTime = e.getTime() - s.getTime()
+      const diffDays = Math.max(1, Math.round(diffTime / (1000 * 60 * 60 * 24)))
+      if (diffDays > 0) {
+        setCart(prev => prev.map(item => ({
+          ...item,
+          durationMode: "daily",
+          durationCount: diffDays
+        })))
+      }
+    }
+  }
+
   const updateQuantity = (id: number, delta: number) => {
     setCart(prev => prev.map(item => {
       if (item.id === id) {
         const newQ = item.quantity + delta
-        return { ...item, quantity: Math.max(1, Math.min(newQ, item.available)) } // prevent going below 1 or above available
+        return { ...item, quantity: Math.max(1, Math.min(newQ, item.available)) }
       }
       return item
     }))
   }
 
   const updateDurationMode = (id: number, mode: "daily" | "weekly" | "monthly") => {
-    setCart(prev => prev.map(item =>
-      item.id === id ? { ...item, durationMode: mode, durationCount: 1 } : item
-    ))
+    setCart(prev => {
+      const updated = prev.map(item =>
+        item.id === id ? { ...item, durationMode: mode, durationCount: 1 } : item
+      )
+      if (startDate) {
+        const days = getDaysFromCart(updated)
+        setEndDate(addDaysToDate(startDate, days))
+      }
+      return updated
+    })
   }
 
   const updateDurationCount = (id: number, delta: number) => {
-    setCart(prev => prev.map(item =>
-      item.id === id ? { ...item, durationCount: Math.max(1, item.durationCount + delta) } : item
-    ))
+    setCart(prev => {
+      const updated = prev.map(item =>
+        item.id === id ? { ...item, durationCount: Math.max(1, item.durationCount + delta) } : item
+      )
+      if (startDate) {
+        const days = getDaysFromCart(updated)
+        setEndDate(addDaysToDate(startDate, days))
+      }
+      return updated
+    })
   }
 
   const removeFromCart = (id: number) => {
@@ -82,10 +159,17 @@ export default function CheckoutPage() {
   const addToCart = (scooter: any) => {
     setCart(prev => {
       const exists = prev.find(i => i.id === scooter.id)
+      let updated
       if (exists) {
-        return prev.map(i => i.id === scooter.id ? { ...i, quantity: i.quantity + 1 } : i)
+        updated = prev.map(i => i.id === scooter.id ? { ...i, quantity: i.quantity + 1 } : i)
+      } else {
+        updated = [...prev, { ...scooter, quantity: 1, durationMode: "daily", durationCount: 1 }]
       }
-      return [...prev, { ...scooter, quantity: 1, durationMode: "daily", durationCount: 1 }]
+      if (startDate) {
+        const days = getDaysFromCart(updated)
+        setEndDate(addDaysToDate(startDate, days))
+      }
+      return updated
     })
     setShowAddModal(false)
   }
@@ -102,35 +186,89 @@ export default function CheckoutPage() {
   }
 
   const getWhatsAppLink = () => {
-    let message = `*NEW BOOKING REQUEST*\n\n`;
-    message += `*VENDOR:* Putu Rentals\n`;
-    message += `*CUSTOMER:* ${firstName || "Not provided"} ${lastName || ""}\n`;
-    if (startDate && endDate) {
-      message += `*RENTAL PERIOD:* ${startDate} to ${endDate}\n`;
-    } else if (startDate) {
-      message += `*RENTAL START:* ${startDate}\n`;
-    } else if (endDate) {
-      message += `*RENTAL END:* ${endDate}\n`;
+    const firstVendor = cart[0]?.vendors
+    const vendorName = firstVendor?.name || "The Bike Rental Bali"
+    let targetPhone = firstVendor?.phone ? firstVendor.phone.replace(/[^0-9]/g, '') : "6285174119423"
+    if (targetPhone.startsWith('0')) targetPhone = '62' + targetPhone.slice(1)
+    if (!targetPhone.startsWith('62') && targetPhone.length > 5) targetPhone = '62' + targetPhone
+
+    const formatDisplayDate = (dateStr: string) => {
+      if (!dateStr) return ""
+      const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"]
+      const [y, m, d] = dateStr.split('-')
+      if (!y || !m || !d) return dateStr
+      const monthIdx = parseInt(m, 10) - 1
+      const monthName = months[monthIdx] || m
+      return `${y}-${monthName}-${d.padStart(2, '0')}`
     }
+
+    let message = `*NEW BOOKING REQUEST*\n\n`;
+    message += `*VENDOR:* ${vendorName}\n`;
+    message += `*CUSTOMER:* ${firstName || "Guest"} ${lastName || ""}`.trim() + `\n`;
     message += `*HELMETS:* ${helmets}\n`;
     message += `*METHOD:* ${deliveryMethod === 'delivery' ? 'Delivery' : 'Pick Up'}\n`;
     if (deliveryMethod === 'delivery') {
-      message += `*ADDRESS:* ${deliveryAddress || "Not provided"}\n`;
-      message += `*DELIVERY FEE AGREEMENT:* ${agreedToFee ? 'Yes' : 'No'}\n`;
+      message += `*DELIVERY ADDRESS:* ${deliveryAddress || "Not provided"}\n`;
+      message += `*DELIVERY FEE AGREEMENT:* ${agreedToFee ? 'Yes (Agreed)' : 'No'}\n`;
+    }
+    if (startDate && endDate) {
+      message += `*RENTAL PERIOD:*\n  ${formatDisplayDate(startDate)} to ${formatDisplayDate(endDate)}\n`;
+    } else if (startDate) {
+      message += `*RENTAL PERIOD:*\n  ${formatDisplayDate(startDate)}\n`;
+    } else if (endDate) {
+      message += `*RENTAL PERIOD:*\n  ${formatDisplayDate(endDate)}\n`;
     }
     message += `\n*FLEET BOOKED:*\n`;
     cart.forEach(item => {
       const durationLabel = item.durationMode === "daily" ? "Days" : item.durationMode === "weekly" ? "Weeks" : "Months";
-      message += `- Quantity: ${item.quantity} | Vehicle: ${item.name} | Duration: ${item.durationCount} ${durationLabel}\n`;
+      message += `• Quantity: ${item.quantity}\n   Vehicle: ${item.name}\n   Duration: ${item.durationCount} ${durationLabel}\n\n`;
     });
-    message += `\n*TOTAL PRICE:* Rp ${getTotalPrice().toLocaleString()}`;
+    message = message.trimEnd() + `\n\n*TOTAL PRICE:* Rp ${getTotalPrice().toLocaleString()}`;
 
-    return `https://wa.me/6285174119423?text=${encodeURIComponent(message)}`;
+    return `https://wa.me/${targetPhone}?text=${encodeURIComponent(message)}`;
+  }
+
+  const handleConfirmBooking = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (cart.length === 0 || isSubmitting) return
+
+    setIsSubmitting(true)
+    try {
+      // Save each booked item into the Supabase bookings table
+      for (const item of cart) {
+        let base = item.daily
+        if (item.durationMode === "weekly") base = item.weekly
+        if (item.durationMode === "monthly") base = item.monthly
+        const itemTotal = base * item.quantity * item.durationCount
+
+        const { error } = await supabase.from('bookings').insert({
+          scooter_id: item.id,
+          vendor_id: item.vendor_id,
+          customer_name: `${firstName} ${lastName}`.trim() || 'Guest Customer',
+          customer_phone: customerPhone || '',
+          customer_email: customerEmail || '',
+          start_date: startDate || new Date().toISOString().split('T')[0],
+          end_date: endDate || new Date().toISOString().split('T')[0],
+          total_price: itemTotal,
+          status: 'confirmed'
+        })
+
+        if (error) {
+          console.error("Supabase booking insert error:", error)
+        }
+      }
+    } catch (err) {
+      console.error("Booking error:", err)
+    } finally {
+      setIsSubmitting(false)
+      const waUrl = getWhatsAppLink()
+      window.open(waUrl, '_blank')
+    }
   }
 
   return (
-    <div className="min-h-screen bg-[#EBECEF] w-full md:py-8">
-      <div className="flex flex-col min-h-screen md:min-h-0 bg-[#EBECEF] relative p-6 pb-36 md:max-w-6xl md:mx-auto md:shadow-2xl md:rounded-[40px] md:overflow-hidden md:border md:border-gray-200">
+    <div className="min-h-screen bg-[#EBECEF] w-full max-w-full overflow-x-hidden md:py-8 touch-pan-y">
+      <div className="flex flex-col min-h-screen md:min-h-0 bg-[#EBECEF] relative p-6 pb-36 md:max-w-6xl md:mx-auto md:shadow-2xl md:rounded-[40px] md:overflow-hidden md:border md:border-gray-200 w-full max-w-full overflow-x-hidden">
         
         {/* Header */}
         <header className="flex justify-between items-center mb-8">
@@ -168,33 +306,39 @@ export default function CheckoutPage() {
           return (
             <div key={item.id} className="bg-white rounded-[24px] p-5 flex flex-col gap-5 shadow-sm relative border border-transparent mb-6">
 
-              {/* Top Section: Scooter Info */}
-              <div className="flex gap-4 pr-8 relative">
-                {/* Remove Icon */}
-                <button
-                  onClick={() => removeFromCart(item.id)}
-                  className="absolute -top-1 -right-1 w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-500 hover:bg-red-100 transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-
-                <div className="w-24 h-24 bg-[#F8F9FA] rounded-2xl flex items-center justify-center p-2 shrink-0">
+              {/* Top Row: Scooter Info & Remove */}
+              <div className="flex gap-4 items-center">
+                <div className="w-24 h-24 bg-[#F8F9FA] rounded-2xl flex items-center justify-center p-2 relative shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={item.img} alt={item.name} className="w-full h-full object-contain drop-shadow-md" />
                 </div>
-                <div className="flex flex-col flex-1 py-1">
-                  <h3 className="font-semibold text-gray-900 text-[15px] leading-tight mb-1">{item.name}</h3>
-                  <div className="flex items-center gap-1 text-gray-500 mb-2">
-                    <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400 shrink-0" />
-                    <span className="text-[12px] font-medium">{item.rating}</span>
-                    <span className="mx-1">•</span>
-                    <span className="text-[12px] font-medium">{item.brand}</span>
-                  </div>
-
-                  <div className="flex items-end justify-between mt-auto">
-                    <div className="text-gray-900 text-[16px] font-bold">
-                      Rp {itemPrice.toLocaleString()} <span className="text-gray-500 text-[13px] font-medium normal-case tracking-normal">/{displayLabel}</span>
+                
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="font-bold text-gray-900 text-[17px] leading-tight truncate">{item.name}</h3>
+                      <div className="flex items-center gap-1 mt-1">
+                        <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+                        <span className="text-[13px] font-bold text-gray-800">{item.rating}</span>
+                        <span className="text-[12px] text-gray-400 ml-1">({item.reviews_count || 120} reviews)</span>
+                      </div>
                     </div>
+                    {cart.length > 1 && (
+                      <button 
+                        onClick={() => removeFromCart(item.id)}
+                        className="p-1.5 text-gray-400 hover:text-red-500 rounded-full hover:bg-red-50 transition-colors"
+                        title="Remove from cart"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                  
+                  <div className="mt-2 flex items-baseline gap-1">
+                    <span className="text-[18px] font-bold text-gray-900">
+                      Rp {itemPrice.toLocaleString()}
+                    </span>
+                    <span className="text-[12px] text-gray-500 font-medium">/{displayLabel}</span>
                   </div>
                 </div>
               </div>
@@ -306,8 +450,8 @@ export default function CheckoutPage() {
               <input
                 type="date"
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full min-w-0 h-14 bg-white/60 border-none rounded-2xl px-3 sm:px-5 text-[13px] sm:text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none text-gray-800 transition-shadow"
+                onChange={(e) => handleStartDateChange(e.target.value)}
+                className="w-full min-w-0 h-14 bg-white/60 border-none rounded-2xl px-3 sm:px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none text-gray-800 transition-shadow"
               />
             </div>
             <div className="flex-1 min-w-0">
@@ -315,8 +459,8 @@ export default function CheckoutPage() {
               <input
                 type="date"
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="w-full min-w-0 h-14 bg-white/60 border-none rounded-2xl px-3 sm:px-5 text-[13px] sm:text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none text-gray-800 transition-shadow"
+                onChange={(e) => handleEndDateChange(e.target.value)}
+                className="w-full min-w-0 h-14 bg-white/60 border-none rounded-2xl px-3 sm:px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none text-gray-800 transition-shadow"
               />
             </div>
           </div>
@@ -325,26 +469,50 @@ export default function CheckoutPage() {
         {/* Customer Details Form */}
         <section>
           <h2 className="text-[18px] font-semibold text-gray-900 mb-4">Customer Details</h2>
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <label className="block text-[14px] text-gray-700 font-medium mb-1.5 pl-1">First Name</label>
-              <input
-                type="text"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                placeholder="First Name"
-                className="w-full h-14 bg-white/60 border-none rounded-2xl px-5 text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none text-gray-800 transition-shadow"
-              />
+          <div className="space-y-3">
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label className="block text-[14px] text-gray-700 font-medium mb-1.5 pl-1">First Name</label>
+                <input
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder="First Name"
+                  className="w-full h-14 bg-white/60 border-none rounded-2xl px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none text-gray-800 transition-shadow"
+                />
+              </div>
+              <div className="flex-1">
+                <label className="block text-[14px] text-gray-700 font-medium mb-1.5 pl-1">Last Name</label>
+                <input
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  placeholder="Last Name"
+                  className="w-full h-14 bg-white/60 border-none rounded-2xl px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none text-gray-800 transition-shadow"
+                />
+              </div>
             </div>
-            <div className="flex-1">
-              <label className="block text-[14px] text-gray-700 font-medium mb-1.5 pl-1">Last Name</label>
-              <input
-                type="text"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                placeholder="Last Name"
-                className="w-full h-14 bg-white/60 border-none rounded-2xl px-5 text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none text-gray-800 transition-shadow"
-              />
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label className="block text-[14px] text-gray-700 font-medium mb-1.5 pl-1">WhatsApp / Phone Number</label>
+                <input
+                  type="tel"
+                  value={customerPhone}
+                  onChange={(e) => setCustomerPhone(e.target.value)}
+                  placeholder="+62 812-3456-7890"
+                  className="w-full h-14 bg-white/60 border-none rounded-2xl px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none text-gray-800 transition-shadow"
+                />
+              </div>
+              <div className="flex-1">
+                <label className="block text-[14px] text-gray-700 font-medium mb-1.5 pl-1">Email (Optional)</label>
+                <input
+                  type="email"
+                  value={customerEmail}
+                  onChange={(e) => setCustomerEmail(e.target.value)}
+                  placeholder="name@email.com"
+                  className="w-full h-14 bg-white/60 border-none rounded-2xl px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none text-gray-800 transition-shadow"
+                />
+              </div>
             </div>
           </div>
         </section>
@@ -407,7 +575,7 @@ export default function CheckoutPage() {
                 value={deliveryAddress}
                 onChange={(e) => setDeliveryAddress(e.target.value)}
                 placeholder="Enter your hotel or villa address"
-                className="w-full h-14 bg-gray-50 border-none rounded-2xl px-5 text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none text-gray-800 mb-5 transition-shadow"
+                className="w-full h-14 bg-gray-50 border-none rounded-2xl px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none text-gray-800 mb-5 transition-shadow"
               />
               <div className="bg-[#FFF4E5] p-4 rounded-2xl border border-[#FFE0B2] mb-1">
                 <div className="flex gap-3 items-start mb-3">
@@ -445,14 +613,20 @@ export default function CheckoutPage() {
              <span className="text-[13px] font-bold text-gray-500 uppercase tracking-wider">Total Amount</span>
              <span className="text-2xl font-black text-gray-900 tracking-tight">Rp {getTotalPrice().toLocaleString()}</span>
           </div>
-          <a
-            href={getWhatsAppLink()}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full h-14 bg-black text-white rounded-full text-[17px] font-semibold shadow-xl shadow-black/20 hover:scale-[1.02] transition-transform flex items-center justify-center gap-2"
+          <button
+            onClick={handleConfirmBooking}
+            disabled={isSubmitting || cart.length === 0}
+            className="w-full h-14 bg-black text-white rounded-full text-[17px] font-semibold shadow-xl shadow-black/20 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
-            Confirm via WhatsApp
-          </a>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin text-white" />
+                <span>Recording Booking...</span>
+              </>
+            ) : (
+              <span>Confirm via WhatsApp</span>
+            )}
+          </button>
         </div>
       </div>
       </div>
@@ -466,14 +640,20 @@ export default function CheckoutPage() {
            <span className="text-[13px] font-bold text-gray-500 uppercase tracking-wider">Total</span>
            <span className="text-xl font-black text-gray-900 tracking-tight">Rp {getTotalPrice().toLocaleString()}</span>
         </div>
-        <a
-          href={getWhatsAppLink()}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-full h-14 bg-black text-white rounded-full text-[17px] font-semibold shadow-xl shadow-black/20 hover:scale-[1.02] transition-transform flex items-center justify-center gap-2"
+        <button
+          onClick={handleConfirmBooking}
+          disabled={isSubmitting || cart.length === 0}
+          className="w-full h-14 bg-black text-white rounded-full text-[17px] font-semibold shadow-xl shadow-black/20 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none transition-all flex items-center justify-center gap-2 cursor-pointer"
         >
-          Confirm via WhatsApp
-        </a>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin text-white" />
+              <span>Recording Booking...</span>
+            </>
+          ) : (
+            <span>Confirm via WhatsApp</span>
+          )}
+        </button>
       </div>
 
       {/* Modal for Adding Vendor Scooters */}
