@@ -617,25 +617,25 @@ export default function AdminDashboard() {
           <div className="p-5 md:px-8 md:pb-12 animate-in fade-in space-y-6">
             {/* Top Summary Banner */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-              <div className="bg-white p-3.5 md:p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between">
-                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">Total Bookings</p>
+              <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide truncate whitespace-nowrap">Total Bookings</p>
                 <p className="text-xl md:text-2xl font-black text-gray-900 mt-1">{allBookings.length}</p>
               </div>
-              <div className={`p-3.5 md:p-4 rounded-2xl border shadow-sm transition-colors flex flex-col justify-between ${allBookings.filter(b => b.rawStatus === 'pending').length > 0 ? 'bg-amber-50/70 border-amber-200' : 'bg-white border-gray-100'}`}>
-                <p className="text-[11px] font-bold text-amber-700 uppercase tracking-wide flex items-center gap-1">
-                  <Clock className="w-3 h-3" /> Pending Review
+              <div className={`p-4 rounded-2xl border shadow-sm transition-colors ${allBookings.filter(b => b.rawStatus === 'pending').length > 0 ? 'bg-amber-50/70 border-amber-200' : 'bg-white border-gray-100'}`}>
+                <p className="text-[11px] font-bold text-amber-700 uppercase tracking-wide flex items-center gap-1 truncate whitespace-nowrap">
+                  <Clock className="w-3 h-3 shrink-0" /> Pending Review
                 </p>
                 <p className="text-xl md:text-2xl font-black text-amber-900 mt-1">{allBookings.filter(b => b.rawStatus === 'pending').length}</p>
               </div>
-              <div className="bg-white p-3.5 md:p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between">
-                <p className="text-[11px] font-bold text-green-600 uppercase tracking-wide flex items-center gap-1">
-                  <CheckCircle2 className="w-3 h-3" /> Confirmed
+              <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                <p className="text-[11px] font-bold text-green-600 uppercase tracking-wide flex items-center gap-1 truncate whitespace-nowrap">
+                  <CheckCircle2 className="w-3 h-3 shrink-0" /> Confirmed
                 </p>
                 <p className="text-xl md:text-2xl font-black text-gray-900 mt-1">{allBookings.filter(b => b.rawStatus === 'confirmed').length}</p>
               </div>
-              <div className="bg-white p-3.5 md:p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between">
-                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">Platform Revenue</p>
-                <p className="text-sm md:text-base lg:text-lg font-black text-gray-900 mt-1 truncate">
+              <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide truncate whitespace-nowrap">Platform Revenue</p>
+                <p className="text-sm md:text-base lg:text-lg font-black text-gray-900 mt-1 truncate whitespace-nowrap">
                   Rp {allBookings.reduce((sum, b) => sum + (b.price || 0), 0).toLocaleString()}
                 </p>
               </div>
@@ -679,7 +679,7 @@ export default function AdminDashboard() {
 
             {/* Content based on Filter */}
             {bookingFilter !== 'by_vendor' ? (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {allBookings.filter(b => {
                   if (bookingFilter === 'pending') return b.rawStatus === 'pending';
                   if (bookingFilter === 'confirmed') return b.rawStatus === 'confirmed';
@@ -698,71 +698,56 @@ export default function AdminDashboard() {
                   }).map(booking => {
                     const vendorMatch = approvedVendors.find(v => String(v.id) === String(booking.vendorId))
                     return (
-                      <div key={booking.id} className="bg-white p-5 rounded-[24px] border border-gray-100 shadow-sm flex flex-col gap-4 hover:border-gray-200 transition-all">
-                        {/* Top Row: Scooter Info, Vendor, Units & Status */}
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex items-center gap-3.5">
-                            <div className="w-14 h-14 bg-gray-50 rounded-2xl overflow-hidden shrink-0 border border-gray-100 p-1 flex items-center justify-center">
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img src={booking.scooter_img || "/images/scooter.png"} alt="Scooter" className="w-full h-full object-contain" />
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <h5 className="font-black text-gray-900 text-base">{booking.scooter}</h5>
-                                <span className="text-[11px] font-bold bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">
-                                  {booking.quantity} {booking.quantity > 1 ? 'Units' : 'Unit'}
-                                </span>
-                              </div>
+                      <div key={booking.id} className="bg-white p-4 md:p-5 rounded-3xl border border-gray-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-gray-200 transition-all">
+                        <div className="flex items-center gap-3.5 md:gap-4 min-w-0">
+                          <div className="w-14 h-14 bg-gray-50 rounded-2xl overflow-hidden shrink-0 border border-gray-100 p-1 flex items-center justify-center">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={booking.scooter_img || "/images/scooter.png"} alt="Scooter" className="w-full h-full object-contain" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-nowrap">
+                              <h5 className="font-bold text-gray-900 text-sm md:text-base truncate whitespace-nowrap">{booking.scooter}</h5>
+                              <span className="text-[10px] md:text-[11px] font-semibold bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap">
+                                {booking.quantity} {booking.quantity > 1 ? 'Units' : 'Unit'}
+                              </span>
                               {vendorMatch && (
-                                <div className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-blue-600 bg-blue-50/80 px-2.5 py-0.5 rounded-lg w-fit">
-                                  <Store className="w-3.5 h-3.5" />
-                                  <span>{vendorMatch.name}</span>
-                                </div>
+                                <span className="text-[10px] md:text-[11px] font-semibold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full flex items-center gap-1 shrink-0 whitespace-nowrap">
+                                  <Store className="w-3 h-3" /> {vendorMatch.name}
+                                </span>
                               )}
                             </div>
-                          </div>
-
-                          {/* Status Badge */}
-                          <span className={`px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wide shrink-0 border ${
-                            booking.rawStatus === 'pending'
-                              ? 'bg-amber-50 text-amber-800 border-amber-200'
-                              : booking.rawStatus === 'confirmed'
-                              ? 'bg-green-50 text-green-700 border-green-200'
-                              : booking.rawStatus === 'completed'
-                              ? 'bg-blue-50 text-blue-700 border-blue-200'
-                              : 'bg-red-50 text-red-700 border-red-200'
-                          }`}>
-                            {booking.status}
-                          </span>
-                        </div>
-
-                        {/* Middle Info Box: Customer & Rental Period */}
-                        <div className="bg-gray-50/80 rounded-2xl p-3.5 space-y-2 border border-gray-100 text-xs">
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="text-gray-400 font-bold uppercase tracking-wider text-[10px]">Customer</span>
-                            <span className="font-bold text-gray-800">{booking.customer} {booking.phone ? `(${booking.phone})` : ''}</span>
-                          </div>
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="text-gray-400 font-bold uppercase tracking-wider text-[10px]">Rental Period</span>
-                            <span className="font-bold text-gray-900">{formatRentalPeriod(booking.startDate, booking.endDate)}</span>
+                            <p className="text-xs font-medium text-gray-500 truncate whitespace-nowrap">
+                              Customer: <strong className="text-gray-800">{booking.customer}</strong> • Dates: <span className="text-gray-700 font-semibold">{formatRentalPeriod(booking.startDate, booking.endDate)}</span>
+                            </p>
                           </div>
                         </div>
 
-                        {/* Bottom Row: Total Price & Actions */}
-                        <div className="flex items-center justify-between pt-1 border-t border-gray-50">
-                          <div>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Total Price</p>
-                            <p className="font-black text-gray-900 text-lg md:text-xl">Rp {booking.price.toLocaleString()}</p>
+                        <div className="flex flex-wrap items-center justify-between md:justify-end gap-3 md:gap-4 border-t md:border-none border-gray-50 pt-3 md:pt-0 shrink-0">
+                          <div className="text-left md:text-right">
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide truncate whitespace-nowrap">Total Price</p>
+                            <p className="font-black text-gray-900 text-sm md:text-base whitespace-nowrap">Rp {booking.price.toLocaleString()}</p>
                           </div>
 
-                          {/* Action Buttons */}
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide shrink-0 border ${
+                              booking.rawStatus === 'pending'
+                                ? 'bg-amber-50 text-amber-800 border-amber-200'
+                                : booking.rawStatus === 'confirmed'
+                                ? 'bg-green-50 text-green-700 border-green-200'
+                                : booking.rawStatus === 'completed'
+                                ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                : 'bg-red-50 text-red-700 border-red-200'
+                            }`}>
+                              {booking.status}
+                            </span>
+
+                            {/* Action Buttons for Admin */}
                             {booking.rawStatus === 'pending' && (
-                              <>
+                              <div className="flex items-center gap-1.5 ml-1">
                                 <button
                                   onClick={() => handleConfirmBooking(booking)}
                                   disabled={processingBookingId === booking.id}
-                                  className="bg-green-600 hover:bg-green-700 active:scale-95 text-white text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer disabled:opacity-50"
+                                  className="bg-green-600 hover:bg-green-700 active:scale-95 text-white text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-sm transition-all cursor-pointer disabled:opacity-50 whitespace-nowrap"
                                 >
                                   {processingBookingId === booking.id ? (
                                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -774,19 +759,19 @@ export default function AdminDashboard() {
                                 <button
                                   onClick={() => handleRejectBooking(booking)}
                                   disabled={processingBookingId === booking.id}
-                                  className="bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1 transition-all cursor-pointer disabled:opacity-50"
+                                  className="bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold px-2.5 py-1.5 rounded-xl flex items-center gap-1 transition-all cursor-pointer disabled:opacity-50 whitespace-nowrap"
                                 >
                                   <XCircle className="w-3.5 h-3.5" />
                                   <span>Reject</span>
                                 </button>
-                              </>
+                              </div>
                             )}
 
                             {booking.rawStatus === 'confirmed' && (
                               <button
                                 onClick={() => handleCompleteBooking(booking)}
                                 disabled={processingBookingId === booking.id}
-                                className="bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                                className="bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all cursor-pointer ml-1 disabled:opacity-50 whitespace-nowrap"
                               >
                                 {processingBookingId === booking.id ? (
                                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -817,7 +802,7 @@ export default function AdminDashboard() {
                         onClick={() => setExpandedVendorId(isExpanded ? null : vendor.id)}
                         className="p-5 md:p-6 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors"
                       >
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-4 min-w-0">
                           <div className="w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg bg-blue-100 text-blue-700 shrink-0 overflow-hidden">
                             {vendor.logo ? (
                               /* eslint-disable-next-line @next/next/no-img-element */
@@ -826,15 +811,15 @@ export default function AdminDashboard() {
                               (vendor.name || "V").substring(0, 2).toUpperCase()
                             )}
                           </div>
-                          <div>
-                            <h4 className="font-bold text-gray-900 text-lg md:text-xl">{vendor.name}</h4>
-                            <p className="text-sm font-medium text-gray-500">{vendorBookings.length} Total Bookings</p>
+                          <div className="min-w-0">
+                            <h4 className="font-bold text-gray-900 text-base md:text-lg truncate whitespace-nowrap">{vendor.name}</h4>
+                            <p className="text-xs md:text-sm font-medium text-gray-500">{vendorBookings.length} Total Bookings</p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-4 shrink-0">
                           <div className="hidden md:block text-right">
-                            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">Vendor Revenue</p>
-                            <p className="font-black text-gray-900 text-lg">Rp {vendorRevenue.toLocaleString()}</p>
+                            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide truncate whitespace-nowrap">Vendor Revenue</p>
+                            <p className="font-black text-gray-900 text-base">Rp {vendorRevenue.toLocaleString()}</p>
                           </div>
                           <div className={`p-2 rounded-full transition-transform ${isExpanded ? 'rotate-90 bg-gray-100' : 'bg-gray-50 hover:bg-gray-100'}`}>
                             <ChevronRight className="w-5 h-5 text-gray-600" />
@@ -843,83 +828,65 @@ export default function AdminDashboard() {
                       </div>
 
                       {isExpanded && (
-                        <div className="border-t border-gray-50 bg-gray-50/50 p-5 md:p-6 space-y-4">
+                        <div className="border-t border-gray-50 bg-gray-50/50 p-4 md:p-6 space-y-3">
                           {vendorBookings.length === 0 ? (
                             <div className="text-center py-6 text-gray-400 font-medium bg-white rounded-2xl border border-dashed border-gray-200">
                               No recent bookings for this vendor.
                             </div>
                           ) : (
                             vendorBookings.map(booking => (
-                              <div key={booking.id} className="bg-white p-5 rounded-[24px] border border-gray-100 shadow-sm flex flex-col gap-4 hover:border-gray-200 transition-all">
-                                {/* Top Row */}
-                                <div className="flex items-start justify-between gap-3">
-                                  <div className="flex items-center gap-3.5">
-                                    <div className="w-12 h-12 bg-gray-50 rounded-xl overflow-hidden shrink-0 border border-gray-100 p-1 flex items-center justify-center">
-                                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                                      <img src={booking.scooter_img || "/images/scooter.png"} alt="Scooter" className="w-full h-full object-contain" />
-                                    </div>
-                                    <div>
-                                      <div className="flex items-center gap-2">
-                                        <h5 className="font-black text-gray-900 text-base">{booking.scooter}</h5>
-                                        <span className="text-[11px] font-bold bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">
-                                          {booking.quantity} {booking.quantity > 1 ? 'Units' : 'Unit'}
-                                        </span>
-                                      </div>
-                                    </div>
+                              <div key={booking.id} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-blue-200 transition-colors">
+                                <div className="flex items-center gap-3.5 min-w-0">
+                                  <div className="w-12 h-12 bg-gray-50 rounded-xl overflow-hidden shrink-0 p-1 flex items-center justify-center">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={booking.scooter_img || "/images/scooter.png"} alt="Scooter" className="w-full h-full object-contain" />
                                   </div>
+                                  <div className="min-w-0">
+                                    <div className="flex items-center gap-2 mb-1 flex-nowrap">
+                                      <h5 className="font-bold text-gray-900 text-sm truncate whitespace-nowrap">{booking.scooter}</h5>
+                                      <span className="text-[10px] font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded shrink-0 whitespace-nowrap">
+                                        {booking.quantity} {booking.quantity > 1 ? 'Units' : 'Unit'}
+                                      </span>
+                                    </div>
+                                    <p className="text-xs font-medium text-gray-500 truncate whitespace-nowrap">
+                                      Customer: <strong className="text-gray-800">{booking.customer}</strong> • Dates: <span className="text-gray-700 font-semibold">{formatRentalPeriod(booking.startDate, booking.endDate)}</span>
+                                    </p>
+                                  </div>
+                                </div>
 
-                                  <span className={`px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wide shrink-0 border ${
+                                <div className="flex items-center justify-between md:justify-end gap-3 md:gap-4 border-t md:border-none border-gray-50 pt-3 md:pt-0 shrink-0">
+                                  <div className="text-left md:text-right">
+                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide truncate whitespace-nowrap">Total Price</p>
+                                    <p className="font-bold text-gray-900 text-sm md:text-base whitespace-nowrap">Rp {booking.price.toLocaleString()}</p>
+                                  </div>
+                                  <span className={`px-2.5 py-1 rounded text-[11px] font-bold uppercase tracking-wide shrink-0 ${
                                     booking.rawStatus === 'pending'
-                                      ? 'bg-amber-50 text-amber-800 border-amber-200'
+                                      ? 'bg-amber-100 text-amber-800'
                                       : booking.rawStatus === 'confirmed'
-                                      ? 'bg-green-50 text-green-700 border-green-200'
-                                      : booking.rawStatus === 'completed'
-                                      ? 'bg-blue-50 text-blue-700 border-blue-200'
-                                      : 'bg-red-50 text-red-700 border-red-200'
+                                      ? 'bg-green-100 text-green-700'
+                                      : 'bg-blue-100 text-blue-700'
                                   }`}>
                                     {booking.status}
                                   </span>
-                                </div>
 
-                                {/* Middle Info Box */}
-                                <div className="bg-gray-50/80 rounded-2xl p-3.5 space-y-2 border border-gray-100 text-xs">
-                                  <div className="flex items-center justify-between gap-2">
-                                    <span className="text-gray-400 font-bold uppercase tracking-wider text-[10px]">Customer</span>
-                                    <span className="font-bold text-gray-800">{booking.customer}</span>
-                                  </div>
-                                  <div className="flex items-center justify-between gap-2">
-                                    <span className="text-gray-400 font-bold uppercase tracking-wider text-[10px]">Rental Period</span>
-                                    <span className="font-bold text-gray-900">{formatRentalPeriod(booking.startDate, booking.endDate)}</span>
-                                  </div>
-                                </div>
-
-                                {/* Bottom Row */}
-                                <div className="flex items-center justify-between pt-1 border-t border-gray-50">
-                                  <div>
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Total Price</p>
-                                    <p className="font-black text-gray-900 text-lg">Rp {booking.price.toLocaleString()}</p>
-                                  </div>
-
-                                  <div className="flex items-center gap-2">
-                                    {booking.rawStatus === 'pending' && (
-                                      <button
-                                        onClick={() => handleConfirmBooking(booking)}
-                                        disabled={processingBookingId === booking.id}
-                                        className="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1 cursor-pointer disabled:opacity-50"
-                                      >
-                                        <Check className="w-3.5 h-3.5" /> Confirm
-                                      </button>
-                                    )}
-                                    {booking.rawStatus === 'confirmed' && (
-                                      <button
-                                        onClick={() => handleCompleteBooking(booking)}
-                                        disabled={processingBookingId === booking.id}
-                                        className="bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1 cursor-pointer disabled:opacity-50"
-                                      >
-                                        <RotateCcw className="w-3.5 h-3.5" /> Return
-                                      </button>
-                                    )}
-                                  </div>
+                                  {booking.rawStatus === 'pending' && (
+                                    <button
+                                      onClick={() => handleConfirmBooking(booking)}
+                                      disabled={processingBookingId === booking.id}
+                                      className="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                                    >
+                                      <Check className="w-3.5 h-3.5" /> Confirm
+                                    </button>
+                                  )}
+                                  {booking.rawStatus === 'confirmed' && (
+                                    <button
+                                      onClick={() => handleCompleteBooking(booking)}
+                                      disabled={processingBookingId === booking.id}
+                                      className="bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                                    >
+                                      <RotateCcw className="w-3.5 h-3.5" /> Return
+                                    </button>
+                                  )}
                                 </div>
                               </div>
                             ))
