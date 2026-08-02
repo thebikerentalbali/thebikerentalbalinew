@@ -82,6 +82,7 @@ export default function VendorDashboard() {
   }
 
   useEffect(() => {
+    let bookingsSubscription: any;
     async function checkAuth() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) {
@@ -104,8 +105,23 @@ export default function VendorDashboard() {
       setVendorData(data)
       await refreshData(data)
       setIsLoading(false)
+
+      bookingsSubscription = supabase
+        .channel('partner-bookings')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'bookings', filter: `vendor_id=eq.${data.id}` },
+          () => refreshData(data)
+        )
+        .subscribe()
     }
     checkAuth()
+
+    return () => {
+      if (bookingsSubscription) {
+        supabase.removeChannel(bookingsSubscription)
+      }
+    }
   }, [router, supabase])
 
   const handleConfirmBooking = async (booking: any) => {
@@ -542,7 +558,7 @@ export default function VendorDashboard() {
         DESKTOP SIDEBAR
         ========================================================================
       */}
-      <aside className="w-64 bg-white border-r border-gray-100 hidden md:flex flex-col sticky top-0 h-screen z-40 shadow-sm">
+      <aside className="w-64 bg-white border-r border-gray-100 hidden md:flex flex-col sticky top-0 h-screen shrink-0 self-start z-40 shadow-sm">
         <div className="p-6">
           <Link href="/" className="inline-block">
             <h2 className="text-xl font-black text-gray-900 tracking-tight leading-none">THE BIKE RENTAL</h2>
@@ -637,7 +653,7 @@ export default function VendorDashboard() {
                       <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-green-50 text-green-600 flex items-center justify-center">
                         <Wallet className="w-5 h-5 md:w-6 md:h-6" />
                       </div>
-                      <h3 className="text-[13px] md:text-[14px] font-bold text-gray-500 uppercase tracking-wide">Total Earnings</h3>
+                      <h3 className="text-[13px] md:text-[14px] font-bold text-gray-500 uppercase tracking-wide">Net Profit</h3>
                     </div>
                     <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">
                       Rp {totalNetEarnings.toLocaleString()}
@@ -989,7 +1005,7 @@ export default function VendorDashboard() {
                               ? 'bg-white text-black'
                               : 'bg-black text-white'
                           }`}>
-                            {count} {count > 1 ? 'bks' : 'bk'}
+                            {count}
                           </span>
                         ) : (
                           <span className={`text-[9px] sm:text-[10px] font-bold ${isSelected ? 'text-gray-400' : 'text-gray-300'}`}>
@@ -1055,9 +1071,6 @@ export default function VendorDashboard() {
                       <p className="text-xl md:text-2xl font-black mt-1">
                         {periodBookings.length}
                       </p>
-                      <p className={`text-[10px] font-bold mt-0.5 truncate whitespace-nowrap ${bookingFilter === 'all' ? 'text-gray-300' : 'text-gray-500'}`}>
-                        Gross: Rp {periodTotalCustomerPrice.toLocaleString()}
-                      </p>
                     </div>
 
                     <div
@@ -1105,9 +1118,6 @@ export default function VendorDashboard() {
                       </p>
                       <p className="text-xl md:text-2xl font-black mt-1">
                         {periodCompleted.length}
-                      </p>
-                      <p className={`text-[10px] font-bold mt-0.5 truncate whitespace-nowrap ${bookingFilter === 'completed' ? 'text-gray-300' : 'text-gray-500'}`}>
-                        Your Net Profit: Rp {periodNetProfit.toLocaleString()}
                       </p>
                     </div>
                   </div>

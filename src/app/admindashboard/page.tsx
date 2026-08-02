@@ -286,14 +286,26 @@ export default function AdminDashboard() {
       setSettingMonthlyMarkupPerDay(updated.markup_monthly_per_day)
     })
 
-    const unsubscribe = subscribeToPlatformSettings((updated) => {
+    const unsubscribeSettings = subscribeToPlatformSettings((updated) => {
       setPlatformSettings(updated)
       setSettingDailyMarkup(updated.markup_daily)
       setSettingWeeklyMarkupPerDay(updated.markup_weekly_per_day)
       setSettingMonthlyMarkupPerDay(updated.markup_monthly_per_day)
     })
 
-    return () => unsubscribe()
+    const bookingsSubscription = supabase
+      .channel('admin-bookings')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'bookings' },
+        () => fetchVendors()
+      )
+      .subscribe()
+
+    return () => {
+      unsubscribeSettings()
+      supabase.removeChannel(bookingsSubscription)
+    }
   }, [])
 
   const handleSavePlatformSettings = (e?: React.FormEvent) => {
@@ -422,7 +434,7 @@ export default function AdminDashboard() {
         DESKTOP SIDEBAR
         ========================================================================
       */}
-      <aside className="w-64 bg-black border-r border-gray-800 hidden md:flex flex-col sticky top-0 h-screen z-40 shadow-xl">
+      <aside className="w-64 bg-black border-r border-gray-800 hidden md:flex flex-col sticky top-0 h-screen shrink-0 self-start z-40 shadow-xl">
         <div className="p-6">
           <Link href="/" className="inline-block">
             <h2 className="text-xl font-black text-white tracking-tight leading-none">THE BIKE RENTAL</h2>
@@ -1013,9 +1025,6 @@ export default function AdminDashboard() {
                       </p>
                       <p className="text-xl md:text-2xl font-black mt-1">
                         {periodCompleted.length}
-                      </p>
-                      <p className={`text-[10px] font-bold mt-0.5 truncate whitespace-nowrap ${bookingFilter === 'completed' ? 'text-gray-300' : 'text-gray-500'}`}>
-                        Commission: Rp {periodCommission.toLocaleString()}
                       </p>
                     </div>
                   </div>
