@@ -133,6 +133,51 @@ export default function VendorDashboard() {
     }
   }
 
+  const formatIndoDate = (dateStr?: string | Date) => {
+    if (!dateStr) return ''
+    if (typeof dateStr === 'string' && (dateStr.includes(' to ') || dateStr.includes(' - '))) {
+      const parts = dateStr.includes(' to ') ? dateStr.split(' to ') : dateStr.split(' - ')
+      return `${formatIndoDate(parts[0])} – ${formatIndoDate(parts[1])}`
+    }
+    if (typeof dateStr === 'string') {
+      const parts = dateStr.split('-')
+      if (parts.length === 3) {
+        const year = parts[0]
+        const monthIndex = parseInt(parts[1], 10) - 1
+        const day = parts[2].padStart(2, '0')
+        const monthNames = [
+          'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+          'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        ]
+        if (isNaN(monthIndex)) {
+          return `${day} ${parts[1]} ${year}`
+        }
+        const monthName = monthNames[monthIndex] || parts[1]
+        return `${day} ${monthName} ${year}`
+      }
+    }
+    try {
+      const d = new Date(dateStr)
+      if (isNaN(d.getTime())) return String(dateStr)
+      const day = String(d.getDate()).padStart(2, '0')
+      const year = d.getFullYear()
+      const monthNames = [
+        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+      ]
+      return `${day} ${monthNames[d.getMonth()]} ${year}`
+    } catch {
+      return String(dateStr)
+    }
+  }
+
+  const formatRentalPeriod = (startStr?: string | Date, endStr?: string | Date) => {
+    if (!startStr && !endStr) return 'N/A'
+    if (startStr && !endStr) return formatIndoDate(startStr)
+    if (!startStr && endStr) return formatIndoDate(endStr)
+    return `${formatIndoDate(startStr)} – ${formatIndoDate(endStr)}`
+  }
+
   const handleLogout = async () => {
     await supabase.auth.signOut()
     router.push('/partnerportal/login')
@@ -640,30 +685,26 @@ export default function VendorDashboard() {
                   </div>
                 ) : (
                   bookingsList.map((booking) => (
-                    <div key={booking.id} className="bg-white p-4 md:p-5 rounded-3xl border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm hover:shadow-md transition-shadow">
-                      <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 bg-gray-50 rounded-2xl overflow-hidden shrink-0 border border-gray-100 p-1">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={booking.scooter_img} alt="Scooter" className="w-full h-full object-contain" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex flex-wrap items-center gap-2 mb-1">
-                            <h4 className="font-bold text-gray-900 text-[15px] truncate">{booking.scooter}</h4>
-                            <span className="text-[11px] font-semibold bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                              {booking.quantity} {booking.quantity > 1 ? 'Units' : 'Unit'}
-                            </span>
+                    <div key={booking.id} className="bg-white p-5 rounded-[24px] border border-gray-100 shadow-sm flex flex-col gap-4 hover:border-gray-200 transition-all">
+                      {/* Top Row: Scooter Info, Units & Status */}
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3.5">
+                          <div className="w-14 h-14 bg-gray-50 rounded-2xl overflow-hidden shrink-0 border border-gray-100 p-1 flex items-center justify-center">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={booking.scooter_img || "/images/scooter.png"} alt="Scooter" className="w-full h-full object-contain" />
                           </div>
-                          <p className="text-[13px] font-medium text-gray-500">
-                            {booking.startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {booking.endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} • <span className="text-gray-900 font-bold">Rp {booking.price.toLocaleString()}</span>
-                          </p>
-                          <p className="text-[12px] text-gray-500 mt-0.5">
-                            Customer: <strong className="text-gray-800">{booking.customer}</strong> {booking.phone ? `(${booking.phone})` : ''}
-                          </p>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h5 className="font-black text-gray-900 text-base">{booking.scooter}</h5>
+                              <span className="text-[11px] font-bold bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">
+                                {booking.quantity} {booking.quantity > 1 ? 'Units' : 'Unit'}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                      </div>
 
-                      <div className="flex items-center justify-between md:justify-end gap-3 border-t md:border-none border-gray-50 pt-3 md:pt-0">
-                        <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide shrink-0 border ${
+                        {/* Status Badge */}
+                        <span className={`px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wide shrink-0 border ${
                           booking.rawStatus === 'pending'
                             ? 'bg-amber-50 text-amber-800 border-amber-200'
                             : booking.rawStatus === 'confirmed'
@@ -674,21 +715,44 @@ export default function VendorDashboard() {
                         }`}>
                           {booking.status}
                         </span>
+                      </div>
 
-                        {booking.rawStatus === 'confirmed' && (
-                          <button
-                            onClick={() => handleCompleteBooking(booking)}
-                            disabled={processingBookingId === booking.id}
-                            className="bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all cursor-pointer disabled:opacity-50"
-                          >
-                            {processingBookingId === booking.id ? (
-                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            ) : (
-                              <RotateCcw className="w-3.5 h-3.5" />
-                            )}
-                            <span>Mark Returned</span>
-                          </button>
-                        )}
+                      {/* Middle Info Box: Customer & Rental Period */}
+                      <div className="bg-gray-50/80 rounded-2xl p-3.5 space-y-2 border border-gray-100 text-xs">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-gray-400 font-bold uppercase tracking-wider text-[10px]">Customer</span>
+                          <span className="font-bold text-gray-800">{booking.customer} {booking.phone ? `(${booking.phone})` : ''}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-gray-400 font-bold uppercase tracking-wider text-[10px]">Rental Period</span>
+                          <span className="font-bold text-gray-900">{formatRentalPeriod(booking.startDate, booking.endDate)}</span>
+                        </div>
+                      </div>
+
+                      {/* Bottom Row: Total Price & Actions */}
+                      <div className="flex items-center justify-between pt-1 border-t border-gray-50">
+                        <div>
+                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Total Price</p>
+                          <p className="font-black text-gray-900 text-lg md:text-xl">Rp {booking.price.toLocaleString()}</p>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex items-center gap-2">
+                          {booking.rawStatus === 'confirmed' && (
+                            <button
+                              onClick={() => handleCompleteBooking(booking)}
+                              disabled={processingBookingId === booking.id}
+                              className="bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                            >
+                              {processingBookingId === booking.id ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ) : (
+                                <RotateCcw className="w-3.5 h-3.5" />
+                              )}
+                              <span>Mark Returned</span>
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))
