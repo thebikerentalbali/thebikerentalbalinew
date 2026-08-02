@@ -293,69 +293,59 @@ export default function VendorPage() {
               <p className="text-gray-500 text-[15px]">{vendor.address || 'Premium scooter rental in Bali'}</p>
             </div>
 
-            {/* Swipeable Rounded Black Info Cards (Hours, Delivery, Requirements, Rating, Reviews, Scooters) */}
-            <div className="-mx-5 px-5 mb-6">
-              <div className="flex items-center gap-2.5 overflow-x-auto py-1 hide-scrollbar snap-x">
-                
-                {/* Operating Hours Card */}
-                <div 
-                  onClick={() => setActiveInfoModal('hours')}
-                  className="bg-black text-white rounded-2xl px-4 py-3 shrink-0 flex flex-col items-center justify-center snap-start cursor-pointer active:scale-95 transition-all min-w-[110px] shadow-sm"
-                >
-                  <span className="font-bold text-[14px] text-white leading-tight">08:00 - 20:00</span>
-                  <span className="text-[11px] text-gray-400 mt-0.5 font-medium">hours</span>
+            {/* 3 Column Stats */}
+            <div className="flex items-center justify-between py-4 border-y border-gray-100 max-w-sm mb-4">
+              {/* Rating */}
+              <div className="flex flex-col items-center justify-center flex-1 cursor-pointer" onClick={() => setIsReviewModalOpen(true)}>
+                <div className="flex items-center gap-1">
+                  <Star className="w-4 h-4 text-gray-800 fill-gray-800" />
+                  <span className="font-bold text-lg text-gray-900">5.0</span>
                 </div>
-
-                {/* Delivery Areas Card */}
-                <div 
-                  onClick={() => setActiveInfoModal('delivery')}
-                  className="bg-black text-white rounded-2xl px-4 py-3 shrink-0 flex flex-col items-center justify-center snap-start cursor-pointer active:scale-95 transition-all min-w-[110px] shadow-sm"
-                >
-                  <span className="font-bold text-[14px] text-white leading-tight">
-                    {vendor.address?.toLowerCase().includes('ubud') || vendor.address?.toLowerCase().includes('mas') ? 'Ubud Only' : 'Coverage'}
-                  </span>
-                  <span className="text-[11px] text-gray-400 mt-0.5 font-medium">delivery area</span>
-                </div>
-
-                {/* Rental Requirements Card */}
-                <div 
-                  onClick={() => setActiveInfoModal('requirements')}
-                  className="bg-black text-white rounded-2xl px-4 py-3 shrink-0 flex flex-col items-center justify-center snap-start cursor-pointer active:scale-95 transition-all min-w-[115px] shadow-sm"
-                >
-                  <span className="font-bold text-[14px] text-white leading-tight">Requirements</span>
-                  <span className="text-[11px] text-gray-400 mt-0.5 font-medium">ID & license</span>
-                </div>
-
-                {/* Rating Card */}
-                <div 
-                  onClick={() => setIsReviewModalOpen(true)}
-                  className="bg-black text-white rounded-2xl px-4 py-3 shrink-0 flex flex-col items-center justify-center snap-start cursor-pointer active:scale-95 transition-all min-w-[85px] shadow-sm"
-                >
-                  <div className="flex items-center gap-1">
-                    <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
-                    <span className="font-bold text-[14px] text-white leading-tight">5.0</span>
-                  </div>
-                  <span className="text-[11px] text-gray-400 mt-0.5 font-medium">rating</span>
-                </div>
-
-                {/* Reviews Card */}
-                <div 
-                  onClick={() => setIsReviewModalOpen(true)}
-                  className="bg-black text-white rounded-2xl px-4 py-3 shrink-0 flex flex-col items-center justify-center snap-start cursor-pointer active:scale-95 transition-all min-w-[85px] shadow-sm"
-                >
-                  <span className="font-bold text-[14px] text-white leading-tight">{reviews.length}+</span>
-                  <span className="text-[11px] text-gray-400 mt-0.5 font-medium">reviews</span>
-                </div>
-
-                {/* Scooters Count Card */}
-                <div className="bg-black text-white rounded-2xl px-4 py-3 shrink-0 flex flex-col items-center justify-center snap-start min-w-[85px] shadow-sm">
-                  <span className="font-bold text-[14px] text-white leading-tight">
-                    {scooters.reduce((sum, scooter) => sum + (scooter.total_units || 1), 0)}
-                  </span>
-                  <span className="text-[11px] text-gray-400 mt-0.5 font-medium">scooters</span>
-                </div>
-
+                <span className="text-[13px] text-gray-500 mt-0.5">rating</span>
               </div>
+              
+              <div className="w-px h-8 bg-gray-200" />
+
+              {/* Reviews */}
+              <div className="flex flex-col items-center justify-center flex-1 cursor-pointer" onClick={() => setIsReviewModalOpen(true)}>
+                <span className="font-bold text-lg text-gray-900">{reviews.length}+</span>
+                <span className="text-[13px] text-gray-500 mt-0.5">reviews</span>
+              </div>
+
+              <div className="w-px h-8 bg-gray-200" />
+
+              {/* Scooters Count */}
+              <div className="flex flex-col items-center justify-center flex-1">
+                <span className="font-bold text-lg text-gray-900">{scooters.reduce((sum, scooter) => sum + (scooter.total_units || 1), 0)}</span>
+                <span className="text-[13px] text-gray-500 mt-0.5">scooters</span>
+              </div>
+            </div>
+
+            {/* Quick Info Pill Buttons (Operating Hours, Delivery Areas, Rental Requirements) */}
+            <div className="flex items-center gap-2 mb-6 overflow-x-auto hide-scrollbar -mx-5 px-5">
+              <button 
+                onClick={() => setActiveInfoModal('hours')}
+                className="bg-gray-100 hover:bg-gray-200 active:scale-95 transition-all text-gray-800 text-xs font-semibold px-3.5 py-2 rounded-full shrink-0 flex items-center gap-1.5 border border-gray-200/50 shadow-2xs"
+              >
+                <Clock className="w-3.5 h-3.5 text-gray-600" />
+                <span>Operating Hours</span>
+              </button>
+
+              <button 
+                onClick={() => setActiveInfoModal('delivery')}
+                className="bg-gray-100 hover:bg-gray-200 active:scale-95 transition-all text-gray-800 text-xs font-semibold px-3.5 py-2 rounded-full shrink-0 flex items-center gap-1.5 border border-gray-200/50 shadow-2xs"
+              >
+                <MapPin className="w-3.5 h-3.5 text-gray-600" />
+                <span>Delivery Areas</span>
+              </button>
+
+              <button 
+                onClick={() => setActiveInfoModal('requirements')}
+                className="bg-gray-100 hover:bg-gray-200 active:scale-95 transition-all text-gray-800 text-xs font-semibold px-3.5 py-2 rounded-full shrink-0 flex items-center gap-1.5 border border-gray-200/50 shadow-2xs"
+              >
+                <Check className="w-3.5 h-3.5 text-gray-600" />
+                <span>Rental Requirements</span>
+              </button>
             </div>
 
             {/* Swipeable Reviews directly under vendor info */}
