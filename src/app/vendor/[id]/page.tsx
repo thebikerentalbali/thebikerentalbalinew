@@ -155,6 +155,71 @@ export default function VendorPage() {
     return `https://wa.me/${cleanPhone}?text=${message}`;
   }
 
+  const getDeliveryArea = (address?: string) => {
+    const addr = (address || '').toLowerCase()
+    if (
+      addr.includes('ubud') || 
+      addr.includes('mas') || 
+      addr.includes('sayan') || 
+      addr.includes('gianyar') || 
+      addr.includes('tegallalang') || 
+      addr.includes('campuhan') || 
+      addr.includes('penestanan') ||
+      addr.includes('lodtunduh') ||
+      addr.includes('pengosekan')
+    ) {
+      return "Ubud area only (Central Ubud, Mas, Sayan, Campuhan, Penestanan & Tegallalang)"
+    }
+    if (
+      addr.includes('canggu') || 
+      addr.includes('pererenan') || 
+      addr.includes('berawa') || 
+      addr.includes('tibubeneng') || 
+      addr.includes('umalas')
+    ) {
+      return "Canggu, Berawa, Pererenan, Umalas & Kerobokan"
+    }
+    if (
+      addr.includes('seminyak') || 
+      addr.includes('legian') || 
+      addr.includes('kuta') || 
+      addr.includes('petitenget')
+    ) {
+      return "Seminyak, Kuta, Legian, Kerobokan & DPS Airport"
+    }
+    if (
+      addr.includes('uluwatu') || 
+      addr.includes('jimbaran') || 
+      addr.includes('ungasan') || 
+      addr.includes('pecatu') || 
+      addr.includes('bingin') ||
+      addr.includes('padang padang')
+    ) {
+      return "Uluwatu, Pecatu, Bingin, Padang Padang, Ungasan & Jimbaran"
+    }
+    if (
+      addr.includes('sanur') || 
+      addr.includes('denpasar') || 
+      addr.includes('renon')
+    ) {
+      return "Sanur, Denpasar, Renon & DPS Airport"
+    }
+    if (
+      addr.includes('nusa dua') || 
+      addr.includes('benoa')
+    ) {
+      return "Nusa Dua, Tanjung Benoa & Jimbaran"
+    }
+    if (
+      addr.includes('amed') || 
+      addr.includes('candidasa') || 
+      addr.includes('tulamben')
+    ) {
+      return "Amed, Candidasa, Tulamben & East Bali"
+    }
+    return "Local area hotel & villa delivery"
+  }
+
   const availableBrands = ["All", ...Array.from(new Set(scooters.map(s => s.brand).filter(Boolean)))]
   const filteredScooters = selectedBrand === "All" ? scooters : scooters.filter(s => s.brand?.toLowerCase() === selectedBrand.toLowerCase())
 
@@ -298,6 +363,32 @@ export default function VendorPage() {
             </div>
           </div>
         </header>
+
+        {/* Location & Delivery Coverage on Mobile */}
+        <div className="px-5 mt-6">
+          <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
+            <h3 className="font-bold text-gray-900 text-[15px] mb-3">Location & Delivery</h3>
+            
+            <div className="space-y-3 text-xs">
+              <div>
+                <span className="text-gray-400 font-medium block text-[11px]">Address</span>
+                <p className="font-semibold text-gray-800 text-[13px] mt-0.5">{vendor.address || 'Bali, Indonesia'}</p>
+              </div>
+
+              <div className="pt-2.5 border-t border-gray-100">
+                <span className="text-gray-400 font-medium block text-[11px]">Operating Hours</span>
+                <p className="font-semibold text-gray-800 text-[13px] mt-0.5">08:00 AM – 08:00 PM Daily</p>
+              </div>
+
+              <div className="pt-2.5 border-t border-gray-100">
+                <span className="text-gray-400 font-medium block text-[11px]">Delivery Areas</span>
+                <p className="font-semibold text-gray-800 text-[13px] mt-0.5 leading-relaxed">
+                  {getDeliveryArea(vendor.address)}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Available Scooters on Mobile */}
         <div className="px-6 mt-8">
@@ -630,26 +721,11 @@ export default function VendorPage() {
 
                 <div className="pt-2 border-t border-gray-100">
                   <span className="text-xs text-gray-400 font-medium block">Delivery Areas</span>
-                  <p className="text-xs text-gray-500 leading-relaxed">
-                    Canggu, Seminyak, Kuta, Legian, Sanur, Ubud, Uluwatu & Airport.
+                  <p className="text-xs text-gray-600 font-medium leading-relaxed">
+                    {getDeliveryArea(vendor.address)}
                   </p>
                 </div>
               </div>
-            </div>
-
-            {/* Direct WhatsApp Card */}
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
-              <h3 className="font-bold text-gray-900 text-base mb-2">Need Assistance?</h3>
-              <p className="text-xs text-gray-500 mb-4">Chat directly with {vendor.name} on WhatsApp for questions or custom delivery arrangements.</p>
-              <a 
-                href={getWhatsAppUrl()}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full bg-[#25D366] text-white font-bold py-3 px-4 rounded-2xl text-sm flex items-center justify-center gap-2 hover:bg-[#20bd5a] transition-colors"
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span>Chat on WhatsApp</span>
-              </a>
             </div>
 
             {/* Rental Requirements */}
