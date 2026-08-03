@@ -5,6 +5,7 @@ import Link from "next/link"
 import { ChevronLeft, Bell, Star, MapPin, Map, Info, Minus, Plus, PlusCircle, X, Trash2, Loader2 } from "lucide-react"
 import { createClient } from '@/lib/supabase/client'
 import { fetchCatalogData } from '@/lib/api/catalogService'
+import { clientCache } from '@/lib/cache/clientCache'
 import { subscribeToPlatformSettings } from '@/utils/pricing'
 
 export default function CheckoutPage() {
@@ -16,34 +17,6 @@ export default function CheckoutPage() {
   const [customerEmail, setCustomerEmail] = useState("")
   const [deliveryAddress, setDeliveryAddress] = useState("")
   const [agreedToFee, setAgreedToFee] = useState(false)
-  const [startDate, setStartDate] = useState("")
-  const [endDate, setEndDate] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
-  const [cart, setCart] = useState<any[]>([])
-  const [vendorScooters, setVendorScooters] = useState<any[]>(() => {
-    const cached = typeof window !== 'undefined' ? clientCache.get<any>('catalog_data') : null
-    if (cached?.scooters) {
-      return cached.scooters.map((s: any) => ({
-        ...s,
-        img: s.image_url || s.img || "/images/scooter.png",
-        rating: 5.0,
-        available: s.available_units,
-        daily: s.price_daily,
-        weekly: s.price_weekly,
-        monthly: s.price_monthly
-      }))
-    }
-    return []
-  })
-  const [showAddModal, setShowAddModal] = useState(false)
-  const [loading, setLoading] = useState(() => {
-    const cached = typeof window !== 'undefined' ? clientCache.get<any>('catalog_data') : null
-    return !cached?.scooters || cached.scooters.length === 0
-  })
-
-  const supabase = createClient()
-
   // Helper date formatting
   const formatIsoDate = (d: Date) => {
     const year = d.getFullYear()
@@ -68,6 +41,58 @@ export default function CheckoutPage() {
     date.setDate(date.getDate() + days)
     return formatIsoDate(date)
   }
+
+  const [startDate, setStartDate] = useState(() => formatIsoDate(new Date()))
+  const [endDate, setEndDate] = useState(() => addDaysToDate(formatIsoDate(new Date()), 1))
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const [cart, setCart] = useState<any[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const params = new URLSearchParams(window.location.search)
+        const sId = params.get("scooterId")
+        const cached = clientCache.get<any>('catalog_data')
+        if (sId && cached?.scooters) {
+          const selected = cached.scooters.find((s: any) => s.id.toString() === sId)
+          if (selected) {
+            return [{
+              ...selected,
+              img: selected.image_url || selected.img || "/images/scooter.png",
+              rating: 5.0,
+              available: selected.available_units || 1,
+              daily: selected.price_daily || 0,
+              weekly: selected.price_weekly || 0,
+              monthly: selected.price_monthly || 0,
+              quantity: 1,
+              durationMode: "daily",
+              durationCount: 1
+            }]
+          }
+        }
+      } catch (e) {}
+    }
+    return []
+  })
+
+  const [vendorScooters, setVendorScooters] = useState<any[]>(() => {
+    const cached = typeof window !== 'undefined' ? clientCache.get<any>('catalog_data') : null
+    if (cached?.scooters) {
+      return cached.scooters.map((s: any) => ({
+        ...s,
+        img: s.image_url || s.img || "/images/scooter.png",
+        rating: 5.0,
+        available: s.available_units,
+        daily: s.price_daily,
+        weekly: s.price_weekly,
+        monthly: s.price_monthly
+      }))
+    }
+    return []
+  })
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  const supabase = createClient()
 
   useEffect(() => {
     const today = formatIsoDate(new Date())

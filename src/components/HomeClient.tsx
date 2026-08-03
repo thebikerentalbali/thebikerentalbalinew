@@ -220,7 +220,7 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
             </div>
             <div className="flex gap-4 md:gap-8 overflow-x-auto md:overflow-visible pb-2 scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0">
               {topVendors.map((vendor) => (
-                <Link key={vendor.id} href={`/vendor/${vendor.id}`} className="flex flex-col items-center gap-2 md:gap-3 min-w-[80px] md:min-w-[100px] transition-transform hover:scale-105">
+                <Link key={vendor.id} href={`/vendor/${vendor.id}`} prefetch={true} className="flex flex-col items-center gap-2 md:gap-3 min-w-[80px] md:min-w-[100px] transition-transform hover:scale-105">
                   {/* Instagram-style Ring */}
                   <div className="p-[2px] md:p-[3px] rounded-full bg-gradient-to-tr from-yellow-400 to-orange-500">
                     <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white p-[2px] md:p-[3px]">
@@ -307,7 +307,7 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
           ) : (
             <div className="flex gap-4 md:gap-6 overflow-x-auto md:grid md:grid-cols-2 lg:grid-cols-3 md:overflow-visible pb-4 scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0 snap-x snap-mandatory md:snap-none">
               {filteredPopular.map(scooter => (
-                <Link key={scooter.id} href={`/detail/${scooter.id}`} className="min-w-full md:min-w-0 sm:min-w-[340px] shrink-0 block relative bg-white rounded-[32px] md:rounded-[40px] p-4 md:p-5 shadow-sm border border-gray-50 snap-center md:snap-align-none transition-transform hover:-translate-y-1 hover:shadow-md">
+                <Link key={scooter.id} href={`/detail/${scooter.id}`} prefetch={true} className="min-w-full md:min-w-0 sm:min-w-[340px] shrink-0 block relative bg-white rounded-[32px] md:rounded-[40px] p-4 md:p-5 shadow-sm border border-gray-50 snap-center md:snap-align-none transition-transform hover:-translate-y-1 hover:shadow-md">
                   {/* Year & Save */}
                   <div className="absolute top-6 left-6 md:top-8 md:left-8 bg-white/90 backdrop-blur-sm px-3 md:px-4 py-1.5 md:py-2 rounded-full flex items-center gap-1.5 z-10 shadow-sm border border-gray-100">
                     <span className="text-xs md:text-sm font-extrabold text-gray-900">{scooter.year || '2024'}</span>
@@ -354,7 +354,7 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
             
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
               {filteredRecommended.map(scooter => (
-                <Link key={scooter.id} href={`/detail/${scooter.id}`} className="bg-white rounded-[24px] md:rounded-[32px] p-3 md:p-4 shadow-sm border border-gray-50 flex flex-col group transition-all hover:scale-[1.02] hover:shadow-md">
+                <Link key={scooter.id} href={`/detail/${scooter.id}`} prefetch={true} className="bg-white rounded-[24px] md:rounded-[32px] p-3 md:p-4 shadow-sm border border-gray-50 flex flex-col group transition-all hover:scale-[1.02] hover:shadow-md">
                   <div className="relative w-full aspect-square mb-3 md:mb-4 rounded-2xl bg-[#F8F9FA] flex items-center justify-center p-3 md:p-5">
                     <button 
                       onClick={(e) => toggleSaveScooter(e, scooter.id)}

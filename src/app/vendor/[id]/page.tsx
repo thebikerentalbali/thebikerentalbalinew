@@ -1,44 +1,27 @@
-import type { Metadata } from 'next';
-import { fetchVendorDetailServer } from '@/lib/api/catalogService';
+"use client"
+
+import { useParams } from 'next/navigation';
+import { clientCache } from '@/lib/cache/clientCache';
 import VendorDetailClient from '@/components/VendorDetailClient';
 
-export const revalidate = 30;
+export default function VendorPage() {
+  const params = useParams();
+  const id = params?.id as string;
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
-  const { id } = await params;
-  const data = await fetchVendorDetailServer(id);
-  if (!data?.vendor) {
-    return {
-      title: 'Partner Scooter Rental Bali | THE BIKE RENTAL BALI',
-      description: 'Verified scooter rental partner in Bali with hotel delivery and transparent daily rates.',
-    };
-  }
+  const initialVendor = typeof window !== 'undefined' && id
+    ? (clientCache.get<any>(`vendor_${id}`)?.vendor || clientCache.get<any>('catalog_data')?.vendors?.find((v: any) => v.id.toString() === id) || null)
+    : null;
 
-  const vendorName = data.vendor.name || 'Partner';
-  const vendorAddress = data.vendor.address || 'Bali';
-
-  return {
-    title: `${vendorName} - Scooter Rental in ${vendorAddress} | THE BIKE RENTAL BALI`,
-    description: `Rent scooters from ${vendorName} in ${vendorAddress}, Bali. Compare available fleet, check operating hours, delivery coverage, and 5.0 customer reviews.`,
-    openGraph: {
-      title: `${vendorName} - Scooter Rental in Bali`,
-      description: `Rent scooters from ${vendorName} in Bali. Fast hotel & villa delivery.`,
-      images: data.vendor.logo ? [{ url: data.vendor.logo }] : [],
-    },
-  };
-}
-
-export default async function VendorPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const data = await fetchVendorDetailServer(id);
+  const initialScooters = typeof window !== 'undefined' && id
+    ? (clientCache.get<any>(`vendor_${id}`)?.scooters || clientCache.get<any>('catalog_data')?.scooters?.filter((s: any) => s.vendor_id?.toString() === id) || [])
+    : [];
 
   return (
     <VendorDetailClient
       id={id}
-      initialVendor={data?.vendor || null}
-      initialScooters={data?.scooters || []}
-      initialReviews={data?.reviews || []}
-      initialSettings={data?.settings}
+      initialVendor={initialVendor}
+      initialScooters={initialScooters}
+      initialReviews={[]}
     />
   );
 }
