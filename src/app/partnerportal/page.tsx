@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Bike, DollarSign, CalendarDays, Settings, Bell, Search, Star, Plus, QrCode, Home, Wallet, User, ChevronRight, ChevronLeft, TrendingUp, Wrench, MoreVertical, CheckCircle2, Clock, X, ChevronDown, List, Calendar as CalendarIcon, Camera, Loader2, LogOut, RotateCcw, Check, XCircle, Store, Calendar, ArrowUpRight } from "lucide-react"
+import { Bike, DollarSign, CalendarDays, Settings, Bell, Search, Star, Plus, QrCode, Home, Wallet, User, ChevronRight, ChevronLeft, TrendingUp, Wrench, MoreVertical, CheckCircle2, Clock, X, ChevronDown, List, Calendar as CalendarIcon, Camera, Loader2, LogOut, RotateCcw, Check, XCircle, Store, Calendar, ArrowUpRight, Download } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import dynamic from "next/dynamic"
@@ -16,7 +16,6 @@ import {
 } from "@/utils/pricing"
 
 const MapPicker = dynamic(() => import('@/components/MapPicker'), { ssr: false })
-import VendorPWAInstallBanner from "@/components/VendorPWAInstallBanner"
 
 export default function VendorDashboard() {
   const [activeTab, setActiveTab] = useState("home")
@@ -24,6 +23,8 @@ export default function VendorDashboard() {
   const [vendorData, setVendorData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [processingBookingId, setProcessingBookingId] = useState<string | null>(null)
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
+  const [isAppInstalled, setIsAppInstalled] = useState(false)
   
   const router = useRouter()
   const supabase = createClient()
@@ -138,6 +139,46 @@ export default function VendorDashboard() {
       }
     }
   }, [router, supabase])
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true
+      if (isStandalone) setIsAppInstalled(true)
+
+      const handleBeforeInstall = (e: any) => {
+        e.preventDefault()
+        setDeferredPrompt(e)
+      }
+
+      window.addEventListener('beforeinstallprompt', handleBeforeInstall)
+      window.addEventListener('appinstalled', () => {
+        setIsAppInstalled(true)
+        setDeferredPrompt(null)
+      })
+
+      return () => {
+        window.removeEventListener('beforeinstallprompt', handleBeforeInstall)
+      }
+    }
+  }, [])
+
+  const handleDownloadApp = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt()
+      const choice = await deferredPrompt.userChoice
+      if (choice?.outcome === 'accepted') {
+        setIsAppInstalled(true)
+        setDeferredPrompt(null)
+      }
+    } else {
+      const isAndroid = /android/i.test(navigator.userAgent || '')
+      if (isAndroid) {
+        alert("To install on your Android: Open Chrome menu (⋮) and tap 'Install app'")
+      } else {
+        alert("To install on your device: Use your browser's 'Install app' option")
+      }
+    }
+  }
 
   const handleConfirmBooking = async (booking: any) => {
     setProcessingBookingId(booking.id)
@@ -568,7 +609,6 @@ export default function VendorDashboard() {
 
   return (
     <div className="min-h-screen bg-[#F5F7FA] md:flex md:pl-64 pb-28 md:pb-0">
-      <VendorPWAInstallBanner />
       {/* 
         ========================================================================
         DESKTOP SIDEBAR
@@ -1511,6 +1551,17 @@ export default function VendorDashboard() {
               <button onClick={handleSaveSettings} disabled={isSavingSettings} className="w-full bg-black text-white rounded-xl py-3.5 font-bold text-sm hover:scale-[1.02] transition-transform disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2">
                 {isSavingSettings ? <Loader2 className="w-5 h-5 animate-spin" /> : "Save Changes"}
               </button>
+
+              <div className="pt-3 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={handleDownloadApp}
+                  className="w-full bg-neutral-900 text-white hover:bg-black active:scale-[0.99] rounded-xl py-3.5 font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                >
+                  <Download className="w-4 h-4 text-white" />
+                  <span>{isAppInstalled ? "App Installed" : "Download App"}</span>
+                </button>
+              </div>
             </div>
           </div>
         ) : (
