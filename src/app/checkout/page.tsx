@@ -21,9 +21,26 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const [cart, setCart] = useState<any[]>([])
-  const [vendorScooters, setVendorScooters] = useState<any[]>([])
+  const [vendorScooters, setVendorScooters] = useState<any[]>(() => {
+    const cached = typeof window !== 'undefined' ? clientCache.get<any>('catalog_data') : null
+    if (cached?.scooters) {
+      return cached.scooters.map((s: any) => ({
+        ...s,
+        img: s.image_url || s.img || "/images/scooter.png",
+        rating: 5.0,
+        available: s.available_units,
+        daily: s.price_daily,
+        weekly: s.price_weekly,
+        monthly: s.price_monthly
+      }))
+    }
+    return []
+  })
   const [showAddModal, setShowAddModal] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(() => {
+    const cached = typeof window !== 'undefined' ? clientCache.get<any>('catalog_data') : null
+    return !cached?.scooters || cached.scooters.length === 0
+  })
 
   const supabase = createClient()
 

@@ -147,6 +147,107 @@ export async function getCatalogServerData(options?: { forceRefresh?: boolean })
 }
 
 /**
+ * Instant Server-Side Scooter Detail Fetcher (0ms waterfall)
+ */
+export async function fetchScooterDetailServer(id: string): Promise<ScooterDetailData | null> {
+  try {
+    const catalog = await getCatalogServerData();
+    const scooter = catalog.scooters.find((s: any) => String(s.id) === String(id));
+    if (scooter) {
+      const vendor = catalog.vendors.find((v: any) => String(v.id) === String(scooter.vendor_id)) || null;
+      return {
+        scooter,
+        vendor,
+        settings: catalog.settings,
+      };
+    }
+
+    // Direct Supabase fallback
+    const supabase = getDirectSupabase();
+    const { data: sData } = await supabase.from('scooters').select('*').eq('id', id).maybeSingle();
+    if (!sData) return null;
+
+    const [
+      { data: vData },
+      { data: settingsData }
+    ] = await Promise.all([
+      supabase.from('vendors').select('*').eq('id', sData.vendor_id).maybeSingle(),
+      supabase.from('platform_settings').select('*').limit(1).maybeSingle(),
+    ]);
+
+    const settings: PlatformSettings = settingsData ? {
+      markup_daily: Number(settingsData.markup_daily) || DEFAULT_PLATFORM_SETTINGS.markup_daily,
+      markup_weekly_per_day: Number(settingsData.markup_weekly_per_day) || DEFAULT_PLATFORM_SETTINGS.markup_weekly_per_day,
+      markup_monthly_per_day: Number(settingsData.markup_monthly_per_day) || DEFAULT_PLATFORM_SETTINGS.markup_monthly_per_day,
+      markup_weekly: (Number(settingsData.markup_weekly_per_day) || DEFAULT_PLATFORM_SETTINGS.markup_weekly_per_day) * 7,
+      markup_monthly: (Number(settingsData.markup_monthly_per_day) || DEFAULT_PLATFORM_SETTINGS.markup_monthly_per_day) * 30,
+    } : DEFAULT_PLATFORM_SETTINGS;
+
+    const prices = getCustomerPrice(sData.price_daily || 0, sData.price_weekly, sData.price_monthly, settings);
+
+    return {
+      scooter: {
+        ...sData,
+        price_daily: prices.daily,
+        price_weekly: prices.weekly,
+        price_monthly: prices.monthly,
+        img: sData.image_url || '/images/scooter.png',
+        year: sData.year || '2024',
+      },
+      vendor: vData || null,
+      settings,
+    };
+  } catch (e) {
+    console.error('[CatalogService] fetchScooterDetailServer error:', e);
+    return null;
+  }
+}
+
+/**
+ * Instant Server-Side Vendor Detail Fetcher (0ms waterfall)
+ */
+export async function fetchVendorDetailServer(id: string): Promise<VendorDetailData | null> {
+  try {
+    const catalog = await getCatalogServerData();
+    const vendor = catalog.vendors.find((v: any) => String(v.id) === String(id));
+    const scooters = catalog.scooters.filter((s: any) => String(s.vendor_id) === String(id));
+
+    const supabase = getDirectSupabase();
+    const { data: reviews } = await supabase
+      .from('reviews')
+      .select('*')
+      .eq('vendor_id', id)
+      .order('created_at', { ascending: false });
+
+    if (vendor) {
+      return {
+        vendor,
+        scooters,
+        reviews: reviews || [],
+        settings: catalog.settings,
+      };
+    }
+
+    const { data: vData } = await supabase.from('vendors').select('*').eq('id', id).maybeSingle();
+    if (!vData) return null;
+
+    return {
+      vendor: {
+        ...vData,
+        initials: vData.name ? vData.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() : 'V',
+        location: vData.address || 'Bali',
+      },
+      scooters,
+      reviews: reviews || [],
+      settings: catalog.settings,
+    };
+  } catch (e) {
+    console.error('[CatalogService] fetchVendorDetailServer error:', e);
+    return null;
+  }
+}
+
+/**
  * Fast Client-side catalog fetcher with SWR deduplication
  */
 export async function fetchCatalogData(options?: { forceRefresh?: boolean }): Promise<CatalogData> {
