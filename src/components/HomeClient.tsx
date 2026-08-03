@@ -173,7 +173,7 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
         <header className="flex justify-between items-start mb-8 md:mb-12">
           <div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-medium leading-[1.1] text-gray-900 tracking-tight">
-              Find the Best <br className="md:hidden" /> Scooter Rental in Bali
+              Find Your <br className="md:hidden" /> Perfect Ride
             </h1>
           </div>
           <button 
@@ -216,7 +216,7 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
         {topVendors.length > 0 && (
           <div className="mb-10 md:mb-12">
             <div className="flex justify-between items-end mb-4 md:mb-6">
-              <h2 className="text-xl md:text-2xl font-bold text-gray-900">Compare Trusted Scooter Rental Companies Across Bali</h2>
+              <h2 className="text-xl md:text-2xl font-bold text-gray-900">Nearby Vendors</h2>
             </div>
             <div className="flex gap-4 md:gap-8 overflow-x-auto md:overflow-visible pb-2 scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0">
               {topVendors.map((vendor) => (
@@ -239,7 +239,7 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
                     <h3 className="font-semibold text-gray-900 text-[13px] md:text-[15px] leading-tight truncate w-[85px] md:w-[100px]">{vendor.name}</h3>
                     <div className="flex items-center gap-1 text-[11px] md:text-[13px] mt-0.5 md:mt-1 bg-yellow-50 px-2 py-0.5 rounded-full border border-yellow-100 w-fit">
                       <Star className="w-3 h-3 md:w-3.5 md:h-3.5 fill-yellow-400 text-yellow-400" />
-                      <span className="font-bold text-gray-800">5.0</span>
+                      <span className="font-bold text-yellow-700">5.0</span>
                     </div>
                     <div className="flex items-center gap-0.5 md:gap-1 text-[10px] md:text-[12px] text-gray-400 mt-0.5 md:mt-1">
                       <MapPin className="w-3 h-3 md:w-3.5 md:h-3.5" />
@@ -297,7 +297,7 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
         {/* Popular Scrolling Cards / Grid on Desktop */}
         <div className="mb-10 md:mb-12">
           <div className="flex justify-between items-end mb-4 md:mb-6">
-            <h2 className="text-xl md:text-2xl font-bold text-gray-900">Book from Verified Local Rental Vendors</h2>
+            <h2 className="text-xl md:text-2xl font-bold text-gray-900">Popular Options</h2>
           </div>
           
           {filteredPopular.length === 0 ? (
@@ -319,28 +319,25 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
                     <Heart className={`w-4 h-4 md:w-5 md:h-5 ${savedScooters.includes(scooter.id) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
                   </button>
 
-                  {/* Image Container */}
-                  <div className="w-full aspect-[4/3] rounded-[24px] md:rounded-[32px] bg-[#F8F9FA] flex items-center justify-center p-4 md:p-6 mb-4 relative overflow-hidden group">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img 
-                      src={scooter.img} 
-                      alt={scooter.name} 
-                      className="w-full h-full object-contain drop-shadow-md transition-transform duration-300 group-hover:scale-105"
-                    />
+                  {/* Image */}
+                  <div className="relative w-full h-48 md:h-56 mb-4 md:mb-5 rounded-2xl md:rounded-3xl overflow-hidden bg-[#F8F9FA] flex items-center justify-center">
+                     <div 
+                       className="w-[90%] h-[90%] bg-contain bg-center bg-no-repeat"
+                       style={{ backgroundImage: `url("${scooter.img}")` }}
+                     />
                   </div>
 
-                  {/* Content */}
-                  <div className="flex justify-between items-start">
+                  {/* Info */}
+                  <div className="flex items-end justify-between px-2 pb-2">
                     <div>
                       <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">{scooter.name}</h3>
-                      <p className="text-xs md:text-sm text-gray-500">{scooter.vendor_name || 'Verified Partner'}</p>
+                      <p className="text-gray-500 text-sm md:text-base">
+                        <span className="font-extrabold text-gray-900 text-[16px] md:text-[18px]">Rp {durationFilter === 'Weekly' ? Number(scooter.price_weekly || 0).toLocaleString() : durationFilter === 'Monthly' ? Number(scooter.price_monthly || 0).toLocaleString() : Number(scooter.price_daily || 0).toLocaleString()}</span> /{durationFilter}
+                      </p>
                     </div>
-                    <div className="text-right">
-                      <div className="text-base md:text-lg font-black text-gray-900">
-                        Rp {durationFilter === 'Weekly' ? Number(scooter.price_weekly || 0).toLocaleString() : durationFilter === 'Monthly' ? Number(scooter.price_monthly || 0).toLocaleString() : Number(scooter.price_daily || 0).toLocaleString()}
-                      </div>
-                      <div className="text-[11px] md:text-xs text-gray-400 font-medium">/{durationFilter === 'Daily' ? 'day' : durationFilter === 'Weekly' ? 'week' : 'month'}</div>
-                    </div>
+                    <button className="bg-black text-white px-5 md:px-6 py-2.5 md:py-3 rounded-full text-sm md:text-base font-semibold hover:bg-gray-800 transition-colors">
+                      Book Now
+                    </button>
                   </div>
                 </Link>
               ))}
@@ -350,9 +347,9 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
 
         {/* More Listings (Grid) - only if there are additional scooters */}
         {filteredRecommended.length > 0 && (
-          <div className="mb-14 md:mb-16">
+          <div>
             <div className="flex justify-between items-end mb-4 md:mb-6">
-              <h2 className="text-xl md:text-2xl font-bold text-gray-900">More Verified Scooter Listings</h2>
+              <h2 className="text-xl md:text-2xl font-bold text-gray-900">More Listings</h2>
             </div>
             
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
@@ -378,104 +375,6 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
             </div>
           </div>
         )}
-
-        {/* ========================================================================= */}
-        {/* SEO SECTION: SCOOTER DELIVERY ACROSS BALI & WHY CHOOSE MARKETPLACE       */}
-        {/* ========================================================================= */}
-        <section className="mb-14 md:mb-20 pt-6 border-t border-gray-200/60">
-          <div className="mb-10">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">Scooter Delivery Across Bali</h2>
-            <p className="text-sm md:text-base text-gray-600 max-w-3xl mb-6">
-              Compare trusted scooter rental companies delivering directly to your hotel, villa, or resort across all major destinations in Bali. Enjoy free delivery, sanitized helmets, and 24/7 customer support.
-            </p>
-            <div className="flex flex-wrap gap-2 md:gap-2.5">
-              {[
-                { name: 'Ubud', slug: 'scooter-rental-ubud' },
-                { name: 'Canggu', slug: 'scooter-rental-canggu' },
-                { name: 'Seminyak', slug: 'scooter-rental-seminyak' },
-                { name: 'Kuta', slug: 'scooter-rental-kuta' },
-                { name: 'Legian', slug: 'scooter-rental-legian' },
-                { name: 'Sanur', slug: 'scooter-rental-sanur' },
-                { name: 'Uluwatu', slug: 'scooter-rental-uluwatu' },
-                { name: 'Jimbaran', slug: 'scooter-rental-jimbaran' },
-                { name: 'Nusa Dua', slug: 'scooter-rental-nusa-dua' },
-                { name: 'Berawa', slug: 'scooter-rental-berawa' },
-                { name: 'Pererenan', slug: 'scooter-rental-pererenan' },
-                { name: 'Umalas', slug: 'scooter-rental-umalas' },
-                { name: 'Kerobokan', slug: 'scooter-rental-kerobokan' },
-                { name: 'Denpasar', slug: 'scooter-rental-denpasar' },
-                { name: 'Bali Airport (DPS)', slug: 'scooter-rental-airport' },
-                { name: 'Pecatu', slug: 'scooter-rental-pecatu' },
-                { name: 'Gianyar', slug: 'scooter-rental-gianyar' },
-                { name: 'Sidemen', slug: 'scooter-rental-sidemen' },
-                { name: 'Padangbai', slug: 'scooter-rental-padangbai' },
-                { name: 'Candidasa', slug: 'scooter-rental-candidasa' },
-                { name: 'Amed', slug: 'scooter-rental-amed' },
-                { name: 'Lovina', slug: 'scooter-rental-lovina' },
-                { name: 'Bedugul', slug: 'scooter-rental-bedugul' },
-                { name: 'Jatiluwih', slug: 'scooter-rental-jatiluwih' },
-                { name: 'Tabanan', slug: 'scooter-rental-tabanan' },
-                { name: 'Munduk', slug: 'scooter-rental-munduk' },
-              ].map(area => (
-                <Link
-                  key={area.slug}
-                  href={`/${area.slug}`}
-                  className="bg-white hover:bg-black hover:text-white text-gray-700 text-xs md:text-sm font-medium px-3.5 py-2 rounded-full border border-gray-200 shadow-2xs transition-all duration-150"
-                >
-                  {area.name}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Why Choose THE BIKE RENTAL BALI</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
-              <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-2xs">
-                <div className="w-10 h-10 rounded-2xl bg-black text-white flex items-center justify-center font-bold mb-4">1</div>
-                <h3 className="font-bold text-gray-900 text-lg mb-2">Compare Verified Local Vendors</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  We verify business licenses, fleet conditions, and customer track records so you always book with reputable local partners.
-                </p>
-              </div>
-              <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-2xs">
-                <div className="w-10 h-10 rounded-2xl bg-black text-white flex items-center justify-center font-bold mb-4">2</div>
-                <h3 className="font-bold text-gray-900 text-lg mb-2">Transparent Pricing & Discounts</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  Compare real-time daily, weekly, and monthly rates with no hidden fees. Save up to 40% on long-term nomad rentals.
-                </p>
-              </div>
-              <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-2xs">
-                <div className="w-10 h-10 rounded-2xl bg-black text-white flex items-center justify-center font-bold mb-4">3</div>
-                <h3 className="font-bold text-gray-900 text-lg mb-2">Fast Doorstep Handover</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  Enjoy seamless delivery directly to your villa or DPS Airport terminal, complete with clean helmets and vehicle support.
-                </p>
-              </div>
-            </div>
-
-            {/* Popular Models & Blog Links */}
-            <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-100 shadow-2xs flex flex-col md:flex-row gap-6 md:gap-10 justify-between items-start md:items-center">
-              <div>
-                <h4 className="font-bold text-gray-900 text-base md:text-lg mb-2">Explore Popular Scooter Models & Travel Guides</h4>
-                <p className="text-sm text-gray-500">
-                  Read our in-depth comparison reviews, island road trip itineraries, and driving safety guides.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-3 shrink-0">
-                <Link href="/blog" className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold text-xs md:text-sm px-4 py-2.5 rounded-full transition-colors">
-                  Travel Guides & Blog
-                </Link>
-                <Link href="/scooters/honda-scoopy" className="bg-black hover:bg-gray-800 text-white font-bold text-xs md:text-sm px-4 py-2.5 rounded-full transition-colors">
-                  Honda Scoopy Specs
-                </Link>
-                <Link href="/scooters/yamaha-nmax" className="bg-black hover:bg-gray-800 text-white font-bold text-xs md:text-sm px-4 py-2.5 rounded-full transition-colors">
-                  Yamaha NMAX Specs
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* Filter Modal */}
         {isFilterOpen && (
