@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { ChevronLeft, Heart, ChevronRight, Star } from "lucide-react"
 import { fetchScooterDetail } from '@/lib/api/catalogService'
@@ -131,21 +132,23 @@ export default function ScooterDetailClient({
             
             {/* Primary Vehicle Stage */}
             <div className="relative w-full h-[300px] sm:h-[360px] md:h-[440px] flex items-center justify-center mx-auto mb-4 md:mb-6 bg-white md:bg-[#FAFAFA] md:rounded-[28px] md:border md:border-neutral-200/80 p-6 overflow-hidden">
-              <div 
-                className="w-full h-full bg-contain bg-center bg-no-repeat transition-transform duration-500 hover:scale-105"
-                style={{ backgroundImage: `url("${scooter.image_url || '/images/scooter.png'}")` }}
+              <Image
+                src={scooter.image_url || '/images/scooter.png'}
+                alt={scooter.name}
+                fill
+                priority
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 60vw, 550px"
+                className="object-contain p-6 transition-transform duration-500 hover:scale-105"
               />
             </div>
             
             {/* Desktop Thumbnails */}
             <div className="hidden md:flex items-center gap-3 px-1 mb-6">
-              <div className="w-20 h-20 rounded-2xl bg-white border-2 border-black flex items-center justify-center p-2 shadow-xs cursor-pointer">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={scooter.image_url || "/images/scooter.png"} alt="View 1" className="w-full h-full object-contain" />
+              <div className="relative w-20 h-20 rounded-2xl bg-white border-2 border-black flex items-center justify-center p-2 shadow-xs cursor-pointer overflow-hidden">
+                <Image src={scooter.image_url || "/images/scooter.png"} alt="View 1" fill sizes="80px" className="object-contain p-1" />
               </div>
-              <div className="w-20 h-20 rounded-2xl bg-neutral-50 border border-neutral-200 flex items-center justify-center p-2 shadow-xs opacity-60 hover:opacity-100 hover:border-black transition-all cursor-pointer">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={scooter.image_url || "/images/scooter.png"} alt="View 2" className="w-full h-full object-contain" />
+              <div className="relative w-20 h-20 rounded-2xl bg-neutral-50 border border-neutral-200 flex items-center justify-center p-2 shadow-xs opacity-60 hover:opacity-100 hover:border-black transition-all cursor-pointer overflow-hidden">
+                <Image src={scooter.image_url || "/images/scooter.png"} alt="View 2" fill sizes="80px" className="object-contain p-1" />
               </div>
             </div>
 
@@ -176,12 +179,13 @@ export default function ScooterDetailClient({
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full overflow-hidden bg-neutral-100 shrink-0 border border-neutral-200">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img 
+                    <div className="relative w-12 h-12 rounded-full overflow-hidden bg-neutral-100 shrink-0 border border-neutral-200">
+                      <Image 
                         src={vendor.logo || vendor.image_url || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=100&h=100&fit=crop"} 
                         alt={vendor.name} 
-                        className="w-full h-full object-cover" 
+                        fill
+                        sizes="48px"
+                        className="object-cover" 
                       />
                     </div>
                     <div>

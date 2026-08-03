@@ -1,56 +1,71 @@
 import { redirect, notFound } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
 import { Metadata } from "next";
+import { getCatalogServerData } from "@/lib/api/catalogService";
+import { SITE_NAME, SITE_URL } from "@/lib/seo/schemaGenerator";
 
-type Props = {
-  params: { vendorSlug: string }
+interface PageProps {
+  params: Promise<{ vendorSlug: string }>;
 }
 
-// Generate metadata for social sharing (WhatsApp, Facebook, etc.)
-export async function generateMetadata(
-  props: Props
-): Promise<Metadata> {
-  const params = await props.params;
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-  const supabase = createClient(supabaseUrl, supabaseKey);
+export const revalidate = 60;
 
-  const { data: vendors } = await supabase.from('vendors').select('id, name, logo').eq('status', 'approved');
-  if (vendors) {
-    const vendor = vendors.find(v => v.name.toLowerCase().replace(/[^a-z0-9]+/g, '') === params.vendorSlug);
-    if (vendor) {
-      return {
-        title: `${vendor.name} - Premium Scooter Rental in Bali`,
-        description: `Rent a scooter from ${vendor.name}. High-quality bikes and excellent service for your Bali adventure.`,
-        openGraph: {
-          title: vendor.name,
-          description: `Rent a scooter from ${vendor.name} in Bali.`,
-          images: vendor.logo ? [vendor.logo] : [],
-        },
-      }
-    }
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { vendorSlug } = await params;
+  const catalog = await getCatalogServerData();
+  const vendors = catalog.vendors || [];
+
+  const vendor = vendors.find(
+    (v: any) => v.name?.toLowerCase().replace(/[^a-z0-9]+/g, '') === vendorSlug.toLowerCase()
+  );
+
+  if (vendor) {
+    const title = `${vendor.name} - Scooter Rental Bali | ${SITE_NAME}`;
+    const description = `Rent top-rated scooters from ${vendor.name} in Bali. Fast delivery, 24/7 support, and verified fleet.`;
+    const imageUrl = vendor.logo || vendor.image_url || `${SITE_URL}/icons/icon-512x512.png`;
+
+    return {
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        url: `${SITE_URL}/${vendorSlug}`,
+        siteName: SITE_NAME,
+        images: [
+          {
+            url: imageUrl,
+            width: 512,
+            height: 512,
+            alt: vendor.name,
+          },
+        ],
+      },
+      twitter: {
+        card: "summary",
+        title,
+        description,
+        images: [imageUrl],
+      },
+    };
   }
 
   return {
-    title: 'Vendor Not Found - Putu Rentals',
-    description: 'The requested vendor profile could not be found.',
-  }
+    title: `Vendor Not Found | ${SITE_NAME}`,
+    description: "The requested vendor profile could not be found.",
+  };
 }
 
-export default async function VendorSlugPage(props: Props) {
-  const params = await props.params;
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-  const supabase = createClient(supabaseUrl, supabaseKey);
+export default async function VendorSlugPage({ params }: PageProps) {
+  const { vendorSlug } = await params;
+  const catalog = await getCatalogServerData();
+  const vendors = catalog.vendors || [];
 
-  const { data: vendors } = await supabase.from('vendors').select('id, name').eq('status', 'approved');
-  
-  if (vendors) {
-    const vendor = vendors.find(v => v.name.toLowerCase().replace(/[^a-z0-9]+/g, '') === params.vendorSlug);
-    if (vendor) {
-      // Server-side redirect to the actual vendor ID profile page
-      redirect(`/vendor/${vendor.id}`);
-    }
+  const vendor = vendors.find(
+    (v: any) => v.name?.toLowerCase().replace(/[^a-z0-9]+/g, '') === vendorSlug.toLowerCase()
+  );
+
+  if (vendor) {
+    redirect(`/vendor/${vendor.id}`);
   }
 
   notFound();

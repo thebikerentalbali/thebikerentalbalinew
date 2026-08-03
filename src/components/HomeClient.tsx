@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { Heart, Search, SlidersHorizontal, Star, Bike, MapPin, ChevronDown, Menu, X } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 import { fetchCatalogData } from '@/lib/api/catalogService'
@@ -25,14 +26,14 @@ interface HomeClientProps {
 
 export default function HomeClient({ initialVendors = [], initialScooters = [] }: HomeClientProps) {
   const router = useRouter()
-  
+
   const [topVendors, setTopVendors] = useState<any[]>(initialVendors)
   const [allScooters, setAllScooters] = useState<any[]>(initialScooters)
 
   const [activeBrand, setActiveBrand] = useState("")
   const [durationFilter, setDurationFilter] = useState("Daily")
   const [isNavOpen, setIsNavOpen] = useState(false)
-  
+
   // Saved Scooters State
   const [savedScooters, setSavedScooters] = useState<number[]>([])
   const [isSavedModalOpen, setIsSavedModalOpen] = useState(false)
@@ -40,7 +41,7 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
   // Location & Search State
   const [searchQuery, setSearchQuery] = useState("")
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false)
-  
+
   // Filter States
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [maxPrice, setMaxPrice] = useState(500000)
@@ -64,7 +65,7 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
         console.error("Failed to load catalog data:", err);
       }
     }
-    
+
     // Background SWR revalidation
     loadData();
 
@@ -81,7 +82,7 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
 
   const toggleSaveScooter = (e: React.MouseEvent, id: number) => {
     e.preventDefault()
-    setSavedScooters(prev => 
+    setSavedScooters(prev =>
       prev.includes(id) ? prev.filter(sId => sId !== id) : [...prev, id]
     )
   }
@@ -111,7 +112,7 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
     const brandMatch = scooter.brand && scooter.brand.toLowerCase().includes(q);
     return Boolean(nameMatch || brandMatch);
   }
-  
+
   const allFiltered = allScooters.filter(s => filterByPrice(s.price_daily || s.price) && filterByBrand(s) && filterByYear(s) && filterBySearch(s))
   const filteredPopular = allFiltered.slice(0, 3)
   const filteredRecommended = allFiltered.slice(3)
@@ -137,8 +138,8 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
                 </div>
               </div>
             </button>
-            
-            <button 
+
+            <button
               onClick={() => setIsNavOpen(!isNavOpen)}
               className="w-10 h-10 rounded-full bg-white/80 border border-gray-100 flex items-center justify-center text-gray-800 hover:bg-white transition-colors shadow-sm"
             >
@@ -153,9 +154,9 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
               <Link href="/how-it-works" className="text-[16px] font-semibold text-gray-800 px-2 py-1 hover:text-black transition-colors">How it Works</Link>
               <Link href="/faq" className="text-[16px] font-semibold text-gray-800 px-2 py-1 hover:text-black transition-colors">FAQ</Link>
               <Link href="/contact" className="text-[16px] font-semibold text-gray-800 px-2 py-1 hover:text-black transition-colors">Contact Support</Link>
-              
+
               <div className="h-[1px] bg-gray-200 my-1"></div>
-              
+
               <div className="flex flex-col gap-2">
                 <span className="text-[12px] font-bold text-gray-400 uppercase tracking-wider px-2">Partners</span>
                 <Link href="/partnersignup" className="text-[16px] font-semibold text-gray-800 px-2 py-1 hover:text-black transition-colors flex justify-between items-center group">
@@ -176,7 +177,7 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
               Find Your <br className="md:hidden" /> Perfect Ride
             </h1>
           </div>
-          <button 
+          <button
             onClick={() => setIsSavedModalOpen(true)}
             className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 shrink-0 hover:bg-gray-50 transition-colors relative"
           >
@@ -201,7 +202,7 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
               className="w-full pl-12 pr-4 h-14 md:h-16 bg-white border-none rounded-full focus:ring-0 outline-none text-[15px] md:text-[16px] placeholder:text-gray-400 text-gray-800 shadow-sm"
             />
           </div>
-          <button 
+          <button
             onClick={() => setIsFilterOpen(true)}
             className="w-14 h-14 md:w-16 md:h-16 bg-white rounded-full flex items-center justify-center shadow-sm shrink-0 border border-gray-100 transition-transform hover:scale-105 relative"
           >
@@ -226,8 +227,15 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
                     <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white p-[2px] md:p-[3px]">
                       <div className="w-full h-full rounded-full bg-gray-100 flex items-center justify-center border border-gray-200 overflow-hidden">
                         {vendor.logo ? (
-                          /* eslint-disable-next-line @next/next/no-img-element */
-                          <img src={vendor.logo} alt={vendor.name} className="w-full h-full object-cover" />
+                          <Image
+                            src={vendor.logo}
+                            alt={vendor.name}
+                            width={80}
+                            height={80}
+                            className="w-full h-full object-cover"
+                            sizes="(max-width: 768px) 64px, 80px"
+                            loading="eager"
+                          />
                         ) : (
                           <span className="text-lg md:text-xl font-bold text-gray-600">{vendor.initials}</span>
                         )}
@@ -258,10 +266,10 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
             <h2 className="text-xl md:text-2xl font-bold text-gray-900">Brand</h2>
           </div>
           <div className="flex gap-3 overflow-x-auto md:flex-wrap md:justify-center md:overflow-visible pb-2 scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0 items-center">
-            
+
             {/* Duration Dropdown */}
             <div className="relative shrink-0">
-              <select 
+              <select
                 value={durationFilter}
                 onChange={(e) => setDurationFilter(e.target.value)}
                 className="appearance-none bg-black text-white pl-5 pr-10 h-12 md:h-14 md:text-[16px] rounded-full font-medium text-[15px] outline-none border-none shadow-sm flex items-center cursor-pointer focus:ring-0 transition-transform hover:scale-105"
@@ -280,9 +288,8 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
                 <button
                   key={brand.name}
                   onClick={() => setActiveBrand(isActive ? "" : brand.name)}
-                  className={`flex items-center gap-2 px-5 h-12 md:h-14 md:px-6 rounded-full whitespace-nowrap transition-all shadow-sm hover:scale-105 ${
-                    isActive ? "bg-black text-white" : "bg-white text-gray-800 border border-gray-100"
-                  }`}
+                  className={`flex items-center gap-2 px-5 h-12 md:h-14 md:px-6 rounded-full whitespace-nowrap transition-all shadow-sm hover:scale-105 ${isActive ? "bg-black text-white" : "bg-white text-gray-800 border border-gray-100"
+                    }`}
                 >
                   <div className={`w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center ${isActive ? 'bg-white/20' : 'bg-gray-100'}`}>
                     <brand.icon className="w-3.5 h-3.5 md:w-4 md:h-4" />
@@ -299,20 +306,20 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
           <div className="flex justify-between items-end mb-4 md:mb-6">
             <h2 className="text-xl md:text-2xl font-bold text-gray-900">Popular Options</h2>
           </div>
-          
+
           {filteredPopular.length === 0 ? (
             <div className="bg-white rounded-3xl p-8 text-center text-gray-500 font-bold border border-gray-100">
               No scooters found matching your filters.
             </div>
           ) : (
             <div className="flex gap-4 md:gap-6 overflow-x-auto md:grid md:grid-cols-2 lg:grid-cols-3 md:overflow-visible pb-4 scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0 snap-x snap-mandatory md:snap-none">
-              {filteredPopular.map(scooter => (
+              {filteredPopular.map((scooter, index) => (
                 <Link key={scooter.id} href={`/detail/${scooter.id}`} prefetch={true} className="min-w-full md:min-w-0 sm:min-w-[340px] shrink-0 block relative bg-white rounded-[32px] md:rounded-[40px] p-4 md:p-5 shadow-sm border border-gray-50 snap-center md:snap-align-none transition-transform hover:-translate-y-1 hover:shadow-md">
                   {/* Year & Save */}
                   <div className="absolute top-6 left-6 md:top-8 md:left-8 bg-white/90 backdrop-blur-sm px-3 md:px-4 py-1.5 md:py-2 rounded-full flex items-center gap-1.5 z-10 shadow-sm border border-gray-100">
                     <span className="text-xs md:text-sm font-extrabold text-gray-900">{scooter.year || '2024'}</span>
                   </div>
-                  <button 
+                  <button
                     onClick={(e) => toggleSaveScooter(e, scooter.id)}
                     className="absolute top-6 right-6 md:top-8 md:right-8 bg-white/90 backdrop-blur-sm w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center z-10 shadow-sm hover:scale-110 transition-transform"
                   >
@@ -321,10 +328,14 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
 
                   {/* Image */}
                   <div className="relative w-full h-48 md:h-56 mb-4 md:mb-5 rounded-2xl md:rounded-3xl overflow-hidden bg-[#F8F9FA] flex items-center justify-center">
-                     <div 
-                       className="w-[90%] h-[90%] bg-contain bg-center bg-no-repeat"
-                       style={{ backgroundImage: `url("${scooter.img}")` }}
-                     />
+                    <Image
+                      src={scooter.img || "/images/scooter.png"}
+                      alt={scooter.name}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-contain p-3 drop-shadow-md transition-transform duration-300 hover:scale-105"
+                      priority={index < 2}
+                    />
                   </div>
 
                   {/* Info */}
@@ -351,12 +362,12 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
             <div className="flex justify-between items-end mb-4 md:mb-6">
               <h2 className="text-xl md:text-2xl font-bold text-gray-900">More Listings</h2>
             </div>
-            
+
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
               {filteredRecommended.map(scooter => (
                 <Link key={scooter.id} href={`/detail/${scooter.id}`} prefetch={true} className="bg-white rounded-[24px] md:rounded-[32px] p-3 md:p-4 shadow-sm border border-gray-50 flex flex-col group transition-all hover:scale-[1.02] hover:shadow-md">
                   <div className="relative w-full aspect-square mb-3 md:mb-4 rounded-2xl bg-[#F8F9FA] flex items-center justify-center p-3 md:p-5">
-                    <button 
+                    <button
                       onClick={(e) => toggleSaveScooter(e, scooter.id)}
                       className="absolute top-2 left-2 md:top-3 md:left-3 bg-white/90 backdrop-blur-sm w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center z-10 shadow-sm hover:scale-110 transition-transform"
                     >
@@ -365,8 +376,14 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
                     <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-2.5 md:px-3 py-1 md:py-1.5 rounded-full flex items-center gap-1 md:gap-1.5 z-10 shadow-sm border border-gray-100">
                       <span className="text-[11px] md:text-[13px] font-extrabold text-gray-900">{scooter.year || '2024'}</span>
                     </div>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={scooter.img} alt={scooter.name} className="w-full h-full object-contain drop-shadow-md transition-transform group-hover:scale-110" />
+                    <Image
+                      src={scooter.img || "/images/scooter.png"}
+                      alt={scooter.name}
+                      fill
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                      className="object-contain p-3 drop-shadow-md transition-transform duration-300 group-hover:scale-110"
+                      loading="lazy"
+                    />
                   </div>
                   <h3 className="font-bold text-gray-900 text-[14px] md:text-[16px] leading-tight mb-1.5 px-1">{scooter.name}</h3>
                   <p className="text-gray-900 text-[13px] md:text-[15px] font-extrabold mt-auto px-1">Rp {durationFilter === 'Weekly' ? Number(scooter.price_weekly || 0).toLocaleString() : durationFilter === 'Monthly' ? Number(scooter.price_monthly || 0).toLocaleString() : Number(scooter.price_daily || 0).toLocaleString()} <span className="font-medium text-[11px] md:text-[13px] text-gray-500">/{durationFilter === 'Daily' ? 'day' : durationFilter === 'Weekly' ? 'week' : 'month'}</span></p>
@@ -382,7 +399,7 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
             <div className="w-full md:max-w-md bg-white rounded-t-[32px] md:rounded-[32px] p-6 pb-12 md:pb-6 shadow-xl animate-in slide-in-from-bottom-8 md:slide-in-from-bottom-4 relative">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-gray-900">Filters</h3>
-                <button 
+                <button
                   onClick={() => setIsFilterOpen(false)}
                   className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors"
                 >
@@ -397,12 +414,12 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
                     <label className="font-bold text-gray-900 text-[15px]">Max Price (Daily)</label>
                     <span className="font-black text-lg text-black">Rp {maxPrice.toLocaleString('id-ID')}</span>
                   </div>
-                  
+
                   <div className="px-2">
-                    <input 
-                      type="range" 
-                      min="100000" 
-                      max="500000" 
+                    <input
+                      type="range"
+                      min="100000"
+                      max="500000"
                       step="50000"
                       value={maxPrice}
                       onChange={(e) => setMaxPrice(Number(e.target.value))}
@@ -420,9 +437,9 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
                   <div className="flex items-center justify-between mb-3">
                     <label className="font-bold text-gray-900 text-[15px]">Scooter Year</label>
                     {selectedYear !== "All" && (
-                      <button 
-                        type="button" 
-                        onClick={() => setSelectedYear("All")} 
+                      <button
+                        type="button"
+                        onClick={() => setSelectedYear("All")}
                         className="text-xs text-gray-500 font-semibold hover:text-black transition-colors"
                       >
                         Reset
@@ -437,11 +454,10 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
                           key={year}
                           type="button"
                           onClick={() => setSelectedYear(year)}
-                          className={`px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all ${
-                            isSelected 
-                              ? "bg-black text-white shadow-sm scale-105" 
+                          className={`px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all ${isSelected
+                              ? "bg-black text-white shadow-sm scale-105"
                               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                          }`}
+                            }`}
                         >
                           {year === "All" ? "All Years" : year}
                         </button>
@@ -451,7 +467,7 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
                 </div>
               </div>
 
-              <button 
+              <button
                 onClick={() => setIsFilterOpen(false)}
                 className="w-full bg-black text-white font-bold text-lg py-4 rounded-2xl mt-8 shadow-sm hover:bg-gray-900 transition-colors"
               >
@@ -467,7 +483,7 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
             <div className="w-full md:max-w-md bg-white rounded-t-[32px] md:rounded-[32px] p-6 pb-12 md:pb-6 shadow-xl animate-in slide-in-from-bottom-8 md:slide-in-from-bottom-4 relative max-h-[85vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-gray-900">Saved Scooters</h3>
-                <button 
+                <button
                   onClick={() => setIsSavedModalOpen(false)}
                   className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors"
                 >
@@ -487,9 +503,14 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
                 ) : (
                   allScooters.filter((s: any) => savedScooters.includes(s.id)).map((scooter: any) => (
                     <Link key={scooter.id} href={`/detail/${scooter.id}`} className="bg-gray-50 p-3 rounded-2xl flex items-center gap-4 hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-200">
-                      <div className="w-16 h-16 bg-white rounded-xl overflow-hidden shrink-0 shadow-sm p-1">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={scooter.img} alt={scooter.name} className="w-full h-full object-contain" />
+                      <div className="relative w-16 h-16 bg-white rounded-xl overflow-hidden shrink-0 shadow-sm p-1">
+                        <Image
+                          src={scooter.img || "/images/scooter.png"}
+                          alt={scooter.name}
+                          fill
+                          sizes="64px"
+                          className="object-contain"
+                        />
                       </div>
                       <div className="flex-1">
                         <div className="flex justify-between items-start">
@@ -500,7 +521,7 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
                         </div>
                         <p className="text-[13px] font-extrabold text-gray-900 mt-1">Rp {durationFilter === 'Weekly' ? Number(scooter.price_weekly || 0).toLocaleString() : durationFilter === 'Monthly' ? Number(scooter.price_monthly || 0).toLocaleString() : Number(scooter.price_daily || 0).toLocaleString()} <span className="text-gray-500 font-medium text-[11px]">/{durationFilter}</span></p>
                       </div>
-                      <button 
+                      <button
                         onClick={(e) => toggleSaveScooter(e, scooter.id)}
                         className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0"
                       >
@@ -518,10 +539,10 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
         {isLocationModalOpen && (
           <div className="fixed inset-0 z-[100] flex flex-col bg-white animate-in slide-in-from-bottom-full md:slide-in-from-bottom-0 md:fade-in md:items-center md:justify-center md:bg-black/40 md:p-6">
             <div className="flex flex-col w-full h-full md:h-auto md:max-h-[90vh] md:max-w-md bg-white md:rounded-[32px] md:shadow-2xl relative overflow-hidden">
-              
+
               {/* MAP LAYER */}
               <div className="absolute inset-0 z-0 md:relative md:h-[400px]">
-                <MapPicker 
+                <MapPicker
                   vendors={topVendors}
                   onVendorClick={(id) => {
                     router.push(`/vendor/${id}?fromMap=true`);
@@ -533,7 +554,7 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
               {/* FOREGROUND UI OVERLAY */}
               <div className="z-10 flex flex-col h-full pointer-events-none md:pointer-events-auto p-4 md:p-6 absolute inset-0 md:relative md:inset-auto">
                 <div className="flex items-start gap-3 pointer-events-auto w-full">
-                  <button 
+                  <button
                     onClick={() => setIsLocationModalOpen(false)}
                     className="w-12 h-12 rounded-2xl bg-white shadow-lg flex items-center justify-center text-gray-900 hover:bg-gray-50 transition-colors shrink-0 border border-gray-100"
                   >

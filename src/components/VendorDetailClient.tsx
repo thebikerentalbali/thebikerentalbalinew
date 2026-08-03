@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { ChevronLeft, MapPin, Star, Share, X, BadgeCheck, MessageCircle, Check, Clock } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import { createClient } from '@/lib/supabase/client'
 import { fetchVendorDetail } from '@/lib/api/catalogService'
 import { clientCache } from '@/lib/cache/clientCache'
@@ -218,10 +219,9 @@ export default function VendorDetailClient({
         {/* Header */}
         <header className="relative bg-white pb-6 shadow-sm rounded-b-3xl z-10 h-fit overflow-hidden">
           {/* Cover Photo */}
-          <div className="relative h-48 w-full bg-gray-100">
+          <div className="relative h-48 w-full bg-gray-100 overflow-hidden">
             {vendor.image_url ? (
-               /* eslint-disable-next-line @next/next/no-img-element */
-              <img src={vendor.image_url} alt="Cover" className="w-full h-full object-cover" />
+              <Image src={vendor.image_url} alt="Cover" fill priority sizes="100vw" className="object-cover" />
             ) : (
               <div className="w-full h-full bg-gradient-to-r from-gray-200 to-gray-300" />
             )}
@@ -245,10 +245,9 @@ export default function VendorDetailClient({
           <div className="px-5 relative z-10">
             <div className="flex justify-between items-end -mt-12 mb-4">
               <div className="relative">
-                <div className="w-24 h-24 rounded-full overflow-hidden bg-white border-4 border-white shadow-sm shrink-0 flex items-center justify-center">
+                <div className="relative w-24 h-24 rounded-full overflow-hidden bg-white border-4 border-white shadow-sm shrink-0 flex items-center justify-center">
                   {vendor.logo ? (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img src={vendor.logo} alt={vendor.name} className="w-full h-full object-cover" />
+                    <Image src={vendor.logo} alt={vendor.name} fill sizes="96px" priority className="object-cover" />
                   ) : (
                     <span className="text-3xl font-black text-gray-400">{(vendor.name || "V").substring(0, 2).toUpperCase()}</span>
                   )}
@@ -384,9 +383,8 @@ export default function VendorDetailClient({
             ) : (
               scooters.map((scooter) => (
                 <Link key={scooter.id} href={`/detail/${scooter.id}`} className="bg-white rounded-3xl p-4 flex gap-4 shadow-sm items-center border border-transparent hover:border-gray-100 transition-colors">
-                  <div className="w-24 h-24 rounded-2xl bg-[#F8F9FA] flex items-center justify-center p-2 shrink-0">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={scooter.image_url || "/images/scooter.png"} alt={scooter.name} className="w-full h-full object-contain drop-shadow-md" />
+                  <div className="relative w-24 h-24 rounded-2xl bg-[#F8F9FA] flex items-center justify-center p-2 shrink-0 overflow-hidden">
+                    <Image src={scooter.image_url || "/images/scooter.png"} alt={scooter.name} fill sizes="96px" className="object-contain p-1 drop-shadow-md" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
@@ -446,10 +444,9 @@ export default function VendorDetailClient({
         {/* Vendor Header Card */}
         <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100">
           {/* Cover Photo */}
-          <div className="relative h-60 lg:h-72 w-full bg-gray-100">
+          <div className="relative h-60 lg:h-72 w-full bg-gray-100 overflow-hidden">
             {vendor.image_url ? (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img src={vendor.image_url} alt={vendor.name} className="w-full h-full object-cover" />
+              <Image src={vendor.image_url} alt={vendor.name} fill priority sizes="100vw" className="object-cover" />
             ) : (
               <div className="w-full h-full bg-gradient-to-r from-gray-200 to-gray-300" />
             )}
@@ -461,10 +458,9 @@ export default function VendorDetailClient({
               
               {/* Avatar & Title */}
               <div className="flex items-end gap-5">
-                <div className="w-28 h-28 lg:w-32 lg:h-32 rounded-full overflow-hidden bg-white border-4 border-white shadow-md shrink-0 flex items-center justify-center">
+                <div className="relative w-28 h-28 lg:w-32 lg:h-32 rounded-full overflow-hidden bg-white border-4 border-white shadow-md shrink-0 flex items-center justify-center">
                   {vendor.logo ? (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img src={vendor.logo} alt={vendor.name} className="w-full h-full object-cover" />
+                    <Image src={vendor.logo} alt={vendor.name} fill priority sizes="128px" className="object-cover" />
                   ) : (
                     <span className="text-3xl font-bold text-gray-400">{(vendor.name || "V").substring(0, 2).toUpperCase()}</span>
                   )}
@@ -586,22 +582,23 @@ export default function VendorDetailClient({
                     >
                       <div>
                         {/* Image Backdrop */}
-                        <div className="relative w-full h-44 bg-[#F8F9FA] rounded-2xl flex items-center justify-center p-3 mb-3">
-                          <span className="absolute top-3 left-3 text-[10px] font-semibold tracking-wider uppercase text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">
+                        <div className="relative w-full h-44 bg-[#F8F9FA] rounded-2xl flex items-center justify-center p-3 mb-3 overflow-hidden">
+                          <span className="absolute top-3 left-3 text-[10px] font-semibold tracking-wider uppercase text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full z-10">
                             {scooter.brand || 'Scooter'}
                           </span>
-                          <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-[#00A86B]/10 px-2 py-0.5 rounded-full border border-[#00A86B]/20">
+                          <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-[#00A86B]/10 px-2 py-0.5 rounded-full border border-[#00A86B]/20 z-10">
                             <div className="w-1.5 h-1.5 rounded-full bg-[#00A86B]"></div>
                             <span className="text-[10px] font-bold text-[#00A86B] uppercase tracking-wider">
                               {scooter.available_units || 2} AVAILABLE
                             </span>
                           </div>
 
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img 
+                          <Image 
                             src={scooter.image_url || "/images/scooter.png"} 
                             alt={scooter.name} 
-                            className="w-full h-full object-contain drop-shadow-md" 
+                            fill
+                            sizes="(max-width: 768px) 100vw, 300px"
+                            className="object-contain p-4 drop-shadow-md hover:scale-105 transition-transform" 
                           />
                         </div>
 
