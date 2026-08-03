@@ -5,7 +5,9 @@ import { ChevronLeft, ChevronRight, MapPin, Star, Share, Loader2, X, BadgeCheck,
 import { useRouter, useParams } from "next/navigation"
 import Link from "next/link"
 import { createClient } from '@/lib/supabase/client'
-import { getPlatformSettings, fetchPlatformSettings, getCustomerPrice, subscribeToPlatformSettings } from '@/utils/pricing'
+import { getCachedVendorDetail, fetchVendorDetail } from '@/lib/api/catalogService'
+import { clientCache } from '@/lib/cache/clientCache'
+import { subscribeToPlatformSettings } from '@/utils/pricing'
 
 export default function VendorPage() {
   const router = useRouter()
@@ -13,10 +15,11 @@ export default function VendorPage() {
   const id = params?.id as string
   const supabase = createClient()
 
-  const [vendor, setVendor] = useState<any>(null)
-  const [scooters, setScooters] = useState<any[]>([])
-  const [reviews, setReviews] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const cached = id ? getCachedVendorDetail(id) : null
+  const [vendor, setVendor] = useState<any>(() => cached?.vendor || null)
+  const [scooters, setScooters] = useState<any[]>(() => cached?.scooters || [])
+  const [reviews, setReviews] = useState<any[]>(() => cached?.reviews || [])
+  const [loading, setLoading] = useState(!cached)
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false)
   const [isWriteReviewModalOpen, setIsWriteReviewModalOpen] = useState(false)
   const [newReview, setNewReview] = useState({ name: "", rating: 5, comment: "" })
@@ -40,6 +43,7 @@ export default function VendorPage() {
     setIsSubmittingReview(false)
     if (!error && data) {
       setReviews([data, ...reviews])
+      clientCache.invalidate(`vendor_${id}`)
       setIsWriteReviewModalOpen(false)
       setNewReview({ name: "", rating: 5, comment: "" })
     } else {
@@ -48,94 +52,79 @@ export default function VendorPage() {
   }
 
   useEffect(() => {
-    async function loadData() {
+    async function loadData(forceRefresh = false) {
       if (!id) return
       
-      const [
-        { data: vData },
-        { data: sData },
-        { data: rData }
-      ] = await Promise.all([
-        supabase.from('vendors').select('*').eq('id', id).eq('status', 'approved').single(),
-        supabase.from('scooters').select('*').eq('vendor_id', id),
-        supabase.from('reviews').select('*').eq('vendor_id', id)
-      ])
+      try {
+        const data = await fetchVendorDetail(id, { forceRefresh })
+        if (data?.vendor) {
+          setVendor(data.vendor)
+          setScooters(data.scooters || [])
+          let loadedReviews = data.reviews || []
 
-      if (vData) {
-        setVendor(vData)
-        const settings = getPlatformSettings()
-        const formatted = (sData || []).map((s: any) => {
-          const prices = getCustomerPrice(s.price_daily || 0, s.price_weekly, s.price_monthly, settings)
-          return {
-            ...s,
-            price_daily: prices.daily,
-            price_weekly: prices.weekly,
-            price_monthly: prices.monthly
+          // Deterministic mock reviews algorithm
+          const hash = id.split('').reduce((acc, char) => char.charCodeAt(0) + ((acc << 5) - acc), 0);
+          const absHash = Math.abs(hash);
+          const numFakeReviews = (absHash % 31) + 40; // deterministic number 40-70
+
+          if (loadedReviews.length < 5) {
+            const firstNames = ["James", "Mary", "John", "Patricia", "Robert", "Jennifer", "Michael", "Linda", "William", "Elizabeth", "David", "Barbara", "Richard", "Susan", "Joseph", "Jessica", "Thomas", "Sarah", "Charles", "Karen", "Christopher", "Lisa", "Daniel", "Nancy", "Matthew", "Betty", "Anthony", "Margaret", "Mark", "Sandra", "Donald", "Ashley", "Steven", "Kimberly", "Paul", "Emily", "Andrew", "Donna", "Joshua", "Michelle", "Kenneth", "Carol", "Kevin", "Amanda", "Brian", "Melissa", "George", "Deborah", "Timothy", "Stephanie"];
+            const reviewComments = [
+              "Great scooter, ran perfectly the whole trip! The vendor was very responsive and drop-off was super easy. Definitely coming back.",
+              "Excellent service and the bike was in top condition. We drove it all around Ubud and didn't have a single problem with the brakes or engine.",
+              "Very responsive vendor. Highly recommended.",
+              "Smooth rental process. The scooter was clean and well maintained.",
+              "Best rental experience in Bali so far. I loved that they provided two good quality helmets and the bike felt practically brand new.",
+              "Friendly staff and transparent pricing.",
+              "No issues at all. Would definitely rent here again.",
+              "Bike worked flawlessly for our week-long stay.",
+              "Great value for money. Very reliable and surprisingly fuel-efficient on the steep mountain roads.",
+              "Loved the flexibility and easy drop-off.",
+              "Scooter was practically brand new. 5 stars!",
+              "Customer service was exceptional.",
+              "They provided two helmets and a full tank. Awesome! The communication through WhatsApp was clear and they arrived right on time.",
+              "Super easy to communicate with.",
+              "The scooter handled the steep hills without a problem.",
+              "Highly trustworthy vendor.",
+              "Quick and easy. No hidden fees.",
+              "They delivered the bike right to our hotel.",
+              "Incredible experience, very professional.",
+              "The bike was powerful and fuel efficient."
+            ];
+            
+            let currentSeed = absHash;
+            const seededRandom = () => {
+              const x = Math.sin(currentSeed++) * 10000;
+              return x - Math.floor(x);
+            };
+
+            const generatedReviews = [];
+            for (let i = 0; i < numFakeReviews; i++) {
+              const randomName = firstNames[Math.floor(seededRandom() * firstNames.length)] + " " + String.fromCharCode(65 + Math.floor(seededRandom() * 26)) + ".";
+              const randomComment = reviewComments[Math.floor(seededRandom() * reviewComments.length)];
+              generatedReviews.push({
+                id: `fake-${i}`,
+                vendor_id: id,
+                user_name: randomName,
+                rating: 5,
+                comment: randomComment
+              });
+            }
+            loadedReviews = [...loadedReviews, ...generatedReviews];
           }
-        })
-        setScooters(formatted)
-        let loadedReviews = rData || [];
-        
-        // Deterministic mock reviews algorithm
-        const hash = id.split('').reduce((acc, char) => char.charCodeAt(0) + ((acc << 5) - acc), 0);
-        const absHash = Math.abs(hash);
-        const numFakeReviews = (absHash % 31) + 40; // deterministic number 40-70
-
-        if (loadedReviews.length < 5) {
-          const firstNames = ["James", "Mary", "John", "Patricia", "Robert", "Jennifer", "Michael", "Linda", "William", "Elizabeth", "David", "Barbara", "Richard", "Susan", "Joseph", "Jessica", "Thomas", "Sarah", "Charles", "Karen", "Christopher", "Lisa", "Daniel", "Nancy", "Matthew", "Betty", "Anthony", "Margaret", "Mark", "Sandra", "Donald", "Ashley", "Steven", "Kimberly", "Paul", "Emily", "Andrew", "Donna", "Joshua", "Michelle", "Kenneth", "Carol", "Kevin", "Amanda", "Brian", "Melissa", "George", "Deborah", "Timothy", "Stephanie"];
-          const reviewComments = [
-            "Great scooter, ran perfectly the whole trip! The vendor was very responsive and drop-off was super easy. Definitely coming back.",
-            "Excellent service and the bike was in top condition. We drove it all around Ubud and didn't have a single problem with the brakes or engine.",
-            "Very responsive vendor. Highly recommended.",
-            "Smooth rental process. The scooter was clean and well maintained.",
-            "Best rental experience in Bali so far. I loved that they provided two good quality helmets and the bike felt practically brand new.",
-            "Friendly staff and transparent pricing.",
-            "No issues at all. Would definitely rent here again.",
-            "Bike worked flawlessly for our week-long stay.",
-            "Great value for money. Very reliable and surprisingly fuel-efficient on the steep mountain roads.",
-            "Loved the flexibility and easy drop-off.",
-            "Scooter was practically brand new. 5 stars!",
-            "Customer service was exceptional.",
-            "They provided two helmets and a full tank. Awesome! The communication through WhatsApp was clear and they arrived right on time.",
-            "Super easy to communicate with.",
-            "The scooter handled the steep hills without a problem.",
-            "Highly trustworthy vendor.",
-            "Quick and easy. No hidden fees.",
-            "They delivered the bike right to our hotel.",
-            "Incredible experience, very professional.",
-            "The bike was powerful and fuel efficient."
-          ];
           
-          let currentSeed = absHash;
-          const seededRandom = () => {
-            const x = Math.sin(currentSeed++) * 10000;
-            return x - Math.floor(x);
-          };
-
-          const generatedReviews = [];
-          for (let i = 0; i < numFakeReviews; i++) {
-            const randomName = firstNames[Math.floor(seededRandom() * firstNames.length)] + " " + String.fromCharCode(65 + Math.floor(seededRandom() * 26)) + ".";
-            const randomComment = reviewComments[Math.floor(seededRandom() * reviewComments.length)];
-            generatedReviews.push({
-              id: `fake-${i}`,
-              vendor_id: id,
-              user_name: randomName,
-              rating: 5,
-              comment: randomComment
-            });
-          }
-          loadedReviews = [...loadedReviews, ...generatedReviews];
+          setReviews(loadedReviews)
         }
-        
-        setReviews(loadedReviews)
+      } catch (err) {
+        console.error("Failed to load vendor details:", err)
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     }
     loadData()
-    fetchPlatformSettings().then(() => loadData())
 
     const unsubscribe = subscribeToPlatformSettings(() => {
-      loadData();
+      loadData(true);
     });
 
     return () => unsubscribe();

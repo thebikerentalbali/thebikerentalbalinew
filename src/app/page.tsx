@@ -5,8 +5,8 @@ import { Heart, Search, SlidersHorizontal, Star, Bike, MapPin, ChevronDown, Menu
 import Link from "next/link"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
-import { createClient } from '@/lib/supabase/client'
-import { getPlatformSettings, fetchPlatformSettings, getCustomerPrice, subscribeToPlatformSettings } from '@/utils/pricing'
+import { getCachedCatalog, fetchCatalogData } from '@/lib/api/catalogService'
+import { subscribeToPlatformSettings } from '@/utils/pricing'
 
 const MapPicker = dynamic(() => import('@/components/MapPicker'), { ssr: false })
 
@@ -17,15 +17,11 @@ const brands = [
   { name: "Suzuki", icon: Bike },
 ]
 
-// Module-level in-memory cache for instant page loads
-let cachedHomeData: { topVendors: any[]; allScooters: any[] } | null = null;
-
 export default function Home() {
   const router = useRouter()
-  const supabase = createClient()
   
-  const [topVendors, setTopVendors] = useState<any[]>(() => cachedHomeData?.topVendors || [])
-  const [allScooters, setAllScooters] = useState<any[]>(() => cachedHomeData?.allScooters || [])
+  const [topVendors, setTopVendors] = useState<any[]>(() => getCachedCatalog()?.vendors || [])
+  const [allScooters, setAllScooters] = useState<any[]>(() => getCachedCatalog()?.scooters || [])
 
   const [activeBrand, setActiveBrand] = useState("")
   const [durationFilter, setDurationFilter] = useState("Daily")
@@ -62,75 +58,21 @@ export default function Home() {
       }
     }
 
-    async function loadData() {
-      // Parallelize Supabase requests to eliminate waterfall latency
-      const [
-        { data: allReviews },
-        { data: vendors },
-        { data: scooters }
-      ] = await Promise.all([
-        supabase.from('reviews').select('vendor_id'),
-        supabase.from('vendors').select('*').eq('status', 'approved').limit(6),
-        supabase.from('scooters').select('*')
-      ])
-
-      const reviewCounts: Record<string, number> = {}
-      if (allReviews) {
-        for (const r of allReviews) {
-           if (r.vendor_id) {
-             reviewCounts[r.vendor_id] = (reviewCounts[r.vendor_id] || 0) + 1
-           }
-        }
-      }
-
-      const getReviewCount = (id: any, count: number) => {
-        if (count > 0) return count;
-        const hash = String(id || '').split('').reduce((acc, char) => char.charCodeAt(0) + ((acc << 5) - acc), 0);
-        return (Math.abs(hash) % 31) + 40;
-      };
-
-
-      // format vendor initials if missing
-      const formattedVendors = (vendors || []).map((v: any) => ({
-        ...v,
-        initials: v.name ? v.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() : 'V',
-        location: v.address || 'Bali',
-        reviewCount: getReviewCount(v.id, reviewCounts[v.id] || 0)
-      }))
-      setTopVendors(formattedVendors)
-      const settings = getPlatformSettings()
-      const formattedScooters = (scooters || []).map((s: any) => {
-        const prices = getCustomerPrice(s.price_daily || 0, s.price_weekly, s.price_monthly, settings)
-        return {
-          ...s,
-          price: prices.daily.toLocaleString(),
-          price_daily: prices.daily,
-          price_weekly: prices.weekly,
-          price_monthly: prices.monthly,
-          img: s.image_url || "/images/scooter.png",
-          rating: 5.0, // default rating since it's not in scooter table yet
-          reviewCount: getReviewCount(s.vendor_id, reviewCounts[s.vendor_id] || 0)
-        }
-      })
-      
-      setAllScooters(formattedScooters)
-
-      // Save to in-memory cache for instant subsequent renders
-      cachedHomeData = {
-        topVendors: formattedVendors,
-        allScooters: formattedScooters
+    async function loadData(forceRefresh = false) {
+      try {
+        const data = await fetchCatalogData({ forceRefresh });
+        if (data?.vendors) setTopVendors(data.vendors);
+        if (data?.scooters) setAllScooters(data.scooters);
+      } catch (err) {
+        console.error("Failed to load catalog data:", err);
       }
     }
     
+    // Background SWR revalidation
     loadData();
-    fetchPlatformSettings().then(() => {
-      cachedHomeData = null;
-      loadData();
-    });
 
     const unsubscribe = subscribeToPlatformSettings(() => {
-      cachedHomeData = null;
-      loadData();
+      loadData(true);
     });
 
     return () => unsubscribe();

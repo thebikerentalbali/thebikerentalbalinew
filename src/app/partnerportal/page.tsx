@@ -43,20 +43,14 @@ export default function VendorDashboard() {
 
     if (bookingsData) {
       const today = new Date().toISOString().split('T')[0]
-      const formatted = await Promise.all(bookingsData.map(async (b: any) => {
+      const toComplete: any[] = []
+
+      const formatted = bookingsData.map((b: any) => {
         let rawStatus = (b.status || 'pending').toLowerCase()
 
-        // Smart return check: if confirmed and end_date < today, auto-complete and restore availability
         if (rawStatus === 'confirmed' && b.end_date && b.end_date < today) {
           rawStatus = 'completed'
-          await supabase.from('bookings').update({ status: 'completed' }).eq('id', b.id)
-          if (b.scooter_id && b.scooters) {
-            const currentAvail = b.scooters.available_units ?? 0
-            const totalUnits = b.scooters.total_units ?? 1
-            const qty = Number(b.quantity) || 1
-            const newAvail = Math.min(totalUnits, currentAvail + qty)
-            await supabase.from('scooters').update({ available_units: newAvail }).eq('id', b.scooter_id)
-          }
+          toComplete.push(b)
         }
 
         return {
@@ -76,8 +70,28 @@ export default function VendorDashboard() {
           created_at: b.created_at,
           scooter_obj: b.scooters
         }
-      }))
+      })
       setBookingsList(formatted)
+
+      // Asynchronously complete past bookings in background without blocking render
+      if (toComplete.length > 0) {
+        (async () => {
+          for (const b of toComplete) {
+            try {
+              await supabase.from('bookings').update({ status: 'completed' }).eq('id', b.id)
+              if (b.scooter_id && b.scooters) {
+                const currentAvail = b.scooters.available_units ?? 0
+                const totalUnits = b.scooters.total_units ?? 1
+                const qty = Number(b.quantity) || 1
+                const newAvail = Math.min(totalUnits, currentAvail + qty)
+                await supabase.from('scooters').update({ available_units: newAvail }).eq('id', b.scooter_id)
+              }
+            } catch (err) {
+              console.warn("Background auto-complete error for partner booking:", b.id, err)
+            }
+          }
+        })()
+      }
     }
   }
 

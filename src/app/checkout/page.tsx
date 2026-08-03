@@ -4,7 +4,8 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { ChevronLeft, Bell, Star, MapPin, Map, Info, Minus, Plus, PlusCircle, X, Trash2, Loader2 } from "lucide-react"
 import { createClient } from '@/lib/supabase/client'
-import { getPlatformSettings, getCustomerPrice } from '@/utils/pricing'
+import { getCachedCatalog, fetchCatalogData } from '@/lib/api/catalogService'
+import { subscribeToPlatformSettings } from '@/utils/pricing'
 
 export default function CheckoutPage() {
   const [deliveryMethod, setDeliveryMethod] = useState<"pickup" | "delivery">("pickup")
@@ -19,10 +20,11 @@ export default function CheckoutPage() {
   const [endDate, setEndDate] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  const cachedCatalog = getCachedCatalog()
   const [cart, setCart] = useState<any[]>([])
-  const [vendorScooters, setVendorScooters] = useState<any[]>([])
+  const [vendorScooters, setVendorScooters] = useState<any[]>(() => cachedCatalog?.scooters || [])
   const [showAddModal, setShowAddModal] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(!cachedCatalog?.scooters?.length)
 
   const supabase = createClient()
 
@@ -52,52 +54,58 @@ export default function CheckoutPage() {
   }
 
   useEffect(() => {
-    async function loadData() {
-      const today = formatIsoDate(new Date())
-      setStartDate(prev => prev || today)
+    const today = formatIsoDate(new Date())
+    setStartDate(prev => prev || today)
 
-      const { data } = await supabase.from('scooters').select('*, vendors(id, name, phone, address)')
-      if (data) {
-        const settings = getPlatformSettings()
-        const formatted = data.map((s: any) => {
-          const prices = getCustomerPrice(s.price_daily || 0, s.price_weekly, s.price_monthly, settings)
-          return {
+    async function loadData(forceRefresh = false) {
+      try {
+        const catalog = await fetchCatalogData({ forceRefresh })
+        if (catalog?.scooters) {
+          const formatted = catalog.scooters.map((s: any) => ({
             ...s,
-            img: s.image_url || "/images/scooter.png",
+            img: s.image_url || s.img || "/images/scooter.png",
             rating: 5.0,
             available: s.available_units,
-            daily: prices.daily,
-            weekly: prices.weekly,
-            monthly: prices.monthly
-          }
-        })
-        setVendorScooters(formatted)
+            daily: s.price_daily,
+            weekly: s.price_weekly,
+            monthly: s.price_monthly
+          }))
+          setVendorScooters(formatted)
 
-        if (typeof window !== 'undefined') {
-          const params = new URLSearchParams(window.location.search)
-          const sId = params.get("scooterId")
-          if (sId) {
-            const selected = formatted.find((s: any) => s.id.toString() === sId)
-            if (selected) {
-              const initialCart = [{ ...selected, quantity: 1, durationMode: "daily", durationCount: 1 }]
-              setCart(initialCart)
-              const days = getDaysFromCart(initialCart)
-              setEndDate(addDaysToDate(today, days))
+          if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search)
+            const sId = params.get("scooterId")
+            if (sId) {
+              const selected = formatted.find((s: any) => s.id.toString() === sId)
+              if (selected) {
+                setCart(prev => {
+                  if (prev.length === 0) {
+                    const initialCart = [{ ...selected, quantity: 1, durationMode: "daily", durationCount: 1 }]
+                    const days = getDaysFromCart(initialCart)
+                    setEndDate(addDaysToDate(today, days))
+                    return initialCart
+                  }
+                  return prev
+                })
+              }
+            } else {
+              setEndDate(prev => prev || addDaysToDate(today, 1))
             }
-          } else {
-            setEndDate(addDaysToDate(today, 1))
           }
         }
+      } catch (err) {
+        console.error("Failed to load scooters in checkout:", err)
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     }
+    
     loadData()
 
-    const handleSettingsUpdate = () => {
-      loadData();
-    }
-    window.addEventListener('platform_settings_updated', handleSettingsUpdate);
-    return () => window.removeEventListener('platform_settings_updated', handleSettingsUpdate);
+    const unsubscribe = subscribeToPlatformSettings(() => {
+      loadData(true)
+    })
+    return () => unsubscribe()
   }, [])
 
   const handleStartDateChange = (newStart: string) => {

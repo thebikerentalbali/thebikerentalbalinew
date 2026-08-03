@@ -4,44 +4,40 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { ChevronLeft, Heart, Star, MapPin, ChevronRight, Loader2, Clock, Check, X } from "lucide-react"
-import { createClient } from '@/lib/supabase/client'
-import { getPlatformSettings, fetchPlatformSettings, getCustomerPrice, subscribeToPlatformSettings } from '@/utils/pricing'
+import { getCachedScooterDetail, fetchScooterDetail } from '@/lib/api/catalogService'
+import { subscribeToPlatformSettings } from '@/utils/pricing'
 
 export default function DetailPage() {
   const params = useParams()
   const router = useRouter()
   const id = params?.id as string
-  const supabase = createClient()
   
-  const [scooter, setScooter] = useState<any>(null)
-  const [vendor, setVendor] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
+  const cached = id ? getCachedScooterDetail(id) : null
+  const [scooter, setScooter] = useState<any>(() => cached?.scooter || null)
+  const [vendor, setVendor] = useState<any>(() => cached?.vendor || null)
+  const [loading, setLoading] = useState(!cached)
   const [activeInfoModal, setActiveInfoModal] = useState<'hours' | 'delivery' | 'requirements' | null>(null)
 
   useEffect(() => {
-    async function loadData() {
+    async function loadData(forceRefresh = false) {
       if (!id) return
-      
-      const { data: sData } = await supabase.from('scooters').select('*').eq('id', id).single()
-      if (sData) {
-        const settings = getPlatformSettings()
-        const prices = getCustomerPrice(sData.price_daily || 0, sData.price_weekly, sData.price_monthly, settings)
-        setScooter({
-          ...sData,
-          price_daily: prices.daily,
-          price_weekly: prices.weekly,
-          price_monthly: prices.monthly
-        })
-        const { data: vData } = await supabase.from('vendors').select('*').eq('id', sData.vendor_id).single()
-        setVendor(vData)
+      try {
+        const data = await fetchScooterDetail(id, { forceRefresh });
+        if (data) {
+          if (data.scooter) setScooter(data.scooter);
+          if (data.vendor) setVendor(data.vendor);
+        }
+      } catch (err) {
+        console.error("Error loading scooter detail:", err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false)
     }
-    loadData()
-    fetchPlatformSettings().then(() => loadData())
+    
+    loadData();
 
     const unsubscribe = subscribeToPlatformSettings(() => {
-      loadData();
+      loadData(true);
     });
 
     return () => unsubscribe();
