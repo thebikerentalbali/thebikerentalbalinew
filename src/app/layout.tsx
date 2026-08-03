@@ -59,8 +59,15 @@ export const metadata: Metadata = {
     title: "THE BIKE RENTAL BALI",
   },
   icons: {
-    icon: "/icons/icon-192x192.png",
-    apple: "/icons/apple-touch-icon.png",
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
   },
   openGraph: {
     type: "website",
@@ -111,6 +118,10 @@ export default function RootLayout({
       className={`${inter.variable} ${poppins.variable} h-full antialiased`}
     >
       <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
