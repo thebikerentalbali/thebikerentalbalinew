@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { ChevronLeft, Heart, Star, MapPin, ChevronRight, Loader2, Clock, Check, X } from "lucide-react"
-import { getCachedScooterDetail, fetchScooterDetail } from '@/lib/api/catalogService'
+import { fetchScooterDetail } from '@/lib/api/catalogService'
 import { subscribeToPlatformSettings } from '@/utils/pricing'
 
 export default function DetailPage() {
@@ -12,10 +12,9 @@ export default function DetailPage() {
   const router = useRouter()
   const id = params?.id as string
   
-  const cached = id ? getCachedScooterDetail(id) : null
-  const [scooter, setScooter] = useState<any>(() => cached?.scooter || null)
-  const [vendor, setVendor] = useState<any>(() => cached?.vendor || null)
-  const [loading, setLoading] = useState(!cached)
+  const [scooter, setScooter] = useState<any>(null)
+  const [vendor, setVendor] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
   const [activeInfoModal, setActiveInfoModal] = useState<'hours' | 'delivery' | 'requirements' | null>(null)
 
   useEffect(() => {

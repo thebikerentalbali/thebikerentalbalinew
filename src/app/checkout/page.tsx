@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { ChevronLeft, Bell, Star, MapPin, Map, Info, Minus, Plus, PlusCircle, X, Trash2, Loader2 } from "lucide-react"
 import { createClient } from '@/lib/supabase/client'
-import { getCachedCatalog, fetchCatalogData } from '@/lib/api/catalogService'
+import { fetchCatalogData } from '@/lib/api/catalogService'
 import { subscribeToPlatformSettings } from '@/utils/pricing'
 
 export default function CheckoutPage() {
@@ -20,11 +20,10 @@ export default function CheckoutPage() {
   const [endDate, setEndDate] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const cachedCatalog = getCachedCatalog()
   const [cart, setCart] = useState<any[]>([])
-  const [vendorScooters, setVendorScooters] = useState<any[]>(() => cachedCatalog?.scooters || [])
+  const [vendorScooters, setVendorScooters] = useState<any[]>([])
   const [showAddModal, setShowAddModal] = useState(false)
-  const [loading, setLoading] = useState(!cachedCatalog?.scooters?.length)
+  const [loading, setLoading] = useState(true)
 
   const supabase = createClient()
 
