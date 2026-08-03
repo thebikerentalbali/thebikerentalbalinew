@@ -16,6 +16,7 @@ import {
 } from "@/utils/pricing"
 
 const MapPicker = dynamic(() => import('@/components/MapPicker'), { ssr: false })
+import VendorPWAInstallBanner from "@/components/VendorPWAInstallBanner"
 
 export default function VendorDashboard() {
   const [activeTab, setActiveTab] = useState("home")
@@ -567,6 +568,7 @@ export default function VendorDashboard() {
 
   return (
     <div className="min-h-screen bg-[#F5F7FA] md:flex md:pl-64 pb-28 md:pb-0">
+      <VendorPWAInstallBanner />
       {/* 
         ========================================================================
         DESKTOP SIDEBAR

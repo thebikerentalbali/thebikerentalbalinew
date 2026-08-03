@@ -1,0 +1,52 @@
+{
+  "id": "/partnerportal",
+  "name": "The Bike Rental Bali - Vendor Portal",
+  "short_name": "Vendor App",
+  "description": "Official Vendor Management App for The Bike Rental Bali partners. Manage bookings, fleet availability, and real-time earnings.",
+  "start_url": "/partnerportal?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "categories": ["business", "travel", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Bookings",
+      "url": "/partnerportal?tab=bookings",
+      "description": "View active and upcoming bookings"
+    },
+    {
+      "name": "Fleet Inventory",
+      "url": "/partnerportal?tab=fleet",
+      "description": "Manage scooter units and prices"
+    },
+    {
+      "name": "Earnings",
+      "url": "/partnerportal?tab=finance",
+      "description": "View payouts and revenue"
+    }
+  ],
+  "prefer_related_applications": false
+}

@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Mail, Lock, Loader2, Store } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
+import VendorPWAInstallBanner from "@/components/VendorPWAInstallBanner"
 
 export default function PartnerLogin() {
   const [email, setEmail] = useState("")
@@ -58,6 +59,7 @@ export default function PartnerLogin() {
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <VendorPWAInstallBanner />
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <Link href="/" className="flex justify-center mb-6">
           <div className="w-16 h-16 bg-black rounded-2xl flex items-center justify-center shadow-md hover:scale-105 transition-transform">
