@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
-import { ChevronLeft, Heart, ChevronRight, Loader2 } from "lucide-react"
+import { ChevronLeft, Heart, ChevronRight, Loader2, Star } from "lucide-react"
 import { fetchScooterDetail } from '@/lib/api/catalogService'
 import { subscribeToPlatformSettings } from '@/utils/pricing'
 
@@ -175,9 +175,10 @@ export default function DetailPage() {
                     <div>
                       <h3 className="font-bold text-black text-[15px] leading-snug">{vendor.name}</h3>
                       <div className="flex items-center gap-2 mt-1 text-xs">
-                        <span className="font-bold text-black bg-neutral-100 border border-neutral-200 px-2 py-0.5 rounded-md">
-                          5.0 ★
-                        </span>
+                        <div className="flex items-center gap-1 bg-neutral-100 border border-neutral-200 px-2 py-0.5 rounded-md">
+                          <Star className="w-3 h-3 fill-black text-black" />
+                          <span className="font-bold text-black text-xs">5.0</span>
+                        </div>
                         <span className="text-neutral-400">•</span>
                         <span className="text-neutral-500 truncate max-w-[150px] sm:max-w-[220px]">
                           {vendor.address || 'Bali, Indonesia'}
@@ -205,11 +206,10 @@ export default function DetailPage() {
                     Open Daily
                   </span>
                 </div>
-                <div className="flex items-baseline justify-between pt-0.5">
+                <div className="pt-0.5">
                   <p className="font-bold text-lg sm:text-xl text-white tracking-tight">
-                    {vendor?.opening_hours || '08:00 AM – 08:00 PM'}
+                    {vendor?.opening_hours || '08:00 AM – 23:00 PM'}
                   </p>
-                  <span className="text-xs text-neutral-400 font-medium">WITA (Bali)</span>
                 </div>
               </div>
 

@@ -1,12 +1,20 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Users, Bike, DollarSign, Settings, Bell, Search, Store, BarChart3, Home, ChevronRight, ChevronLeft, ChevronDown, ChevronUp, Calendar, TrendingUp, CalendarDays, MoreVertical, Filter, ArrowUpRight, CheckCircle2, AlertCircle, Menu, UserCheck, MoreHorizontal, Loader2, XCircle, RotateCcw, Clock, Check, Calculator, Sparkles, Coins } from "lucide-react"
+import { Users, Bike, DollarSign, Settings, Bell, Search, Store, BarChart3, Home, ChevronRight, ChevronLeft, ChevronDown, ChevronUp, Calendar, TrendingUp, CalendarDays, MoreVertical, Filter, ArrowUpRight, CheckCircle2, AlertCircle, Menu, UserCheck, MoreHorizontal, Loader2, XCircle, RotateCcw, Clock, Check, Calculator, Sparkles, Coins, LogOut, Lock, Mail, Eye, EyeOff, ShieldCheck } from "lucide-react"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { getPlatformSettings, savePlatformSettings, calculateBookingCommission, calculateRentalDays, fetchPlatformSettings, subscribeToPlatformSettings, PlatformSettings, DEFAULT_PLATFORM_SETTINGS } from "@/utils/pricing"
 
 export default function AdminDashboard() {
+  // Admin Authentication State
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
+  const [loginEmail, setLoginEmail] = useState("")
+  const [loginPassword, setLoginPassword] = useState("")
+  const [loginError, setLoginError] = useState("")
+  const [isLoggingIn, setIsLoggingIn] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+
   const [activeTab, setActiveTab] = useState("home")
   const [expandedVendorId, setExpandedVendorId] = useState<number | null>(null)
   const [expandedVendorDetailsId, setExpandedVendorDetailsId] = useState<number | null>(null)
@@ -43,6 +51,47 @@ export default function AdminDashboard() {
   const [totalFleetCount, setTotalFleetCount] = useState(0)
   const [isLoadingApprovals, setIsLoadingApprovals] = useState(false)
   const supabase = createClient()
+
+  // Verify Admin Session on Mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("tbrb_admin_session")
+      if (token === "auth_granted_thebikerentalbali") {
+        setIsAuthenticated(true)
+      } else {
+        setIsAuthenticated(false)
+      }
+    }
+  }, [])
+
+  const handleAdminLogin = (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoginError("")
+    setIsLoggingIn(true)
+
+    const email = loginEmail.trim().toLowerCase()
+    const password = loginPassword.trim()
+
+    if (email === "thebikerentalbali@gmail.com" && password === "Putu3d0santika!?") {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("tbrb_admin_session", "auth_granted_thebikerentalbali")
+      }
+      setIsAuthenticated(true)
+      setLoginError("")
+    } else {
+      setLoginError("Invalid credentials. Please enter the correct admin email and password.")
+    }
+    setIsLoggingIn(false)
+  }
+
+  const handleAdminLogout = () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("tbrb_admin_session")
+    }
+    setIsAuthenticated(false)
+    setLoginEmail("")
+    setLoginPassword("")
+  }
 
   const fetchVendors = async () => {
     setIsLoadingApprovals(true)
@@ -464,11 +513,126 @@ export default function AdminDashboard() {
     }
   }
 
+  // Show loader while checking session
+  if (isAuthenticated === null) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-white animate-spin" />
+      </div>
+    )
+  }
+
+  // Show Admin Login Gate if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#0E0E10] text-white flex flex-col items-center justify-center p-4 sm:p-6 selection:bg-white selection:text-black">
+        {/* Background glow */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-white/[0.03] rounded-full blur-3xl" />
+        </div>
+
+        <div className="w-full max-w-md bg-black rounded-[32px] p-7 sm:p-9 border border-neutral-800 shadow-2xl relative z-10">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="w-14 h-14 bg-neutral-900 border border-neutral-700 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-inner">
+              <Lock className="w-6 h-6 text-white" />
+            </div>
+            <h1 className="text-2xl font-black tracking-tight text-white uppercase">
+              The Bike Rental Bali
+            </h1>
+            <p className="text-xs font-semibold text-neutral-400 mt-1 uppercase tracking-widest">
+              Admin Console Gateway
+            </p>
+          </div>
+
+          {/* Login Form */}
+          <form onSubmit={handleAdminLogin} className="space-y-4">
+            {loginError && (
+              <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-medium p-3.5 rounded-2xl flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-400" />
+                <p className="leading-snug">{loginError}</p>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-[11px] font-bold text-neutral-400 uppercase tracking-wider mb-2">
+                Admin Email
+              </label>
+              <div className="relative">
+                <Mail className="w-4 h-4 text-neutral-500 absolute left-4 top-1/2 -translate-y-1/2" />
+                <input 
+                  type="email" 
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  placeholder="thebikerentalbali@gmail.com"
+                  required
+                  className="w-full bg-neutral-900 border border-neutral-800 focus:border-white rounded-2xl pl-11 pr-4 py-3.5 text-sm text-white placeholder-neutral-600 outline-none transition-colors"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-neutral-400 uppercase tracking-wider mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-neutral-500 absolute left-4 top-1/2 -translate-y-1/2" />
+                <input 
+                  type={showPassword ? "text" : "password"} 
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  placeholder="Enter admin password"
+                  required
+                  className="w-full bg-neutral-900 border border-neutral-800 focus:border-white rounded-2xl pl-11 pr-11 py-3.5 text-sm text-white placeholder-neutral-600 outline-none transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white transition-colors"
+                  aria-label="Toggle password visibility"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <button 
+              type="submit" 
+              disabled={isLoggingIn}
+              className="w-full mt-2 bg-white text-black hover:bg-neutral-200 py-3.5 rounded-2xl font-bold text-sm transition-all shadow-md active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
+            >
+              {isLoggingIn ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Verifying...</span>
+                </>
+              ) : (
+                <>
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>Sign In to Admin</span>
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Return link */}
+          <div className="mt-6 pt-6 border-t border-neutral-900 text-center">
+            <Link 
+              href="/"
+              className="text-xs text-neutral-500 hover:text-white transition-colors inline-flex items-center gap-1 font-medium"
+            >
+              ← Return to Main Website
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const mockVendors: any[] = []
-
   const mockUsers = []
-
   const mockBookings: any[] = []
+
   return (
     <div className="min-h-screen bg-[#F5F7FA] md:flex md:pl-64 pb-28 md:pb-0">
       {/* 
@@ -513,18 +677,26 @@ export default function AdminDashboard() {
           </button>
         </nav>
 
-        <div className="p-6 border-t border-gray-800">
-          <div className="flex items-center gap-3 bg-white/5 p-3 rounded-2xl border border-gray-800 cursor-pointer hover:border-gray-700 transition-colors">
-            <div className="w-10 h-10 rounded-full bg-white p-[2px] shrink-0">
+        <div className="p-4 border-t border-gray-800 space-y-2">
+          <div className="flex items-center gap-3 bg-white/5 p-3 rounded-2xl border border-gray-800">
+            <div className="w-9 h-9 rounded-full bg-white p-[2px] shrink-0">
               <div className="w-full h-full bg-black rounded-full flex items-center justify-center">
                 <span className="font-bold text-white text-xs">AD</span>
               </div>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-white truncate">Super Admin</p>
-              <p className="text-[11px] font-medium text-blue-400 truncate">System Access</p>
+              <p className="text-xs font-bold text-white truncate">Super Admin</p>
+              <p className="text-[10px] font-medium text-neutral-400 truncate">thebikerentalbali@gmail.com</p>
             </div>
           </div>
+
+          <button
+            onClick={handleAdminLogout}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all cursor-pointer"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Sign Out</span>
+          </button>
         </div>
       </aside>
 
@@ -2102,6 +2274,12 @@ export default function AdminDashboard() {
                   className={`flex items-center gap-3 px-4 py-3 text-sm font-bold transition-colors border-t border-gray-50 ${activeTab === 'settings' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`}
                 >
                   <Settings className="w-4 h-4" /> Settings
+                </button>
+                <button
+                  onClick={() => { setIsMobileMenuOpen(false); handleAdminLogout(); }}
+                  className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-red-500 hover:bg-red-50 border-t border-gray-50 transition-colors"
+                >
+                  <LogOut className="w-4 h-4" /> Sign Out
                 </button>
               </div>
             </div>

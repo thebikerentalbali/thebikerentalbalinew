@@ -337,10 +337,9 @@ export default function CheckoutPage() {
                   <div className="flex items-start justify-between">
                     <div>
                       <h3 className="font-bold text-gray-900 text-[17px] leading-tight truncate">{item.name}</h3>
-                      <div className="flex items-center gap-1 mt-1">
-                        <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
-                        <span className="text-[13px] font-bold text-gray-800">{item.rating}</span>
-                        <span className="text-[12px] text-gray-400 ml-1">({item.reviews_count || 120} reviews)</span>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <Star className="w-3.5 h-3.5 fill-black text-black" />
+                        <span className="text-[13px] font-bold text-gray-900">5.0</span>
                       </div>
                     </div>
                     {cart.length > 1 && (
