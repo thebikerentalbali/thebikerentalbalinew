@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 import { fetchVendorDetail } from '@/lib/api/catalogService'
 import { clientCache } from '@/lib/cache/clientCache'
 import { subscribeToPlatformSettings } from '@/utils/pricing'
+import { getLocalBusinessSchema, getBreadcrumbSchema } from '@/lib/seo/schemaGenerator'
 
 export default function VendorPage() {
   const router = useRouter()
@@ -98,31 +99,31 @@ export default function VendorPage() {
     } else {
       navigator.clipboard?.writeText(url);
       setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 2500);
+      setTimeout(() => setCopiedLink(false), 2000);
     }
   }
 
-  const getWhatsAppUrl = () => {
-    const phone = vendor?.phone?.replace(/[^0-9]/g, '') || '6281234567890';
-    const cleanPhone = phone.startsWith('0') ? '62' + phone.substring(1) : phone;
-    const message = encodeURIComponent(`Hi ${vendor?.name || 'there'}, I found your scooter rental on The Bike Rental Bali and would like to inquire about availability.`);
-    return `https://wa.me/${cleanPhone}?text=${message}`;
+  const handleDirectWhatsApp = () => {
+    if (!vendor?.whatsapp_number) {
+      alert("Vendor WhatsApp is currently unavailable. Please book online.")
+      return
+    }
+    const cleanNumber = vendor.whatsapp_number.replace(/[^0-9]/g, '')
+    const message = encodeURIComponent(`Hi ${vendor.name}, I am contacting you from THE BIKE RENTAL BALI. Are scooters available?`)
+    window.open(`https://wa.me/${cleanNumber}?text=${message}`, '_blank')
   }
 
-  const getDeliveryArea = (address?: string) => {
-    const addr = (address || '').toLowerCase()
+  const getCleanDeliveryArea = (address?: string) => {
+    if (!address) return "Local area hotel & villa delivery"
+    const addr = address.toLowerCase()
     if (
       addr.includes('ubud') || 
-      addr.includes('mas') || 
-      addr.includes('sayan') || 
       addr.includes('gianyar') || 
-      addr.includes('tegallalang') || 
-      addr.includes('campuhan') || 
-      addr.includes('penestanan') ||
-      addr.includes('lodtunduh') ||
-      addr.includes('pengosekan')
+      addr.includes('cempaka') || 
+      addr.includes('mas') ||
+      addr.includes('sayan')
     ) {
-      return "Ubud area only - Central Ubud, Mas, Sayan, Campuhan, Penestanan & Tegallalang"
+      return "Central Ubud, Mas, Sayan, Campuhan, Penestanan & Tegallalang"
     }
     if (
       addr.includes('canggu') || 
@@ -190,8 +191,27 @@ export default function VendorPage() {
     )
   }
 
+  const localBusinessSchema = getLocalBusinessSchema(vendor.name);
+  const breadcrumbSchema = getBreadcrumbSchema([
+    { name: 'Home', url: 'https://thebikerentalbali.com' },
+    { name: 'Vendors', url: 'https://thebikerentalbali.com' },
+    { name: vendor.name, url: `https://thebikerentalbali.com/vendor/${vendor.id}` },
+  ]);
+
   return (
     <div className="min-h-screen bg-[#F0F2F5] w-full max-w-full overflow-x-hidden touch-pan-y">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(localBusinessSchema),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbSchema),
+        }}
+      />
       
       {/* ======================================================== */}
       {/* MOBILE LAYOUT (< MD) - PRESERVED EXACTLY AS ORIGINAL */}

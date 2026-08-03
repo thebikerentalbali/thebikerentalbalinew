@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
+import PWARegister from "@/components/PWARegister";
+import { getWebSiteSchema, getOrganizationSchema } from "@/lib/seo/schemaGenerator";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -22,27 +24,87 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "THE BIKE RENTAL BALI | Premium Scooter Rental & Vendor Portal",
-  description: "Premium scooter rental in Bali. Official partner portal for scooter rental vendors.",
+  metadataBase: new URL("https://thebikerentalbali.com"),
+  title: {
+    default: "Scooter Rental Bali | Compare Prices, Trusted Vendors & Fast Delivery",
+    template: "%s | THE BIKE RENTAL BALI"
+  },
+  description: "Compare trusted scooter rental companies across Bali. Book Honda, Yamaha and Vespa scooters with daily, weekly and monthly rentals. Fast delivery to Ubud, Canggu, Seminyak, Kuta, Sanur, Uluwatu, Nusa Dua, Jimbaran, Denpasar and across Bali.",
+  applicationName: "THE BIKE RENTAL BALI",
+  authors: [{ name: "THE BIKE RENTAL BALI" }],
+  generator: "Next.js",
+  keywords: [
+    "Scooter Rental Bali",
+    "Rent Scooter Bali",
+    "Bali Scooter Rental",
+    "Motorbike Rental Bali",
+    "Motorcycle Rental Bali",
+    "Scooter Hire Bali",
+    "Best Scooter Rental Bali",
+    "Trusted Scooter Rental Bali",
+    "Premium Scooter Rental Bali",
+    "Scooter Rental Marketplace Bali",
+    "Compare Scooter Rental Bali",
+    "Bali Scooter Booking",
+    "Scooter Delivery Bali",
+    "Weekly Scooter Rental Bali",
+    "Monthly Scooter Rental Bali",
+    "Daily Scooter Rental Bali",
+    "Airport Scooter Rental Bali"
+  ],
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Vendor Portal",
+    title: "THE BIKE RENTAL BALI",
   },
   icons: {
     icon: "/icons/icon-192x192.png",
     apple: "/icons/apple-touch-icon.png",
   },
+  openGraph: {
+    type: "website",
+    siteName: "THE BIKE RENTAL BALI",
+    title: "Scooter Rental Bali | Compare Prices, Trusted Vendors & Fast Delivery",
+    description: "Compare trusted scooter rental companies across Bali. Book Honda, Yamaha and Vespa scooters with daily, weekly and monthly rentals.",
+    url: "https://thebikerentalbali.com",
+    locale: "en_US",
+    images: [
+      {
+        url: "/icons/icon-512x512.png",
+        width: 512,
+        height: 512,
+        alt: "THE BIKE RENTAL BALI - Scooter Rental Marketplace"
+      }
+    ]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Scooter Rental Bali | Compare Prices, Trusted Vendors & Fast Delivery",
+    description: "Compare trusted scooter rental companies across Bali. Book Honda, Yamaha and Vespa scooters with daily, weekly and monthly rentals.",
+    images: ["/icons/icon-512x512.png"]
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1
+    }
+  }
 };
-
-import PWARegister from "@/components/PWARegister";
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const websiteSchema = getWebSiteSchema();
+  const organizationSchema = getOrganizationSchema();
+
   return (
     <html
       lang="en"
@@ -52,9 +114,21 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="application-name" content="Vendor Portal" />
-        <meta name="apple-mobile-web-app-title" content="Vendor Portal" />
+        <meta name="application-name" content="THE BIKE RENTAL BALI" />
+        <meta name="apple-mobile-web-app-title" content="THE BIKE RENTAL BALI" />
         <meta name="theme-color" content="#000000" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(websiteSchema),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationSchema),
+          }}
+        />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <PWARegister />
