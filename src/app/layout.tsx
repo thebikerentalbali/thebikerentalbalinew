@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import PWARegister from "@/components/PWARegister";
+import AppSplashScreen from "@/components/AppSplashScreen";
 import { getWebSiteSchema, getOrganizationSchema } from "@/lib/seo/schemaGenerator";
 
 const inter = Inter({
@@ -142,6 +143,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
+        <AppSplashScreen />
         <PWARegister />
         <main className="flex-1 w-full min-h-screen relative bg-[#F0F2F5]">
           {children}
