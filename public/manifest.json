@@ -1,7 +1,7 @@
 {
   "id": "/partnerportal",
-  "name": "The Bike Rental Bali - Vendor Portal",
-  "short_name": "Vendor App",
+  "name": "THE BIKE RENTAL BALI",
+  "short_name": "THE BIKE RENTAL BALI",
   "description": "Official Vendor Management App for The Bike Rental Bali partners. Manage bookings, fleet availability, and real-time earnings.",
   "start_url": "/partnerportal?source=pwa",
   "scope": "/",
