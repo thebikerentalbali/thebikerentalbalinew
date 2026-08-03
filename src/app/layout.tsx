@@ -56,7 +56,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "THE BIKE RENTAL BALI",
+    title: "Vendor Portal",
   },
   icons: {
     icon: [
@@ -125,8 +125,8 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="application-name" content="THE BIKE RENTAL BALI" />
-        <meta name="apple-mobile-web-app-title" content="THE BIKE RENTAL BALI" />
+        <meta name="application-name" content="Vendor Portal" />
+        <meta name="apple-mobile-web-app-title" content="Vendor Portal" />
         <meta name="theme-color" content="#000000" />
         <script
           type="application/ld+json"
