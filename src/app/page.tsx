@@ -145,13 +145,17 @@ export default function Home() {
   }
 
   // Filter Logic
-  const filterByPrice = (priceStr: string) => parseInt(priceStr.replace(/,/g, '')) <= maxPrice
+  const filterByPrice = (priceVal: any) => {
+    if (typeof priceVal === 'number') return priceVal <= maxPrice;
+    const parsed = parseInt(String(priceVal || '0').replace(/[^0-9]/g, ''));
+    return isNaN(parsed) || parsed === 0 || parsed <= maxPrice;
+  }
   const filterByBrand = (scooter: any) => {
     if (!activeBrand) return true;
     const brandLower = activeBrand.toLowerCase();
     const nameMatch = scooter.name && scooter.name.toLowerCase().includes(brandLower);
     const brandMatch = scooter.brand && scooter.brand.toLowerCase().includes(brandLower);
-    return nameMatch || brandMatch;
+    return Boolean(nameMatch || brandMatch);
   }
   const filterByYear = (scooter: any) => {
     if (!selectedYear || selectedYear === "All") return true;
@@ -159,9 +163,9 @@ export default function Home() {
     return sYear === selectedYear;
   }
   
-  const allFiltered = allScooters.filter(s => filterByPrice(s.price) && filterByBrand(s) && filterByYear(s))
+  const allFiltered = allScooters.filter(s => filterByPrice(s.price_daily || s.price) && filterByBrand(s) && filterByYear(s))
   const filteredPopular = allFiltered.slice(0, 3)
-  const filteredRecommended = allFiltered.slice(3)
+  const filteredRecommended = allFiltered.length > 3 ? allFiltered.slice(3) : allFiltered
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F0F2F5] px-6 pb-24 md:px-12 md:pb-32">

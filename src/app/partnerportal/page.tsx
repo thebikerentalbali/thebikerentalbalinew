@@ -892,144 +892,115 @@ export default function VendorDashboard() {
             </div>
           </div>
         ) : activeTab === 'bookings' ? (
-          <div className="p-5 md:px-8 pb-12 animate-in fade-in space-y-6">
-            {/* Top Navigation & Smart Calendar Header */}
-            <div className="bg-white rounded-3xl border-2 border-black/80 shadow-sm p-4 md:p-6 space-y-5">
-              {/* Month Navigator Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-black text-white flex items-center justify-center shrink-0 shadow-xs">
-                    <Calendar className="w-5 h-5" />
+          <div className="p-4 md:p-8 pb-12 animate-in fade-in space-y-6">
+            {/* Simple & Clean Smart Calendar Header */}
+            <div className="bg-white rounded-3xl border border-gray-200/80 shadow-sm p-4 sm:p-5 space-y-4">
+              {/* Header Month & Actions */}
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-black text-white flex items-center justify-center shrink-0">
+                    <Calendar className="w-4 h-4" />
                   </div>
                   <div>
-                    <h2 className="text-xl md:text-2xl font-black text-gray-900 capitalize tracking-tight">
+                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 capitalize tracking-tight flex items-center gap-2">
                       {formatMonthYear(activeMonthDate)}
+                      {selectedCalendarDate && (
+                        <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-black/5 text-black">
+                          {formatIndoDate(selectedCalendarDate)}
+                        </span>
+                      )}
                     </h2>
-                    <p className="text-xs font-bold text-gray-500">
-                      Smart Period Bookings & Net Profit Overview
-                    </p>
                   </div>
                 </div>
 
-                {/* Month Controls */}
-                <div className="flex items-center gap-2 self-start sm:self-auto">
+                {/* Month & Week Navigation */}
+                <div className="flex items-center gap-1.5 ml-auto">
                   <button
-                    onClick={handlePrevMonth}
-                    title="Previous Month"
-                    className="p-2.5 rounded-xl border-2 border-black hover:bg-black hover:text-white transition-colors cursor-pointer text-black"
+                    onClick={handlePrevWeek}
+                    title="Previous Days"
+                    className="w-8 h-8 rounded-lg border border-gray-200 hover:border-black hover:bg-black hover:text-white flex items-center justify-center text-gray-700 transition-colors cursor-pointer"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={handleThisMonth}
-                    className="px-3.5 py-2 rounded-xl text-xs font-black border-2 border-black bg-white hover:bg-black hover:text-white transition-colors cursor-pointer text-black"
+                    onClick={handleToday}
+                    className="px-3 h-8 rounded-lg text-xs font-bold border border-gray-200 bg-white hover:bg-black hover:text-white text-gray-800 transition-colors cursor-pointer"
                   >
-                    This Month
+                    Today
                   </button>
+                  {selectedCalendarDate && (
+                    <button
+                      onClick={() => setSelectedCalendarDate(null)}
+                      className="px-2.5 h-8 rounded-lg text-xs font-bold text-gray-500 hover:text-black hover:bg-gray-100 transition-colors cursor-pointer"
+                    >
+                      View All
+                    </button>
+                  )}
                   <button
-                    onClick={handleNextMonth}
-                    title="Next Month"
-                    className="p-2.5 rounded-xl border-2 border-black hover:bg-black hover:text-white transition-colors cursor-pointer text-black"
+                    onClick={handleNextWeek}
+                    title="Next Days"
+                    className="w-8 h-8 rounded-lg border border-gray-200 hover:border-black hover:bg-black hover:text-white flex items-center justify-center text-gray-700 transition-colors cursor-pointer"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
               </div>
 
-              {/* 7-Day Quick Strip Navigator with booking count indicator badges */}
-              <div className="pt-2 border-t border-gray-200">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-black uppercase tracking-wider text-black">
-                      7-Day Strip
-                    </span>
-                    {selectedCalendarDate && (
-                      <span className="text-[11px] font-bold text-gray-500">
-                        (Filtered on {formatIndoDate(selectedCalendarDate)})
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={handlePrevWeek}
-                      className="p-1.5 rounded-lg border border-gray-300 hover:border-black text-black hover:bg-black hover:text-white transition-colors cursor-pointer"
-                      title="Previous 7 Days"
-                    >
-                      <ChevronLeft className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={handleToday}
-                      className="px-2.5 py-1 rounded-lg text-[11px] font-black border border-gray-300 hover:border-black text-black hover:bg-black hover:text-white transition-colors cursor-pointer"
-                    >
-                      Today
-                    </button>
-                    <button
-                      onClick={handleNextWeek}
-                      className="p-1.5 rounded-lg border border-gray-300 hover:border-black text-black hover:bg-black hover:text-white transition-colors cursor-pointer"
-                      title="Next 7 Days"
-                    >
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
+              {/* Minimalist 7-Day Date Pill Strip */}
+              <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+                {get7Days(calendarStartDate).map((dateObj, idx) => {
+                  const year = dateObj.getFullYear()
+                  const month = String(dateObj.getMonth() + 1).padStart(2, '0')
+                  const day = String(dateObj.getDate()).padStart(2, '0')
+                  const isoDate = `${year}-${month}-${day}`
 
-                <div className="grid grid-cols-7 gap-1.5 sm:gap-2.5">
-                  {get7Days(calendarStartDate).map((dateObj, idx) => {
-                    const year = dateObj.getFullYear()
-                    const month = String(dateObj.getMonth() + 1).padStart(2, '0')
-                    const day = String(dateObj.getDate()).padStart(2, '0')
-                    const isoDate = `${year}-${month}-${day}`
+                  const isSelected = selectedCalendarDate === isoDate
+                  const isToday = new Date().toDateString() === dateObj.toDateString()
+                  const count = getBookingsCountForDate(dateObj)
+                  const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' })
 
-                    const isSelected = selectedCalendarDate === isoDate
-                    const isToday = new Date().toDateString() === dateObj.toDateString()
-                    const count = getBookingsCountForDate(dateObj)
-                    const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' })
-
-                    return (
-                      <button
-                        key={idx}
-                        onClick={() => {
-                          if (isSelected) {
-                            setSelectedCalendarDate(null)
-                          } else {
-                            setSelectedCalendarDate(isoDate)
-                            if (dateObj.getMonth() !== activeMonthDate.getMonth() || dateObj.getFullYear() !== activeMonthDate.getFullYear()) {
-                              setActiveMonthDate(new Date(dateObj.getFullYear(), dateObj.getMonth(), 1))
-                            }
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        if (isSelected) {
+                          setSelectedCalendarDate(null)
+                        } else {
+                          setSelectedCalendarDate(isoDate)
+                          if (dateObj.getMonth() !== activeMonthDate.getMonth() || dateObj.getFullYear() !== activeMonthDate.getFullYear()) {
+                            setActiveMonthDate(new Date(dateObj.getFullYear(), dateObj.getMonth(), 1))
                           }
-                        }}
-                        className={`flex flex-col items-center justify-center p-2 sm:p-3 rounded-2xl border-2 transition-all cursor-pointer relative ${
-                          isSelected
-                            ? 'bg-black text-white border-black shadow-md scale-[1.02]'
-                            : isToday
-                            ? 'bg-gray-100 text-black border-black font-black'
-                            : 'bg-white text-gray-800 border-gray-200 hover:border-black'
-                        }`}
-                      >
-                        <span className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider ${isSelected ? 'text-gray-300' : 'text-gray-500'}`}>
-                          {dayName}
-                        </span>
-                        <span className="text-sm sm:text-base font-black my-0.5">
-                          {dateObj.getDate()}
-                        </span>
+                        }
+                      }}
+                      className={`flex flex-col items-center justify-center py-2 px-1 sm:py-3 sm:px-2 rounded-2xl border transition-all cursor-pointer relative ${
+                        isSelected
+                          ? 'bg-black text-white border-black shadow-sm scale-[1.02]'
+                          : isToday
+                          ? 'bg-gray-50 text-black border-black/60 font-bold'
+                          : 'bg-white text-gray-700 border-gray-100 hover:border-gray-300'
+                      }`}
+                    >
+                      <span className={`text-[10px] sm:text-xs font-semibold uppercase ${isSelected ? 'text-gray-300' : 'text-gray-400'}`}>
+                        {dayName}
+                      </span>
+                      <span className="text-sm sm:text-base font-bold my-0.5">
+                        {dateObj.getDate()}
+                      </span>
 
-                        {count > 0 ? (
-                          <span className={`text-[9px] sm:text-[10px] font-black px-1.5 py-0.2 rounded-full mt-0.5 ${
-                            isSelected
-                              ? 'bg-white text-black'
-                              : 'bg-black text-white'
-                          }`}>
-                            {count}
-                          </span>
-                        ) : (
-                          <span className={`text-[9px] sm:text-[10px] font-bold ${isSelected ? 'text-gray-400' : 'text-gray-300'}`}>
-                            -
-                          </span>
-                        )}
-                      </button>
-                    )
-                  })}
-                </div>
+                      {count > 0 ? (
+                        <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full mt-0.5 ${
+                          isSelected
+                            ? 'bg-white text-black'
+                            : 'bg-emerald-500 text-white'
+                        }`}>
+                          {count}
+                        </span>
+                      ) : (
+                        <span className="w-1 h-1 rounded-full bg-transparent mt-1" />
+                      )}
+                    </button>
+                  )
+                })}
               </div>
             </div>
 
