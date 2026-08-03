@@ -27,6 +27,19 @@ export default function ScooterDetailClient({
   const [loading, setLoading] = useState<boolean>(!initialScooter)
   const [isLiked, setIsLiked] = useState(false)
 
+  const handleBack = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault()
+    if (typeof window !== 'undefined') {
+      if (window.history.length <= 2) {
+        router.push('/')
+      } else {
+        router.back()
+      }
+    } else {
+      router.push('/')
+    }
+  }
+
   useEffect(() => {
     // Background refresh only if initial data wasn't provided or settings change
     if (!initialScooter && id) {
@@ -86,7 +99,7 @@ export default function ScooterDetailClient({
       <div className="min-h-screen bg-[#F4F4F6] flex flex-col items-center justify-center gap-4 px-6 text-center">
         <h2 className="text-xl font-bold text-black tracking-tight">Scooter not found</h2>
         <p className="text-sm text-neutral-500">The requested vehicle listing is unavailable or has been removed.</p>
-        <Link href="/" className="px-6 py-3 bg-black text-white rounded-full text-sm font-semibold hover:bg-neutral-800 transition-colors">
+        <Link href="/" prefetch={true} className="px-6 py-3 bg-black text-white rounded-full text-sm font-semibold hover:bg-neutral-800 transition-colors active-press">
           Return to Catalog
         </Link>
       </div>
@@ -104,9 +117,10 @@ export default function ScooterDetailClient({
         {/* Navigation Bar */}
         <header className="flex justify-between items-center px-5 sm:px-8 py-6 relative z-10">
           <button 
-            onClick={() => router.back()} 
+            type="button"
+            onClick={handleBack} 
             aria-label="Go Back"
-            className="w-11 h-11 bg-white rounded-full flex items-center justify-center border border-neutral-200/80 shadow-xs hover:bg-neutral-100 transition-all cursor-pointer"
+            className="w-11 h-11 bg-white rounded-full flex items-center justify-center border border-neutral-200/80 shadow-xs hover:bg-neutral-100 transition-all active-press cursor-pointer"
           >
             <ChevronLeft className="w-5 h-5 text-black" />
           </button>
@@ -116,11 +130,12 @@ export default function ScooterDetailClient({
           </h1>
 
           <button 
+            type="button"
             onClick={() => setIsLiked(!isLiked)}
             aria-label="Save Scooter"
-            className="w-11 h-11 bg-white rounded-full flex items-center justify-center border border-neutral-200/80 shadow-xs hover:bg-neutral-100 transition-all cursor-pointer"
+            className="w-11 h-11 bg-white rounded-full flex items-center justify-center border border-neutral-200/80 shadow-xs hover:bg-neutral-100 transition-all active-press cursor-pointer"
           >
-            <Heart className={`w-5 h-5 transition-colors ${isLiked ? 'fill-black text-black' : 'text-black'}`} />
+            <Heart className={`w-5 h-5 transition-colors ${isLiked ? 'fill-red-500 text-red-500' : 'text-neutral-600'}`} />
           </button>
         </header>
 
@@ -367,7 +382,8 @@ export default function ScooterDetailClient({
               </div>
               <Link 
                 href={`/checkout?scooterId=${scooter.id}`} 
-                className="bg-black text-white px-8 py-3.5 rounded-full text-sm font-bold shadow-sm hover:bg-neutral-800 transition-all cursor-pointer"
+                prefetch={true}
+                className="bg-black text-white px-8 py-3.5 rounded-full text-sm font-bold shadow-sm hover:bg-neutral-800 active-press transition-all cursor-pointer"
               >
                 Book Rent
               </Link>
@@ -390,7 +406,8 @@ export default function ScooterDetailClient({
         
         <Link 
           href={`/checkout?scooterId=${scooter.id}`} 
-          className="bg-white text-black px-6 py-2.5 rounded-full text-xs font-bold shadow-xs hover:bg-neutral-100 active:scale-95 transition-all"
+          prefetch={true}
+          className="bg-white text-black px-6 py-2.5 rounded-full text-xs font-bold shadow-xs hover:bg-neutral-100 active-press transition-all"
         >
           Book Rent
         </Link>

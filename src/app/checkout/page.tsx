@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { ChevronLeft, Bell, Star, MapPin, Map, Info, Minus, Plus, PlusCircle, X, Trash2, Loader2 } from "lucide-react"
 import { createClient } from '@/lib/supabase/client'
 import { fetchCatalogData } from '@/lib/api/catalogService'
@@ -9,6 +10,7 @@ import { clientCache } from '@/lib/cache/clientCache'
 import { subscribeToPlatformSettings } from '@/utils/pricing'
 
 export default function CheckoutPage() {
+  const router = useRouter()
   const [deliveryMethod, setDeliveryMethod] = useState<"pickup" | "delivery">("pickup")
   const [helmets, setHelmets] = useState<number>(1)
   const [firstName, setFirstName] = useState("")
@@ -17,6 +19,20 @@ export default function CheckoutPage() {
   const [customerEmail, setCustomerEmail] = useState("")
   const [deliveryAddress, setDeliveryAddress] = useState("")
   const [agreedToFee, setAgreedToFee] = useState(false)
+
+  const handleBack = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault()
+    if (typeof window !== 'undefined') {
+      if (window.history.length <= 2) {
+        router.push('/')
+      } else {
+        router.back()
+      }
+    } else {
+      router.push('/')
+    }
+  }
+
   // Helper date formatting
   const formatIsoDate = (d: Date) => {
     const year = d.getFullYear()
@@ -51,7 +67,7 @@ export default function CheckoutPage() {
       try {
         const params = new URLSearchParams(window.location.search)
         const sId = params.get("scooterId")
-        const cached = clientCache.get<any>('catalog_data')
+        const cached = clientCache.get<any>('catalog') || clientCache.get<any>('catalog_data')
         if (sId && cached?.scooters) {
           const selected = cached.scooters.find((s: any) => s.id.toString() === sId)
           if (selected) {
@@ -75,7 +91,7 @@ export default function CheckoutPage() {
   })
 
   const [vendorScooters, setVendorScooters] = useState<any[]>(() => {
-    const cached = typeof window !== 'undefined' ? clientCache.get<any>('catalog_data') : null
+    const cached = typeof window !== 'undefined' ? (clientCache.get<any>('catalog') || clientCache.get<any>('catalog_data')) : null
     if (cached?.scooters) {
       return cached.scooters.map((s: any) => ({
         ...s,
@@ -334,13 +350,17 @@ export default function CheckoutPage() {
         
         {/* Header */}
         <header className="flex justify-between items-center mb-8">
-          <Link href="/" className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
+          <button 
+            type="button"
+            onClick={handleBack} 
+            className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm active-press cursor-pointer hover:bg-gray-50 transition-colors"
+          >
             <ChevronLeft className="w-6 h-6 text-gray-800" />
-          </Link>
+          </button>
           <h1 className="text-xl font-medium text-gray-900 absolute left-1/2 -translate-x-1/2">
             Checkout
           </h1>
-          <button className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm relative">
+          <button type="button" className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm relative active-press">
             <Bell className="w-5 h-5 text-gray-800" />
             <span className="absolute top-3 right-3.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
           </button>
@@ -697,11 +717,21 @@ export default function CheckoutPage() {
 
       {/* Modal for Adding Vendor Scooters */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-end sm:items-center justify-center animate-in fade-in">
-          <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom-8 sm:slide-in-from-bottom-0 sm:zoom-in-95 max-h-[85vh] overflow-y-auto">
+        <div 
+          onClick={() => setShowAddModal(false)}
+          className="fixed inset-0 bg-black/60 z-50 flex items-end sm:items-center justify-center animate-in fade-in"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom-8 sm:slide-in-from-bottom-0 sm:zoom-in-95 max-h-[85vh] overflow-y-auto"
+          >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900">Vendor Fleet</h2>
-              <button onClick={() => setShowAddModal(false)} className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">
+              <button 
+                type="button"
+                onClick={() => setShowAddModal(false)} 
+                className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors active-press"
+              >
                 <X className="w-5 h-5 text-gray-700" />
               </button>
             </div>

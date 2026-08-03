@@ -7,6 +7,7 @@ import Image from "next/image"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 import { fetchCatalogData } from '@/lib/api/catalogService'
+import { clientCache } from '@/lib/cache/clientCache'
 import { subscribeToPlatformSettings, PlatformSettings } from '@/utils/pricing'
 
 const MapPicker = dynamic(() => import('@/components/MapPicker'), { ssr: false })
@@ -24,7 +25,7 @@ interface HomeClientProps {
   initialSettings?: PlatformSettings;
 }
 
-export default function HomeClient({ initialVendors = [], initialScooters = [] }: HomeClientProps) {
+export default function HomeClient({ initialVendors = [], initialScooters = [], initialSettings }: HomeClientProps) {
   const router = useRouter()
 
   const [topVendors, setTopVendors] = useState<any[]>(initialVendors)
@@ -48,6 +49,16 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
   const [selectedYear, setSelectedYear] = useState<string>("All")
 
   useEffect(() => {
+    // 1. Seed client cache immediately with SSR props for 0ms sub-routes
+    if (initialVendors?.length > 0 || initialScooters?.length > 0) {
+      clientCache.set('catalog', {
+        vendors: initialVendors,
+        scooters: initialScooters,
+        settings: initialSettings,
+        cachedAt: new Date().toISOString()
+      });
+    }
+
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       if (params.get("showMap") === "true") {
@@ -66,15 +77,17 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
       }
     }
 
-    // Background SWR revalidation
-    loadData();
+    // Only fetch client-side if SSR didn't supply vendors/scooters
+    if (initialVendors.length === 0 || initialScooters.length === 0) {
+      loadData();
+    }
 
     const unsubscribe = subscribeToPlatformSettings(() => {
       loadData(true);
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [initialVendors, initialScooters, initialSettings]);
 
   const openLocationPicker = () => {
     setIsLocationModalOpen(true);
@@ -124,7 +137,11 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
         <div className="w-full max-w-7xl mx-auto relative pointer-events-auto">
           <div className="bg-white/70 backdrop-blur-xl border border-white/50 shadow-sm rounded-3xl p-3 px-4 flex justify-between items-center transition-all duration-300">
             {/* Location Selector (Street level) */}
-            <button onClick={openLocationPicker} className="flex items-center gap-2.5 text-left hover:bg-black/5 p-1.5 pr-3 rounded-full transition-colors">
+            <button 
+              onClick={openLocationPicker} 
+              type="button"
+              className="flex items-center gap-2.5 text-left hover:bg-black/5 p-1.5 pr-3 rounded-full transition-colors active-press"
+            >
               <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center shrink-0">
                 <MapPin className="w-4 h-4 text-white" />
               </div>
@@ -141,7 +158,8 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
 
             <button
               onClick={() => setIsNavOpen(!isNavOpen)}
-              className="w-10 h-10 rounded-full bg-white/80 border border-gray-100 flex items-center justify-center text-gray-800 hover:bg-white transition-colors shadow-sm"
+              type="button"
+              className="w-10 h-10 rounded-full bg-white/80 border border-gray-100 flex items-center justify-center text-gray-800 hover:bg-white transition-colors shadow-sm active-press"
             >
               {isNavOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -150,16 +168,16 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
           {/* Dropdown Menu */}
           {isNavOpen && (
             <div className="absolute top-[80px] left-0 right-0 bg-white/95 backdrop-blur-2xl border border-white/60 shadow-xl rounded-3xl p-6 flex flex-col gap-4 animate-in slide-in-from-top-4 fade-in">
-              <Link href="/about" className="text-[16px] font-semibold text-gray-800 px-2 py-1 hover:text-black transition-colors">About Us</Link>
-              <Link href="/how-it-works" className="text-[16px] font-semibold text-gray-800 px-2 py-1 hover:text-black transition-colors">How it Works</Link>
-              <Link href="/faq" className="text-[16px] font-semibold text-gray-800 px-2 py-1 hover:text-black transition-colors">FAQ</Link>
-              <Link href="/contact" className="text-[16px] font-semibold text-gray-800 px-2 py-1 hover:text-black transition-colors">Contact Support</Link>
+              <Link href="/about" onClick={() => setIsNavOpen(false)} prefetch={true} className="text-[16px] font-semibold text-gray-800 px-2 py-1 hover:text-black transition-colors">About Us</Link>
+              <Link href="/how-it-works" onClick={() => setIsNavOpen(false)} prefetch={true} className="text-[16px] font-semibold text-gray-800 px-2 py-1 hover:text-black transition-colors">How it Works</Link>
+              <Link href="/faq" onClick={() => setIsNavOpen(false)} prefetch={true} className="text-[16px] font-semibold text-gray-800 px-2 py-1 hover:text-black transition-colors">FAQ</Link>
+              <Link href="/contact" onClick={() => setIsNavOpen(false)} prefetch={true} className="text-[16px] font-semibold text-gray-800 px-2 py-1 hover:text-black transition-colors">Contact Support</Link>
 
               <div className="h-[1px] bg-gray-200 my-1"></div>
 
               <div className="flex flex-col gap-2">
                 <span className="text-[12px] font-bold text-gray-400 uppercase tracking-wider px-2">Partners</span>
-                <Link href="/partnersignup" className="text-[16px] font-semibold text-gray-800 px-2 py-1 hover:text-black transition-colors flex justify-between items-center group">
+                <Link href="/partnersignup" onClick={() => setIsNavOpen(false)} prefetch={true} className="text-[16px] font-semibold text-gray-800 px-2 py-1 hover:text-black transition-colors flex justify-between items-center group">
                   Partner Portal
                   <span className="text-[11px] font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md">Sign In / Sign Up</span>
                 </Link>
@@ -179,7 +197,8 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
           </div>
           <button
             onClick={() => setIsSavedModalOpen(true)}
-            className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 shrink-0 hover:bg-gray-50 transition-colors relative"
+            type="button"
+            className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 shrink-0 hover:bg-gray-50 transition-colors relative active-press"
           >
             <Heart className="w-5 h-5 text-gray-800" />
             {savedScooters.length > 0 && (
@@ -204,7 +223,8 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
           </div>
           <button
             onClick={() => setIsFilterOpen(true)}
-            className="w-14 h-14 md:w-16 md:h-16 bg-white rounded-full flex items-center justify-center shadow-sm shrink-0 border border-gray-100 transition-transform hover:scale-105 relative"
+            type="button"
+            className="w-14 h-14 md:w-16 md:h-16 bg-white rounded-full flex items-center justify-center shadow-sm shrink-0 border border-gray-100 transition-transform hover:scale-105 active-press relative"
           >
             <SlidersHorizontal className="w-5 h-5 md:w-6 md:h-6 text-gray-800" />
             {(maxPrice < 500000 || selectedYear !== "All") && (
@@ -221,7 +241,7 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
             </div>
             <div className="flex gap-4 md:gap-8 overflow-x-auto md:overflow-visible pb-2 scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0">
               {topVendors.map((vendor) => (
-                <Link key={vendor.id} href={`/vendor/${vendor.id}`} prefetch={true} className="flex flex-col items-center gap-2 md:gap-3 min-w-[80px] md:min-w-[100px] transition-transform hover:scale-105">
+                <Link key={vendor.id} href={`/vendor/${vendor.id}`} prefetch={true} className="flex flex-col items-center gap-2 md:gap-3 min-w-[80px] md:min-w-[100px] transition-transform hover:scale-105 active-press">
                   {/* Instagram-style Ring */}
                   <div className="p-[2px] md:p-[3px] rounded-full bg-gradient-to-tr from-yellow-400 to-orange-500">
                     <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white p-[2px] md:p-[3px]">
@@ -272,7 +292,7 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
               <select
                 value={durationFilter}
                 onChange={(e) => setDurationFilter(e.target.value)}
-                className="appearance-none bg-black text-white pl-5 pr-10 h-12 md:h-14 md:text-[16px] rounded-full font-medium text-[15px] outline-none border-none shadow-sm flex items-center cursor-pointer focus:ring-0 transition-transform hover:scale-105"
+                className="appearance-none bg-black text-white pl-5 pr-10 h-12 md:h-14 md:text-[16px] rounded-full font-medium text-[15px] outline-none border-none shadow-sm flex items-center cursor-pointer focus:ring-0 transition-transform hover:scale-105 active-press"
               >
                 <option value="Daily">Daily</option>
                 <option value="Weekly">Weekly</option>
@@ -287,8 +307,9 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
               return (
                 <button
                   key={brand.name}
+                  type="button"
                   onClick={() => setActiveBrand(isActive ? "" : brand.name)}
-                  className={`flex items-center gap-2 px-5 h-12 md:h-14 md:px-6 rounded-full whitespace-nowrap transition-all shadow-sm hover:scale-105 ${isActive ? "bg-black text-white" : "bg-white text-gray-800 border border-gray-100"
+                  className={`flex items-center gap-2 px-5 h-12 md:h-14 md:px-6 rounded-full whitespace-nowrap transition-all shadow-sm hover:scale-105 active-press ${isActive ? "bg-black text-white" : "bg-white text-gray-800 border border-gray-100"
                     }`}
                 >
                   <div className={`w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center ${isActive ? 'bg-white/20' : 'bg-gray-100'}`}>
@@ -314,14 +335,19 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
           ) : (
             <div className="flex gap-4 md:gap-6 overflow-x-auto md:grid md:grid-cols-2 lg:grid-cols-3 md:overflow-visible pb-4 scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0 snap-x snap-mandatory md:snap-none">
               {filteredPopular.map((scooter, index) => (
-                <Link key={scooter.id} href={`/detail/${scooter.id}`} prefetch={true} className="min-w-full md:min-w-0 sm:min-w-[340px] shrink-0 block relative bg-white rounded-[32px] md:rounded-[40px] p-4 md:p-5 shadow-sm border border-gray-50 snap-center md:snap-align-none transition-transform hover:-translate-y-1 hover:shadow-md">
+                <Link key={scooter.id} href={`/detail/${scooter.id}`} prefetch={true} className="min-w-full md:min-w-0 sm:min-w-[340px] shrink-0 block relative bg-white rounded-[32px] md:rounded-[40px] p-4 md:p-5 shadow-sm border border-gray-50 snap-center md:snap-align-none transition-transform hover:-translate-y-1 hover:shadow-md active-press">
                   {/* Year & Save */}
                   <div className="absolute top-6 left-6 md:top-8 md:left-8 bg-white/90 backdrop-blur-sm px-3 md:px-4 py-1.5 md:py-2 rounded-full flex items-center gap-1.5 z-10 shadow-sm border border-gray-100">
                     <span className="text-xs md:text-sm font-extrabold text-gray-900">{scooter.year || '2024'}</span>
                   </div>
                   <button
-                    onClick={(e) => toggleSaveScooter(e, scooter.id)}
-                    className="absolute top-6 right-6 md:top-8 md:right-8 bg-white/90 backdrop-blur-sm w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center z-10 shadow-sm hover:scale-110 transition-transform"
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleSaveScooter(e, scooter.id);
+                    }}
+                    className="absolute top-6 right-6 md:top-8 md:right-8 bg-white/90 backdrop-blur-sm w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center z-20 shadow-sm hover:scale-110 active-press transition-transform"
                   >
                     <Heart className={`w-4 h-4 md:w-5 md:h-5 ${savedScooters.includes(scooter.id) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
                   </button>
@@ -346,9 +372,9 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
                         <span className="font-extrabold text-gray-900 text-[16px] md:text-[18px]">Rp {durationFilter === 'Weekly' ? Number(scooter.price_weekly || 0).toLocaleString() : durationFilter === 'Monthly' ? Number(scooter.price_monthly || 0).toLocaleString() : Number(scooter.price_daily || 0).toLocaleString()}</span> /{durationFilter}
                       </p>
                     </div>
-                    <button className="bg-black text-white px-5 md:px-6 py-2.5 md:py-3 rounded-full text-sm md:text-base font-semibold hover:bg-gray-800 transition-colors">
+                    <span className="bg-black text-white px-5 md:px-6 py-2.5 md:py-3 rounded-full text-sm md:text-base font-semibold pointer-events-none transition-colors">
                       Book Now
-                    </button>
+                    </span>
                   </div>
                 </Link>
               ))}
@@ -365,15 +391,20 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
               {filteredRecommended.map(scooter => (
-                <Link key={scooter.id} href={`/detail/${scooter.id}`} prefetch={true} className="bg-white rounded-[24px] md:rounded-[32px] p-3 md:p-4 shadow-sm border border-gray-50 flex flex-col group transition-all hover:scale-[1.02] hover:shadow-md">
+                <Link key={scooter.id} href={`/detail/${scooter.id}`} prefetch={true} className="bg-white rounded-[24px] md:rounded-[32px] p-3 md:p-4 shadow-sm border border-gray-50 flex flex-col group transition-all hover:scale-[1.02] hover:shadow-md active-press">
                   <div className="relative w-full aspect-square mb-3 md:mb-4 rounded-2xl bg-[#F8F9FA] flex items-center justify-center p-3 md:p-5">
                     <button
-                      onClick={(e) => toggleSaveScooter(e, scooter.id)}
-                      className="absolute top-2 left-2 md:top-3 md:left-3 bg-white/90 backdrop-blur-sm w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center z-10 shadow-sm hover:scale-110 transition-transform"
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleSaveScooter(e, scooter.id);
+                      }}
+                      className="absolute top-2 left-2 md:top-3 md:left-3 bg-white/90 backdrop-blur-sm w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center z-20 shadow-sm hover:scale-110 active-press transition-transform"
                     >
                       <Heart className={`w-3.5 h-3.5 md:w-4 md:h-4 ${savedScooters.includes(scooter.id) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
                     </button>
-                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-2.5 md:px-3 py-1 md:py-1.5 rounded-full flex items-center gap-1 md:gap-1.5 z-10 shadow-sm border border-gray-100">
+                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-2.5 md:px-3 py-1 md:py-1.5 rounded-full flex items-center gap-1 md:gap-1.5 z-10 shadow-sm border border-gray-100">
                       <span className="text-[11px] md:text-[13px] font-extrabold text-gray-900">{scooter.year || '2024'}</span>
                     </div>
                     <Image
@@ -395,13 +426,20 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
 
         {/* Filter Modal */}
         {isFilterOpen && (
-          <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-6 bg-black/40 backdrop-blur-sm animate-in fade-in">
-            <div className="w-full md:max-w-md bg-white rounded-t-[32px] md:rounded-[32px] p-6 pb-12 md:pb-6 shadow-xl animate-in slide-in-from-bottom-8 md:slide-in-from-bottom-4 relative">
+          <div 
+            onClick={() => setIsFilterOpen(false)}
+            className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-6 bg-black/40 backdrop-blur-sm animate-in fade-in"
+          >
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              className="w-full md:max-w-md bg-white rounded-t-[32px] md:rounded-[32px] p-6 pb-12 md:pb-6 shadow-xl animate-in slide-in-from-bottom-8 md:slide-in-from-bottom-4 relative"
+            >
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-gray-900">Filters</h3>
                 <button
+                  type="button"
                   onClick={() => setIsFilterOpen(false)}
-                  className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors"
+                  className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors active-press"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -410,37 +448,36 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
               <div className="space-y-6">
                 {/* Max Price Filter */}
                 <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <label className="font-bold text-gray-900 text-[15px]">Max Price (Daily)</label>
-                    <span className="font-black text-lg text-black">Rp {maxPrice.toLocaleString('id-ID')}</span>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-bold text-gray-700">Max Daily Price</span>
+                    <span className="text-sm font-extrabold text-gray-900">
+                      Rp {maxPrice.toLocaleString()}
+                    </span>
                   </div>
-
-                  <div className="px-2">
-                    <input
-                      type="range"
-                      min="100000"
-                      max="500000"
-                      step="50000"
-                      value={maxPrice}
-                      onChange={(e) => setMaxPrice(Number(e.target.value))}
-                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black"
-                    />
-                    <div className="flex justify-between text-xs font-medium text-gray-400 mt-2">
-                      <span>Rp 100k</span>
-                      <span>Rp 500k</span>
-                    </div>
+                  <input
+                    type="range"
+                    min="50000"
+                    max="500000"
+                    step="10000"
+                    value={maxPrice}
+                    onChange={(e) => setMaxPrice(Number(e.target.value))}
+                    className="w-full accent-black cursor-pointer"
+                  />
+                  <div className="flex justify-between text-[11px] font-bold text-gray-400 mt-1">
+                    <span>Rp 50k</span>
+                    <span>Rp 500k+</span>
                   </div>
                 </div>
 
-                {/* Scooter Year Filter */}
+                {/* Production Year Filter */}
                 <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <label className="font-bold text-gray-900 text-[15px]">Scooter Year</label>
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="text-sm font-bold text-gray-700">Production Year</span>
                     {selectedYear !== "All" && (
                       <button
                         type="button"
                         onClick={() => setSelectedYear("All")}
-                        className="text-xs text-gray-500 font-semibold hover:text-black transition-colors"
+                        className="text-xs font-bold text-gray-500 hover:text-black transition-colors"
                       >
                         Reset
                       </button>
@@ -454,7 +491,7 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
                           key={year}
                           type="button"
                           onClick={() => setSelectedYear(year)}
-                          className={`px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all ${isSelected
+                          className={`px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all active-press ${isSelected
                               ? "bg-black text-white shadow-sm scale-105"
                               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                             }`}
@@ -468,8 +505,9 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
               </div>
 
               <button
+                type="button"
                 onClick={() => setIsFilterOpen(false)}
-                className="w-full bg-black text-white font-bold text-lg py-4 rounded-2xl mt-8 shadow-sm hover:bg-gray-900 transition-colors"
+                className="w-full bg-black text-white font-bold text-lg py-4 rounded-2xl mt-8 shadow-sm hover:bg-gray-900 transition-colors active-press"
               >
                 Apply Filters
               </button>
@@ -479,13 +517,20 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
 
         {/* Saved Scooters Modal */}
         {isSavedModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-6 bg-black/40 backdrop-blur-sm animate-in fade-in">
-            <div className="w-full md:max-w-md bg-white rounded-t-[32px] md:rounded-[32px] p-6 pb-12 md:pb-6 shadow-xl animate-in slide-in-from-bottom-8 md:slide-in-from-bottom-4 relative max-h-[85vh] overflow-y-auto">
+          <div 
+            onClick={() => setIsSavedModalOpen(false)}
+            className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-6 bg-black/40 backdrop-blur-sm animate-in fade-in"
+          >
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              className="w-full md:max-w-md bg-white rounded-t-[32px] md:rounded-[32px] p-6 pb-12 md:pb-6 shadow-xl animate-in slide-in-from-bottom-8 md:slide-in-from-bottom-4 relative max-h-[85vh] overflow-y-auto"
+            >
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-gray-900">Saved Scooters</h3>
                 <button
+                  type="button"
                   onClick={() => setIsSavedModalOpen(false)}
-                  className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors"
+                  className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors active-press"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -502,7 +547,13 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
                   </div>
                 ) : (
                   allScooters.filter((s: any) => savedScooters.includes(s.id)).map((scooter: any) => (
-                    <Link key={scooter.id} href={`/detail/${scooter.id}`} className="bg-gray-50 p-3 rounded-2xl flex items-center gap-4 hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-200">
+                    <Link 
+                      key={scooter.id} 
+                      href={`/detail/${scooter.id}`} 
+                      onClick={() => setIsSavedModalOpen(false)}
+                      prefetch={true}
+                      className="bg-gray-50 p-3 rounded-2xl flex items-center gap-4 hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-200 active-press"
+                    >
                       <div className="relative w-16 h-16 bg-white rounded-xl overflow-hidden shrink-0 shadow-sm p-1">
                         <Image
                           src={scooter.img || "/images/scooter.png"}
@@ -522,8 +573,13 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
                         <p className="text-[13px] font-extrabold text-gray-900 mt-1">Rp {durationFilter === 'Weekly' ? Number(scooter.price_weekly || 0).toLocaleString() : durationFilter === 'Monthly' ? Number(scooter.price_monthly || 0).toLocaleString() : Number(scooter.price_daily || 0).toLocaleString()} <span className="text-gray-500 font-medium text-[11px]">/{durationFilter}</span></p>
                       </div>
                       <button
-                        onClick={(e) => toggleSaveScooter(e, scooter.id)}
-                        className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0"
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          toggleSaveScooter(e, scooter.id);
+                        }}
+                        className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0 active-press"
                       >
                         <Heart className="w-4 h-4 fill-red-500 text-red-500" />
                       </button>
@@ -537,14 +593,20 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
 
         {/* Location Picker Modal */}
         {isLocationModalOpen && (
-          <div className="fixed inset-0 z-[100] flex flex-col bg-white animate-in slide-in-from-bottom-full md:slide-in-from-bottom-0 md:fade-in md:items-center md:justify-center md:bg-black/40 md:p-6">
-            <div className="flex flex-col w-full h-full md:h-auto md:max-h-[90vh] md:max-w-md bg-white md:rounded-[32px] md:shadow-2xl relative overflow-hidden">
-
+          <div 
+            onClick={() => setIsLocationModalOpen(false)}
+            className="fixed inset-0 z-[100] flex flex-col bg-white animate-in slide-in-from-bottom-full md:slide-in-from-bottom-0 md:fade-in md:items-center md:justify-center md:bg-black/40 md:p-6"
+          >
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              className="flex flex-col w-full h-full md:h-auto md:max-h-[90vh] md:max-w-md bg-white md:rounded-[32px] md:shadow-2xl relative overflow-hidden"
+            >
               {/* MAP LAYER */}
               <div className="absolute inset-0 z-0 md:relative md:h-[400px]">
                 <MapPicker
                   vendors={topVendors}
                   onVendorClick={(id) => {
+                    setIsLocationModalOpen(false);
                     router.push(`/vendor/${id}?fromMap=true`);
                   }}
                   className="w-full h-full object-cover"
@@ -555,8 +617,9 @@ export default function HomeClient({ initialVendors = [], initialScooters = [] }
               <div className="z-10 flex flex-col h-full pointer-events-none md:pointer-events-auto p-4 md:p-6 absolute inset-0 md:relative md:inset-auto">
                 <div className="flex items-start gap-3 pointer-events-auto w-full">
                   <button
+                    type="button"
                     onClick={() => setIsLocationModalOpen(false)}
-                    className="w-12 h-12 rounded-2xl bg-white shadow-lg flex items-center justify-center text-gray-900 hover:bg-gray-50 transition-colors shrink-0 border border-gray-100"
+                    className="w-12 h-12 rounded-2xl bg-white shadow-lg flex items-center justify-center text-gray-900 hover:bg-gray-50 transition-colors shrink-0 border border-gray-100 active-press"
                   >
                     <X className="w-6 h-6" />
                   </button>

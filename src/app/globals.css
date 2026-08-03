@@ -148,6 +148,17 @@
     max-width: 100%;
     overflow-x: hidden;
     touch-action: pan-y;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button, a, input, select, textarea, [role="button"] {
+    touch-action: manipulation;
+  }
+  button, [role="button"], a {
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
+  button:not(:disabled), a:not(:disabled), [role="button"]:not(:disabled) {
+    cursor: pointer;
   }
   input, select, textarea {
     font-size: 16px;
@@ -169,6 +180,9 @@
   }
   .premium-shadow {
     @apply shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] transition-shadow duration-500;
+  }
+  .active-press {
+    @apply active:scale-[0.98] transition-transform duration-75;
   }
   .scrollbar-hide::-webkit-scrollbar,
   .hide-scrollbar::-webkit-scrollbar {

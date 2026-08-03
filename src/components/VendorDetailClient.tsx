@@ -382,7 +382,12 @@ export default function VendorDetailClient({
               </div>
             ) : (
               scooters.map((scooter) => (
-                <Link key={scooter.id} href={`/detail/${scooter.id}`} className="bg-white rounded-3xl p-4 flex gap-4 shadow-sm items-center border border-transparent hover:border-gray-100 transition-colors">
+                <Link 
+                  key={scooter.id} 
+                  href={`/detail/${scooter.id}`} 
+                  prefetch={true}
+                  className="bg-white rounded-3xl p-4 flex gap-4 shadow-sm items-center border border-transparent hover:border-gray-100 active-press transition-colors cursor-pointer"
+                >
                   <div className="relative w-24 h-24 rounded-2xl bg-[#F8F9FA] flex items-center justify-center p-2 shrink-0 overflow-hidden">
                     <Image src={scooter.image_url || "/images/scooter.png"} alt={scooter.name} fill sizes="96px" className="object-contain p-1 drop-shadow-md" />
                   </div>
@@ -578,7 +583,8 @@ export default function VendorDetailClient({
                     <Link 
                       key={scooter.id} 
                       href={`/detail/${scooter.id}`}
-                      className="bg-white rounded-3xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+                      prefetch={true}
+                      className="bg-white rounded-3xl p-4 border border-gray-100 shadow-sm hover:shadow-md active-press transition-all flex flex-col justify-between cursor-pointer"
                     >
                       <div>
                         {/* Image Backdrop */}
@@ -712,8 +718,14 @@ export default function VendorDetailClient({
 
       {/* Reviews Modal for Mobile & Desktop */}
       {isReviewModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-lg max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
+        <div 
+          onClick={() => setIsReviewModalOpen(false)}
+          className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl w-full max-w-lg max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200"
+          >
             <div className="p-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white rounded-t-3xl z-10">
               <div>
                 <h3 className="font-bold text-lg">Reviews</h3>
@@ -723,7 +735,11 @@ export default function VendorDetailClient({
                   <span className="text-xs text-gray-500">({reviews.length} reviews)</span>
                 </div>
               </div>
-              <button onClick={() => setIsReviewModalOpen(false)} className="p-2 bg-gray-50 rounded-full hover:bg-gray-100">
+              <button 
+                type="button"
+                onClick={() => setIsReviewModalOpen(false)} 
+                className="p-2 bg-gray-50 rounded-full hover:bg-gray-100 active-press"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -757,11 +773,12 @@ export default function VendorDetailClient({
 
             <div className="p-4 border-t border-gray-100">
               <button 
+                type="button"
                 onClick={() => {
                   setIsReviewModalOpen(false)
                   setIsWriteReviewModalOpen(true)
                 }}
-                className="w-full bg-black text-white font-bold py-3.5 rounded-2xl hover:bg-gray-900 transition-colors"
+                className="w-full bg-black text-white font-bold py-3.5 rounded-2xl hover:bg-gray-900 active-press transition-colors"
               >
                 Write a Review
               </button>
@@ -772,11 +789,21 @@ export default function VendorDetailClient({
 
       {/* Write Review Modal */}
       {isWriteReviewModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-lg p-6 animate-in zoom-in-95 duration-200">
+        <div 
+          onClick={() => setIsWriteReviewModalOpen(false)}
+          className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl w-full max-w-lg p-6 animate-in zoom-in-95 duration-200"
+          >
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-black">Write a Review</h3>
-              <button onClick={() => setIsWriteReviewModalOpen(false)}>
+              <button 
+                type="button"
+                onClick={() => setIsWriteReviewModalOpen(false)}
+                className="active-press"
+              >
                 <X className="w-6 h-6 text-gray-400" />
               </button>
             </div>
