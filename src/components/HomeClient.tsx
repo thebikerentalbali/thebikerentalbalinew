@@ -44,6 +44,7 @@ export default function HomeClient({ initialVendors = [], initialScooters = [], 
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false)
   const [selectedMapVendorId, setSelectedMapVendorId] = useState<number | string | null>(null)
   const [mapSearchQuery, setMapSearchQuery] = useState("")
+  const [isMapCardVisible, setIsMapCardVisible] = useState(true)
 
   // Filter States
   const [isFilterOpen, setIsFilterOpen] = useState(false)
@@ -257,8 +258,19 @@ export default function HomeClient({ initialVendors = [], initialScooters = [], 
         {/* Top Vendors (Story Layout) */}
         {topVendors.length > 0 && (
           <div className="mb-10 md:mb-12">
-            <div className="flex justify-between items-end mb-4 md:mb-6">
+            <div className="flex justify-between items-center mb-4 md:mb-6">
               <h2 className="text-xl md:text-2xl font-bold text-gray-900">Nearby Vendors</h2>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMapCardVisible(true);
+                  openLocationPicker();
+                }}
+                className="flex items-center gap-1.5 text-xs md:text-sm font-bold text-black bg-white hover:bg-black hover:text-white px-3.5 py-1.5 rounded-full border border-gray-200 shadow-xs transition-all active-press cursor-pointer"
+              >
+                <MapPin className="w-3.5 h-3.5" />
+                <span>Explore Map</span>
+              </button>
             </div>
             <div className="flex gap-4 md:gap-8 overflow-x-auto md:overflow-visible pb-2 scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0">
               {topVendors.map((vendor, idx) => (
@@ -616,47 +628,51 @@ export default function HomeClient({ initialVendors = [], initialScooters = [], 
         {isLocationModalOpen && (
           <div 
             onClick={() => setIsLocationModalOpen(false)}
-            className="fixed inset-0 z-[100] flex flex-col bg-black/60 backdrop-blur-xs md:items-center md:justify-center p-0 md:p-6 animate-in fade-in duration-200"
+            className="fixed inset-0 z-[100] flex flex-col bg-black/70 backdrop-blur-sm md:items-center md:justify-center p-0 md:p-6 lg:p-10 animate-in fade-in duration-200"
           >
             <div 
               onClick={(e) => e.stopPropagation()}
-              className="flex flex-col w-full h-full md:h-[650px] md:max-w-4xl bg-white md:rounded-[32px] md:shadow-2xl relative overflow-hidden"
+              className="flex flex-col w-full h-[100dvh] md:h-[82vh] md:max-h-[780px] md:max-w-5xl bg-white md:rounded-[36px] md:shadow-2xl relative overflow-hidden md:border md:border-gray-200"
             >
-              {/* Top Floating Control Bar */}
-              <div className="absolute top-4 left-4 right-4 z-20 flex flex-col gap-2 pointer-events-none">
-                <div className="flex items-center gap-2.5 pointer-events-auto">
+              {/* Top Floating Control Bar (Minimalist Black & White) */}
+              <div className="absolute top-3 left-3 right-3 md:top-5 md:left-5 md:right-5 z-20 flex flex-col gap-2 pointer-events-none">
+                <div className="flex items-center gap-2 pointer-events-auto">
                   {/* Close button */}
                   <button
                     type="button"
                     onClick={() => setIsLocationModalOpen(false)}
-                    className="w-11 h-11 rounded-2xl bg-white text-gray-900 shadow-md border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-transform active:scale-95 shrink-0 cursor-pointer"
+                    className="w-10 h-10 md:w-11 md:h-11 rounded-full bg-black text-white hover:bg-neutral-800 shadow-md flex items-center justify-center transition-transform active:scale-95 shrink-0 cursor-pointer"
+                    aria-label="Close Map"
                   >
                     <X className="w-5 h-5" />
                   </button>
 
                   {/* Search / Filter Area Input */}
-                  <div className="relative flex-1 bg-white rounded-2xl shadow-md border border-gray-100 flex items-center px-3.5 py-2.5">
-                    <Search className="w-4 h-4 text-gray-400 shrink-0 mr-2" />
+                  <div className="relative flex-1 bg-white/95 backdrop-blur-md rounded-full shadow-md border border-gray-200 flex items-center px-3.5 py-2 md:py-2.5">
+                    <Search className="w-4 h-4 text-black shrink-0 mr-2" />
                     <input
                       type="text"
                       value={mapSearchQuery}
-                      onChange={(e) => setMapSearchQuery(e.target.value)}
-                      placeholder="Search area (e.g. Canggu, Ubud, Seminyak, Sanur)..."
-                      className="w-full text-xs md:text-sm font-bold text-gray-900 placeholder-gray-400 outline-none bg-transparent"
+                      onChange={(e) => {
+                        setMapSearchQuery(e.target.value);
+                        setIsMapCardVisible(true);
+                      }}
+                      placeholder="Search area (e.g. Canggu, Ubud, Seminyak)..."
+                      className="w-full text-xs md:text-sm font-semibold text-black placeholder-gray-400 outline-none bg-transparent"
                     />
                     {mapSearchQuery && (
                       <button
                         type="button"
                         onClick={() => setMapSearchQuery("")}
-                        className="text-gray-400 hover:text-black font-bold text-xs px-1 cursor-pointer"
+                        className="text-gray-400 hover:text-black font-bold text-xs px-1.5 cursor-pointer"
                       >
                         ✕
                       </button>
                     )}
                   </div>
 
-                  {/* Vendors Count Badge */}
-                  <div className="hidden sm:flex items-center gap-1.5 bg-black text-white px-3.5 py-2.5 rounded-2xl shadow-md text-xs font-black shrink-0">
+                  {/* Verified Count Badge */}
+                  <div className="hidden sm:flex items-center gap-1.5 bg-black text-white px-3.5 py-2.5 rounded-full shadow-md text-xs font-bold shrink-0">
                     <MapPin className="w-3.5 h-3.5" />
                     <span>{filteredMapVendors.length} Verified</span>
                   </div>
@@ -664,17 +680,20 @@ export default function HomeClient({ initialVendors = [], initialScooters = [], 
 
                 {/* Quick Area Filter Pills */}
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pointer-events-auto scrollbar-hide -mx-1 px-1">
-                  {["All Bali", "Ubud", "Canggu", "Seminyak", "Sanur", "Kuta", "Uluwatu"].map((area) => {
+                  {["All Bali", "Canggu", "Seminyak", "Ubud", "Sanur", "Kuta", "Uluwatu", "Nusa Dua"].map((area) => {
                     const isSelected = area === "All Bali" ? !mapSearchQuery : mapSearchQuery.toLowerCase() === area.toLowerCase();
                     return (
                       <button
                         key={area}
                         type="button"
-                        onClick={() => setMapSearchQuery(area === "All Bali" ? "" : area)}
-                        className={`text-[11px] font-extrabold px-3 py-1.5 rounded-xl whitespace-nowrap shadow-xs transition-all cursor-pointer ${
+                        onClick={() => {
+                          setMapSearchQuery(area === "All Bali" ? "" : area);
+                          setIsMapCardVisible(true);
+                        }}
+                        className={`text-[11px] md:text-xs font-bold px-3.5 py-1.5 rounded-full whitespace-nowrap shadow-xs transition-all cursor-pointer ${
                           isSelected
                             ? "bg-black text-white shadow-sm"
-                            : "bg-white/90 backdrop-blur-md text-gray-800 hover:bg-white border border-gray-200"
+                            : "bg-white/95 backdrop-blur-md text-black hover:bg-black hover:text-white border border-gray-200"
                         }`}
                       >
                         {area}
@@ -691,24 +710,21 @@ export default function HomeClient({ initialVendors = [], initialScooters = [], 
                   selectedVendorId={selectedMapVendor?.id}
                   onVendorClick={(id) => {
                     setSelectedMapVendorId(id);
-                    const v = topVendors.find(vend => String(vend.id) === String(id));
-                    if (v) {
-                      setIsLocationModalOpen(false);
-                      router.push(`/vendor/${v.id}?fromMap=true`);
-                    }
+                    setIsMapCardVisible(true);
                   }}
                   className="w-full h-full"
                 />
               </div>
 
-              {/* Selected / Highlighted Vendor Bottom Drawer Card */}
-              {selectedMapVendor && (
-                <div className="absolute bottom-4 left-4 right-4 z-20 pointer-events-auto">
-                  <div className="bg-white/95 backdrop-blur-md rounded-3xl p-4 md:p-5 shadow-2xl border border-gray-200 max-w-lg mx-auto flex flex-col gap-3 animate-in slide-in-from-bottom duration-200">
+              {/* Selected Vendor Floating Bottom Drawer (Minimalist Black & White) */}
+              {selectedMapVendor && isMapCardVisible && (
+                <div className="absolute bottom-3 left-3 right-3 md:bottom-5 md:left-5 md:right-auto md:max-w-md z-20 pointer-events-auto animate-in slide-in-from-bottom-4 duration-200">
+                  <div className="bg-white/95 backdrop-blur-md rounded-3xl p-4 md:p-5 shadow-2xl border border-gray-200 flex flex-col gap-3">
+                    {/* Header Row */}
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0">
-                        {/* Vendor Logo */}
-                        <div className="w-12 h-12 rounded-2xl bg-black text-white font-black text-sm flex items-center justify-center shrink-0 border border-black overflow-hidden shadow-xs">
+                        {/* Vendor Avatar */}
+                        <div className="w-12 h-12 rounded-2xl bg-black text-white font-extrabold text-sm flex items-center justify-center shrink-0 border border-black overflow-hidden shadow-xs">
                           {selectedMapVendor.logo || selectedMapVendor.logo_url || selectedMapVendor.image_url ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img 
@@ -726,8 +742,8 @@ export default function HomeClient({ initialVendors = [], initialScooters = [], 
                             <h4 className="font-extrabold text-base text-gray-900 truncate leading-tight">
                               {selectedMapVendor.name}
                             </h4>
-                            <span className="flex items-center gap-0.5 bg-yellow-50 text-yellow-800 text-[11px] font-black px-1.5 py-0.5 rounded-md border border-yellow-200">
-                              <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                            <span className="flex items-center gap-1 bg-black text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full">
+                              <Star className="w-3 h-3 fill-white text-white" />
                               <span>{selectedMapVendor.rating ? Number(selectedMapVendor.rating).toFixed(1) : '5.0'}</span>
                             </span>
                           </div>
@@ -737,6 +753,16 @@ export default function HomeClient({ initialVendors = [], initialScooters = [], 
                           </p>
                         </div>
                       </div>
+
+                      {/* Minimize Card Button */}
+                      <button
+                        type="button"
+                        onClick={() => setIsMapCardVisible(false)}
+                        className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-black flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                        title="Minimize"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
                     </div>
 
                     {selectedMapVendor.delivery_area && (
@@ -745,20 +771,33 @@ export default function HomeClient({ initialVendors = [], initialScooters = [], 
                       </p>
                     )}
 
-                    <div className="flex items-center gap-2 pt-1">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsLocationModalOpen(false);
-                          router.push(`/vendor/${selectedMapVendor.id}?fromMap=true`);
-                        }}
-                        className="flex-1 bg-black hover:bg-neutral-800 text-white font-extrabold text-xs md:text-sm py-3 px-4 rounded-2xl transition-all shadow-md active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
-                      >
-                        <span>View Vendor Profile & Fleet</span>
-                        <span>→</span>
-                      </button>
-                    </div>
+                    {/* CTA Button */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsLocationModalOpen(false);
+                        router.push(`/vendor/${selectedMapVendor.id}?fromMap=true`);
+                      }}
+                      className="w-full bg-black hover:bg-neutral-800 text-white font-bold text-xs md:text-sm py-3 px-4 rounded-2xl transition-all shadow-md active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <span>View Scooters & Profile</span>
+                      <span>→</span>
+                    </button>
                   </div>
+                </div>
+              )}
+
+              {/* Show card pill button if minimized */}
+              {selectedMapVendor && !isMapCardVisible && (
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 pointer-events-auto">
+                  <button
+                    type="button"
+                    onClick={() => setIsMapCardVisible(true)}
+                    className="bg-black text-white text-xs font-bold px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2 hover:bg-neutral-800 transition-all cursor-pointer active-press"
+                  >
+                    <MapPin className="w-3.5 h-3.5" />
+                    <span>Show {selectedMapVendor.name}</span>
+                  </button>
                 </div>
               )}
             </div>

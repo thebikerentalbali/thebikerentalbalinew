@@ -5,13 +5,10 @@ import { ChevronLeft, MapPin, Star, Share, X, BadgeCheck, MessageCircle, Check, 
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
-import dynamic from "next/dynamic"
 import { createClient } from '@/lib/supabase/client'
 import { fetchVendorDetail } from '@/lib/api/catalogService'
 import { clientCache } from '@/lib/cache/clientCache'
 import { subscribeToPlatformSettings } from '@/utils/pricing'
-
-const MapPicker = dynamic(() => import('@/components/MapPicker'), { ssr: false })
 
 interface VendorDetailClientProps {
   id: string
@@ -443,15 +440,6 @@ export default function VendorDetailClient({
               </a>
             </div>
 
-            <div className="h-[200px] w-full rounded-2xl overflow-hidden border border-gray-100 relative">
-              <MapPicker
-                vendors={[vendor]}
-                selectedVendorId={vendor.id}
-                zoom={14}
-                className="w-full h-full"
-              />
-            </div>
-
             {vendor.delivery_area && (
               <p className="text-xs text-gray-600 bg-gray-50 p-2.5 rounded-xl border border-gray-100">
                 🚚 <strong>Delivery Coverage:</strong> {vendor.delivery_area}
@@ -750,16 +738,6 @@ export default function VendorDetailClient({
                   <ExternalLink className="w-3 h-3" />
                 </a>
               </div>
-
-              {/* Leaflet Map Preview */}
-              <div className="h-[180px] w-full rounded-2xl overflow-hidden border border-gray-100 relative">
-                <MapPicker
-                  vendors={[vendor]}
-                  selectedVendorId={vendor.id}
-                  zoom={14}
-                  className="w-full h-full"
-                />
-              </div>
               
               <div className="space-y-3 text-sm pt-1">
                 <div>
@@ -1003,15 +981,6 @@ export default function VendorDetailClient({
                     <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
                     <span>Dispatched from: {vendor.address || 'Bali, Indonesia'}</span>
                   </p>
-                </div>
-
-                <div className="h-[180px] w-full rounded-2xl overflow-hidden border border-gray-200 relative">
-                  <MapPicker
-                    vendors={[vendor]}
-                    selectedVendorId={vendor.id}
-                    zoom={14}
-                    className="w-full h-full"
-                  />
                 </div>
 
                 <div className="flex items-center gap-2">
