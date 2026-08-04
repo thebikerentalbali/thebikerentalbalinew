@@ -400,9 +400,9 @@ export default function VendorDetailClient({
                       </div>
                     </div>
                     <h4 className="font-semibold text-gray-900 text-[15px] mb-1 truncate">{scooter.name}</h4>
-                    <div className="flex items-end mt-2">
+                    <div className="flex items-baseline gap-1 mt-2">
                       <span className="text-lg font-bold text-gray-900 leading-none">Rp {scooter.price_daily?.toLocaleString('id-ID') || scooter.price_daily}</span>
-                      <span className="text-xs text-gray-500 font-medium ml-1 mb-0.5">/Day</span>
+                      <span className="text-xs text-gray-400 font-semibold">Daily</span>
                     </div>
                   </div>
                 </Link>
@@ -616,14 +616,14 @@ export default function VendorDetailClient({
 
                       {/* Price & CTA */}
                       <div className="pt-3 border-t border-gray-50 flex items-center justify-between mt-3">
-                        <div>
+                        <div className="flex items-baseline gap-1">
                           <span className="text-lg font-bold text-gray-900 leading-none">
                             Rp {scooter.price_daily?.toLocaleString('id-ID') || scooter.price_daily}
                           </span>
-                          <span className="text-xs text-gray-500 font-medium ml-1">/day</span>
+                          <span className="text-xs text-gray-400 font-semibold">Daily</span>
                         </div>
-                        <span className="text-xs font-semibold bg-black text-white px-4 py-2 rounded-full hover:bg-gray-800 transition-colors">
-                          Book
+                        <span className="text-xs font-bold bg-black text-white px-4 py-2 rounded-full hover:bg-neutral-800 transition-colors">
+                          Book Now
                         </span>
                       </div>
                     </Link>

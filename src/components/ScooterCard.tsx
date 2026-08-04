@@ -39,7 +39,7 @@ function ScooterCardComponent({
         >
           {/* Badge */}
           <div className="absolute top-6 left-6 md:top-8 md:left-8 bg-white/95 backdrop-blur-sm px-3 md:px-4 py-1.5 rounded-full flex items-center gap-1.5 z-20 shadow-xs border border-gray-100">
-            <span className="text-xs md:text-sm font-extrabold text-gray-900">{scooter.year || "2024"}</span>
+            <span className="text-xs md:text-sm font-extrabold text-gray-900">{scooter.year || "2025"}</span>
           </div>
 
           {/* Save Button */}
@@ -76,17 +76,19 @@ function ScooterCardComponent({
           </div>
 
           {/* Info */}
-          <div className="flex items-end justify-between px-2 pb-2">
-            <div>
-              <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">{scooter.name}</h3>
-              <p className="text-gray-500 text-sm md:text-base">
-                <span className="font-extrabold text-gray-900 text-[16px] md:text-[18px]">
+          <div className="flex items-center justify-between px-1 pb-1 gap-3">
+            <div className="min-w-0 flex-1">
+              <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-0.5 truncate">{scooter.name}</h3>
+              <div className="flex flex-col">
+                <span className="font-extrabold text-gray-900 text-[16px] sm:text-[18px] leading-tight">
                   Rp {price.toLocaleString()}
-                </span>{" "}
-                /{durationFilter}
-              </p>
+                </span>
+                <span className="text-[12px] font-semibold text-gray-400 mt-0.5">
+                  {durationFilter}
+                </span>
+              </div>
             </div>
-            <span className="bg-black text-white px-5 md:px-6 py-2.5 md:py-3 rounded-full text-sm md:text-base font-semibold pointer-events-none transition-colors">
+            <span className="bg-black text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap shrink-0 pointer-events-none transition-all group-hover:bg-neutral-800 shadow-xs">
               Book Now
             </span>
           </div>
@@ -123,7 +125,7 @@ function ScooterCardComponent({
           </button>
           <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-2.5 md:px-3 py-1 md:py-1.5 rounded-full flex items-center gap-1 md:gap-1.5 z-10 shadow-sm border border-gray-100">
             <span className="text-[11px] md:text-[13px] font-extrabold text-gray-900">
-              {scooter.year || "2024"}
+              {scooter.year || "2025"}
             </span>
           </div>
           <Image
@@ -140,16 +142,18 @@ function ScooterCardComponent({
             <h3 className="text-[14px] md:text-[16px] font-bold text-gray-900 mb-0.5 truncate">
               {scooter.name}
             </h3>
-            <p className="text-gray-500 text-xs md:text-sm">
-              <span className="font-extrabold text-gray-900 text-[13px] md:text-[15px]">
+            <div className="flex flex-col">
+              <span className="font-extrabold text-gray-900 text-[13px] md:text-[15px] leading-tight">
                 Rp {price.toLocaleString()}
-              </span>{" "}
-              /{durationFilter}
-            </p>
+              </span>
+              <span className="text-[11px] font-semibold text-gray-400 mt-0.5">
+                {durationFilter}
+              </span>
+            </div>
           </div>
           <div className="mt-3">
-            <span className="w-full bg-black text-white py-2 rounded-xl text-xs md:text-sm font-semibold flex items-center justify-center group-hover:bg-neutral-800 transition-colors">
-              Book
+            <span className="w-full bg-black text-white py-2 rounded-xl text-xs md:text-sm font-bold whitespace-nowrap flex items-center justify-center group-hover:bg-neutral-800 transition-colors">
+              Book Now
             </span>
           </div>
         </div>

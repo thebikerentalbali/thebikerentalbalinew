@@ -97,12 +97,14 @@ function HomeSavedModalComponent({
                         </span>
                       </div>
                     </div>
-                    <p className="text-[13px] font-extrabold text-gray-900 mt-1">
-                      Rp {price.toLocaleString()}{" "}
-                      <span className="text-gray-500 font-medium text-[11px]">
-                        /{durationFilter}
+                    <div className="flex items-baseline gap-1.5 mt-1">
+                      <span className="text-[14px] font-extrabold text-gray-900">
+                        Rp {price.toLocaleString()}
                       </span>
-                    </p>
+                      <span className="text-gray-400 font-semibold text-[11px]">
+                        {durationFilter}
+                      </span>
+                    </div>
                   </div>
                   <button
                     type="button"
