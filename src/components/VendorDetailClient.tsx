@@ -8,13 +8,8 @@ import {
   Share, 
   X, 
   BadgeCheck, 
-  MessageCircle, 
   Check, 
-  ExternalLink,
-  Bike,
-  ShieldCheck,
-  ChevronRight,
-  Sparkles
+  Bike
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -143,13 +138,6 @@ export default function VendorDetailClient({
     }
   }
 
-  const getWhatsAppUrl = () => {
-    const phone = vendor?.phone?.replace(/[^0-9]/g, "") || "6281234567890"
-    const cleanPhone = phone.startsWith("0") ? "62" + phone.substring(1) : phone
-    const message = encodeURIComponent(`Hi ${vendor?.name || "there"}, I found your scooter rental on The Bike Rental Bali and would like to inquire about bike availability.`)
-    return `https://wa.me/${cleanPhone}?text=${message}`
-  }
-
   if (loading) {
     return (
       <div className="min-h-screen bg-[#F0F2F5] flex items-center justify-center">
@@ -178,446 +166,542 @@ export default function VendorDetailClient({
   const totalFleetCount = scooters.reduce((sum, s) => sum + (s.total_units || 1), 0)
   const totalAvailableCount = scooters.reduce((sum, s) => sum + (s.available_units || 1), 0)
 
+  // GetYourGuide-style cover photo
+  const coverImage = vendor.image_url || (scooters.length > 0 && scooters[0]?.image_url ? scooters[0].image_url : null)
+
   return (
     <div className="min-h-screen bg-[#F0F2F5] text-black antialiased w-full max-w-full overflow-x-hidden pb-16">
       
       {/* ======================================================== */}
-      {/* TOP HEADER & BREADCRUMB NAVIGATION                      */}
+      {/* MOBILE LAYOUT (SM & DOWN)                                */}
       {/* ======================================================== */}
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
-        <div className="flex items-center justify-between gap-3 mb-4 sm:mb-6">
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={handleBack} 
-              aria-label="Go Back"
-              className="w-11 h-11 bg-white rounded-full flex items-center justify-center text-black border border-gray-200/80 shadow-xs hover:bg-neutral-100 transition-all active-press cursor-pointer shrink-0"
-            >
-              <ChevronLeft className="w-5 h-5 text-black" />
-            </button>
-            <nav className="hidden sm:flex items-center gap-2 text-xs font-medium text-gray-500">
-              <Link href="/" className="hover:text-black transition-colors">Home</Link>
-              <span>/</span>
-              <span className="text-gray-400">Garages</span>
-              <span>/</span>
-              <span className="text-gray-900 font-bold truncate max-w-[200px]">{vendor.name}</span>
-            </nav>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={handleShare}
-              aria-label="Share Vendor Profile"
-              className="bg-white border border-gray-200/80 text-black hover:bg-neutral-100 px-4 py-2.5 rounded-full text-xs font-extrabold flex items-center gap-2 shadow-xs transition-all active-press cursor-pointer"
-            >
-              {copiedLink ? <Check className="w-4 h-4 text-black" /> : <Share className="w-4 h-4 text-black" />}
-              <span className="hidden sm:inline">{copiedLink ? "Copied!" : "Share Profile"}</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* ======================================================== */}
-      {/* MAIN RESPONSIVE CONTAINER                                */}
-      {/* ======================================================== */}
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
+      <div className="block md:hidden">
         
-        {/* ========================================================================= */}
-        {/* 1. STOREFRONT HERO BANNER & HOST DETAILS                                  */}
-        {/* ========================================================================= */}
-        <section aria-labelledby="vendor-title-heading" className="bg-white rounded-[32px] p-6 sm:p-8 md:p-10 shadow-xs border border-gray-200/80 relative overflow-hidden">
-          
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        {/* GetYourGuide-style Mobile Header Card with Cover Image */}
+        <header className="px-4 pt-4">
+          <div className="bg-white rounded-[32px] shadow-xs border border-gray-100 overflow-hidden relative">
             
-            {/* Host Identity & Details */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+            {/* 1. Cover Photo Banner */}
+            <div className="relative h-44 w-full bg-neutral-100 overflow-hidden">
+              {coverImage ? (
+                <Image 
+                  src={coverImage} 
+                  alt={vendor.name} 
+                  fill 
+                  priority 
+                  sizes="100vw" 
+                  className="object-cover" 
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-r from-neutral-200 to-neutral-300" />
+              )}
               
-              {/* Host Avatar / Logo */}
-              <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-2 border-white shadow-md bg-neutral-100 flex items-center justify-center font-black text-2xl text-black shrink-0">
+              {/* Top Action Overlay (Back & Share) */}
+              <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-20">
+                <button 
+                  onClick={handleBack} 
+                  aria-label="Go Back"
+                  className="w-10 h-10 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center text-black shadow-xs border border-gray-100 active-press cursor-pointer"
+                >
+                  <ChevronLeft className="w-5 h-5 text-black" />
+                </button>
+
+                <button 
+                  onClick={handleShare}
+                  aria-label="Share Vendor Profile"
+                  className="w-10 h-10 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center text-black shadow-xs border border-gray-100 active-press cursor-pointer"
+                >
+                  {copiedLink ? <Check className="w-4 h-4 text-black" /> : <Share className="w-4 h-4 text-black" />}
+                </button>
+              </div>
+            </div>
+
+            {/* 2. Provider Profile Details with Overlapping Logo */}
+            <div className="px-5 pb-5 pt-0">
+              
+              {/* Overlapping Circular Logo */}
+              <div className="relative -mt-12 mb-3 z-10 w-22 h-22 rounded-full overflow-hidden border-4 border-white shadow-md bg-white flex items-center justify-center">
                 {vendor.logo || vendor.image_url ? (
                   <Image 
                     src={vendor.logo || vendor.image_url} 
                     alt={vendor.name} 
                     fill 
-                    sizes="(max-width: 640px) 80px, 96px" 
+                    sizes="88px" 
                     className="object-cover" 
                   />
                 ) : (
-                  <span>{vendor.name?.slice(0, 2).toUpperCase() || "VN"}</span>
+                  <span className="font-extrabold text-2xl text-gray-700">{vendor.name?.slice(0, 2).toUpperCase() || "VN"}</span>
                 )}
               </div>
 
-              {/* Title & Location */}
-              <div>
-                <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                  <h1 id="vendor-title-heading" className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">
-                    {vendor.name}
-                  </h1>
-                  <span className="bg-black text-white text-[11px] font-extrabold px-3 py-1 rounded-full flex items-center gap-1 shadow-2xs">
-                    <BadgeCheck className="w-3.5 h-3.5 text-white" />
-                    <span>Verified Partner</span>
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 font-medium mt-1">
-                  <MapPin className="w-4 h-4 text-black shrink-0" />
-                  <span className="leading-snug">{vendor.address || "Bali, Indonesia"}</span>
+              {/* Title & Verified Badge */}
+              <div className="flex flex-wrap items-center gap-2 mb-1">
+                <h1 className="text-xl font-extrabold text-gray-900 leading-tight">
+                  {vendor.name}
+                </h1>
+                <div className="flex items-center gap-1 bg-black text-white px-2.5 py-0.5 rounded-full shadow-2xs">
+                  <BadgeCheck className="w-3 h-3 text-white" />
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider">Verified Partner</span>
                 </div>
               </div>
 
-            </div>
-
-            {/* Direct Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full md:w-auto shrink-0">
-              <a 
-                href={getWhatsAppUrl()}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-black hover:bg-neutral-800 text-white font-extrabold px-6 py-3.5 rounded-full text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all active-press"
-              >
-                <MessageCircle className="w-4 h-4 text-white" />
-                <span>Chat on WhatsApp</span>
-              </a>
-
-              <a
-                href={
-                  vendor.lat && vendor.lng && Number(vendor.lat) !== 0
-                    ? `https://www.google.com/maps/search/?api=1&query=${Number(vendor.lat)},${Number(vendor.lng)}`
-                    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(vendor.name + " " + (vendor.address || "Bali Indonesia"))}`
-                }
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-white hover:bg-neutral-100 border border-gray-200/90 text-black font-extrabold px-5 py-3.5 rounded-full text-xs sm:text-sm flex items-center justify-center gap-2 shadow-2xs transition-all active-press"
-              >
-                <MapPin className="w-4 h-4 text-black" />
-                <span>Directions</span>
-                <ExternalLink className="w-3.5 h-3.5 text-gray-400" />
-              </a>
-            </div>
-
-          </div>
-
-          {/* Quick Metrics Bar */}
-          <div className="grid grid-cols-3 gap-3 border-t border-gray-100 pt-6 mt-6 sm:mt-8">
-            
-            {/* Rating */}
-            <div 
-              onClick={() => setIsReviewModalOpen(true)}
-              className="text-center cursor-pointer hover:opacity-80 transition-opacity"
-            >
-              <div className="flex items-center justify-center gap-1">
-                <Star className="w-4 h-4 fill-black text-black" />
-                <span className="font-black text-xl sm:text-2xl text-gray-900">
-                  {vendor.rating ? Number(vendor.rating).toFixed(1) : "5.0"}
-                </span>
+              {/* Address */}
+              <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium mt-1">
+                <MapPin className="w-3.5 h-3.5 text-black shrink-0" />
+                <span className="truncate max-w-[280px]">{vendor.address || "Bali, Indonesia"}</span>
               </div>
-              <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider mt-0.5 block">
-                {reviews.length}+ Reviews
-              </span>
-            </div>
 
-            {/* Total Fleet */}
-            <div className="text-center border-x border-gray-100">
-              <span className="font-black text-xl sm:text-2xl text-gray-900">
-                {totalFleetCount}
-              </span>
-              <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider mt-0.5 block">
-                Bikes in Fleet
-              </span>
-            </div>
+              {/* Stats Row */}
+              <div className="flex items-center justify-between border-t border-b border-gray-100 py-3.5 my-4">
+                {/* Rating */}
+                <div className="flex flex-col items-center justify-center flex-1 cursor-pointer" onClick={() => setIsReviewModalOpen(true)}>
+                  <div className="flex items-center gap-1">
+                    <Star className="w-4 h-4 fill-black text-black" />
+                    <span className="font-extrabold text-lg text-gray-900">{vendor.rating ? Number(vendor.rating).toFixed(1) : "5.0"}</span>
+                  </div>
+                  <span className="text-[10px] text-gray-400 font-bold mt-0.5 uppercase tracking-wider">rating</span>
+                </div>
 
-            {/* Available Ready */}
-            <div className="text-center">
-              <span className="font-black text-xl sm:text-2xl text-gray-900">
-                {totalAvailableCount}
-              </span>
-              <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider mt-0.5 block">
-                Ready to Ride
-              </span>
-            </div>
+                <div className="w-px h-6 bg-gray-200" />
 
-          </div>
+                {/* Reviews */}
+                <div className="flex flex-col items-center justify-center flex-1 cursor-pointer" onClick={() => setIsReviewModalOpen(true)}>
+                  <span className="font-extrabold text-lg text-gray-900">{reviews.length}+</span>
+                  <span className="text-[10px] text-gray-400 font-bold mt-0.5 uppercase tracking-wider">reviews</span>
+                </div>
 
-        </section>
+                <div className="w-px h-6 bg-gray-200" />
 
+                {/* Scooters Count */}
+                <div className="flex flex-col items-center justify-center flex-1">
+                  <span className="font-extrabold text-lg text-gray-900">{totalFleetCount}</span>
+                  <span className="text-[10px] text-gray-400 font-bold mt-0.5 uppercase tracking-wider">scooters</span>
+                </div>
+              </div>
 
-        {/* ========================================================================= */}
-        {/* 2. UPLOADED SCOOTER PHOTO SHOWCASE / FLEET GALLERY                        */}
-        {/* ========================================================================= */}
-        {scooters.length > 0 && (
-          <section aria-labelledby="fleet-gallery-heading" className="bg-white rounded-[32px] p-6 sm:p-8 shadow-xs border border-gray-200/80 space-y-4">
-            
-            <div className="flex items-center justify-between">
+              {/* Swipeable Reviews directly under vendor info */}
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-widest text-gray-400 block mb-0.5">
-                  Garage Visual Showcase
-                </span>
-                <h2 id="fleet-gallery-heading" className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">
-                  Uploaded Fleet Vehicles ({scooters.length})
-                </h2>
-              </div>
-              <span className="text-xs font-bold text-gray-500 bg-[#F8F9FA] border border-gray-200 px-3 py-1 rounded-full">
-                Real Photos
-              </span>
-            </div>
-
-            {/* Horizontal Scrollable Gallery Strip */}
-            <style jsx>{`
-              .hide-scrollbar::-webkit-scrollbar { display: none; }
-              .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-            `}</style>
-            
-            <div className="flex overflow-x-auto gap-4 pb-2 pt-1 snap-x hide-scrollbar">
-              {scooters.map((scooter) => {
-                const formattedBikeName = formatTitleCase(scooter.name)
-                return (
-                  <Link
-                    key={scooter.id}
-                    href={`/detail/${scooter.id}`}
-                    prefetch={true}
-                    className="snap-start shrink-0 w-[240px] sm:w-[280px] bg-[#F8F9FA] rounded-[24px] p-3.5 border border-gray-200/80 hover:border-black transition-all group active-press flex flex-col justify-between"
-                  >
-                    {/* Visual Photo Box */}
-                    <div className="relative w-full h-40 sm:h-44 rounded-2xl bg-white flex items-center justify-center p-3 mb-3 overflow-hidden border border-gray-100 shadow-2xs">
-                      {/* Brand Tag */}
-                      <span className="absolute top-2.5 left-2.5 text-[10px] font-extrabold tracking-wider uppercase text-gray-600 bg-neutral-100 px-2 py-0.5 rounded-full z-10">
-                        {scooter.brand || "Scooter"}
-                      </span>
-
-                      {/* Black & White Available Badge */}
-                      <div className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-black text-white px-2 py-0.5 rounded-full shadow-2xs z-10">
-                        <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
-                        <span className="text-[9px] font-extrabold uppercase tracking-wider">
-                          {scooter.available_units || 1} AVAILABLE
-                        </span>
+                <style jsx>{`
+                  .hide-scrollbar::-webkit-scrollbar { display: none; }
+                  .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+                `}</style>
+                <div className="flex overflow-x-auto gap-3 pb-2 snap-x hide-scrollbar">
+                  {reviews.slice(0, 5).map((review) => (
+                    <div key={review.id} className="snap-start shrink-0 w-[260px] bg-[#F8F9FA] rounded-2xl p-3.5 border border-gray-200/80 flex flex-col justify-between">
+                      <div>
+                        <div className="flex gap-0.5 mb-2">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className={`w-3.5 h-3.5 ${i < (review.rating || 5) ? "fill-black text-black" : "fill-gray-200 text-gray-200"}`} />
+                          ))}
+                        </div>
+                        <p className="text-xs text-gray-600 line-clamp-3 mb-2 font-medium">"{review.comment}"</p>
                       </div>
-
-                      {/* Scooter Photo */}
-                      <Image 
-                        src={scooter.image_url || "/images/scooter.png"} 
-                        alt={`${formattedBikeName} rental`} 
-                        fill
-                        sizes="(max-width: 640px) 240px, 280px"
-                        className="object-contain p-2 drop-shadow-md group-hover:scale-105 transition-transform duration-300"
-                      />
+                      <p className="font-extrabold text-xs text-gray-900">- {review.user_name || "Guest"}</p>
                     </div>
-
-                    {/* Scooter Name & Specs */}
-                    <div>
-                      <h3 className="font-extrabold text-gray-900 text-sm truncate group-hover:text-black">
-                        {formattedBikeName}
-                      </h3>
-                      <p className="text-[11px] text-gray-500 font-medium mt-0.5">
-                        {scooter.year || "2025"} • {scooter.engine || "125 cc"} • {scooter.transmission || "Automatic"}
-                      </p>
-                    </div>
-
-                    {/* Price & Book Row */}
-                    <div className="pt-2.5 border-t border-gray-200/70 flex items-center justify-between mt-2.5">
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-sm font-black text-gray-900">
-                          Rp {scooter.price_daily?.toLocaleString("id-ID") || scooter.price_daily}
-                        </span>
-                        <span className="text-[10px] text-gray-400 font-semibold">/ day</span>
-                      </div>
-                      <span className="text-[11px] font-extrabold bg-black text-white px-3 py-1 rounded-full group-hover:bg-neutral-800 transition-colors shadow-2xs">
-                        View
-                      </span>
-                    </div>
-                  </Link>
-                )
-              })}
-            </div>
-
-          </section>
-        )}
-
-
-        {/* ========================================================================= */}
-        {/* 3. AVAILABLE SCOOTERS LISTINGS GRID & BRAND FILTER                        */}
-        {/* ========================================================================= */}
-        <section aria-labelledby="catalog-heading" className="space-y-5">
-          
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div>
-              <span className="text-[11px] font-bold uppercase tracking-widest text-gray-400 block mb-0.5">
-                Garage Fleet Selection
-              </span>
-              <h2 id="catalog-heading" className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">
-                Available Scooter Listings
-              </h2>
-            </div>
-
-            {/* Brand Filter Tabs */}
-            {availableBrands.length > 1 && (
-              <div className="flex items-center gap-1.5 bg-white p-1 rounded-full border border-gray-200 shadow-2xs overflow-x-auto max-w-full">
-                {availableBrands.map((brand) => (
-                  <button
-                    key={brand}
-                    onClick={() => setSelectedBrand(brand)}
-                    className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                      selectedBrand === brand
-                        ? "bg-black text-white shadow-xs"
-                        : "text-gray-600 hover:text-black"
-                    }`}
+                  ))}
+                  {reviews.length === 0 && (
+                    <div className="w-full text-center py-4 text-xs text-gray-500">No reviews yet. Be the first!</div>
+                  )}
+                </div>
+                <div className="flex items-center gap-2.5 mt-3">
+                  <button 
+                    onClick={() => setIsWriteReviewModalOpen(true)}
+                    className="flex-1 bg-black text-white font-extrabold py-2.5 rounded-full text-xs hover:bg-neutral-800 transition-colors shadow-xs active-press"
                   >
-                    {brand}
+                    Write a Review
                   </button>
-                ))}
+                  {reviews.length > 0 && (
+                    <button 
+                      onClick={() => setIsReviewModalOpen(true)}
+                      className="flex-1 bg-white border border-gray-200 text-black font-extrabold py-2.5 rounded-full text-xs hover:bg-gray-50 transition-colors active-press"
+                    >
+                      See More
+                    </button>
+                  )}
+                </div>
               </div>
-            )}
+
+            </div>
+          </div>
+        </header>
+
+        {/* Available Scooters on Mobile (Original Clean Design) */}
+        <div className="px-4 mt-6">
+          <div className="flex items-center justify-between mb-3 px-1">
+            <h2 className="text-base font-extrabold text-gray-900 tracking-tight">Available Scooters</h2>
+            <span className="text-xs font-bold text-gray-500 bg-white border border-gray-200 px-2.5 py-0.5 rounded-full">{scooters.length} bikes</span>
           </div>
 
-          {filteredScooters.length === 0 ? (
-            <div className="bg-white rounded-[32px] p-12 text-center border border-gray-200/80">
-              <Bike className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-              <p className="text-gray-500 font-medium text-sm">No scooters found for this filter.</p>
-              <button 
-                onClick={() => setSelectedBrand("All")}
-                className="mt-4 text-xs font-bold bg-black text-white px-5 py-2.5 rounded-full hover:bg-neutral-800"
-              >
-                Show All Scooters
-              </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filteredScooters.map((scooter) => {
-                const formattedBikeName = formatTitleCase(scooter.name)
+          <div className="space-y-3">
+            {scooters.length === 0 ? (
+              <div className="text-center py-8 bg-white rounded-3xl p-6 border border-gray-100">
+                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
+                  <MapPin className="w-6 h-6 text-gray-400" />
+                </div>
+                <p className="text-gray-500 font-medium text-xs">No scooters available right now</p>
+              </div>
+            ) : (
+              scooters.map((scooter) => {
+                const formattedName = formatTitleCase(scooter.name)
                 return (
                   <Link 
                     key={scooter.id} 
-                    href={`/detail/${scooter.id}`}
+                    href={`/detail/${scooter.id}`} 
                     prefetch={true}
-                    className="bg-white rounded-[32px] p-5 border border-gray-200/80 shadow-xs hover:shadow-md active-press transition-all flex flex-col justify-between group cursor-pointer"
+                    className="bg-white rounded-3xl p-4 flex gap-3.5 shadow-xs items-center border border-gray-200/80 active-press transition-colors cursor-pointer"
                   >
-                    <div>
-                      {/* Image Backdrop Box */}
-                      <div className="relative w-full h-48 sm:h-52 bg-[#F8F9FA] rounded-2xl flex items-center justify-center p-3 mb-4 overflow-hidden border border-gray-100">
-                        {/* Brand Tag */}
-                        <span className="absolute top-3 left-3 text-[10px] font-extrabold tracking-wider uppercase text-gray-600 bg-white border border-gray-200/80 px-2.5 py-0.5 rounded-full z-10">
+                    <div className="relative w-24 h-24 rounded-2xl bg-[#F8F9FA] flex items-center justify-center p-2 shrink-0 overflow-hidden border border-gray-100">
+                      <Image 
+                        src={scooter.image_url || "/images/scooter.png"} 
+                        alt={formattedName} 
+                        fill 
+                        sizes="96px" 
+                        className="object-contain p-1 drop-shadow-md" 
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[10px] font-bold tracking-wider uppercase text-gray-500 bg-[#F8F9FA] px-2 py-0.5 rounded-full border border-gray-200/60">
                           {scooter.brand || "Scooter"}
                         </span>
-                        
                         {/* Black and White Available Label */}
-                        <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-black text-white px-2.5 py-1 rounded-full shadow-xs z-10">
+                        <div className="flex items-center gap-1.5 bg-black text-white px-2.5 py-0.5 rounded-full shadow-2xs">
                           <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
                           <span className="text-[10px] font-extrabold uppercase tracking-wider">
                             {scooter.available_units || 1} AVAILABLE
                           </span>
                         </div>
-
-                        {/* Uploaded Scooter Image */}
-                        <Image 
-                          src={scooter.image_url || "/images/scooter.png"} 
-                          alt={`${formattedBikeName} rental`} 
-                          fill
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                          className="object-contain p-3 drop-shadow-md group-hover:scale-105 transition-transform duration-300" 
-                        />
                       </div>
-
-                      {/* Title & Specs */}
-                      <h3 className="font-extrabold text-gray-900 text-base sm:text-lg mb-1 group-hover:text-black transition-colors truncate">
-                        {formattedBikeName}
-                      </h3>
-                      <p className="text-xs text-gray-500 font-medium">
-                        {scooter.year || "2025"} • {scooter.engine || "125 cc"} • {scooter.transmission || "Automatic CVT"}
-                      </p>
-                    </div>
-
-                    {/* Price & CTA */}
-                    <div className="pt-4 border-t border-gray-100 flex items-center justify-between mt-4">
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-lg font-black text-gray-900 leading-none">
+                      <h3 className="font-extrabold text-gray-900 text-sm mb-1 truncate">{formattedName}</h3>
+                      <div className="flex items-baseline gap-1 mt-1.5">
+                        <span className="text-base font-black text-gray-900 leading-none">
                           Rp {scooter.price_daily?.toLocaleString("id-ID") || scooter.price_daily}
                         </span>
-                        <span className="text-xs text-gray-400 font-semibold">/ day</span>
+                        <span className="text-xs text-gray-400 font-semibold">Daily</span>
                       </div>
-                      <span className="text-xs font-extrabold bg-black text-white px-5 py-2.5 rounded-full group-hover:bg-neutral-800 transition-colors shadow-2xs">
-                        Book Now
-                      </span>
                     </div>
                   </Link>
                 )
-              })}
-            </div>
-          )}
-
-        </section>
-
-
-        {/* ========================================================================= */}
-        {/* 4. CUSTOMER REVIEWS & RATINGS                                             */}
-        {/* ========================================================================= */}
-        <section aria-labelledby="reviews-heading" className="bg-white rounded-[32px] p-6 sm:p-8 md:p-10 shadow-xs border border-gray-200/80">
-          
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-            <div>
-              <span className="text-[11px] font-bold uppercase tracking-widest text-gray-400 block mb-0.5">
-                Verified Feedback
-              </span>
-              <h2 id="reviews-heading" className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">
-                Customer Reviews ({reviews.length})
-              </h2>
-            </div>
-            
-            <button 
-              onClick={() => setIsWriteReviewModalOpen(true)}
-              className="text-xs font-extrabold bg-black text-white px-5 py-3 rounded-full hover:bg-neutral-800 transition-colors shadow-xs active-press cursor-pointer"
-            >
-              Write a Review
-            </button>
-          </div>
-
-          {/* Reviews Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {reviews.slice(0, 6).map((review) => (
-              <div key={review.id} className="bg-[#F8F9FA] rounded-2xl p-4 sm:p-5 flex flex-col justify-between border border-gray-200/80">
-                <div>
-                  <div className="flex items-center gap-0.5 mb-2.5">
-                    {[...Array(review.rating || 5)].map((_, i) => (
-                      <Star key={i} className={`w-3.5 h-3.5 ${i < (review.rating || 5) ? "fill-black text-black" : "fill-gray-200 text-gray-200"}`} />
-                    ))}
-                  </div>
-                  <p className="text-xs sm:text-sm text-gray-600 font-medium mb-3 leading-relaxed">
-                    "{review.comment || "Smooth rental process, clean bike, and responsive host."}"
-                  </p>
-                </div>
-                <div className="pt-2 border-t border-gray-200/60 flex items-center justify-between">
-                  <p className="font-extrabold text-xs text-gray-900">- {review.user_name || "Guest"}</p>
-                  {review.created_at && (
-                    <span className="text-[10px] text-gray-400">
-                      {new Date(review.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
-            
-            {reviews.length === 0 && (
-              <div className="col-span-full text-center py-10 text-xs text-gray-500 font-medium">
-                No customer reviews yet. Be the first to share your rental experience!
-              </div>
+              })
             )}
           </div>
-
-          {reviews.length > 6 && (
-            <div className="mt-8 text-center">
-              <button 
-                onClick={() => setIsReviewModalOpen(true)}
-                className="px-6 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-900 font-bold rounded-full text-xs transition-all cursor-pointer"
-              >
-                See All {reviews.length} Reviews
-              </button>
-            </div>
-          )}
-
-        </section>
+        </div>
 
       </div>
 
       {/* ======================================================== */}
-      {/* REVIEWS LIST MODAL                                       */}
+      {/* DESKTOP LAYOUT (MD AND UP)                               */}
       {/* ======================================================== */}
+      <div className="hidden md:block w-full max-w-7xl mx-auto px-6 lg:px-8 py-8 space-y-8">
+        
+        {/* Top Breadcrumb & Quick Actions Bar */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={handleBack} 
+              aria-label="Go Back"
+              className="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-gray-200 shadow-xs hover:bg-gray-50 transition-colors cursor-pointer"
+            >
+              <ChevronLeft className="w-5 h-5 text-gray-800" />
+            </button>
+            <nav className="flex items-center gap-2 text-sm text-gray-500 font-medium">
+              <Link href="/" className="hover:text-black transition-colors">Home</Link>
+              <span>/</span>
+              <span className="text-gray-900 font-bold">{vendor.name}</span>
+            </nav>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={handleShare}
+              className="bg-white border border-gray-200 text-gray-800 hover:bg-gray-50 px-4 py-2.5 rounded-full text-xs font-bold flex items-center gap-2 shadow-xs transition-all active:scale-95 cursor-pointer"
+            >
+              {copiedLink ? <Check className="w-4 h-4 text-black" /> : <Share className="w-4 h-4 text-black" />}
+              <span>{copiedLink ? "Link Copied!" : "Share Profile"}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* GetYourGuide-style Desktop Header Card with Cover Image */}
+        <div className="bg-white rounded-[32px] overflow-hidden shadow-xs border border-gray-200/80">
+          
+          {/* Cover Photo Banner */}
+          <div className="relative h-60 lg:h-72 w-full bg-neutral-100 overflow-hidden">
+            {coverImage ? (
+              <Image 
+                src={coverImage} 
+                alt={vendor.name} 
+                fill 
+                priority 
+                sizes="100vw" 
+                className="object-cover" 
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-r from-neutral-200 to-neutral-300" />
+            )}
+          </div>
+
+          {/* Profile Details with Overlapping Circular Logo */}
+          <div className="px-8 pb-8 pt-0">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 -mt-14 relative z-10 mb-6">
+              
+              {/* Avatar & Title */}
+              <div className="flex items-end gap-5">
+                <div className="relative w-28 h-28 lg:w-32 lg:h-32 rounded-full overflow-hidden bg-white border-4 border-white shadow-md shrink-0 flex items-center justify-center">
+                  {vendor.logo || vendor.image_url ? (
+                    <Image 
+                      src={vendor.logo || vendor.image_url} 
+                      alt={vendor.name} 
+                      fill 
+                      priority 
+                      sizes="128px" 
+                      className="object-cover" 
+                    />
+                  ) : (
+                    <span className="text-3xl font-extrabold text-gray-700">{(vendor.name || "V").substring(0, 2).toUpperCase()}</span>
+                  )}
+                </div>
+
+                <div className="pb-1">
+                  <div className="flex items-center gap-2.5 mb-1">
+                    <h1 className="text-2xl lg:text-3xl font-extrabold text-gray-900 leading-tight">{vendor.name}</h1>
+                    <div className="bg-black text-white p-1 rounded-full shadow-2xs">
+                      <BadgeCheck className="w-3.5 h-3.5 text-white" />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
+                    <MapPin className="w-3.5 h-3.5 text-black shrink-0" />
+                    <span>{vendor.address || "Bali, Indonesia"}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Button */}
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setIsWriteReviewModalOpen(true)}
+                  className="bg-black text-white font-extrabold px-6 py-3 rounded-full hover:bg-neutral-800 shadow-xs transition-colors text-xs cursor-pointer"
+                >
+                  Write a Review
+                </button>
+              </div>
+
+            </div>
+
+            {/* 3 Column Stats Bar */}
+            <div className="flex items-center gap-8 py-4 border-t border-gray-100 max-w-md">
+              {/* Rating */}
+              <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setIsReviewModalOpen(true)}>
+                <div className="flex items-center gap-1">
+                  <Star className="w-4 h-4 fill-black text-black" />
+                  <span className="font-extrabold text-lg text-gray-900">{vendor.rating ? Number(vendor.rating).toFixed(1) : "5.0"}</span>
+                </div>
+                <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">rating</span>
+              </div>
+              
+              <div className="w-px h-6 bg-gray-200" />
+
+              {/* Reviews */}
+              <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setIsReviewModalOpen(true)}>
+                <span className="font-extrabold text-lg text-gray-900">{reviews.length}+</span>
+                <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">reviews</span>
+              </div>
+
+              <div className="w-px h-6 bg-gray-200" />
+
+              {/* Scooters Count */}
+              <div className="flex items-center gap-2.5">
+                <span className="font-extrabold text-lg text-gray-900">{totalFleetCount}</span>
+                <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">scooters</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* 2-Column Desktop Grid Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* Main Content Area (8 Columns) */}
+          <div className="lg:col-span-8 space-y-8">
+            
+            {/* Scooters Fleet Section (Original Desktop Grid) */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-extrabold text-gray-900 tracking-tight">Available Scooters</h2>
+                  <p className="text-xs text-gray-500 font-medium mt-0.5">{scooters.length} bikes in garage</p>
+                </div>
+
+                {availableBrands.length > 1 && (
+                  <div className="flex items-center gap-1.5 bg-white p-1 rounded-full border border-gray-200 shadow-2xs">
+                    {availableBrands.map((brand) => (
+                      <button
+                        key={brand}
+                        onClick={() => setSelectedBrand(brand)}
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                          selectedBrand === brand
+                            ? "bg-black text-white shadow-xs"
+                            : "text-gray-600 hover:text-black"
+                        }`}
+                      >
+                        {brand}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {filteredScooters.length === 0 ? (
+                <div className="bg-white rounded-3xl p-12 text-center border border-gray-100">
+                  <p className="text-gray-500 font-medium">No scooters found for this brand filter.</p>
+                  <button 
+                    onClick={() => setSelectedBrand("All")}
+                    className="mt-4 text-xs font-bold bg-black text-white px-4 py-2 rounded-full"
+                  >
+                    Reset Filter
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {filteredScooters.map((scooter) => {
+                    const formattedName = formatTitleCase(scooter.name)
+                    return (
+                      <Link 
+                        key={scooter.id} 
+                        href={`/detail/${scooter.id}`}
+                        prefetch={true}
+                        className="bg-white rounded-3xl p-4 border border-gray-200/80 shadow-xs hover:shadow-md active-press transition-all flex flex-col justify-between cursor-pointer"
+                      >
+                        <div>
+                          {/* Image Backdrop Box */}
+                          <div className="relative w-full h-44 bg-[#F8F9FA] rounded-2xl flex items-center justify-center p-3 mb-3 overflow-hidden border border-gray-100">
+                            <span className="absolute top-3 left-3 text-[10px] font-extrabold tracking-wider uppercase text-gray-600 bg-white border border-gray-200/80 px-2.5 py-0.5 rounded-full z-10">
+                              {scooter.brand || "Scooter"}
+                            </span>
+                            
+                            {/* Black and White Available Label */}
+                            <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-black text-white px-2.5 py-1 rounded-full shadow-xs z-10">
+                              <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
+                              <span className="text-[10px] font-extrabold uppercase tracking-wider">
+                                {scooter.available_units || 1} AVAILABLE
+                              </span>
+                            </div>
+
+                            <Image 
+                              src={scooter.image_url || "/images/scooter.png"} 
+                              alt={formattedName} 
+                              fill
+                              sizes="(max-width: 768px) 100vw, 300px"
+                              className="object-contain p-4 drop-shadow-md hover:scale-105 transition-transform" 
+                            />
+                          </div>
+
+                          {/* Title */}
+                          <h3 className="font-extrabold text-gray-900 text-base mb-1">
+                            {formattedName}
+                          </h3>
+                        </div>
+
+                        {/* Price & CTA */}
+                        <div className="pt-3 border-t border-gray-100 flex items-center justify-between mt-3">
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-lg font-black text-gray-900 leading-none">
+                              Rp {scooter.price_daily?.toLocaleString("id-ID") || scooter.price_daily}
+                            </span>
+                            <span className="text-xs text-gray-400 font-semibold">Daily</span>
+                          </div>
+                          <span className="text-xs font-extrabold bg-black text-white px-4 py-2 rounded-full hover:bg-neutral-800 transition-colors shadow-2xs">
+                            Book Now
+                          </span>
+                        </div>
+                      </Link>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Customer Reviews Section */}
+            <div className="bg-white rounded-[32px] p-6 lg:p-8 shadow-xs border border-gray-200/80">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-extrabold text-gray-900 tracking-tight">Reviews ({reviews.length})</h2>
+                </div>
+                <button 
+                  onClick={() => setIsWriteReviewModalOpen(true)}
+                  className="text-xs font-extrabold bg-black text-white px-4 py-2 rounded-full hover:bg-neutral-800 transition-colors shadow-xs cursor-pointer"
+                >
+                  Write a Review
+                </button>
+              </div>
+
+              {/* Reviews Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {reviews.slice(0, 6).map((review) => (
+                  <div key={review.id} className="bg-[#F8F9FA] rounded-2xl p-4 flex flex-col justify-between border border-gray-200/80">
+                    <div>
+                      <div className="flex items-center gap-0.5 mb-2">
+                        {[...Array(review.rating || 5)].map((_, i) => (
+                          <Star key={i} className={`w-3.5 h-3.5 ${i < (review.rating || 5) ? "fill-black text-black" : "fill-gray-200 text-gray-200"}`} />
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-600 font-medium mb-3">"{review.comment || "Smooth rental process and well-maintained bike."}"</p>
+                    </div>
+                    <p className="font-extrabold text-xs text-gray-900">- {review.user_name || "Guest"}</p>
+                  </div>
+                ))}
+                {reviews.length === 0 && (
+                  <div className="col-span-2 text-center py-8 text-xs text-gray-500 font-medium">No reviews yet. Be the first!</div>
+                )}
+              </div>
+
+              {reviews.length > 6 && (
+                <div className="mt-6 text-center">
+                  <button 
+                    onClick={() => setIsReviewModalOpen(true)}
+                    className="px-6 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-900 font-bold rounded-full text-xs transition-all cursor-pointer"
+                  >
+                    See All Reviews
+                  </button>
+                </div>
+              )}
+            </div>
+
+          </div>
+
+          {/* Sticky Sidebar (4 Columns) */}
+          <div className="lg:col-span-4 space-y-5 lg:sticky lg:top-8 self-start">
+            
+            {/* Host Partner Garage Location Card */}
+            <div className="bg-white rounded-[32px] p-6 shadow-xs border border-gray-200/80 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-extrabold text-gray-900 text-base tracking-tight">Garage Hub</h3>
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-black bg-neutral-100 border border-neutral-200 px-2.5 py-0.5 rounded-full">
+                  Pickup Location
+                </span>
+              </div>
+              
+              <div className="space-y-3 pt-1">
+                <div className="bg-[#F8F9FA] rounded-2xl p-4 border border-gray-200/80">
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">
+                    Dispatch Address
+                  </span>
+                  <p className="font-extrabold text-gray-900 text-xs leading-relaxed flex items-start gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-black shrink-0 mt-0.5" />
+                    <span>{vendor.address || "Bali, Indonesia"}</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      {/* Reviews Modal for Mobile & Desktop */}
       {isReviewModalOpen && (
         <div 
           onClick={() => setIsReviewModalOpen(false)}
@@ -627,13 +711,13 @@ export default function VendorDetailClient({
             onClick={(e) => e.stopPropagation()}
             className="bg-white rounded-3xl w-full max-w-lg max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200"
           >
-            <div className="p-5 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white rounded-t-3xl z-10">
+            <div className="p-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white rounded-t-3xl z-10">
               <div>
-                <h3 className="font-extrabold text-lg">Customer Reviews</h3>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <Star className="w-3.5 h-3.5 fill-black text-black" />
-                  <span className="text-xs font-bold">{vendor.rating ? Number(vendor.rating).toFixed(1) : "5.0"}</span>
-                  <span className="text-xs text-gray-500">({reviews.length} verified reviews)</span>
+                <h3 className="font-extrabold text-lg">Reviews</h3>
+                <div className="flex items-center gap-1">
+                  <Star className="w-3 h-3 fill-black text-black" />
+                  <span className="text-xs font-bold">5.0</span>
+                  <span className="text-xs text-gray-500">({reviews.length} reviews)</span>
                 </div>
               </div>
               <button 
@@ -644,18 +728,18 @@ export default function VendorDetailClient({
               </button>
             </div>
 
-            <div className="p-5 overflow-y-auto space-y-3.5 flex-1">
+            <div className="p-4 overflow-y-auto space-y-3 flex-1">
               {reviews.map((review) => (
-                <div key={review.id} className="bg-[#F8F9FA] rounded-2xl p-4 border border-gray-200/80">
+                <div key={review.id} className="bg-[#F8F9FA] rounded-2xl p-3.5 border border-gray-200/80">
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="font-extrabold text-xs text-gray-900">{review.user_name || "Customer"}</span>
                     <div className="flex items-center gap-0.5">
                       {[...Array(5)].map((_, i) => (
-                        <Star key={i} className={`w-3 h-3 ${i < (review.rating || 5) ? "fill-black text-black" : "fill-gray-200 text-gray-200"}`} />
+                        <Star key={i} className={`w-3.5 h-3.5 ${i < (review.rating || 5) ? "fill-black text-black" : "fill-gray-200 text-gray-200"}`} />
                       ))}
                     </div>
                   </div>
-                  <p className="text-xs text-gray-600 font-medium leading-relaxed">"{review.comment}"</p>
+                  <p className="text-xs text-gray-600 font-medium">"{review.comment}"</p>
                   {review.created_at && (
                     <span className="text-[10px] text-gray-400 mt-1 block">
                       {new Date(review.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
@@ -674,7 +758,7 @@ export default function VendorDetailClient({
                   setIsReviewModalOpen(false)
                   setIsWriteReviewModalOpen(true)
                 }}
-                className="w-full bg-black text-white font-extrabold py-3.5 rounded-full text-xs hover:bg-neutral-800 transition-colors cursor-pointer"
+                className="w-full bg-black text-white font-extrabold py-3 rounded-full text-xs hover:bg-neutral-800 transition-colors"
               >
                 Write a Review
               </button>
@@ -683,9 +767,7 @@ export default function VendorDetailClient({
         </div>
       )}
 
-      {/* ======================================================== */}
-      {/* WRITE REVIEW MODAL                                       */}
-      {/* ======================================================== */}
+      {/* Write Review Modal */}
       {isWriteReviewModalOpen && (
         <div 
           onClick={() => setIsWriteReviewModalOpen(false)}
@@ -695,7 +777,7 @@ export default function VendorDetailClient({
             onClick={(e) => e.stopPropagation()}
             className="bg-white rounded-3xl w-full max-w-md flex flex-col animate-in zoom-in-95 duration-200"
           >
-            <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+            <div className="p-4 border-b border-gray-100 flex items-center justify-between">
               <h3 className="font-extrabold text-base text-gray-900">Write a Review</h3>
               <button 
                 onClick={() => setIsWriteReviewModalOpen(false)}
@@ -747,7 +829,7 @@ export default function VendorDetailClient({
               <button 
                 onClick={handleSubmitReview}
                 disabled={isSubmittingReview}
-                className="w-full bg-black text-white font-extrabold py-3.5 rounded-full text-xs hover:bg-neutral-800 transition-colors shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full bg-black text-white font-extrabold py-3 rounded-full text-xs hover:bg-neutral-800 transition-colors shadow-xs flex items-center justify-center gap-2"
               >
                 {isSubmittingReview ? "Submitting..." : "Submit Review"}
               </button>
