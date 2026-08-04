@@ -30,6 +30,35 @@ function getDirectSupabase() {
   return createSupabaseClient(url, key);
 }
 
+export function getNormalizedVendorCoordinates(vendor: any): { lat: number; lng: number } {
+  let lat = Number(vendor?.lat);
+  let lng = Number(vendor?.lng);
+
+  if (!lat || !lng || isNaN(lat) || isNaN(lng) || (lat === 0 && lng === 0)) {
+    const text = `${vendor?.name || ''} ${vendor?.address || ''} ${vendor?.delivery_area || ''}`.toLowerCase();
+    if (text.includes('canggu') || text.includes('berawa') || text.includes('pererenan') || text.includes('batu bolong')) {
+      lat = -8.6478; lng = 115.1385;
+    } else if (text.includes('seminyak') || text.includes('petitenget') || text.includes('kerobokan')) {
+      lat = -8.6892; lng = 115.1686;
+    } else if (text.includes('kuta') || text.includes('legian') || text.includes('airport') || text.includes('tuban')) {
+      lat = -8.7185; lng = 115.1686;
+    } else if (text.includes('sanur')) {
+      lat = -8.6882; lng = 115.2635;
+    } else if (text.includes('uluwatu') || text.includes('pecatu') || text.includes('bingin') || text.includes('padang padang')) {
+      lat = -8.8149; lng = 115.1147;
+    } else if (text.includes('nusa dua') || text.includes('benoa')) {
+      lat = -8.7985; lng = 115.2243;
+    } else if (text.includes('jimbaran')) {
+      lat = -8.7733; lng = 115.1652;
+    } else if (text.includes('denpasar')) {
+      lat = -8.6705; lng = 115.2126;
+    } else {
+      lat = -8.5069; lng = 115.2625; // Ubud / Bali Central default
+    }
+  }
+  return { lat, lng };
+}
+
 /**
  * High-speed Server-side catalog loader with in-memory caching & single-flight stampede protection.
  * Used for instant Server-Side Pre-Rendering (0ms waterfall).
@@ -97,16 +126,18 @@ export async function getCatalogServerData(options?: { forceRefresh?: boolean })
         markup_weekly: (Number(settingsData.markup_weekly_per_day) || DEFAULT_PLATFORM_SETTINGS.markup_weekly_per_day) * 7,
         markup_monthly: (Number(settingsData.markup_monthly_per_day) || DEFAULT_PLATFORM_SETTINGS.markup_monthly_per_day) * 30,
       } : DEFAULT_PLATFORM_SETTINGS;
-
       const formattedVendors = (vendors || []).map((v: any) => {
         const stats = reviewStats[v.id];
         const count = stats?.count ?? v.review_count ?? 0;
         const avgRating = stats?.count && stats.count > 0 
           ? (stats.totalRating / stats.count).toFixed(1) 
           : (v.rating ? Number(v.rating).toFixed(1) : '5.0');
+        const coords = getNormalizedVendorCoordinates(v);
 
         return {
           ...v,
+          lat: coords.lat,
+          lng: coords.lng,
           initials: v.name
             ? v.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()
             : 'V',
@@ -231,9 +262,12 @@ export async function fetchVendorDetailServer(id: string): Promise<VendorDetailD
     const { data: vData } = await supabase.from('vendors').select('*').eq('id', id).maybeSingle();
     if (!vData) return null;
 
+    const coords = getNormalizedVendorCoordinates(vData);
     return {
       vendor: {
         ...vData,
+        lat: coords.lat,
+        lng: coords.lng,
         initials: vData.name ? vData.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() : 'V',
         location: vData.address || 'Bali',
       },
@@ -316,9 +350,12 @@ export async function fetchCatalogData(options?: { forceRefresh?: boolean }): Pr
       const avgRating = stats?.count && stats.count > 0 
         ? (stats.totalRating / stats.count).toFixed(1) 
         : (v.rating ? Number(v.rating).toFixed(1) : '5.0');
+      const coords = getNormalizedVendorCoordinates(v);
 
       return {
         ...v,
+        lat: coords.lat,
+        lng: coords.lng,
         initials: v.name ? v.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() : 'V',
         location: v.address || 'Bali',
         rating: Number(avgRating),

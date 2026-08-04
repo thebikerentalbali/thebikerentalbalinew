@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo, useCallback } from "react"
 import { Users, Bike, DollarSign, Settings, Bell, Search, Store, BarChart3, Home, ChevronRight, ChevronLeft, ChevronDown, ChevronUp, Calendar, TrendingUp, CalendarDays, MoreVertical, Filter, ArrowUpRight, CheckCircle2, AlertCircle, Menu, UserCheck, MoreHorizontal, Loader2, XCircle, RotateCcw, Clock, Check, Calculator, Sparkles, Coins, LogOut, Lock, Mail, Eye, EyeOff, ShieldCheck } from "lucide-react"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
@@ -240,105 +240,154 @@ export default function AdminDashboard() {
     return days
   }
 
-  // Smart Period Filtering:
-  // Evaluates whether a booking is active in the currently selected period (month or specific day).
-  // Cross-month overlap rule: A booking spanning across months (e.g. 31 Aug – 3 Sep) is included
-  // in BOTH August and September data!
-  const isBookingInActivePeriod = (b: { startDate?: string; endDate?: string }): boolean => {
-    if (!b.startDate || !b.endDate) return false
-    const startStr = typeof b.startDate === 'string' ? b.startDate.substring(0, 10) : new Date(b.startDate).toISOString().split('T')[0]
-    const endStr = typeof b.endDate === 'string' ? b.endDate.substring(0, 10) : new Date(b.endDate).toISOString().split('T')[0]
-
-    // If a specific calendar day is selected on the 7-day strip, filter precisely for that day
-    if (selectedCalendarDate) {
-      return selectedCalendarDate >= startStr && selectedCalendarDate <= endStr
-    }
-
-    // Otherwise, scope to the active month
+  // Memoized date strings for active month
+  const activeMonthRange = useMemo(() => {
     const year = activeMonthDate.getFullYear()
     const month = activeMonthDate.getMonth()
     const monthStartStr = `${year}-${String(month + 1).padStart(2, '0')}-01`
     const lastDayNum = new Date(year, month + 1, 0).getDate()
     const monthEndStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDayNum).padStart(2, '0')}`
+    return { monthStartStr, monthEndStr }
+  }, [activeMonthDate])
 
-    // Overlap condition: booking starts on or before monthEnd, AND booking ends on or after monthStart
-    return startStr <= monthEndStr && endStr >= monthStartStr
-  }
+  // Fast string-based period check
+  const isBookingInActivePeriod = useCallback((b: { startDate?: string; endDate?: string }): boolean => {
+    if (!b.startDate || !b.endDate) return false
+    const startStr = typeof b.startDate === 'string' ? b.startDate.substring(0, 10) : ''
+    const endStr = typeof b.endDate === 'string' ? b.endDate.substring(0, 10) : ''
+    if (!startStr || !endStr) return false
 
-  const getBookingsCountForDate = (dateObj: Date) => {
+    if (selectedCalendarDate) {
+      return selectedCalendarDate >= startStr && selectedCalendarDate <= endStr
+    }
+    return startStr <= activeMonthRange.monthEndStr && endStr >= activeMonthRange.monthStartStr
+  }, [selectedCalendarDate, activeMonthRange])
+
+  // Top-level memoized computations
+  const totalPlatformProfit = useMemo(() => {
+    return allBookings
+      .filter(b => b.rawStatus === 'confirmed' || b.rawStatus === 'completed')
+      .reduce((sum, b) => sum + calculateBookingCommission(b.startDate, b.endDate, b.quantity, b.price, platformSettings), 0)
+  }, [allBookings, platformSettings])
+
+  const totalConfirmedCompletedCount = useMemo(() => {
+    return allBookings.filter(b => b.rawStatus === 'confirmed' || b.rawStatus === 'completed').length
+  }, [allBookings])
+
+  const periodBookings = useMemo(() => {
+    return allBookings.filter(b => isBookingInActivePeriod(b))
+  }, [allBookings, isBookingInActivePeriod])
+
+  const periodPending = useMemo(() => periodBookings.filter(b => b.rawStatus === 'pending'), [periodBookings])
+  const periodConfirmed = useMemo(() => periodBookings.filter(b => b.rawStatus === 'confirmed'), [periodBookings])
+  const periodCompleted = useMemo(() => periodBookings.filter(b => b.rawStatus === 'completed'), [periodBookings])
+
+  const periodCommission = useMemo(() => {
+    return periodBookings
+      .filter(b => b.rawStatus === 'completed' || b.rawStatus === 'confirmed')
+      .reduce((sum, b) => sum + calculateBookingCommission(b.startDate, b.endDate, b.quantity, b.price, platformSettings), 0)
+  }, [periodBookings, platformSettings])
+
+  // Pre-indexed map of vendor bookings for instantaneous tab switches
+  const vendorBookingsMap = useMemo(() => {
+    const map: Record<string, any[]> = {}
+    for (const b of periodBookings) {
+      const key = b.vendorId ? String(b.vendorId) : 'unassigned'
+      if (!map[key]) map[key] = []
+      map[key].push(b)
+    }
+    return map
+  }, [periodBookings])
+
+  const filteredApprovedVendors = useMemo(() => {
+    if (!vendorSearchQuery) return approvedVendors
+    const q = vendorSearchQuery.toLowerCase()
+    return approvedVendors.filter(v =>
+      v.name?.toLowerCase().includes(q) ||
+      v.address?.toLowerCase().includes(q)
+    )
+  }, [approvedVendors, vendorSearchQuery])
+
+  const unassignedBookings = useMemo(() => {
+    return vendorBookingsMap['unassigned'] || periodBookings.filter(b =>
+      !approvedVendors.some(v => String(v.id) === String(b.vendorId))
+    )
+  }, [vendorBookingsMap, periodBookings, approvedVendors])
+
+  const getBookingsCountForDate = useCallback((dateObj: Date) => {
     const targetDateStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`
     return allBookings.filter(b => {
       if (!b.startDate || !b.endDate) return false
-      const startStr = typeof b.startDate === 'string' ? b.startDate.substring(0, 10) : new Date(b.startDate).toISOString().split('T')[0]
-      const endStr = typeof b.endDate === 'string' ? b.endDate.substring(0, 10) : new Date(b.endDate).toISOString().split('T')[0]
+      const startStr = typeof b.startDate === 'string' ? b.startDate.substring(0, 10) : ''
+      const endStr = typeof b.endDate === 'string' ? b.endDate.substring(0, 10) : ''
       return targetDateStr >= startStr && targetDateStr <= endStr
     }).length
-  }
+  }, [allBookings])
 
-  const handlePrevMonth = () => {
-    const prev = new Date(activeMonthDate.getFullYear(), activeMonthDate.getMonth() - 1, 1)
-    setActiveMonthDate(prev)
+  const handlePrevMonth = useCallback(() => {
+    setActiveMonthDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))
     setSelectedCalendarDate(null)
-    setCalendarStartDate(prev)
-  }
+  }, [])
 
-  const handleNextMonth = () => {
-    const next = new Date(activeMonthDate.getFullYear(), activeMonthDate.getMonth() + 1, 1)
-    setActiveMonthDate(next)
+  const handleNextMonth = useCallback(() => {
+    setActiveMonthDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))
     setSelectedCalendarDate(null)
-    setCalendarStartDate(next)
-  }
+  }, [])
 
-  const handleThisMonth = () => {
+  const handleThisMonth = useCallback(() => {
     const now = new Date()
     setActiveMonthDate(now)
     setSelectedCalendarDate(null)
     const d = new Date(now)
     d.setDate(d.getDate() - 2)
     setCalendarStartDate(d)
-  }
+  }, [])
 
-  const handlePrevWeek = () => {
-    const next = new Date(calendarStartDate)
-    next.setDate(next.getDate() - 7)
-    setCalendarStartDate(next)
-  }
+  const handlePrevWeek = useCallback(() => {
+    setCalendarStartDate(prev => {
+      const next = new Date(prev)
+      next.setDate(next.getDate() - 7)
+      return next
+    })
+  }, [])
 
-  const handleNextWeek = () => {
-    const next = new Date(calendarStartDate)
-    next.setDate(next.getDate() + 7)
-    setCalendarStartDate(next)
-  }
+  const handleNextWeek = useCallback(() => {
+    setCalendarStartDate(prev => {
+      const next = new Date(prev)
+      next.setDate(next.getDate() + 7)
+      return next
+    })
+  }, [])
 
-  const handleToday = () => {
+  const handleToday = useCallback(() => {
     const d = new Date()
     d.setDate(d.getDate() - 2)
     setCalendarStartDate(d)
     const now = new Date()
     const todayIso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
     setSelectedCalendarDate(todayIso)
-  }
+  }, [])
 
-  const toggleVendorBookings = (vendorId: string | number) => {
+  const toggleVendorBookings = useCallback((vendorId: string | number) => {
     const key = String(vendorId)
     setExpandedVendorBookingIds(prev => ({
       ...prev,
       [key]: !prev[key]
     }))
-  }
+  }, [])
 
-  const expandAllVendors = () => {
+  const expandAllVendors = useCallback(() => {
     const all: Record<string, boolean> = {}
     approvedVendors.forEach(v => {
       all[String(v.id)] = true
     })
     all['unassigned'] = true
     setExpandedVendorBookingIds(all)
-  }
+  }, [approvedVendors])
 
-  const collapseAllVendors = () => {
+  const collapseAllVendors = useCallback(() => {
     setExpandedVendorBookingIds({})
-  }
+  }, [])
 
   useEffect(() => {
     fetchVendors()
@@ -764,14 +813,11 @@ export default function AdminDashboard() {
                   </div>
                 </div>
                 <p className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">
-                  Rp {allBookings
-                    .filter(b => b.rawStatus === 'confirmed' || b.rawStatus === 'completed')
-                    .reduce((sum, b) => sum + calculateBookingCommission(b.startDate, b.endDate, b.quantity, b.price, platformSettings), 0)
-                    .toLocaleString()}
+                  Rp {totalPlatformProfit.toLocaleString()}
                 </p>
                 <div className="flex items-center gap-1 mt-2 md:mt-3 bg-green-50 text-green-700 w-fit px-2.5 py-0.5 rounded-full">
                   <span className="text-[10px] md:text-[11px] font-bold">
-                    {allBookings.filter(b => b.rawStatus === 'confirmed' || b.rawStatus === 'completed').length} Confirmed / Completed
+                    {totalConfirmedCompletedCount} Confirmed / Completed
                   </span>
                 </div>
               </div>
@@ -1046,20 +1092,8 @@ export default function AdminDashboard() {
           </div>
         ) : activeTab === 'bookings' ? (
           <div className="p-4 md:p-8 md:pb-12 animate-in fade-in space-y-5">
-            {/* Period-Scoped Bookings Calculation */}
-            {(() => {
-              const periodBookings = allBookings.filter(b => isBookingInActivePeriod(b))
-              const periodPending = periodBookings.filter(b => b.rawStatus === 'pending')
-              const periodConfirmed = periodBookings.filter(b => b.rawStatus === 'confirmed')
-              const periodCompleted = periodBookings.filter(b => b.rawStatus === 'completed')
-              const periodCommission = periodBookings
-                .filter(b => b.rawStatus === 'completed' || b.rawStatus === 'confirmed')
-                .reduce((sum, b) => sum + calculateBookingCommission(b.startDate, b.endDate, b.quantity, b.price, platformSettings), 0)
-
-              return (
-                <>
-                  {/* Floating Calendar & Smart Month Navigator */}
-                  <div className="bg-white/95 backdrop-blur-md p-4 md:p-5 rounded-3xl border-2 border-black/80 shadow-sm space-y-3.5">
+            {/* Floating Calendar & Smart Month Navigator */}
+            <div className="bg-white/95 backdrop-blur-md p-4 md:p-5 rounded-3xl border-2 border-black/80 shadow-sm space-y-3.5">
                     {/* Month Navigator Header */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-gray-100">
                       {/* Left: Active Month Selector */}
@@ -1336,48 +1370,29 @@ export default function AdminDashboard() {
 
                   {/* Vendor Cards First with Dropdown Logic to view bookings */}
                   <div className="space-y-4">
-                    {(() => {
-                      const filteredVendors = approvedVendors.filter(v => 
-                        !vendorSearchQuery || 
-                        v.name?.toLowerCase().includes(vendorSearchQuery.toLowerCase()) ||
-                        v.address?.toLowerCase().includes(vendorSearchQuery.toLowerCase())
-                      )
+                    {filteredApprovedVendors.length === 0 && unassignedBookings.length === 0 ? (
+                      <div className="bg-white p-12 text-center text-gray-500 font-bold rounded-3xl border-2 border-gray-200">
+                        No vendors or bookings found for this period.
+                      </div>
+                    ) : (
+                      <>
+                        {filteredApprovedVendors.map(vendor => {
+                          const vendorIdStr = String(vendor.id)
+                          const isExpanded = !!expandedVendorBookingIds[vendorIdStr]
+                          const vendorPeriodBookings = vendorBookingsMap[vendorIdStr] || []
 
-                      // Check for unassigned bookings for the active period
-                      const unassignedBookings = periodBookings.filter(b => 
-                        !approvedVendors.some(v => String(v.id) === String(b.vendorId))
-                      )
+                          const filteredBookings = vendorPeriodBookings.filter(b => {
+                            if (bookingFilter === 'pending' && b.rawStatus !== 'pending') return false
+                            if (bookingFilter === 'confirmed' && b.rawStatus !== 'confirmed') return false
+                            if (bookingFilter === 'completed' && b.rawStatus !== 'completed') return false
+                            return true
+                          })
 
-                      if (filteredVendors.length === 0 && unassignedBookings.length === 0) {
-                        return (
-                          <div className="bg-white p-12 text-center text-gray-500 font-bold rounded-3xl border-2 border-gray-200">
-                            No vendors or bookings found for this period.
-                          </div>
-                        )
-                      }
-
-                      return (
-                        <>
-                          {filteredVendors.map(vendor => {
-                            const vendorIdStr = String(vendor.id)
-                            const isExpanded = !!expandedVendorBookingIds[vendorIdStr]
-
-                            // Bookings belonging to this vendor in the active period (month or specific day)
-                            const vendorPeriodBookings = periodBookings.filter(b => String(b.vendorId) === vendorIdStr)
-
-                            // Filter by status tab if selected
-                            const filteredBookings = vendorPeriodBookings.filter(b => {
-                              if (bookingFilter === 'pending' && b.rawStatus !== 'pending') return false
-                              if (bookingFilter === 'confirmed' && b.rawStatus !== 'confirmed') return false
-                              if (bookingFilter === 'completed' && b.rawStatus !== 'completed') return false
-                              return true
-                            })
-
-                            const pendingCount = vendorPeriodBookings.filter(b => b.rawStatus === 'pending').length
-                            const confirmedCount = vendorPeriodBookings.filter(b => b.rawStatus === 'confirmed').length
-                            const vendorCommission = vendorPeriodBookings
-                              .filter(b => b.rawStatus === 'completed' || b.rawStatus === 'confirmed')
-                              .reduce((sum, b) => sum + calculateBookingCommission(b.startDate, b.endDate, b.quantity, b.price, platformSettings), 0)
+                          const pendingCount = vendorPeriodBookings.filter(b => b.rawStatus === 'pending').length
+                          const confirmedCount = vendorPeriodBookings.filter(b => b.rawStatus === 'confirmed').length
+                          const vendorCommission = vendorPeriodBookings
+                            .filter(b => b.rawStatus === 'completed' || b.rawStatus === 'confirmed')
+                            .reduce((sum, b) => sum + calculateBookingCommission(b.startDate, b.endDate, b.quantity, b.price, platformSettings), 0)
 
                             return (
                               <div
@@ -1808,12 +1823,8 @@ export default function AdminDashboard() {
                             </div>
                           )}
                         </>
-                      )
-                    })()}
+                      )}
                   </div>
-                </>
-              )
-            })()}
           </div>
         ) : activeTab === 'revenue' ? (
           <div className="p-5 md:px-8 md:pb-12 flex flex-col items-center justify-center flex-1 min-h-[50vh] text-center animate-in fade-in">

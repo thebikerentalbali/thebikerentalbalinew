@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo, useCallback } from "react"
 import { Heart, Search, SlidersHorizontal, Star, Bike, MapPin, ChevronDown, Menu, X } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
@@ -39,9 +39,11 @@ export default function HomeClient({ initialVendors = [], initialScooters = [], 
   const [savedScooters, setSavedScooters] = useState<number[]>([])
   const [isSavedModalOpen, setIsSavedModalOpen] = useState(false)
 
-  // Location & Search State
+  // Location & Map State
   const [searchQuery, setSearchQuery] = useState("")
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false)
+  const [selectedMapVendorId, setSelectedMapVendorId] = useState<number | string | null>(null)
+  const [mapSearchQuery, setMapSearchQuery] = useState("")
 
   // Filter States
   const [isFilterOpen, setIsFilterOpen] = useState(false)
@@ -126,9 +128,28 @@ export default function HomeClient({ initialVendors = [], initialScooters = [], 
     return Boolean(nameMatch || brandMatch);
   }
 
-  const allFiltered = allScooters.filter(s => filterByPrice(s.price_daily || s.price) && filterByBrand(s) && filterByYear(s) && filterBySearch(s))
-  const filteredPopular = allFiltered.slice(0, 3)
-  const filteredRecommended = allFiltered.slice(3)
+  const allFiltered = useMemo(() => {
+    return allScooters.filter(s => filterByPrice(s.price_daily || s.price) && filterByBrand(s) && filterByYear(s) && filterBySearch(s));
+  }, [allScooters, maxPrice, activeBrand, selectedYear, searchQuery]);
+
+  const filteredPopular = useMemo(() => allFiltered.slice(0, 3), [allFiltered]);
+  const filteredRecommended = useMemo(() => allFiltered.slice(3), [allFiltered]);
+
+  // Filtered vendors for the map modal
+  const filteredMapVendors = useMemo(() => {
+    if (!mapSearchQuery.trim()) return topVendors;
+    const q = mapSearchQuery.toLowerCase();
+    return topVendors.filter(v => 
+      (v.name && v.name.toLowerCase().includes(q)) ||
+      (v.address && v.address.toLowerCase().includes(q)) ||
+      (v.delivery_area && v.delivery_area.toLowerCase().includes(q))
+    );
+  }, [topVendors, mapSearchQuery]);
+
+  const selectedMapVendor = useMemo(() => {
+    if (!selectedMapVendorId) return filteredMapVendors[0] || topVendors[0] || null;
+    return topVendors.find(v => String(v.id) === String(selectedMapVendorId)) || topVendors[0] || null;
+  }, [selectedMapVendorId, filteredMapVendors, topVendors]);
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F0F2F5] px-6 pb-24 md:px-12 md:pb-32">
@@ -591,40 +612,155 @@ export default function HomeClient({ initialVendors = [], initialScooters = [], 
           </div>
         )}
 
-        {/* Location Picker Modal */}
+        {/* Location & Vendor Map Modal */}
         {isLocationModalOpen && (
           <div 
             onClick={() => setIsLocationModalOpen(false)}
-            className="fixed inset-0 z-[100] flex flex-col bg-white animate-in slide-in-from-bottom-full md:slide-in-from-bottom-0 md:fade-in md:items-center md:justify-center md:bg-black/40 md:p-6"
+            className="fixed inset-0 z-[100] flex flex-col bg-black/60 backdrop-blur-xs md:items-center md:justify-center p-0 md:p-6 animate-in fade-in duration-200"
           >
             <div 
               onClick={(e) => e.stopPropagation()}
-              className="flex flex-col w-full h-full md:h-auto md:max-h-[90vh] md:max-w-md bg-white md:rounded-[32px] md:shadow-2xl relative overflow-hidden"
+              className="flex flex-col w-full h-full md:h-[650px] md:max-w-4xl bg-white md:rounded-[32px] md:shadow-2xl relative overflow-hidden"
             >
-              {/* MAP LAYER */}
-              <div className="absolute inset-0 z-0 md:relative md:h-[400px]">
-                <MapPicker
-                  vendors={topVendors}
-                  onVendorClick={(id) => {
-                    setIsLocationModalOpen(false);
-                    router.push(`/vendor/${id}?fromMap=true`);
-                  }}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-
-              {/* FOREGROUND UI OVERLAY */}
-              <div className="z-10 flex flex-col h-full pointer-events-none md:pointer-events-auto p-4 md:p-6 absolute inset-0 md:relative md:inset-auto">
-                <div className="flex items-start gap-3 pointer-events-auto w-full">
+              {/* Top Floating Control Bar */}
+              <div className="absolute top-4 left-4 right-4 z-20 flex flex-col gap-2 pointer-events-none">
+                <div className="flex items-center gap-2.5 pointer-events-auto">
+                  {/* Close button */}
                   <button
                     type="button"
                     onClick={() => setIsLocationModalOpen(false)}
-                    className="w-12 h-12 rounded-2xl bg-white shadow-lg flex items-center justify-center text-gray-900 hover:bg-gray-50 transition-colors shrink-0 border border-gray-100 active-press"
+                    className="w-11 h-11 rounded-2xl bg-white text-gray-900 shadow-md border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-transform active:scale-95 shrink-0 cursor-pointer"
                   >
-                    <X className="w-6 h-6" />
+                    <X className="w-5 h-5" />
                   </button>
+
+                  {/* Search / Filter Area Input */}
+                  <div className="relative flex-1 bg-white rounded-2xl shadow-md border border-gray-100 flex items-center px-3.5 py-2.5">
+                    <Search className="w-4 h-4 text-gray-400 shrink-0 mr-2" />
+                    <input
+                      type="text"
+                      value={mapSearchQuery}
+                      onChange={(e) => setMapSearchQuery(e.target.value)}
+                      placeholder="Search area (e.g. Canggu, Ubud, Seminyak, Sanur)..."
+                      className="w-full text-xs md:text-sm font-bold text-gray-900 placeholder-gray-400 outline-none bg-transparent"
+                    />
+                    {mapSearchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setMapSearchQuery("")}
+                        className="text-gray-400 hover:text-black font-bold text-xs px-1 cursor-pointer"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Vendors Count Badge */}
+                  <div className="hidden sm:flex items-center gap-1.5 bg-black text-white px-3.5 py-2.5 rounded-2xl shadow-md text-xs font-black shrink-0">
+                    <MapPin className="w-3.5 h-3.5" />
+                    <span>{filteredMapVendors.length} Verified</span>
+                  </div>
+                </div>
+
+                {/* Quick Area Filter Pills */}
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pointer-events-auto scrollbar-hide -mx-1 px-1">
+                  {["All Bali", "Ubud", "Canggu", "Seminyak", "Sanur", "Kuta", "Uluwatu"].map((area) => {
+                    const isSelected = area === "All Bali" ? !mapSearchQuery : mapSearchQuery.toLowerCase() === area.toLowerCase();
+                    return (
+                      <button
+                        key={area}
+                        type="button"
+                        onClick={() => setMapSearchQuery(area === "All Bali" ? "" : area)}
+                        className={`text-[11px] font-extrabold px-3 py-1.5 rounded-xl whitespace-nowrap shadow-xs transition-all cursor-pointer ${
+                          isSelected
+                            ? "bg-black text-white shadow-sm"
+                            : "bg-white/90 backdrop-blur-md text-gray-800 hover:bg-white border border-gray-200"
+                        }`}
+                      >
+                        {area}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
+
+              {/* MAP COMPONENT */}
+              <div className="flex-1 w-full h-full relative z-0">
+                <MapPicker
+                  vendors={filteredMapVendors}
+                  selectedVendorId={selectedMapVendor?.id}
+                  onVendorClick={(id) => {
+                    setSelectedMapVendorId(id);
+                    const v = topVendors.find(vend => String(vend.id) === String(id));
+                    if (v) {
+                      setIsLocationModalOpen(false);
+                      router.push(`/vendor/${v.id}?fromMap=true`);
+                    }
+                  }}
+                  className="w-full h-full"
+                />
+              </div>
+
+              {/* Selected / Highlighted Vendor Bottom Drawer Card */}
+              {selectedMapVendor && (
+                <div className="absolute bottom-4 left-4 right-4 z-20 pointer-events-auto">
+                  <div className="bg-white/95 backdrop-blur-md rounded-3xl p-4 md:p-5 shadow-2xl border border-gray-200 max-w-lg mx-auto flex flex-col gap-3 animate-in slide-in-from-bottom duration-200">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        {/* Vendor Logo */}
+                        <div className="w-12 h-12 rounded-2xl bg-black text-white font-black text-sm flex items-center justify-center shrink-0 border border-black overflow-hidden shadow-xs">
+                          {selectedMapVendor.logo || selectedMapVendor.logo_url || selectedMapVendor.image_url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img 
+                              src={selectedMapVendor.logo || selectedMapVendor.logo_url || selectedMapVendor.image_url} 
+                              alt={selectedMapVendor.name} 
+                              className="w-full h-full object-cover" 
+                            />
+                          ) : (
+                            <span>{selectedMapVendor.initials || 'VN'}</span>
+                          )}
+                        </div>
+
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="font-extrabold text-base text-gray-900 truncate leading-tight">
+                              {selectedMapVendor.name}
+                            </h4>
+                            <span className="flex items-center gap-0.5 bg-yellow-50 text-yellow-800 text-[11px] font-black px-1.5 py-0.5 rounded-md border border-yellow-200">
+                              <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                              <span>{selectedMapVendor.rating ? Number(selectedMapVendor.rating).toFixed(1) : '5.0'}</span>
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-500 font-medium truncate mt-0.5 flex items-center gap-1">
+                            <MapPin className="w-3 h-3 text-black shrink-0" />
+                            <span>{selectedMapVendor.address || 'Bali, Indonesia'}</span>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {selectedMapVendor.delivery_area && (
+                      <p className="text-[11px] text-gray-600 bg-gray-50 p-2 rounded-xl border border-gray-100 leading-snug line-clamp-1">
+                        🚚 <strong>Delivery:</strong> {selectedMapVendor.delivery_area}
+                      </p>
+                    )}
+
+                    <div className="flex items-center gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsLocationModalOpen(false);
+                          router.push(`/vendor/${selectedMapVendor.id}?fromMap=true`);
+                        }}
+                        className="flex-1 bg-black hover:bg-neutral-800 text-white font-extrabold text-xs md:text-sm py-3 px-4 rounded-2xl transition-all shadow-md active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
+                      >
+                        <span>View Vendor Profile & Fleet</span>
+                        <span>→</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

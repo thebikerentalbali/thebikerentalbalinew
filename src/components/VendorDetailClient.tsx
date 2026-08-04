@@ -1,14 +1,17 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ChevronLeft, MapPin, Star, Share, X, BadgeCheck, MessageCircle, Check, Clock } from "lucide-react"
+import { ChevronLeft, MapPin, Star, Share, X, BadgeCheck, MessageCircle, Check, Clock, ExternalLink, Navigation } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
+import dynamic from "next/dynamic"
 import { createClient } from '@/lib/supabase/client'
 import { fetchVendorDetail } from '@/lib/api/catalogService'
 import { clientCache } from '@/lib/cache/clientCache'
 import { subscribeToPlatformSettings } from '@/utils/pricing'
+
+const MapPicker = dynamic(() => import('@/components/MapPicker'), { ssr: false })
 
 interface VendorDetailClientProps {
   id: string
@@ -410,6 +413,52 @@ export default function VendorDetailClient({
             )}
           </div>
         </div>
+
+        {/* Location & Map Section on Mobile */}
+        <div className="px-6 mt-8 mb-6">
+          <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 space-y-3.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center">
+                  <MapPin className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="font-extrabold text-sm text-gray-900 leading-tight">Location & Area</h4>
+                  <p className="text-[11px] text-gray-500 font-medium">{vendor.address || 'Bali, Indonesia'}</p>
+                </div>
+              </div>
+
+              <a
+                href={
+                  vendor.lat && vendor.lng && Number(vendor.lat) !== 0
+                    ? `https://www.google.com/maps/search/?api=1&query=${Number(vendor.lat)},${Number(vendor.lng)}`
+                    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(vendor.name + ' ' + (vendor.address || 'Bali Indonesia'))}`
+                }
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-black hover:bg-neutral-800 text-white text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 shadow-xs active:scale-95 transition-all"
+              >
+                <span>Google Maps</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
+
+            <div className="h-[200px] w-full rounded-2xl overflow-hidden border border-gray-100 relative">
+              <MapPicker
+                vendors={[vendor]}
+                selectedVendorId={vendor.id}
+                zoom={14}
+                className="w-full h-full"
+              />
+            </div>
+
+            {vendor.delivery_area && (
+              <p className="text-xs text-gray-600 bg-gray-50 p-2.5 rounded-xl border border-gray-100">
+                🚚 <strong>Delivery Coverage:</strong> {vendor.delivery_area}
+              </p>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* ======================================================== */}
@@ -683,12 +732,45 @@ export default function VendorDetailClient({
           {/* Sticky Sidebar (4 Columns) */}
           <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-8 self-start">
             
-            {/* Hours & Delivery */}
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
-              <h3 className="font-bold text-gray-900 text-base mb-4">Hours & Delivery</h3>
+            {/* Hours, Location & Delivery */}
+            <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-gray-900 text-base">Location & Delivery</h3>
+                <a
+                  href={
+                    vendor.lat && vendor.lng && Number(vendor.lat) !== 0
+                      ? `https://www.google.com/maps/search/?api=1&query=${Number(vendor.lat)},${Number(vendor.lng)}`
+                      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(vendor.name + ' ' + (vendor.address || 'Bali Indonesia'))}`
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-black hover:bg-neutral-800 text-white text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-xs active:scale-95 transition-all"
+                >
+                  <span>Google Maps</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+
+              {/* Leaflet Map Preview */}
+              <div className="h-[180px] w-full rounded-2xl overflow-hidden border border-gray-100 relative">
+                <MapPicker
+                  vendors={[vendor]}
+                  selectedVendorId={vendor.id}
+                  zoom={14}
+                  className="w-full h-full"
+                />
+              </div>
               
-              <div className="space-y-3 text-sm">
+              <div className="space-y-3 text-sm pt-1">
                 <div>
+                  <span className="text-xs text-gray-400 font-medium block">Address</span>
+                  <p className="font-semibold text-gray-800 text-xs flex items-center gap-1 mt-0.5">
+                    <MapPin className="w-3.5 h-3.5 text-black shrink-0" />
+                    <span>{vendor.address || 'Bali, Indonesia'}</span>
+                  </p>
+                </div>
+
+                <div className="pt-2 border-t border-gray-100">
                   <span className="text-xs text-gray-400 font-medium block">Operating Hours</span>
                   <p className="font-medium text-gray-800">{vendor.opening_hours || '08:00 AM – 08:00 PM Daily'}</p>
                 </div>
@@ -921,6 +1003,31 @@ export default function VendorDetailClient({
                     <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
                     <span>Dispatched from: {vendor.address || 'Bali, Indonesia'}</span>
                   </p>
+                </div>
+
+                <div className="h-[180px] w-full rounded-2xl overflow-hidden border border-gray-200 relative">
+                  <MapPicker
+                    vendors={[vendor]}
+                    selectedVendorId={vendor.id}
+                    zoom={14}
+                    className="w-full h-full"
+                  />
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <a
+                    href={
+                      vendor.lat && vendor.lng && Number(vendor.lat) !== 0
+                        ? `https://www.google.com/maps/search/?api=1&query=${Number(vendor.lat)},${Number(vendor.lng)}`
+                        : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(vendor.name + ' ' + (vendor.address || 'Bali Indonesia'))}`
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full bg-black hover:bg-neutral-800 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-xs transition-all"
+                  >
+                    <span>Open in Google Maps</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
                 </div>
 
                 <div className="bg-gray-50 rounded-2xl p-4 space-y-3">

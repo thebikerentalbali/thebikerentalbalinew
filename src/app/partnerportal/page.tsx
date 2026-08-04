@@ -440,6 +440,9 @@ export default function VendorDashboard() {
         opening_hours: vendorData.opening_hours || "08:00 AM – 08:00 PM Daily",
         delivery_area: vendorData.delivery_area || ""
       })
+      if (vendorData.lat && vendorData.lng && Number(vendorData.lat) !== 0 && !isNaN(Number(vendorData.lat)) && !isNaN(Number(vendorData.lng))) {
+        setVendorLocation([Number(vendorData.lat), Number(vendorData.lng)])
+      }
       if (vendorData.logo) {
         setVendorLogo(vendorData.logo)
       }
