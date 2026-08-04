@@ -36,6 +36,26 @@ function formatTitleCase(str?: string) {
     .join(" ")
 }
 
+function InstagramVerifiedBadge({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg 
+      viewBox="0 0 40 40" 
+      aria-label="Verified Partner" 
+      className={`inline-block ${className}`}
+    >
+      <title>Verified Partner</title>
+      <path
+        d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.137V5.15h-6.162L25.358 0l-5.36 3.094Z"
+        fill="#0095F6"
+      />
+      <path
+        d="M16.5 28.5 9 21l2.85-2.85 4.65 4.65 11.65-11.65L31 14l-14.5 14.5Z"
+        fill="#FFFFFF"
+      />
+    </svg>
+  )
+}
+
 export default function VendorDetailClient({
   id,
   initialVendor,
@@ -235,14 +255,11 @@ export default function VendorDetailClient({
               </div>
 
               {/* Title & Verified Badge */}
-              <div className="flex flex-wrap items-center gap-2 mb-1">
-                <h1 className="text-xl font-extrabold text-gray-900 leading-tight">
+              <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                <h1 className="text-xl font-black text-gray-900 leading-tight uppercase tracking-tight">
                   {vendor.name}
                 </h1>
-                <div className="flex items-center gap-1 bg-black text-white px-2.5 py-0.5 rounded-full shadow-2xs">
-                  <BadgeCheck className="w-3 h-3 text-white" />
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider">Verified Partner</span>
-                </div>
+                <InstagramVerifiedBadge className="w-5 h-5 shrink-0" />
               </div>
 
               {/* Address */}
@@ -325,23 +342,45 @@ export default function VendorDetailClient({
           </div>
         </header>
 
-        {/* Available Scooters on Mobile (Original Clean Design) */}
-        <div className="px-4 mt-6">
-          <div className="flex items-center justify-between mb-3 px-1">
-            <h2 className="text-base font-extrabold text-gray-900 tracking-tight">Available Scooters</h2>
-            <span className="text-xs font-bold text-gray-500 bg-white border border-gray-200 px-2.5 py-0.5 rounded-full">{scooters.length} bikes</span>
-          </div>
+        {/* Mobile Scooters Fleet Section */}
+        <div className="px-4 mt-5">
+          {/* Brand Filter Pills on Mobile */}
+          {availableBrands.length > 1 && (
+            <div className="mb-4">
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 hide-scrollbar">
+                {availableBrands.map((brand) => (
+                  <button
+                    key={brand}
+                    onClick={() => setSelectedBrand(brand)}
+                    className={`px-4 py-2 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer active-press ${
+                      selectedBrand === brand
+                        ? "bg-black text-white shadow-xs"
+                        : "bg-white text-gray-700 border border-gray-200 hover:text-black"
+                    }`}
+                  >
+                    {brand}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="space-y-3">
-            {scooters.length === 0 ? (
+            {filteredScooters.length === 0 ? (
               <div className="text-center py-8 bg-white rounded-3xl p-6 border border-gray-100">
                 <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
-                  <MapPin className="w-6 h-6 text-gray-400" />
+                  <Bike className="w-6 h-6 text-gray-400" />
                 </div>
-                <p className="text-gray-500 font-medium text-xs">No scooters available right now</p>
+                <p className="text-gray-500 font-medium text-xs">No scooters available for this brand</p>
+                <button 
+                  onClick={() => setSelectedBrand("All")}
+                  className="mt-3 text-xs font-bold bg-black text-white px-4 py-2 rounded-full active-press cursor-pointer"
+                >
+                  Reset Filter
+                </button>
               </div>
             ) : (
-              scooters.map((scooter) => {
+              filteredScooters.map((scooter) => {
                 const formattedName = formatTitleCase(scooter.name)
                 return (
                   <Link 
@@ -463,11 +502,9 @@ export default function VendorDetailClient({
                 </div>
 
                 <div className="pb-1">
-                  <div className="flex items-center gap-2.5 mb-1">
-                    <h1 className="text-2xl lg:text-3xl font-extrabold text-gray-900 leading-tight">{vendor.name}</h1>
-                    <div className="bg-black text-white p-1 rounded-full shadow-2xs">
-                      <BadgeCheck className="w-3.5 h-3.5 text-white" />
-                    </div>
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <h1 className="text-2xl lg:text-3xl font-black text-gray-900 leading-tight uppercase tracking-tight">{vendor.name}</h1>
+                    <InstagramVerifiedBadge className="w-6 h-6 shrink-0" />
                   </div>
                   <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
                     <MapPin className="w-3.5 h-3.5 text-black shrink-0" />
