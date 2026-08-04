@@ -4,6 +4,7 @@ import "./globals.css";
 import PWARegister from "@/components/PWARegister";
 import AppSplashScreen from "@/components/AppSplashScreen";
 import { getWebSiteSchema, getOrganizationSchema } from "@/lib/seo/schemaGenerator";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -154,6 +155,7 @@ export default function RootLayout({
         <main className="flex-1 w-full min-h-screen relative bg-[#F0F2F5]">
           {children}
         </main>
+        <SpeedInsights />
       </body>
     </html>
   );
