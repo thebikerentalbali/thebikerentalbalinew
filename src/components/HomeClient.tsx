@@ -11,8 +11,7 @@ import {
   X,
   Heart,
   MapPin,
-  Flame,
-  Zap,
+  Bike,
 } from "lucide-react"
 
 import ScooterCard from "@/components/ScooterCard"
@@ -29,10 +28,10 @@ const HomeMapModal = dynamic(() => import("@/components/HomeMapModal"), {
 })
 
 const BRANDS = [
-  { name: "Honda", icon: Flame },
-  { name: "Vespa", icon: Zap },
-  { name: "Yamaha", icon: Flame },
-  { name: "Kawasaki", icon: Zap },
+  { name: "Honda", icon: Bike },
+  { name: "Vespa", icon: Bike },
+  { name: "Yamaha", icon: Bike },
+  { name: "Kawasaki", icon: Bike },
 ]
 
 interface HomeClientProps {
@@ -218,13 +217,16 @@ export default function HomeClient({
         </div>
       </nav>
 
-      <main className="w-full max-w-7xl mx-auto mt-24 sm:mt-28 md:mt-32">
+      <main className="w-full max-w-7xl mx-auto pt-28 sm:pt-32 md:pt-36 lg:pt-40">
         {/* Header */}
-        <header className="flex justify-between items-start mb-6 sm:mb-8 md:mb-12">
+        <header className="flex justify-between items-start mb-6 sm:mb-8 md:mb-10">
           <div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-heading font-bold leading-[1.1] text-gray-900 tracking-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-heading font-extrabold leading-[1.08] text-gray-900 tracking-tight">
               Find Your <br className="md:hidden" /> Perfect Ride
             </h1>
+            <p className="text-xs sm:text-sm md:text-base text-gray-500 font-medium mt-2 max-w-md">
+              Verified local scooter rentals across Bali
+            </p>
           </div>
           <button
             onClick={() => setIsSavedModalOpen(true)}
@@ -234,7 +236,7 @@ export default function HomeClient({
           >
             <Heart className="w-5 h-5 text-black" aria-hidden="true" />
             {savedScooters.length > 0 && (
-              <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+              <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-black rounded-full border-2 border-white"></span>
             )}
           </button>
         </header>
@@ -272,17 +274,6 @@ export default function HomeClient({
           <section aria-labelledby="nearby-vendors-heading" className="mb-10 md:mb-12">
             <div className="flex justify-between items-center mb-4 md:mb-6">
               <h2 id="nearby-vendors-heading" className="text-xl md:text-2xl font-bold text-gray-900">Nearby Vendors</h2>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsMapCardVisible(true)
-                  openLocationPicker()
-                }}
-                className="flex items-center gap-1.5 text-xs md:text-sm font-bold text-black bg-white hover:bg-black hover:text-white px-3.5 py-1.5 rounded-full border border-gray-200 shadow-xs transition-all active-press cursor-pointer"
-              >
-                <MapPin className="w-3.5 h-3.5" aria-hidden="true" />
-                <span>Explore Map</span>
-              </button>
             </div>
             <div className="flex gap-4 md:gap-8 overflow-x-auto md:overflow-visible pb-2 scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0">
               {topVendors.map((vendor, idx) => (

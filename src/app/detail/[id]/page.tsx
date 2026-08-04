@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const title = `Rent ${scooter.name} in Bali | From Rp ${(scooter.price_daily || 0).toLocaleString()} / day`;
-  const description = `Rent a ${scooter.year ? `${scooter.year} ` : ''}${scooter.name} (${scooter.engine || '125cc'}) from ${vendor?.name || 'Verified Vendor'} in Bali. Free 24h cancellation, 2 helmets included, fast hotel delivery.`;
+  const description = `Rent a ${scooter.year ? `${scooter.year} ` : ''}${scooter.name} (${scooter.engine || '125cc'}) from ${vendor?.name || 'Verified Vendor'} in Bali. 2 helmets included, fast hotel delivery.`;
   const imageUrl = scooter.image_url || `${SITE_URL}/icons/icon-512x512.png`;
 
   return {
