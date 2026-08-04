@@ -10,9 +10,7 @@ import {
   ChevronRight, 
   Star, 
   Clock, 
-  MapPin, 
   ShieldCheck, 
-  Headphones, 
   CheckCircle2,
   Bike,
   Gauge,
@@ -22,9 +20,7 @@ import {
   Disc,
   Share2,
   Check,
-  Navigation,
-  Building2,
-  RotateCcw
+  Navigation
 } from "lucide-react"
 import { fetchScooterDetail } from "@/lib/api/catalogService"
 import { subscribeToPlatformSettings } from "@/utils/pricing"
@@ -34,6 +30,16 @@ interface ScooterDetailClientProps {
   initialScooter: any
   initialVendor: any
   initialSettings?: any
+}
+
+// Helper to format names into proper title case (avoids ALL CAPS like "FAZZIO")
+function formatTitleCase(str?: string) {
+  if (!str) return ""
+  return str
+    .toLowerCase()
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ")
 }
 
 export default function ScooterDetailClient({
@@ -64,11 +70,12 @@ export default function ScooterDetailClient({
 
   const handleShare = async () => {
     if (typeof window !== "undefined") {
+      const formattedTitle = formatTitleCase(scooter?.name) || "Scooter"
       if (navigator.share) {
         try {
           await navigator.share({
-            title: `${scooter?.name || "Scooter"} Rental in Bali`,
-            text: `Check out this ${scooter?.name || "Scooter"} rental on THE BIKE RENTAL BALI!`,
+            title: `${formattedTitle} Rental in Bali`,
+            text: `Check out this ${formattedTitle} rental on THE BIKE RENTAL BALI!`,
             url: window.location.href,
           })
         } catch {
@@ -158,12 +165,14 @@ export default function ScooterDetailClient({
     return null
   }
 
+  const formattedName = formatTitleCase(scooter.name) || "Scooter"
   const engineDisplay = scooter.engine || "125 cc"
   const yearDisplay = scooter.year || "2025"
   const fuelDisplay = scooter.fuel_capacity || "5.1 L"
   const transmissionDisplay = scooter.transmission || "Automatic CVT"
-  const brandDisplay = scooter.brand || scooter.name?.split(" ")[0] || "Honda"
+  const brandDisplay = formatTitleCase(scooter.brand || scooter.name?.split(" ")[0] || "Honda")
   const availableUnits = scooter.available_units || 1
+  const priceDaily = Number(scooter.price_daily || scooter.price || 0)
 
   return (
     <div className="min-h-screen bg-[#F0F2F5] text-black antialiased w-full max-w-full overflow-x-hidden pt-3 pb-24 md:py-6">
@@ -192,7 +201,7 @@ export default function ScooterDetailClient({
           <div className="flex items-center gap-2">
             <span className="text-xs font-extrabold uppercase tracking-widest text-gray-400">Fleet</span>
             <span className="text-gray-300">•</span>
-            <span className="text-sm font-extrabold text-gray-900 truncate max-w-[180px] sm:max-w-xs">{scooter.name}</span>
+            <span className="text-sm font-extrabold text-gray-900 truncate max-w-[180px] sm:max-w-xs">{formattedName}</span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -207,7 +216,7 @@ export default function ScooterDetailClient({
             <button 
               type="button"
               onClick={() => setIsLiked(!isLiked)}
-              aria-label={isLiked ? `Unsave ${scooter.name}` : `Save ${scooter.name}`}
+              aria-label={isLiked ? `Unsave ${formattedName}` : `Save ${formattedName}`}
               className="w-11 h-11 bg-white rounded-full flex items-center justify-center shadow-xs border border-gray-200/80 hover:bg-neutral-100 transition-all active-press cursor-pointer shrink-0"
             >
               <Heart className={`w-5 h-5 transition-colors ${isLiked ? "fill-black text-black" : "text-gray-700"}`} aria-hidden="true" />
@@ -245,7 +254,7 @@ export default function ScooterDetailClient({
               <div className="relative w-full h-[260px] sm:h-[340px] md:h-[400px] flex items-center justify-center my-3 sm:my-4">
                 <Image
                   src={scooter.image_url || "/images/scooter.png"}
-                  alt={`${scooter.name} scooter rental Bali`}
+                  alt={`${formattedName} scooter rental Bali`}
                   fill
                   priority
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 55vw, 550px"
@@ -253,7 +262,7 @@ export default function ScooterDetailClient({
                 />
               </div>
 
-              {/* Clean Feature Strip (No full tank title) */}
+              {/* Clean Feature Strip (No fuel tank title) */}
               <div className="grid grid-cols-2 gap-2.5 pt-3 border-t border-gray-100 text-center">
                 <div className="p-2.5 bg-[#F8F9FA] rounded-2xl border border-gray-200/60 flex items-center justify-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-black shrink-0" aria-hidden="true" />
@@ -363,13 +372,16 @@ export default function ScooterDetailClient({
               </div>
             </section>
 
-            {/* 3. About This Scooter & Bali Riding Suitability */}
+            {/* 3. About This Scooter (Enhanced Description without ALL CAPS) */}
             <section aria-labelledby="about-scooter-heading" className="bg-white rounded-[32px] p-5 sm:p-6 shadow-xs border border-gray-200/80">
               <h2 id="about-scooter-heading" className="text-base font-extrabold text-gray-900 tracking-tight mb-2.5">
-                About the {scooter.name}
+                About the {formattedName}
               </h2>
               <p className="text-sm text-gray-600 leading-relaxed font-normal">
-                {scooter.description || `The ${scooter.name} is engineered for effortless handling, nimble maneuverability, and exceptional fuel efficiency. Perfectly calibrated for Bali's bustling coastal alleys in Canggu and Seminyak as well as scenic mountain slopes in Ubud and Uluwatu, it provides smooth acceleration, plush dual seating, and dependable performance.`}
+                {scooter.description && !scooter.description.includes("FAZZIO") 
+                  ? scooter.description 
+                  : `The ${formattedName} is engineered for nimble maneuverability, effortless handling, and exceptional fuel economy across Bali. Equipped with a smooth automatic CVT transmission, comfortable dual seating, and convenient underseat storage, it delivers an easy and dependable ride whether you are exploring bustling coastal roads in Canggu and Seminyak, cruising the serene valleys of Ubud, or touring the southern beaches of Uluwatu. Fully sanitized, fueled, and mechanically safety-inspected before every handover.`
+                }
               </p>
             </section>
 
@@ -377,33 +389,12 @@ export default function ScooterDetailClient({
 
 
           {/* ========================================================================= */}
-          {/* RIGHT COLUMN: IDENTITY, VENDOR, INCLUDED GEAR, ITINERARY & BOOKING */}
+          {/* RIGHT COLUMN: VENDOR, INCLUDED GEAR, ITINERARY & BOOKING                  */}
+          {/* (Top Identity card removed as requested)                                  */}
           {/* ========================================================================= */}
           <div className="flex flex-col w-full space-y-4 sm:space-y-5">
             
-            {/* 1. Identity Header Card (Clean - No Price Display) */}
-            <section aria-labelledby="scooter-title-heading" className="bg-white rounded-[32px] p-5 sm:p-6 shadow-xs border border-gray-200/80">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <span className="text-[11px] font-bold uppercase tracking-widest text-gray-400 block mb-1">
-                    {brandDisplay} Fleet
-                  </span>
-                  <h1 id="scooter-title-heading" className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight leading-tight">
-                    {scooter.name}
-                  </h1>
-                  <p className="text-xs text-gray-500 font-medium mt-1">
-                    {yearDisplay} • {engineDisplay} • {transmissionDisplay}
-                  </p>
-                </div>
-                <div className="flex items-center gap-1.5 bg-black text-white text-xs font-extrabold px-3 py-1.5 rounded-full shrink-0 shadow-xs">
-                  <Star className="w-3.5 h-3.5 fill-white text-white" aria-hidden="true" />
-                  <span>{vendor?.rating ? Number(vendor.rating).toFixed(1) : "5.0"}</span>
-                </div>
-              </div>
-            </section>
-
-
-            {/* 2. Verified Host Vendor Card */}
+            {/* 1. Verified Host Vendor Card */}
             {vendor && (
               <section aria-labelledby="host-heading" className="bg-white rounded-[32px] p-5 sm:p-6 shadow-xs border border-gray-200/80">
                 <div className="flex items-center justify-between mb-3">
@@ -418,7 +409,7 @@ export default function ScooterDetailClient({
                 <Link 
                   href={`/vendor/${vendor.id}`} 
                   prefetch={true}
-                  className="group flex items-center justify-between p-3.5 bg-[#F8F9FA] rounded-2xl border border-gray-200/80 hover:border-black transition-all"
+                  className="group flex items-center justify-between p-3.5 bg-[#F8F9FA] rounded-2xl border border-gray-200/80 hover:border-black transition-all cursor-pointer"
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
                     <div className="relative w-12 h-12 rounded-2xl overflow-hidden bg-white border border-gray-200 shrink-0 shadow-xs flex items-center justify-center font-extrabold text-sm text-black">
@@ -452,20 +443,11 @@ export default function ScooterDetailClient({
                     <ChevronRight className="w-4 h-4" aria-hidden="true" />
                   </div>
                 </Link>
-
-                {/* Vendor Operating Hours Strip */}
-                <div className="mt-3 flex items-center justify-between text-xs text-gray-600 bg-white border border-gray-100 p-2.5 rounded-xl">
-                  <div className="flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-black shrink-0" aria-hidden="true" />
-                    <span className="font-medium">Hours: {vendor.opening_hours || "08:00 AM – 22:00 PM"}</span>
-                  </div>
-                  <span className="font-extrabold text-black">Fast Dispatch</span>
-                </div>
               </section>
             )}
 
 
-            {/* 3. Included Equipment & Support */}
+            {/* 2. Included Equipment & Support */}
             <section aria-labelledby="inclusions-heading" className="bg-white rounded-[32px] p-5 sm:p-6 shadow-xs border border-gray-200/80">
               <div className="flex items-center justify-between pb-3 mb-3 border-b border-gray-100">
                 <div className="flex items-center gap-2">
@@ -517,7 +499,7 @@ export default function ScooterDetailClient({
             </section>
 
 
-            {/* 4. Trip Itinerary: Delivery & Pickup Route */}
+            {/* 3. Trip Itinerary: Delivery & Pickup Route */}
             <section aria-labelledby="itinerary-heading" className="bg-white rounded-[32px] p-5 sm:p-6 shadow-xs border border-gray-200/80">
               <div className="flex items-center justify-between pb-3 mb-4 border-b border-gray-100">
                 <div className="flex items-center gap-2">
@@ -592,7 +574,7 @@ export default function ScooterDetailClient({
             </section>
 
 
-            {/* 5. 3-Step Rental Requirements */}
+            {/* 4. 3-Step Rental Requirements */}
             <section aria-labelledby="requirements-heading" className="bg-white rounded-[32px] p-5 sm:p-6 shadow-xs border border-gray-200/80">
               <h2 id="requirements-heading" className="text-base font-extrabold text-gray-900 tracking-tight mb-3">
                 Rental Requirements
@@ -621,15 +603,18 @@ export default function ScooterDetailClient({
             </section>
 
 
-            {/* 6. Desktop Booking CTA Box */}
-            <div className="hidden lg:flex flex-col bg-white rounded-[32px] p-6 shadow-sm border border-gray-200/80 space-y-3.5">
+            {/* 5. Desktop Booking CTA Box with Price Display */}
+            <div className="hidden lg:flex flex-col bg-white rounded-[32px] p-6 shadow-sm border border-gray-200/80 space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-sm font-extrabold text-gray-900 tracking-tight block">Instant Reservation</span>
-                  <span className="text-xs text-gray-500 font-medium">Free helmet fitting & fast delivery</span>
+                  <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Daily Rate</span>
+                  <div className="flex items-baseline gap-1.5 mt-0.5">
+                    <span className="text-2xl font-black text-gray-900 tracking-tight">Rp {priceDaily.toLocaleString('id-ID')}</span>
+                    <span className="text-xs text-gray-500 font-bold">/ day</span>
+                  </div>
                 </div>
                 <span className="text-xs font-extrabold bg-neutral-100 text-black border border-neutral-200 px-3 py-1.5 rounded-full">
-                  Ready to Ride
+                  Instant Confirmation
                 </span>
               </div>
 
@@ -648,15 +633,18 @@ export default function ScooterDetailClient({
         </main>
       </div>
       
-      {/* Mobile Floating Sticky Booking Footer Bar */}
+      {/* Mobile Floating Sticky Booking Footer Bar with Price Display */}
       <nav aria-label="Quick Booking Bar" className="lg:hidden fixed bottom-4 left-4 right-4 mx-auto bg-black text-white rounded-full px-5 py-3.5 flex items-center justify-between shadow-2xl z-40 border border-neutral-800">
         <div className="flex flex-col min-w-0 pr-2">
           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-            {brandDisplay} Fleet
+            Daily Rate
           </span>
-          <span className="text-sm sm:text-base font-extrabold text-white tracking-tight truncate max-w-[180px]">
-            {scooter.name}
-          </span>
+          <div className="flex items-baseline gap-1">
+            <span className="text-base sm:text-lg font-black text-white tracking-tight">
+              Rp {priceDaily.toLocaleString('id-ID')}
+            </span>
+            <span className="text-[11px] text-gray-400 font-medium">/ day</span>
+          </div>
         </div>
         
         <Link 
