@@ -210,34 +210,34 @@ export default function VendorDetailClient({
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0C] text-white w-full max-w-full overflow-x-hidden touch-pan-y selection:bg-white selection:text-black">
+    <div className="min-h-screen bg-[#F0F2F5] text-foreground w-full max-w-full overflow-x-hidden touch-pan-y">
       
       {/* ======================================================== */}
       {/* MOBILE LAYOUT (< MD) */}
       {/* ======================================================== */}
       <div className="block md:hidden relative pb-24 w-full max-w-full overflow-x-hidden">
         {/* Header */}
-        <header className="relative bg-[#121215] text-white pb-6 shadow-xl border-b border-white/10 rounded-b-3xl z-10 h-fit overflow-hidden">
+        <header className="relative bg-white text-gray-900 pb-6 shadow-sm border-b border-gray-100 rounded-b-3xl z-10 h-fit overflow-hidden">
           {/* Cover Photo */}
-          <div className="relative h-48 w-full bg-[#1c1c22] overflow-hidden">
+          <div className="relative h-48 w-full bg-gray-100 overflow-hidden">
             {vendor.image_url ? (
               <Image src={vendor.image_url} alt="Cover" fill priority sizes="100vw" className="object-cover" />
             ) : (
-              <div className="w-full h-full bg-gradient-to-r from-neutral-800 to-neutral-900" />
+              <div className="w-full h-full bg-gradient-to-r from-gray-200 to-gray-300" />
             )}
             
             {/* Top Buttons floating over cover */}
             <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between z-10">
-              <button onClick={handleBack} aria-label="Go Back" className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-neutral-100 transition-colors">
-                <ChevronLeft className="w-5 h-5 text-black" />
+              <button onClick={handleBack} aria-label="Go Back" className="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors">
+                <ChevronLeft className="w-5 h-5 text-gray-800" />
               </button>
 
               <button 
                 onClick={handleShare}
                 aria-label="Share"
-                className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-neutral-100 active:scale-95 transition-all"
+                className="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-gray-200 shadow-sm hover:bg-gray-50 active:scale-95 transition-all"
               >
-                <Share className="w-4 h-4 text-black" />
+                <Share className="w-4 h-4 text-gray-600" />
               </button>
             </div>
           </div>
@@ -246,11 +246,11 @@ export default function VendorDetailClient({
           <div className="px-5 relative z-10">
             <div className="flex justify-between items-end -mt-12 mb-4">
               <div className="relative">
-                <div className="relative w-24 h-24 rounded-full overflow-hidden bg-white border-4 border-[#121215] shadow-lg shrink-0 flex items-center justify-center">
+                <div className="relative w-24 h-24 rounded-full overflow-hidden bg-white border-4 border-white shadow-lg shrink-0 flex items-center justify-center">
                   {vendor.logo ? (
                     <Image src={vendor.logo} alt={vendor.name} fill sizes="96px" priority className="object-cover" />
                   ) : (
-                    <span className="text-3xl font-black text-black">{(vendor.name || "V").substring(0, 2).toUpperCase()}</span>
+                    <span className="text-3xl font-bold text-gray-400">{(vendor.name || "V").substring(0, 2).toUpperCase()}</span>
                   )}
                 </div>
               </div>
@@ -258,66 +258,66 @@ export default function VendorDetailClient({
             
             <div className="mb-6">
               <div className="flex items-center gap-2 mb-1">
-                <h2 className="text-2xl font-black text-white leading-tight">{vendor.name}</h2>
+                <h2 className="text-2xl font-bold text-gray-900 leading-tight">{vendor.name}</h2>
                 <BadgeCheck className="w-6 h-6 text-white fill-blue-500 shrink-0" />
               </div>
-              <p className="text-gray-300 text-[15px]">{vendor.address || 'Premium scooter rental in Bali'}</p>
+              <p className="text-gray-500 text-[15px]">{vendor.address || 'Premium scooter rental in Bali'}</p>
             </div>
 
             {/* 3 Column Stats */}
-            <div className="flex items-center justify-between py-3 max-w-sm mb-3 bg-white/5 rounded-2xl px-3 border border-white/5">
+            <div className="flex items-center justify-between py-3 max-w-sm mb-3">
               {/* Rating */}
               <div className="flex flex-col items-center justify-center flex-1 cursor-pointer" onClick={() => setIsReviewModalOpen(true)}>
                 <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                  <span className="font-extrabold text-lg text-white">5.0</span>
+                  <Star className="w-4 h-4 text-gray-800 fill-gray-800" />
+                  <span className="font-bold text-lg text-gray-900">5.0</span>
                 </div>
-                <span className="text-[12px] font-bold text-gray-400 mt-0.5 uppercase tracking-wider">rating</span>
+                <span className="text-[12px] text-gray-400 mt-0.5 uppercase tracking-wider">rating</span>
               </div>
               
-              <div className="w-px h-7 bg-white/10" />
+              <div className="w-px h-6 bg-gray-200" />
 
               {/* Reviews */}
               <div className="flex flex-col items-center justify-center flex-1 cursor-pointer" onClick={() => setIsReviewModalOpen(true)}>
-                <span className="font-extrabold text-lg text-white">{reviews.length}+</span>
-                <span className="text-[12px] font-bold text-gray-400 mt-0.5 uppercase tracking-wider">reviews</span>
+                <span className="font-bold text-lg text-gray-900">{reviews.length}+</span>
+                <span className="text-[12px] text-gray-400 mt-0.5 uppercase tracking-wider">reviews</span>
               </div>
 
-              <div className="w-px h-7 bg-white/10" />
+              <div className="w-px h-6 bg-gray-200" />
 
               {/* Scooters Count */}
               <div className="flex flex-col items-center justify-center flex-1">
-                <span className="font-extrabold text-lg text-white">{scooters.reduce((sum, scooter) => sum + (scooter.total_units || 1), 0)}</span>
-                <span className="text-[12px] font-bold text-gray-400 mt-0.5 uppercase tracking-wider">scooters</span>
+                <span className="font-bold text-lg text-gray-900">{scooters.reduce((sum, scooter) => sum + (scooter.total_units || 1), 0)}</span>
+                <span className="text-[12px] text-gray-400 mt-0.5 uppercase tracking-wider">scooters</span>
               </div>
             </div>
 
-            {/* Quick Info Pill Buttons (Crisp White background, black title) */}
+            {/* Quick Info Pill Buttons */}
             <div 
               className="flex items-center gap-2 mb-6 overflow-x-auto scrollbar-hide hide-scrollbar -mx-5 px-5"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
             >
               <button 
                 onClick={() => setActiveInfoModal('hours')}
-                className="bg-white hover:bg-neutral-200 active:scale-95 transition-all text-black text-xs font-bold px-4 py-2.5 rounded-full shrink-0 flex items-center gap-2 shadow-md"
+                className="bg-black hover:bg-gray-800 active:scale-95 transition-all text-white text-xs font-semibold px-4 py-2.5 rounded-full shrink-0 flex items-center gap-2 shadow-xs"
               >
-                <Clock className="w-3.5 h-3.5 text-black" />
+                <Clock className="w-3.5 h-3.5 text-white" />
                 <span>Operating Hours</span>
               </button>
 
               <button 
                 onClick={() => setActiveInfoModal('delivery')}
-                className="bg-white hover:bg-neutral-200 active:scale-95 transition-all text-black text-xs font-bold px-4 py-2.5 rounded-full shrink-0 flex items-center gap-2 shadow-md"
+                className="bg-black hover:bg-gray-800 active:scale-95 transition-all text-white text-xs font-semibold px-4 py-2.5 rounded-full shrink-0 flex items-center gap-2 shadow-xs"
               >
-                <MapPin className="w-3.5 h-3.5 text-black" />
+                <MapPin className="w-3.5 h-3.5 text-white" />
                 <span>Delivery Areas</span>
               </button>
 
               <button 
                 onClick={() => setActiveInfoModal('requirements')}
-                className="bg-white hover:bg-neutral-200 active:scale-95 transition-all text-black text-xs font-bold px-4 py-2.5 rounded-full shrink-0 flex items-center gap-2 shadow-md"
+                className="bg-black hover:bg-gray-800 active:scale-95 transition-all text-white text-xs font-semibold px-4 py-2.5 rounded-full shrink-0 flex items-center gap-2 shadow-xs"
               >
-                <Check className="w-3.5 h-3.5 text-black" />
+                <Check className="w-3.5 h-3.5 text-white" />
                 <span>Rental Requirements</span>
               </button>
             </div>
@@ -330,33 +330,33 @@ export default function VendorDetailClient({
               `}</style>
               <div className="flex overflow-x-auto gap-4 pb-2 snap-x hide-scrollbar">
                 {reviews.slice(0, 5).map(review => (
-                  <div key={review.id} className="snap-start shrink-0 w-[280px] bg-white text-black rounded-2xl p-4 shadow-md border border-white/20 flex flex-col justify-between">
+                  <div key={review.id} className="snap-start shrink-0 w-[280px] bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex flex-col justify-between">
                     <div>
                       <div className="flex gap-0.5 mb-2">
                         {[...Array(5)].map((_, i) => (
                           <Star key={i} className={`w-3.5 h-3.5 ${i < (review.rating || 5) ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-200 text-gray-200'}`} />
                         ))}
                       </div>
-                      <p className="text-[13px] text-gray-800 font-medium line-clamp-3 mb-3">"{review.comment}"</p>
+                      <p className="text-[13px] text-gray-600 line-clamp-3 mb-3">"{review.comment}"</p>
                     </div>
-                    <p className="font-extrabold text-xs text-black">- {review.user_name || 'User'}</p>
+                    <p className="font-bold text-xs text-gray-900">- {review.user_name || 'User'}</p>
                   </div>
                 ))}
                 {reviews.length === 0 && (
-                  <div className="w-full text-center py-4 text-sm text-gray-400">No reviews yet. Be the first!</div>
+                  <div className="w-full text-center py-4 text-sm text-gray-500">No reviews yet. Be the first!</div>
                 )}
               </div>
               <div className="flex items-center gap-3 mt-4">
                 <button 
                   onClick={() => setIsWriteReviewModalOpen(true)}
-                  className="flex-1 bg-white text-black font-extrabold py-3 rounded-full text-[15px] hover:bg-neutral-200 transition-colors shadow-md"
+                  className="flex-1 bg-black text-white font-bold py-3 rounded-[20px] text-[15px] hover:bg-gray-800 transition-colors shadow-sm"
                 >
                   Write a Review
                 </button>
                 {reviews.length > 0 && (
                   <button 
                     onClick={() => setIsReviewModalOpen(true)}
-                    className="flex-1 bg-neutral-800 border border-white/20 text-white font-bold py-3 rounded-full text-[15px] hover:bg-neutral-700 transition-colors"
+                    className="flex-1 bg-white border border-gray-200 text-black font-bold py-3 rounded-[20px] text-[15px] hover:bg-gray-50 transition-colors"
                   >
                     See More
                   </button>
@@ -368,9 +368,9 @@ export default function VendorDetailClient({
 
         {/* Available Scooters on Mobile */}
         <div className="px-6 mt-8">
-          <h3 className="text-lg font-extrabold text-white mb-4 flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center justify-between">
             <span>Available Scooters</span>
-            <span className="text-xs font-bold text-emerald-400 bg-emerald-500/20 px-3 py-1 rounded-full border border-emerald-500/30">{scooters.length} Live Now</span>
+            <span className="text-xs font-medium text-[#00A86B] bg-[#00A86B]/10 px-2.5 py-1.5 rounded-full">{scooters.length} Live Now</span>
           </h3>
           
           <div className="space-y-4">
@@ -424,25 +424,25 @@ export default function VendorDetailClient({
             <button 
               onClick={handleBack} 
               aria-label="Go Back"
-              className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-neutral-100 transition-colors"
+              className="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors"
             >
-              <ChevronLeft className="w-5 h-5 text-black" />
+              <ChevronLeft className="w-5 h-5 text-gray-800" />
             </button>
-            <nav className="flex items-center gap-2 text-sm text-gray-400 font-semibold">
-              <Link href="/" className="hover:text-white transition-colors">Home</Link>
+            <nav className="flex items-center gap-2 text-sm text-gray-500 font-medium">
+              <Link href="/" className="hover:text-black transition-colors">Home</Link>
               <span>/</span>
-              <Link href="/?showMap=true" className="hover:text-white transition-colors">Bali Vendors</Link>
+              <Link href="/?showMap=true" className="hover:text-black transition-colors">Bali Vendors</Link>
               <span>/</span>
-              <span className="text-white font-bold">{vendor.name}</span>
+              <span className="text-gray-900 font-semibold">{vendor.name}</span>
             </nav>
           </div>
 
           <div className="flex items-center gap-3">
             <button 
               onClick={handleShare}
-              className="bg-white text-black hover:bg-neutral-100 px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer"
+              className="bg-white border border-gray-200 text-gray-800 hover:bg-gray-50 px-4 py-2.5 rounded-full text-sm font-semibold flex items-center gap-2 shadow-xs transition-all active:scale-95"
             >
-              {copiedLink ? <Check className="w-4 h-4 text-emerald-600" /> : <Share className="w-4 h-4 text-black" />}
+              {copiedLink ? <Check className="w-4 h-4 text-emerald-600" /> : <Share className="w-4 h-4 text-gray-600" />}
               <span>{copiedLink ? "Link Copied!" : "Share"}</span>
             </button>
           </div>

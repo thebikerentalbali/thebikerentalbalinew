@@ -604,14 +604,14 @@ export default function VendorDashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0A0A0C] flex items-center justify-center text-white">
-        <Loader2 className="w-8 h-8 animate-spin text-white" />
+      <div className="min-h-screen bg-[#F5F7FA] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0C] text-white md:flex md:pl-64 pb-28 md:pb-0 selection:bg-white selection:text-black">
+    <div className="min-h-screen bg-[#F5F7FA] md:flex md:pl-64 pb-28 md:pb-0">
       {/* 
         ========================================================================
         DESKTOP SIDEBAR

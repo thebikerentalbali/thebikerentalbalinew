@@ -2,7 +2,7 @@ import React from "react"
 
 export default function GlobalLoading() {
   return (
-    <div className="min-h-screen bg-[#0A0A0C] text-white pb-24 w-full animate-pulse">
+    <div className="min-h-screen bg-[#F0F2F5] pb-24 w-full animate-pulse">
       {/* Top Bar Skeleton */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 pt-6">
         <div className="flex items-center justify-between mb-8">

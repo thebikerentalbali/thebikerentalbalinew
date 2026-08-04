@@ -95,10 +95,10 @@ export default function ScooterDetailClient({
 
   if (!scooter && !loading) {
     return (
-      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center gap-4 px-6 text-center">
-        <h2 className="text-2xl font-bold text-white tracking-tight">Scooter not found</h2>
-        <p className="text-sm text-gray-400">The requested vehicle listing is unavailable or has been removed.</p>
-        <Link href="/" prefetch={true} className="px-6 py-3 bg-white text-black rounded-full text-sm font-bold hover:bg-gray-100 transition-colors active-press">
+      <div className="min-h-screen bg-[#F0F2F5] text-black flex flex-col items-center justify-center gap-4 px-6 text-center">
+        <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Scooter not found</h2>
+        <p className="text-sm text-gray-500">The requested vehicle listing is unavailable or has been removed.</p>
+        <Link href="/" prefetch={true} className="px-6 py-3 bg-black text-white rounded-full text-sm font-bold hover:bg-gray-800 transition-colors active-press">
           Return to Catalog
         </Link>
       </div>
@@ -112,7 +112,7 @@ export default function ScooterDetailClient({
   const priceDaily = Number(scooter.price_daily || scooter.price || 0)
 
   return (
-    <div className="min-h-screen bg-[#0A0A0C] text-white antialiased selection:bg-white selection:text-black w-full max-w-full overflow-x-hidden py-4 sm:py-6 md:py-10">
+    <div className="min-h-screen bg-[#F0F2F5] text-foreground antialiased w-full max-w-full overflow-x-hidden py-4 sm:py-6 md:py-10">
       <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 md:pb-12">
         
         {/* Navigation Bar Header */}
@@ -121,12 +121,12 @@ export default function ScooterDetailClient({
             type="button"
             onClick={handleBack} 
             aria-label="Go Back"
-            className="w-11 h-11 bg-white rounded-full flex items-center justify-center text-black shadow-md hover:bg-neutral-100 transition-all active-press cursor-pointer shrink-0"
+            className="w-11 h-11 bg-white rounded-full flex items-center justify-center text-black shadow-sm border border-gray-100 hover:bg-gray-50 transition-all active-press cursor-pointer shrink-0"
           >
             <ChevronLeft className="w-5 h-5" aria-hidden="true" />
           </button>
           
-          <h1 className="text-base sm:text-lg font-bold text-white tracking-tight absolute left-1/2 -translate-x-1/2">
+          <h1 className="text-base sm:text-lg font-bold text-gray-900 tracking-tight absolute left-1/2 -translate-x-1/2">
             Scooter Details
           </h1>
 
@@ -134,7 +134,7 @@ export default function ScooterDetailClient({
             type="button"
             onClick={() => setIsLiked(!isLiked)}
             aria-label={isLiked ? `Unsave ${scooter.name}` : `Save ${scooter.name}`}
-            className="w-11 h-11 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-neutral-100 transition-all active-press cursor-pointer shrink-0"
+            className="w-11 h-11 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 hover:bg-gray-50 transition-all active-press cursor-pointer shrink-0"
           >
             <Heart className={`w-5 h-5 transition-colors ${isLiked ? "fill-red-500 text-red-500" : "text-gray-700"}`} aria-hidden="true" />
           </button>
@@ -391,19 +391,19 @@ export default function ScooterDetailClient({
               </div>
             </div>
             
-            {/* Desktop Sticky Price & Booking Card (Crisp White Rounded Card) */}
-            <div className="hidden md:flex items-center justify-between bg-white text-black rounded-[28px] p-6 shadow-xl border border-white/20 mt-2">
+            {/* Desktop Sticky Price & Booking Card */}
+            <div className="hidden md:flex items-center justify-between bg-white text-black rounded-[24px] p-6 shadow-sm border border-gray-100 mt-2">
               <div className="flex flex-col">
                 <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Rental Price</span>
                 <div className="flex items-baseline gap-1.5 mt-0.5">
-                  <span className="text-2xl font-black text-black tracking-tight">Rp {priceDaily.toLocaleString()}</span>
+                  <span className="text-2xl font-bold text-gray-900 tracking-tight">Rp {priceDaily.toLocaleString()}</span>
                   <span className="text-xs text-gray-400 font-semibold">Daily</span>
                 </div>
               </div>
               <Link 
                 href={`/checkout?scooterId=${scooter.id}`} 
                 prefetch={true}
-                className="bg-black text-white px-8 py-3.5 rounded-full text-sm font-bold shadow-md hover:bg-neutral-800 active-press transition-all cursor-pointer"
+                className="bg-black text-white px-8 py-3.5 rounded-full text-sm font-bold shadow-sm hover:bg-neutral-800 active-press transition-all cursor-pointer"
               >
                 Book Rent
               </Link>
@@ -414,20 +414,20 @@ export default function ScooterDetailClient({
         </main>
       </div>
       
-      {/* Mobile Floating Sticky Footer Bar (Crisp White Floating Pill) */}
-      <nav aria-label="Quick Booking Bar" className="md:hidden fixed bottom-5 left-4 right-4 mx-auto bg-white text-black rounded-full px-5 py-3 flex items-center justify-between shadow-2xl z-40 border border-gray-200">
+      {/* Mobile Floating Sticky Footer Bar */}
+      <nav aria-label="Quick Booking Bar" className="md:hidden fixed bottom-5 left-4 right-4 mx-auto bg-black text-white rounded-full px-5 py-3 flex items-center justify-between shadow-2xl z-40 border border-gray-800">
         <div className="flex flex-col">
-          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Daily Rate</span>
+          <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Daily Rate</span>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-base font-black text-black tracking-tight">Rp {priceDaily.toLocaleString()}</span>
-            <span className="text-[11px] text-gray-400 font-semibold">Daily</span>
+            <span className="text-base font-bold text-white tracking-tight">Rp {priceDaily.toLocaleString()}</span>
+            <span className="text-[11px] text-gray-400 font-medium">Daily</span>
           </div>
         </div>
         
         <Link 
           href={`/checkout?scooterId=${scooter.id}`} 
           prefetch={true}
-          className="bg-black text-white px-6 py-2.5 rounded-full text-xs font-bold shadow-sm hover:bg-neutral-800 active-press transition-all"
+          className="bg-white text-black px-6 py-2.5 rounded-full text-xs font-bold shadow-xs hover:bg-neutral-100 active-press transition-all"
         >
           Book Rent
         </Link>

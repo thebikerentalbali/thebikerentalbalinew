@@ -683,7 +683,7 @@ export default function AdminDashboard() {
   const mockBookings: any[] = []
 
   return (
-    <div className="min-h-screen bg-[#0A0A0C] text-white md:flex md:pl-64 pb-28 md:pb-0 selection:bg-white selection:text-black">
+    <div className="min-h-screen bg-[#F5F7FA] md:flex md:pl-64 pb-28 md:pb-0">
       {/* 
         ========================================================================
         DESKTOP SIDEBAR

@@ -41,17 +41,17 @@ function VendorStoryItemComponent({ vendor, isEager = false }: VendorStoryItemPr
 
         {/* Details */}
         <div className="text-center flex flex-col items-center">
-          <h3 className="font-bold text-white text-[13px] md:text-[15px] leading-tight truncate w-[85px] md:w-[100px]">
+          <h3 className="font-semibold text-gray-900 text-[13px] md:text-[15px] leading-tight truncate w-[85px] md:w-[100px]">
             {vendor.name}
           </h3>
-          <div className="flex items-center gap-1 text-[11px] md:text-[13px] mt-0.5 md:mt-1 bg-yellow-400/20 px-2 py-0.5 rounded-full border border-yellow-400/40 w-fit">
+          <div className="flex items-center gap-1 text-[11px] md:text-[13px] mt-0.5 md:mt-1 bg-yellow-50 px-2 py-0.5 rounded-full border border-yellow-100 w-fit">
             <Star className="w-3 h-3 md:w-3.5 md:h-3.5 fill-yellow-400 text-yellow-400" aria-hidden="true" />
-            <span className="font-extrabold text-yellow-300">
+            <span className="font-bold text-yellow-700">
               {vendor.rating ? Number(vendor.rating).toFixed(1) : "5.0"}
             </span>
           </div>
           <div className="flex items-center gap-0.5 md:gap-1 text-[10px] md:text-[12px] text-gray-400 mt-0.5 md:mt-1">
-            <MapPin className="w-3 h-3 md:w-3.5 md:h-3.5 text-gray-400" aria-hidden="true" />
+            <MapPin className="w-3 h-3 md:w-3.5 md:h-3.5" aria-hidden="true" />
             <span className="truncate max-w-[80px] md:max-w-[100px]">{vendor.location || vendor.address || "Bali"}</span>
           </div>
         </div>

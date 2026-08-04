@@ -154,7 +154,7 @@ export default function RootLayout({
         </Suspense>
         <AppSplashScreen />
         <PWARegister />
-        <main className="flex-1 w-full min-h-screen relative bg-[#0A0A0C] text-white">
+        <main className="flex-1 w-full min-h-screen relative">
           {children}
         </main>
         <SpeedInsights />

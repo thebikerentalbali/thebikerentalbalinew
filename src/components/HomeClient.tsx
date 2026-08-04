@@ -160,7 +160,7 @@ export default function HomeClient({
   }, [topVendors, mapSearchQuery])
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#0A0A0C] text-white px-5 pb-24 sm:px-8 md:px-12 md:pb-32 selection:bg-white selection:text-black">
+    <div className="flex flex-col min-h-screen bg-[#F0F2F5] px-6 pb-24 md:px-12 md:pb-32">
       {/* Floating Navbar - Always Visible */}
       <nav aria-label="Main Navigation" className="fixed top-4 left-4 right-4 md:left-12 md:right-12 z-50 pointer-events-none">
         <div className="w-full max-w-7xl mx-auto relative pointer-events-auto">
@@ -222,7 +222,7 @@ export default function HomeClient({
         {/* Header */}
         <header className="flex justify-between items-start mb-6 sm:mb-8 md:mb-12">
           <div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-heading font-extrabold leading-[1.1] text-white tracking-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-heading font-bold leading-[1.1] text-gray-900 tracking-tight">
               Find Your <br className="md:hidden" /> Perfect Ride
             </h1>
           </div>
@@ -230,7 +230,7 @@ export default function HomeClient({
             onClick={() => setIsSavedModalOpen(true)}
             type="button"
             aria-label="View saved scooters"
-            className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg border border-white/20 shrink-0 hover:bg-neutral-100 transition-all relative active-press cursor-pointer"
+            className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 shrink-0 hover:bg-gray-50 transition-all relative active-press cursor-pointer"
           >
             <Heart className="w-5 h-5 text-black" aria-hidden="true" />
             {savedScooters.length > 0 && (
@@ -251,16 +251,16 @@ export default function HomeClient({
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search scooter name or brand..."
               aria-label="Search scooter name or brand"
-              className="w-full pl-12 pr-4 h-14 md:h-16 bg-white border-none rounded-full focus:ring-0 outline-none text-[15px] md:text-[16px] placeholder:text-gray-400 text-black font-semibold shadow-xl"
+              className="w-full pl-12 pr-4 h-14 md:h-16 bg-white border-none rounded-full focus:ring-0 outline-none text-[15px] md:text-[16px] placeholder:text-gray-400 text-gray-900 font-medium shadow-sm"
             />
           </div>
           <button
             onClick={() => setIsFilterOpen(true)}
             type="button"
             aria-label="Open Filter Settings"
-            className="w-14 h-14 md:w-16 md:h-16 bg-white rounded-full flex items-center justify-center shadow-xl shrink-0 border border-white/20 transition-transform hover:scale-105 active-press relative cursor-pointer"
+            className="w-14 h-14 md:w-16 md:h-16 bg-white rounded-full flex items-center justify-center shadow-sm shrink-0 border border-gray-100 transition-transform hover:scale-105 active-press relative cursor-pointer"
           >
-            <SlidersHorizontal className="w-5 h-5 md:w-6 md:h-6 text-black" aria-hidden="true" />
+            <SlidersHorizontal className="w-5 h-5 md:w-6 md:h-6 text-gray-700" aria-hidden="true" />
             {(maxPrice < 500000 || selectedYear !== "All") && (
               <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-black rounded-full border-2 border-white"></span>
             )}
@@ -269,22 +269,22 @@ export default function HomeClient({
 
         {/* Top Vendors (Story Layout) */}
         {topVendors.length > 0 && (
-          <section aria-labelledby="nearby-vendors-heading" className="mb-10 md:mb-14">
+          <section aria-labelledby="nearby-vendors-heading" className="mb-10 md:mb-12">
             <div className="flex justify-between items-center mb-4 md:mb-6">
-              <h2 id="nearby-vendors-heading" className="text-xl md:text-2xl font-extrabold text-white">Nearby Vendors</h2>
+              <h2 id="nearby-vendors-heading" className="text-xl md:text-2xl font-bold text-gray-900">Nearby Vendors</h2>
               <button
                 type="button"
                 onClick={() => {
                   setIsMapCardVisible(true)
                   openLocationPicker()
                 }}
-                className="flex items-center gap-1.5 text-xs md:text-sm font-bold text-black bg-white hover:bg-neutral-100 px-4 py-2 rounded-full shadow-md transition-all active-press cursor-pointer"
+                className="flex items-center gap-1.5 text-xs md:text-sm font-bold text-black bg-white hover:bg-black hover:text-white px-3.5 py-1.5 rounded-full border border-gray-200 shadow-xs transition-all active-press cursor-pointer"
               >
                 <MapPin className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>Explore Map</span>
               </button>
             </div>
-            <div className="flex gap-4 md:gap-8 overflow-x-auto md:overflow-visible pb-2 scrollbar-hide -mx-5 px-5 sm:-mx-8 sm:px-8 md:mx-0 md:px-0">
+            <div className="flex gap-4 md:gap-8 overflow-x-auto md:overflow-visible pb-2 scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0">
               {topVendors.map((vendor, idx) => (
                 <VendorStoryItem key={vendor.id} vendor={vendor} isEager={idx < 3} />
               ))}
@@ -293,27 +293,27 @@ export default function HomeClient({
         )}
 
         {/* Filter and Brands */}
-        <section aria-labelledby="brands-heading" className="mb-10 md:mb-14">
+        <section aria-labelledby="brands-heading" className="mb-10 md:mb-12">
           <div className="flex justify-between items-end mb-4 md:mb-6">
-            <h2 id="brands-heading" className="text-xl md:text-2xl font-extrabold text-white">Brand</h2>
+            <h2 id="brands-heading" className="text-xl md:text-2xl font-bold text-gray-900">Brand</h2>
           </div>
-          <div className="flex gap-3 overflow-x-auto md:flex-wrap md:justify-center md:overflow-visible pb-2 scrollbar-hide -mx-5 px-5 sm:-mx-8 sm:px-8 md:mx-0 md:px-0 items-center">
-            {/* Duration Dropdown (White Rounded Pill) */}
+          <div className="flex gap-3 overflow-x-auto md:flex-wrap md:justify-center md:overflow-visible pb-2 scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0 items-center">
+            {/* Duration Dropdown */}
             <div className="relative shrink-0">
               <select
                 value={durationFilter}
                 onChange={(e) => setDurationFilter(e.target.value)}
                 aria-label="Filter rental duration plan"
-                className="appearance-none bg-white text-black pl-5 pr-10 h-12 md:h-14 md:text-[16px] rounded-full font-extrabold text-[15px] outline-none border-none shadow-xl flex items-center cursor-pointer focus:ring-0 transition-transform hover:scale-105 active-press"
+                className="appearance-none bg-black text-white pl-5 pr-10 h-12 md:h-14 md:text-[16px] rounded-full font-medium text-[15px] outline-none border-none shadow-sm flex items-center cursor-pointer focus:ring-0 transition-transform hover:scale-105 active-press"
               >
                 <option value="Daily">Daily</option>
                 <option value="Weekly">Weekly</option>
                 <option value="Monthly">Monthly</option>
               </select>
-              <ChevronDown className="w-4 h-4 text-black absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
+              <ChevronDown className="w-4 h-4 text-white absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
             </div>
 
-            {/* Brand Chips (White Rounded Pills) */}
+            {/* Brand Chips */}
             {BRANDS.map((brand) => {
               const isActive = activeBrand === brand.name
               return (
@@ -322,16 +322,14 @@ export default function HomeClient({
                   type="button"
                   onClick={() => setActiveBrand(isActive ? "" : brand.name)}
                   aria-pressed={isActive}
-                  className={`flex items-center gap-2 px-5 h-12 md:h-14 md:px-6 rounded-full whitespace-nowrap transition-all shadow-xl hover:scale-105 active-press ${
-                    isActive
-                      ? "bg-white text-black ring-4 ring-white/30 font-black"
-                      : "bg-white/90 text-black hover:bg-white font-bold"
+                  className={`flex items-center gap-2 px-5 h-12 md:h-14 md:px-6 rounded-full whitespace-nowrap transition-all shadow-sm hover:scale-105 active-press ${
+                    isActive ? "bg-black text-white" : "bg-white text-gray-800 border border-gray-100"
                   }`}
                 >
-                  <div className="w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center bg-black text-white">
-                    <brand.icon className="w-3.5 h-3.5 md:w-4 md:h-4 text-white" aria-hidden="true" />
+                  <div className={`w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center ${isActive ? "bg-white/20" : "bg-gray-100"}`}>
+                    <brand.icon className="w-3.5 h-3.5 md:w-4 md:h-4" aria-hidden="true" />
                   </div>
-                  <span className="text-sm md:text-base">{brand.name}</span>
+                  <span className="font-semibold text-sm md:text-base">{brand.name}</span>
                 </button>
               )
             })}
@@ -339,18 +337,18 @@ export default function HomeClient({
         </section>
 
         {/* Popular Scooters (Horizontal Carousel) */}
-        <section aria-labelledby="popular-scooters-heading" className="mb-10 md:mb-14">
+        <section aria-labelledby="popular-scooters-heading" className="mb-10 md:mb-12">
           <div className="flex justify-between items-end mb-4 md:mb-6">
-            <h2 id="popular-scooters-heading" className="text-xl md:text-2xl font-extrabold text-white">Popular</h2>
-            <Link href="#all-scooters" className="text-gray-400 text-sm font-bold hover:text-white transition-colors">See all</Link>
+            <h2 id="popular-scooters-heading" className="text-xl md:text-2xl font-bold text-gray-900">Popular</h2>
+            <Link href="#all-scooters" className="text-gray-400 text-sm font-semibold hover:text-black transition-colors">See all</Link>
           </div>
 
           {filteredPopular.length === 0 ? (
-            <div className="bg-white text-black rounded-[32px] p-8 text-center font-bold shadow-xl">
+            <div className="bg-white rounded-3xl p-8 text-center text-gray-500 font-medium shadow-sm border border-gray-100">
               No scooters found matching your filters.
             </div>
           ) : (
-            <div className="flex gap-4 md:gap-6 overflow-x-auto pb-4 pt-1 px-1 -mx-5 px-5 sm:-mx-8 sm:px-8 md:mx-0 md:px-0 snap-x scrollbar-hide">
+            <div className="flex gap-4 md:gap-6 overflow-x-auto pb-4 pt-1 px-1 -mx-6 px-6 md:mx-0 md:px-0 snap-x scrollbar-hide">
               {filteredPopular.map((scooter, index) => (
                 <ScooterCard
                   key={scooter.id}
@@ -370,7 +368,7 @@ export default function HomeClient({
         {filteredRecommended.length > 0 && (
           <section id="all-scooters" aria-labelledby="more-listings-heading">
             <div className="flex justify-between items-end mb-4 md:mb-6">
-              <h2 id="more-listings-heading" className="text-xl md:text-2xl font-extrabold text-white">More Listings</h2>
+              <h2 id="more-listings-heading" className="text-xl md:text-2xl font-bold text-gray-900">More Listings</h2>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
