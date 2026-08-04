@@ -353,15 +353,20 @@ export default function CheckoutPage() {
           <button 
             type="button"
             onClick={handleBack} 
+            aria-label="Go Back"
             className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm active-press cursor-pointer hover:bg-gray-50 transition-colors"
           >
-            <ChevronLeft className="w-6 h-6 text-gray-800" />
+            <ChevronLeft className="w-6 h-6 text-gray-800" aria-hidden="true" />
           </button>
           <h1 className="text-xl font-medium text-gray-900 absolute left-1/2 -translate-x-1/2">
             Checkout
           </h1>
-          <button type="button" className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm relative active-press">
-            <Bell className="w-5 h-5 text-gray-800" />
+          <button 
+            type="button" 
+            aria-label="Notifications"
+            className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm relative active-press"
+          >
+            <Bell className="w-5 h-5 text-gray-800" aria-hidden="true" />
             <span className="absolute top-3 right-3.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
           </button>
         </header>

@@ -160,10 +160,10 @@ export default function ScooterDetailClient({
             {/* Desktop Thumbnails */}
             <div className="hidden md:flex items-center gap-3 px-1 mb-6">
               <div className="relative w-20 h-20 rounded-2xl bg-white border-2 border-black flex items-center justify-center p-2 shadow-xs cursor-pointer overflow-hidden">
-                <Image src={scooter.image_url || "/images/scooter.png"} alt="View 1" fill sizes="80px" className="object-contain p-1" />
+                <Image src={scooter.image_url || "/images/scooter.png"} alt={`${scooter.name} angle 1`} fill sizes="80px" className="object-contain p-1" loading="lazy" />
               </div>
               <div className="relative w-20 h-20 rounded-2xl bg-neutral-50 border border-neutral-200 flex items-center justify-center p-2 shadow-xs opacity-60 hover:opacity-100 hover:border-black transition-all cursor-pointer overflow-hidden">
-                <Image src={scooter.image_url || "/images/scooter.png"} alt="View 2" fill sizes="80px" className="object-contain p-1" />
+                <Image src={scooter.image_url || "/images/scooter.png"} alt={`${scooter.name} angle 2`} fill sizes="80px" className="object-contain p-1" loading="lazy" />
               </div>
             </div>
 
