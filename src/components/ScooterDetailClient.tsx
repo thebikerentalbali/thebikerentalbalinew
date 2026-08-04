@@ -8,19 +8,11 @@ import {
   ChevronLeft, 
   Heart, 
   ChevronRight, 
-  Star, 
-  Clock, 
-  ShieldCheck, 
-  CheckCircle2,
+  Share2, 
+  Check, 
+  MapPin, 
   Bike,
-  Gauge,
-  Fuel,
-  Package,
-  KeyRound,
-  Disc,
-  Share2,
-  Check,
-  Navigation
+  ShieldCheck
 } from "lucide-react"
 import { fetchScooterDetail } from "@/lib/api/catalogService"
 import { subscribeToPlatformSettings } from "@/utils/pricing"
@@ -32,7 +24,6 @@ interface ScooterDetailClientProps {
   initialSettings?: any
 }
 
-// Helper to format names into proper title case (avoids ALL CAPS like "FAZZIO")
 function formatTitleCase(str?: string) {
   if (!str) return ""
   return str
@@ -40,6 +31,26 @@ function formatTitleCase(str?: string) {
     .split(" ")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ")
+}
+
+function InstagramVerifiedBadge({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg 
+      viewBox="0 0 40 40" 
+      aria-label="Verified Partner" 
+      className={`inline-block ${className}`}
+    >
+      <title>Verified Partner</title>
+      <path
+        d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.137V5.15h-6.162L25.358 0l-5.36 3.094Z"
+        fill="#0095F6"
+      />
+      <path
+        d="M16.5 28.5 9 21l2.85-2.85 4.65 4.65 11.65-11.65L31 14l-14.5 14.5Z"
+        fill="#FFFFFF"
+      />
+    </svg>
+  )
 }
 
 export default function ScooterDetailClient({
@@ -75,11 +86,11 @@ export default function ScooterDetailClient({
         try {
           await navigator.share({
             title: `${formattedTitle} Rental in Bali`,
-            text: `Check out this ${formattedTitle} rental on THE BIKE RENTAL BALI!`,
+            text: `Rent ${formattedTitle} on THE BIKE RENTAL BALI!`,
             url: window.location.href,
           })
         } catch {
-          // Fallback or user canceled
+          // User dismissed or share error
         }
       } else {
         try {
@@ -124,37 +135,15 @@ export default function ScooterDetailClient({
     return () => unsubscribe()
   }, [id, initialScooter])
 
-  // Helper to get delivery area
-  const getDeliveryArea = (address?: string) => {
-    if (!address) return "Ubud, Canggu, Seminyak, Sanur & Greater Bali"
-    const lower = address.toLowerCase()
-    if (lower.includes("ubud") || lower.includes("gianyar") || lower.includes("cempaka") || lower.includes("mas")) {
-      return "Central Ubud, Mas, Sayan, Campuhan, Penestanan & Tegallalang"
-    }
-    if (lower.includes("canggu") || lower.includes("pererenan") || lower.includes("berawa") || lower.includes("tibubeneng")) {
-      return "Batu Bolong, Echo Beach, Berawa, Pererenan & Umalas"
-    }
-    if (lower.includes("seminyak") || lower.includes("kerobokan") || lower.includes("kuta")) {
-      return "Seminyak, Petitenget, Double Six, Legian & Sunset Road"
-    }
-    if (lower.includes("uluwatu") || lower.includes("bukit") || lower.includes("ungasan") || lower.includes("jimbaran") || lower.includes("pecatu")) {
-      return "Uluwatu, Padang Padang, Bingin, Balangan & Jimbaran"
-    }
-    if (lower.includes("sanur")) {
-      return "Sanur Beach, Renon & Denpasar Timur"
-    }
-    return `${address} and surrounding area (10km radius)`
-  }
-
   if (!scooter && !loading) {
     return (
       <div className="min-h-screen bg-[#F0F2F5] text-black flex flex-col items-center justify-center gap-4 px-6 text-center">
         <div className="w-16 h-16 rounded-full bg-white border border-gray-200 flex items-center justify-center shadow-xs">
           <Bike className="w-8 h-8 text-black" aria-hidden="true" />
         </div>
-        <h2 className="text-2xl font-black text-gray-900 tracking-tight">Scooter Not Found</h2>
+        <h2 className="text-2xl font-black text-gray-900 tracking-tight uppercase">Scooter Not Found</h2>
         <p className="text-sm text-gray-500 max-w-sm">The vehicle listing you are looking for is unavailable or has been removed from our fleet.</p>
-        <Link href="/" prefetch={true} className="mt-2 px-6 py-3 bg-black text-white rounded-full text-sm font-bold hover:bg-neutral-800 transition-colors active-press">
+        <Link href="/" prefetch={true} className="mt-2 px-6 py-3 bg-black text-white rounded-full text-xs font-bold hover:bg-neutral-800 transition-colors active-press uppercase tracking-wider">
           Return to Catalog
         </Link>
       </div>
@@ -173,13 +162,15 @@ export default function ScooterDetailClient({
   const brandDisplay = formatTitleCase(scooter.brand || scooter.name?.split(" ")[0] || "Honda")
   const availableUnits = scooter.available_units || 1
   const priceDaily = Number(scooter.price_daily || scooter.price || 0)
+  const priceWeekly = Number(scooter.price_weekly || priceDaily * 6.5)
+  const priceMonthly = Number(scooter.price_monthly || priceDaily * 22)
 
   return (
     <div className="min-h-screen bg-[#F0F2F5] text-black antialiased w-full max-w-full overflow-x-hidden pt-3 pb-24 md:py-6">
       
       {/* Toast Notification */}
       {copiedToast && (
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-black text-white text-xs font-bold px-4 py-2.5 rounded-full shadow-2xl animate-in fade-in slide-in-from-top-2 border border-gray-800 flex items-center gap-2">
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-black text-white text-xs font-bold px-4 py-2.5 rounded-full shadow-2xl animate-in fade-in slide-in-from-top-2 border border-neutral-800 flex items-center gap-2">
           <Check className="w-3.5 h-3.5 text-white" />
           <span>Link copied to clipboard!</span>
         </div>
@@ -187,13 +178,13 @@ export default function ScooterDetailClient({
 
       <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Navigation Header Bar */}
+        {/* Navigation Header */}
         <header className="flex justify-between items-center py-2.5 mb-4 sm:mb-6">
           <button 
             type="button"
             onClick={handleBack} 
             aria-label="Go Back"
-            className="w-11 h-11 bg-white rounded-full flex items-center justify-center text-black shadow-xs border border-gray-200/80 hover:bg-neutral-100 transition-all active-press cursor-pointer shrink-0"
+            className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-black shadow-xs border border-gray-200 hover:bg-neutral-100 transition-all active-press cursor-pointer shrink-0"
           >
             <ChevronLeft className="w-5 h-5 text-black" aria-hidden="true" />
           </button>
@@ -201,7 +192,7 @@ export default function ScooterDetailClient({
           <div className="flex items-center gap-2">
             <span className="text-xs font-extrabold uppercase tracking-widest text-gray-400">Fleet</span>
             <span className="text-gray-300">•</span>
-            <span className="text-sm font-extrabold text-gray-900 truncate max-w-[180px] sm:max-w-xs">{formattedName}</span>
+            <span className="text-sm font-extrabold text-gray-900 uppercase tracking-tight truncate max-w-[180px] sm:max-w-xs">{formattedName}</span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -209,7 +200,7 @@ export default function ScooterDetailClient({
               type="button"
               onClick={handleShare}
               aria-label="Share this scooter"
-              className="w-11 h-11 bg-white rounded-full flex items-center justify-center text-black shadow-xs border border-gray-200/80 hover:bg-neutral-100 transition-all active-press cursor-pointer shrink-0"
+              className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-black shadow-xs border border-gray-200 hover:bg-neutral-100 transition-all active-press cursor-pointer shrink-0"
             >
               <Share2 className="w-4 h-4 text-black" aria-hidden="true" />
             </button>
@@ -217,170 +208,116 @@ export default function ScooterDetailClient({
               type="button"
               onClick={() => setIsLiked(!isLiked)}
               aria-label={isLiked ? `Unsave ${formattedName}` : `Save ${formattedName}`}
-              className="w-11 h-11 bg-white rounded-full flex items-center justify-center shadow-xs border border-gray-200/80 hover:bg-neutral-100 transition-all active-press cursor-pointer shrink-0"
+              className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-xs border border-gray-200 hover:bg-neutral-100 transition-all active-press cursor-pointer shrink-0"
             >
-              <Heart className={`w-5 h-5 transition-colors ${isLiked ? "fill-black text-black" : "text-gray-700"}`} aria-hidden="true" />
+              <Heart className={`w-4 h-4 transition-colors ${isLiked ? "fill-black text-black" : "text-gray-700"}`} aria-hidden="true" />
             </button>
           </div>
         </header>
 
-        {/* Responsive 2-Column Showcase Layout */}
-        <main className="flex flex-col lg:grid lg:grid-cols-[1.1fr_1fr] gap-6 lg:gap-8 items-start w-full">
+        {/* Main 2-Column Responsive Layout */}
+        <main className="flex flex-col lg:grid lg:grid-cols-[1.15fr_1fr] gap-6 lg:gap-8 items-start w-full">
           
           {/* ========================================================================= */}
-          {/* LEFT COLUMN: VEHICLE VISUAL SHOWCASE & TECHNICAL SPECIFICATIONS */}
+          {/* LEFT COLUMN: VEHICLE SHOWCASE & SPECIFICATIONS                            */}
           {/* ========================================================================= */}
           <div className="flex flex-col w-full space-y-4 sm:space-y-5">
             
-            {/* 1. Main Scooter Stage Card */}
-            <article className="relative w-full bg-white rounded-[32px] p-5 sm:p-7 md:p-8 shadow-xs border border-gray-200/80 flex flex-col justify-between overflow-hidden">
+            {/* 1. Main Scooter Showcase Card */}
+            <article className="bg-white rounded-3xl p-5 sm:p-7 md:p-8 shadow-xs border border-gray-200 flex flex-col justify-between">
               
-              {/* Top Tags Row */}
-              <div className="flex items-center justify-between gap-2 z-10 mb-2">
-                <div className="flex items-center gap-2">
-                  <span className="bg-black text-white text-xs font-extrabold px-3.5 py-1.5 rounded-full shadow-xs">
-                    {yearDisplay}
-                  </span>
-                  <span className="bg-neutral-100 text-black border border-neutral-200/90 text-xs font-bold px-3 py-1.5 rounded-full">
+              {/* Pills Row */}
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="bg-black text-white text-[11px] font-black px-3 py-1 rounded-full uppercase tracking-wider">
                     {brandDisplay}
                   </span>
+                  <span className="bg-[#F8F9FA] text-gray-800 border border-gray-200 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                    {yearDisplay}
+                  </span>
                 </div>
-                <span className="bg-neutral-100 text-black border border-neutral-200/90 text-[11px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-black" /> Verified Fleet
+                <span className="bg-[#F8F9FA] text-black border border-gray-200 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                  {availableUnits} Available
                 </span>
               </div>
 
-              {/* High-Resolution Scooter Visual Presentation */}
-              <div className="relative w-full h-[260px] sm:h-[340px] md:h-[400px] flex items-center justify-center my-3 sm:my-4">
+              {/* Scooter High-Res Image Presentation */}
+              <div className="relative w-full h-[240px] sm:h-[320px] md:h-[360px] flex items-center justify-center my-3 sm:my-4">
                 <Image
                   src={scooter.image_url || "/images/scooter.png"}
                   alt={`${formattedName} scooter rental Bali`}
                   fill
                   priority
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 55vw, 550px"
-                  className="object-contain p-2 sm:p-4 drop-shadow-md transition-transform duration-500 hover:scale-105"
+                  className="object-contain p-2 sm:p-4 drop-shadow-md"
                 />
               </div>
 
-              {/* Clean Feature Strip (No fuel tank title) */}
-              <div className="grid grid-cols-2 gap-2.5 pt-3 border-t border-gray-100 text-center">
-                <div className="p-2.5 bg-[#F8F9FA] rounded-2xl border border-gray-200/60 flex items-center justify-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-black shrink-0" aria-hidden="true" />
-                  <div className="text-left">
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Cleanliness</span>
-                    <span className="text-xs font-extrabold text-gray-900 block">Sanitized & Cleaned</span>
-                  </div>
-                </div>
-                <div className="p-2.5 bg-[#F8F9FA] rounded-2xl border border-gray-200/60 flex items-center justify-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-black shrink-0" aria-hidden="true" />
-                  <div className="text-left">
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Fleet Status</span>
-                    <span className="text-xs font-extrabold text-gray-900 block">{availableUnits} Available</span>
-                  </div>
-                </div>
+              {/* Title & Core Summary */}
+              <div className="pt-3 border-t border-gray-100">
+                <h1 className="text-2xl sm:text-3xl font-black text-gray-900 uppercase tracking-tight mb-1.5">
+                  {formattedName}
+                </h1>
+                <p className="text-xs text-gray-500 font-medium">
+                  {engineDisplay} • {transmissionDisplay} • 2 Helmets Included • Verified Clean & Serviced
+                </p>
               </div>
             </article>
 
-            {/* 2. Scooter Technical Specifications Matrix (6 Black & White Cards) */}
-            <section aria-labelledby="specs-heading" className="bg-white rounded-[32px] p-5 sm:p-6 shadow-xs border border-gray-200/80">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <Bike className="w-5 h-5 text-black" aria-hidden="true" />
-                  <h2 id="specs-heading" className="text-base font-extrabold text-gray-900 tracking-tight">
-                    Technical Specifications
-                  </h2>
-                </div>
-                <span className="text-[11px] font-extrabold text-gray-400 uppercase tracking-wider">
-                  Factory Specs
-                </span>
-              </div>
+            {/* 2. Unified Specifications Strip */}
+            <section className="bg-white rounded-3xl p-5 sm:p-6 shadow-xs border border-gray-200">
+              <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">
+                Vehicle Specifications
+              </h2>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                
-                {/* Engine Card */}
-                <div className="bg-[#F8F9FA] rounded-2xl p-3.5 border border-gray-200/80 flex flex-col justify-between">
-                  <div className="flex items-center justify-between text-gray-400 mb-2">
-                    <span className="text-[11px] font-bold uppercase tracking-wider">Engine</span>
-                    <Gauge className="w-4 h-4 text-black" aria-hidden="true" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-extrabold text-gray-900">{engineDisplay}</p>
-                    <p className="text-[11px] text-gray-500 font-medium">4-Stroke SOHC</p>
-                  </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-4 gap-x-6">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block mb-0.5">Engine</span>
+                  <span className="text-sm font-black text-gray-900 block">{engineDisplay}</span>
+                  <span className="text-[11px] text-gray-500">4-Stroke SOHC</span>
                 </div>
 
-                {/* Transmission Card */}
-                <div className="bg-[#F8F9FA] rounded-2xl p-3.5 border border-gray-200/80 flex flex-col justify-between">
-                  <div className="flex items-center justify-between text-gray-400 mb-2">
-                    <span className="text-[11px] font-bold uppercase tracking-wider">Drive</span>
-                    <Bike className="w-4 h-4 text-black" aria-hidden="true" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-extrabold text-gray-900">{transmissionDisplay}</p>
-                    <p className="text-[11px] text-gray-500 font-medium">Twist & Go</p>
-                  </div>
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block mb-0.5">Transmission</span>
+                  <span className="text-sm font-black text-gray-900 block">{transmissionDisplay}</span>
+                  <span className="text-[11px] text-gray-500">Twist & Go Automatic</span>
                 </div>
 
-                {/* Fuel Capacity Card */}
-                <div className="bg-[#F8F9FA] rounded-2xl p-3.5 border border-gray-200/80 flex flex-col justify-between">
-                  <div className="flex items-center justify-between text-gray-400 mb-2">
-                    <span className="text-[11px] font-bold uppercase tracking-wider">Fuel Tank</span>
-                    <Fuel className="w-4 h-4 text-black" aria-hidden="true" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-extrabold text-gray-900">{fuelDisplay}</p>
-                    <p className="text-[11px] text-gray-500 font-medium">~45-50 km/L</p>
-                  </div>
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block mb-0.5">Fuel Tank</span>
+                  <span className="text-sm font-black text-gray-900 block">{fuelDisplay}</span>
+                  <span className="text-[11px] text-gray-500">~45–50 km/L</span>
                 </div>
 
-                {/* Storage Card */}
-                <div className="bg-[#F8F9FA] rounded-2xl p-3.5 border border-gray-200/80 flex flex-col justify-between">
-                  <div className="flex items-center justify-between text-gray-400 mb-2">
-                    <span className="text-[11px] font-bold uppercase tracking-wider">Storage</span>
-                    <Package className="w-4 h-4 text-black" aria-hidden="true" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-extrabold text-gray-900">Underseat Trunk</p>
-                    <p className="text-[11px] text-gray-500 font-medium">Fits 1 Helmet</p>
-                  </div>
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block mb-0.5">Storage</span>
+                  <span className="text-sm font-black text-gray-900 block">Underseat Trunk</span>
+                  <span className="text-[11px] text-gray-500">Fits 1 Helmet</span>
                 </div>
 
-                {/* Ignition / Key Card */}
-                <div className="bg-[#F8F9FA] rounded-2xl p-3.5 border border-gray-200/80 flex flex-col justify-between">
-                  <div className="flex items-center justify-between text-gray-400 mb-2">
-                    <span className="text-[11px] font-bold uppercase tracking-wider">Ignition</span>
-                    <KeyRound className="w-4 h-4 text-black" aria-hidden="true" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-extrabold text-gray-900">Electric Start</p>
-                    <p className="text-[11px] text-gray-500 font-medium">Smart Key / Keyless</p>
-                  </div>
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block mb-0.5">Ignition</span>
+                  <span className="text-sm font-black text-gray-900 block">Electric Start</span>
+                  <span className="text-[11px] text-gray-500">Smart Key / Keyless</span>
                 </div>
 
-                {/* Braking System Card */}
-                <div className="bg-[#F8F9FA] rounded-2xl p-3.5 border border-gray-200/80 flex flex-col justify-between">
-                  <div className="flex items-center justify-between text-gray-400 mb-2">
-                    <span className="text-[11px] font-bold uppercase tracking-wider">Braking</span>
-                    <Disc className="w-4 h-4 text-black" aria-hidden="true" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-extrabold text-gray-900">Front Disc</p>
-                    <p className="text-[11px] text-gray-500 font-medium">Combined Braking</p>
-                  </div>
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block mb-0.5">Included Gear</span>
+                  <span className="text-sm font-black text-gray-900 block">2 Helmets</span>
+                  <span className="text-[11px] text-gray-500">+ Phone Mount</span>
                 </div>
-
               </div>
             </section>
 
-            {/* 3. About This Scooter (Enhanced Description without ALL CAPS) */}
-            <section aria-labelledby="about-scooter-heading" className="bg-white rounded-[32px] p-5 sm:p-6 shadow-xs border border-gray-200/80">
-              <h2 id="about-scooter-heading" className="text-base font-extrabold text-gray-900 tracking-tight mb-2.5">
+            {/* 3. About This Scooter */}
+            <section className="bg-white rounded-3xl p-5 sm:p-6 shadow-xs border border-gray-200">
+              <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2.5">
                 About the {formattedName}
               </h2>
-              <p className="text-sm text-gray-600 leading-relaxed font-normal">
+              <p className="text-xs sm:text-sm text-gray-600 leading-relaxed font-normal">
                 {scooter.description && !scooter.description.includes("FAZZIO") 
                   ? scooter.description 
-                  : `The ${formattedName} is engineered for nimble maneuverability, effortless handling, and exceptional fuel economy across Bali. Equipped with a smooth automatic CVT transmission, comfortable dual seating, and convenient underseat storage, it delivers an easy and dependable ride whether you are exploring bustling coastal roads in Canggu and Seminyak, cruising the serene valleys of Ubud, or touring the southern beaches of Uluwatu. Fully sanitized, fueled, and mechanically safety-inspected before every handover.`
+                  : `The ${formattedName} is engineered for agile maneuverability, effortless handling, and exceptional fuel economy across Bali. Equipped with a smooth automatic CVT transmission, comfortable dual seating, and convenient underseat storage, it delivers an easy and dependable ride whether you are navigating coastal roads in Canggu and Seminyak, touring Ubud's scenic routes, or exploring the beaches of Uluwatu. Thoroughly sanitized, fueled, and safety-inspected prior to handover.`
                 }
               </p>
             </section>
@@ -389,36 +326,121 @@ export default function ScooterDetailClient({
 
 
           {/* ========================================================================= */}
-          {/* RIGHT COLUMN: VENDOR, INCLUDED GEAR, ITINERARY & BOOKING                  */}
-          {/* (Top Identity card removed as requested)                                  */}
+          {/* RIGHT COLUMN: BOOKING, PRICING, VENDOR & RENTAL RULES                     */}
           {/* ========================================================================= */}
-          <div className="flex flex-col w-full space-y-4 sm:space-y-5">
+          <div className="flex flex-col w-full space-y-4 sm:space-y-5 lg:sticky lg:top-6">
             
-            {/* 1. Verified Host Vendor Card */}
-            {vendor && (
-              <section aria-labelledby="host-heading" className="bg-white rounded-[32px] p-5 sm:p-6 shadow-xs border border-gray-200/80">
+            {/* 1. Primary Booking Card */}
+            <section className="bg-white rounded-3xl p-5 sm:p-6 shadow-xs border border-gray-200">
+              
+              {/* Rates Breakdown */}
+              <div className="mb-5 pb-5 border-b border-gray-100">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-[11px] font-bold uppercase tracking-widest text-gray-400 block">
+                  <span className="text-xs font-black text-gray-400 uppercase tracking-widest">
+                    Rental Rates
+                  </span>
+                  <span className="text-[10px] font-black uppercase tracking-wider bg-black text-white px-2.5 py-0.5 rounded-full">
+                    Best Price Guarantee
+                  </span>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between p-3 bg-[#F8F9FA] rounded-2xl border border-gray-200">
+                    <div>
+                      <span className="text-xs font-black text-gray-900 block">Daily</span>
+                      <span className="text-[10px] text-gray-500">Flexible 24-hr rental</span>
+                    </div>
+                    <span className="text-base font-black text-gray-900">
+                      Rp {priceDaily.toLocaleString("id-ID")}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 bg-[#F8F9FA] rounded-2xl border border-gray-200">
+                    <div>
+                      <span className="text-xs font-black text-gray-900 block">Weekly</span>
+                      <span className="text-[10px] text-gray-500">7 Days (Discounted)</span>
+                    </div>
+                    <span className="text-base font-black text-gray-900">
+                      Rp {priceWeekly.toLocaleString("id-ID")}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 bg-[#F8F9FA] rounded-2xl border border-gray-200">
+                    <div>
+                      <span className="text-xs font-black text-gray-900 block">Monthly</span>
+                      <span className="text-[10px] text-gray-500">30 Days (Maximum Savings)</span>
+                    </div>
+                    <span className="text-base font-black text-gray-900">
+                      Rp {priceMonthly.toLocaleString("id-ID")}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Inclusions List */}
+              <div className="space-y-2 mb-5">
+                <div className="flex items-center gap-2.5 text-xs text-gray-700 font-bold">
+                  <div className="w-4 h-4 rounded-full bg-black text-white flex items-center justify-center shrink-0">
+                    <Check className="w-2.5 h-2.5 text-white" />
+                  </div>
+                  <span>2 Sanitized Helmets + Phone Mount Included</span>
+                </div>
+                <div className="flex items-center gap-2.5 text-xs text-gray-700 font-bold">
+                  <div className="w-4 h-4 rounded-full bg-black text-white flex items-center justify-center shrink-0">
+                    <Check className="w-2.5 h-2.5 text-white" />
+                  </div>
+                  <span>Free Hotel & Villa Delivery in Service Area</span>
+                </div>
+                <div className="flex items-center gap-2.5 text-xs text-gray-700 font-bold">
+                  <div className="w-4 h-4 rounded-full bg-black text-white flex items-center justify-center shrink-0">
+                    <Check className="w-2.5 h-2.5 text-white" />
+                  </div>
+                  <span>24/7 Roadside Mechanical Support Across Bali</span>
+                </div>
+                <div className="flex items-center gap-2.5 text-xs text-gray-700 font-bold">
+                  <div className="w-4 h-4 rounded-full bg-black text-white flex items-center justify-center shrink-0">
+                    <Check className="w-2.5 h-2.5 text-white" />
+                  </div>
+                  <span>Instant Confirmation with Zero Hidden Fees</span>
+                </div>
+              </div>
+
+              {/* CTA Button */}
+              <Link 
+                href={`/checkout?scooterId=${scooter.id}`} 
+                prefetch={true}
+                className="w-full bg-black text-white text-center py-4 rounded-full text-xs sm:text-sm font-black uppercase tracking-wider hover:bg-neutral-800 active-press transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+              >
+                <span>Book This Scooter</span>
+                <ChevronRight className="w-4 h-4 text-white" />
+              </Link>
+            </section>
+
+            {/* 2. Verified Host Partner Card */}
+            {vendor && (
+              <section className="bg-white rounded-3xl p-5 sm:p-6 shadow-xs border border-gray-200">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[11px] font-black uppercase tracking-widest text-gray-400">
                     Verified Host Partner
                   </span>
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-black bg-neutral-100 border border-neutral-200 px-2.5 py-0.5 rounded-full">
-                    Active Garage
+                  <span className="text-[10px] font-black uppercase tracking-wider bg-[#F8F9FA] text-gray-800 border border-gray-200 px-2.5 py-0.5 rounded-full">
+                    Active Partner
                   </span>
                 </div>
 
                 <Link 
                   href={`/vendor/${vendor.id}`} 
                   prefetch={true}
-                  className="group flex items-center justify-between p-3.5 bg-[#F8F9FA] rounded-2xl border border-gray-200/80 hover:border-black transition-all cursor-pointer"
+                  className="group flex items-center justify-between p-3 bg-[#F8F9FA] rounded-2xl border border-gray-200 hover:border-black transition-all cursor-pointer"
                 >
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="relative w-12 h-12 rounded-2xl overflow-hidden bg-white border border-gray-200 shrink-0 shadow-xs flex items-center justify-center font-extrabold text-sm text-black">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="relative w-11 h-11 rounded-full overflow-hidden bg-white border border-gray-200 shrink-0 flex items-center justify-center font-black text-xs text-black">
                       {vendor.logo || vendor.image_url ? (
                         <Image 
                           src={vendor.logo || vendor.image_url} 
                           alt={vendor.name || "Vendor"} 
                           fill
-                          sizes="48px"
+                          sizes="44px"
                           className="object-cover" 
                         />
                       ) : (
@@ -426,222 +448,61 @@ export default function ScooterDetailClient({
                       )}
                     </div>
                     <div className="min-w-0">
-                      <h3 className="font-extrabold text-gray-900 text-sm sm:text-base truncate group-hover:text-black transition-colors">
-                        {vendor.name}
-                      </h3>
-                      <div className="flex items-center gap-2 mt-0.5 text-xs text-gray-500 font-medium">
-                        <span className="flex items-center gap-1 text-black font-bold">
-                          <Star className="w-3 h-3 fill-black text-black" aria-hidden="true" />
-                          {vendor.rating ? Number(vendor.rating).toFixed(1) : "5.0"}
-                        </span>
-                        <span>•</span>
-                        <span className="truncate max-w-[140px] sm:max-w-[180px]">{vendor.address || "Bali, Indonesia"}</span>
+                      <div className="flex items-center gap-1.5">
+                        <h3 className="font-black text-gray-900 text-sm uppercase tracking-tight truncate group-hover:text-black transition-colors">
+                          {vendor.name}
+                        </h3>
+                        <InstagramVerifiedBadge className="w-4 h-4 shrink-0" />
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-gray-500 font-medium mt-0.5">
+                        <MapPin className="w-3 h-3 text-black shrink-0" />
+                        <span className="truncate max-w-[170px]">{vendor.address || "Bali, Indonesia"}</span>
                       </div>
                     </div>
                   </div>
-                  <div className="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center text-black shrink-0 group-hover:bg-black group-hover:text-white transition-all shadow-2xs">
+                  <div className="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center text-black shrink-0 group-hover:bg-black group-hover:text-white transition-all">
                     <ChevronRight className="w-4 h-4" aria-hidden="true" />
                   </div>
                 </Link>
               </section>
             )}
 
-
-            {/* 2. Included Equipment & Support */}
-            <section aria-labelledby="inclusions-heading" className="bg-white rounded-[32px] p-5 sm:p-6 shadow-xs border border-gray-200/80">
-              <div className="flex items-center justify-between pb-3 mb-3 border-b border-gray-100">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-5 h-5 text-black" aria-hidden="true" />
-                  <h2 id="inclusions-heading" className="text-base font-extrabold text-gray-900 tracking-tight">
-                    Included with Scooter
-                  </h2>
-                </div>
-                <span className="text-[11px] font-extrabold text-gray-500 bg-neutral-100 border border-neutral-200 px-2.5 py-0.5 rounded-full">
-                  Complimentary
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                
-                <div className="bg-[#F8F9FA] border border-gray-200/80 p-3 rounded-2xl flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-black shrink-0 mt-0.5" aria-hidden="true" />
-                  <div>
-                    <strong className="text-gray-900 block font-bold">2 Sanitized Helmets</strong>
-                    <span className="text-gray-500 text-[11px]">Clean padding with adjustable visor</span>
-                  </div>
-                </div>
-
-                <div className="bg-[#F8F9FA] border border-gray-200/80 p-3 rounded-2xl flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-black shrink-0 mt-0.5" aria-hidden="true" />
-                  <div>
-                    <strong className="text-gray-900 block font-bold">Phone Mount Holder</strong>
-                    <span className="text-gray-500 text-[11px]">Secure handlebar clamp for GPS navigation</span>
-                  </div>
-                </div>
-
-                <div className="bg-[#F8F9FA] border border-gray-200/80 p-3 rounded-2xl flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-black shrink-0 mt-0.5" aria-hidden="true" />
-                  <div>
-                    <strong className="text-gray-900 block font-bold">24/7 Roadside Assistance</strong>
-                    <span className="text-gray-500 text-[11px]">Island-wide emergency & mechanical support</span>
-                  </div>
-                </div>
-
-                <div className="bg-[#F8F9FA] border border-gray-200/80 p-3 rounded-2xl flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-black shrink-0 mt-0.5" aria-hidden="true" />
-                  <div>
-                    <strong className="text-gray-900 block font-bold">Full Safety Inspection</strong>
-                    <span className="text-gray-500 text-[11px]">Brakes, tires, engine & fluids checked</span>
-                  </div>
-                </div>
-
-              </div>
-            </section>
-
-
-            {/* 3. Trip Itinerary: Delivery & Pickup Route */}
-            <section aria-labelledby="itinerary-heading" className="bg-white rounded-[32px] p-5 sm:p-6 shadow-xs border border-gray-200/80">
-              <div className="flex items-center justify-between pb-3 mb-4 border-b border-gray-100">
-                <div className="flex items-center gap-2">
-                  <Navigation className="w-5 h-5 text-black" aria-hidden="true" />
-                  <h2 id="itinerary-heading" className="text-base font-extrabold text-gray-900 tracking-tight">
-                    Delivery & Pickup Itinerary
-                  </h2>
-                </div>
-                <span className="text-[11px] font-extrabold text-black bg-neutral-100 border border-neutral-200 px-2.5 py-0.5 rounded-full">
-                  Trip Route
-                </span>
-              </div>
-
-              {/* Connected Itinerary Timeline */}
-              <div className="relative pl-6 sm:pl-8 space-y-4 sm:space-y-5 before:absolute before:top-3 before:bottom-3 before:left-[11px] sm:before:left-[15px] before:w-[2px] before:bg-gray-200">
-                
-                {/* Stop 1: Garage Hub & Dispatch */}
-                <div className="relative flex items-start">
-                  <div className="absolute -left-6 sm:-left-8 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-black text-white font-extrabold text-[10px] sm:text-xs flex items-center justify-center border-2 border-white shadow-xs z-10">
-                    01
-                  </div>
-                  <div className="bg-[#F8F9FA] rounded-2xl p-3.5 sm:p-4 border border-gray-200/80 w-full ml-1 sm:ml-2">
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <span className="text-[10px] font-extrabold uppercase tracking-widest text-black bg-white border border-gray-200 px-2 py-0.5 rounded-full">
-                        Pickup Hub
-                      </span>
-                      <span className="text-[11px] text-gray-400 font-bold">Fast Handover</span>
-                    </div>
-                    <h3 className="text-xs sm:text-sm font-extrabold text-gray-900">Garage Dispatch & Departure</h3>
-                    <p className="text-xs text-gray-700 font-semibold mt-0.5">{vendor?.address || "Bali, Indonesia"}</p>
-                    <p className="text-[11px] text-gray-500 mt-1">Direct collection available with instant 5-minute vehicle handover and helmet sizing.</p>
-                  </div>
-                </div>
-
-                {/* Stop 2: Hotel / Villa Delivery Handover */}
-                <div className="relative flex items-start">
-                  <div className="absolute -left-6 sm:-left-8 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-black text-white font-extrabold text-[10px] sm:text-xs flex items-center justify-center border-2 border-white shadow-xs z-10">
-                    02
-                  </div>
-                  <div className="bg-[#F8F9FA] rounded-2xl p-3.5 sm:p-4 border border-gray-200/80 w-full ml-1 sm:ml-2">
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <span className="text-[10px] font-extrabold uppercase tracking-widest text-black bg-white border border-gray-200 px-2 py-0.5 rounded-full">
-                        Hotel & Villa Delivery
-                      </span>
-                      <span className="text-[11px] text-gray-400 font-bold">Door-to-Door</span>
-                    </div>
-                    <h3 className="text-xs sm:text-sm font-extrabold text-gray-900">Destination Delivery Handover</h3>
-                    <p className="text-xs text-gray-700 font-semibold mt-0.5">{vendor?.delivery_area || getDeliveryArea(vendor?.address)}</p>
-                    <p className="text-[11px] text-gray-500 mt-1">Delivered directly to your resort lobby, private villa entrance, or Airbnb accommodation.</p>
-                  </div>
-                </div>
-
-                {/* Stop 3: Trip End & Seamless Return */}
-                <div className="relative flex items-start">
-                  <div className="absolute -left-6 sm:-left-8 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-black text-white font-extrabold text-[10px] sm:text-xs flex items-center justify-center border-2 border-white shadow-xs z-10">
-                    03
-                  </div>
-                  <div className="bg-[#F8F9FA] rounded-2xl p-3.5 sm:p-4 border border-gray-200/80 w-full ml-1 sm:ml-2">
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <span className="text-[10px] font-extrabold uppercase tracking-widest text-black bg-white border border-gray-200 px-2 py-0.5 rounded-full">
-                        Return Handover
-                      </span>
-                      <span className="text-[11px] text-gray-400 font-bold">Flexible Return</span>
-                    </div>
-                    <h3 className="text-xs sm:text-sm font-extrabold text-gray-900">Trip Conclusion & Collection</h3>
-                    <p className="text-xs text-gray-700 font-semibold mt-0.5">Same Location or Flexible Pick-up Point</p>
-                    <p className="text-[11px] text-gray-500 mt-1">Easily coordinate return collection at your villa or drop off at the garage via WhatsApp.</p>
-                  </div>
-                </div>
-
-              </div>
-            </section>
-
-
-            {/* 4. 3-Step Rental Requirements */}
-            <section aria-labelledby="requirements-heading" className="bg-white rounded-[32px] p-5 sm:p-6 shadow-xs border border-gray-200/80">
-              <h2 id="requirements-heading" className="text-base font-extrabold text-gray-900 tracking-tight mb-3">
+            {/* 3. Simple Rental Requirements */}
+            <section className="bg-white rounded-3xl p-5 sm:p-6 shadow-xs border border-gray-200">
+              <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">
                 Rental Requirements
               </h2>
 
               <div className="space-y-2 text-xs">
-                <div className="flex items-center gap-3 bg-[#F8F9FA] p-3 rounded-2xl border border-gray-200/80">
-                  <div className="w-6 h-6 rounded-full bg-black text-white font-extrabold text-xs flex items-center justify-center shrink-0">
-                    1
-                  </div>
-                  <p className="font-bold text-gray-900">Valid Passport or National ID Photo</p>
+                <div className="flex items-center gap-3 p-2.5 bg-[#F8F9FA] rounded-xl border border-gray-200">
+                  <span className="w-5 h-5 rounded-full bg-black text-white font-bold text-[10px] flex items-center justify-center shrink-0">1</span>
+                  <span className="font-bold text-gray-900">Valid Passport or ID Photo</span>
                 </div>
-                <div className="flex items-center gap-3 bg-[#F8F9FA] p-3 rounded-2xl border border-gray-200/80">
-                  <div className="w-6 h-6 rounded-full bg-black text-white font-extrabold text-xs flex items-center justify-center shrink-0">
-                    2
-                  </div>
-                  <p className="font-bold text-gray-900">Valid Driving License or International Permit</p>
+                <div className="flex items-center gap-3 p-2.5 bg-[#F8F9FA] rounded-xl border border-gray-200">
+                  <span className="w-5 h-5 rounded-full bg-black text-white font-bold text-[10px] flex items-center justify-center shrink-0">2</span>
+                  <span className="font-bold text-gray-900">Driver License or International Permit</span>
                 </div>
-                <div className="flex items-center gap-3 bg-[#F8F9FA] p-3 rounded-2xl border border-gray-200/80">
-                  <div className="w-6 h-6 rounded-full bg-black text-white font-extrabold text-xs flex items-center justify-center shrink-0">
-                    3
-                  </div>
-                  <p className="font-bold text-gray-900">Online Checkout & WhatsApp Delivery Coordination</p>
+                <div className="flex items-center gap-3 p-2.5 bg-[#F8F9FA] rounded-xl border border-gray-200">
+                  <span className="w-5 h-5 rounded-full bg-black text-white font-bold text-[10px] flex items-center justify-center shrink-0">3</span>
+                  <span className="font-bold text-gray-900">Online Checkout & WhatsApp Delivery Coordination</span>
                 </div>
               </div>
             </section>
-
-
-            {/* 5. Desktop Booking CTA Box with Price Display */}
-            <div className="hidden lg:flex flex-col bg-white rounded-[32px] p-6 shadow-sm border border-gray-200/80 space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Daily Rate</span>
-                  <div className="flex items-baseline gap-1.5 mt-0.5">
-                    <span className="text-2xl font-black text-gray-900 tracking-tight">Rp {priceDaily.toLocaleString('id-ID')}</span>
-                    <span className="text-xs text-gray-500 font-bold">/ day</span>
-                  </div>
-                </div>
-                <span className="text-xs font-extrabold bg-neutral-100 text-black border border-neutral-200 px-3 py-1.5 rounded-full">
-                  Instant Confirmation
-                </span>
-              </div>
-
-              <Link 
-                href={`/checkout?scooterId=${scooter.id}`} 
-                prefetch={true}
-                className="w-full bg-black text-white text-center py-4 rounded-full text-sm font-extrabold shadow-sm hover:bg-neutral-800 active-press transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <span>Book This Scooter</span>
-                <ChevronRight className="w-4 h-4" />
-              </Link>
-            </div>
 
           </div>
 
         </main>
       </div>
       
-      {/* Mobile Floating Sticky Booking Footer Bar with Price Display */}
+      {/* Mobile Floating Sticky Booking Footer Bar */}
       <nav aria-label="Quick Booking Bar" className="lg:hidden fixed bottom-4 left-4 right-4 mx-auto bg-black text-white rounded-full px-5 py-3.5 flex items-center justify-between shadow-2xl z-40 border border-neutral-800">
         <div className="flex flex-col min-w-0 pr-2">
           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
             Daily Rate
           </span>
           <div className="flex items-baseline gap-1">
-            <span className="text-base sm:text-lg font-black text-white tracking-tight">
-              Rp {priceDaily.toLocaleString('id-ID')}
+            <span className="text-base font-black text-white tracking-tight">
+              Rp {priceDaily.toLocaleString("id-ID")}
             </span>
             <span className="text-[11px] text-gray-400 font-medium">/ day</span>
           </div>
@@ -650,7 +511,7 @@ export default function ScooterDetailClient({
         <Link 
           href={`/checkout?scooterId=${scooter.id}`} 
           prefetch={true}
-          className="bg-white text-black px-6 py-2.5 rounded-full text-xs sm:text-sm font-extrabold shadow-xs hover:bg-neutral-100 active-press transition-all flex items-center gap-1.5 shrink-0"
+          className="bg-white text-black px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-wider shadow-xs hover:bg-neutral-100 active-press transition-all flex items-center gap-1.5 shrink-0"
         >
           <span>Book Now</span>
           <ChevronRight className="w-3.5 h-3.5 text-black" />
