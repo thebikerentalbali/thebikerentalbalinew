@@ -3,14 +3,14 @@ import { ChevronLeft, Bell } from "lucide-react"
 
 export default function CheckoutLoading() {
   return (
-    <div className="min-h-screen bg-[#F0F2F5] pb-24 touch-pan-y">
+    <div className="min-h-screen bg-[#0A0A0C] text-white pb-24 touch-pan-y">
       <main className="max-w-6xl mx-auto px-4 md:px-8 pt-6 min-h-screen flex flex-col">
         {/* Header */}
         <header className="relative flex items-center justify-between mb-8">
           <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
-            <ChevronLeft className="w-6 h-6 text-gray-800" />
+            <ChevronLeft className="w-6 h-6 text-black" />
           </div>
-          <h1 className="text-xl font-bold text-gray-900 absolute left-1/2 -translate-x-1/2">
+          <h1 className="text-xl font-bold text-white absolute left-1/2 -translate-x-1/2">
             Checkout
           </h1>
           <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">

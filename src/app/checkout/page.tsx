@@ -345,8 +345,8 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#EBECEF] w-full max-w-full overflow-x-hidden md:py-8 touch-pan-y">
-      <div className="flex flex-col min-h-screen md:min-h-0 bg-[#EBECEF] relative p-6 pb-36 md:max-w-6xl md:mx-auto md:shadow-2xl md:rounded-[40px] md:overflow-hidden md:border md:border-gray-200 w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-[#0A0A0C] text-white w-full max-w-full overflow-x-hidden md:py-8 touch-pan-y selection:bg-white selection:text-black">
+      <div className="flex flex-col min-h-screen md:min-h-0 bg-[#0A0A0C] relative p-5 sm:p-6 pb-36 md:max-w-6xl md:mx-auto md:shadow-2xl md:rounded-[40px] md:overflow-hidden md:border md:border-white/10 w-full max-w-full overflow-x-hidden">
         
         {/* Header */}
         <header className="flex justify-between items-center mb-8">
@@ -354,19 +354,19 @@ export default function CheckoutPage() {
             type="button"
             onClick={handleBack} 
             aria-label="Go Back"
-            className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm active-press cursor-pointer hover:bg-gray-50 transition-colors"
+            className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-md active-press cursor-pointer hover:bg-neutral-100 transition-colors"
           >
-            <ChevronLeft className="w-6 h-6 text-gray-800" aria-hidden="true" />
+            <ChevronLeft className="w-6 h-6 text-black" aria-hidden="true" />
           </button>
-          <h1 className="text-xl font-medium text-gray-900 absolute left-1/2 -translate-x-1/2">
+          <h1 className="text-xl font-extrabold text-white tracking-tight absolute left-1/2 -translate-x-1/2">
             Checkout
           </h1>
           <button 
             type="button" 
             aria-label="Notifications"
-            className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm relative active-press"
+            className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-md relative active-press"
           >
-            <Bell className="w-5 h-5 text-gray-800" aria-hidden="true" />
+            <Bell className="w-5 h-5 text-black" aria-hidden="true" />
             <span className="absolute top-3 right-3.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
           </button>
         </header>
@@ -564,24 +564,24 @@ export default function CheckoutPage() {
           <div className="space-y-8">
         {/* Rental Period */}
         <section>
-          <h2 className="text-[18px] font-semibold text-gray-900 mb-4">Rental Period</h2>
+          <h2 className="text-[18px] font-bold text-white mb-4">Rental Period</h2>
           <div className="flex gap-3 sm:gap-4">
             <div className="flex-1 min-w-0">
-              <label className="block text-[14px] text-gray-700 font-medium mb-1.5 pl-1 truncate">Start Date</label>
+              <label className="block text-[13px] text-gray-300 font-bold mb-1.5 pl-1 truncate">Start Date</label>
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => handleStartDateChange(e.target.value)}
-                className="w-full min-w-0 h-14 bg-white/60 border-none rounded-2xl px-3 sm:px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none text-gray-800 transition-shadow"
+                className="w-full min-w-0 h-14 bg-white text-black font-semibold border-none rounded-2xl px-3 sm:px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-white outline-none transition-shadow shadow-lg"
               />
             </div>
             <div className="flex-1 min-w-0">
-              <label className="block text-[14px] text-gray-700 font-medium mb-1.5 pl-1 truncate">End Date</label>
+              <label className="block text-[13px] text-gray-300 font-bold mb-1.5 pl-1 truncate">End Date</label>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => handleEndDateChange(e.target.value)}
-                className="w-full min-w-0 h-14 bg-white/60 border-none rounded-2xl px-3 sm:px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none text-gray-800 transition-shadow"
+                className="w-full min-w-0 h-14 bg-white text-black font-semibold border-none rounded-2xl px-3 sm:px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-white outline-none transition-shadow shadow-lg"
               />
             </div>
           </div>
@@ -589,27 +589,27 @@ export default function CheckoutPage() {
 
         {/* Customer Details Form */}
         <section>
-          <h2 className="text-[18px] font-semibold text-gray-900 mb-4">Customer Details</h2>
+          <h2 className="text-[18px] font-bold text-white mb-4">Customer Details</h2>
           <div className="space-y-3">
             <div className="flex gap-4">
               <div className="flex-1">
-                <label className="block text-[14px] text-gray-700 font-medium mb-1.5 pl-1">First Name</label>
+                <label className="block text-[13px] text-gray-300 font-bold mb-1.5 pl-1">First Name</label>
                 <input
                   type="text"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   placeholder="First Name"
-                  className="w-full h-14 bg-white/60 border-none rounded-2xl px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none text-gray-800 transition-shadow"
+                  className="w-full h-14 bg-white text-black font-semibold border-none rounded-2xl px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-white outline-none transition-shadow shadow-lg"
                 />
               </div>
               <div className="flex-1">
-                <label className="block text-[14px] text-gray-700 font-medium mb-1.5 pl-1">Last Name</label>
+                <label className="block text-[13px] text-gray-300 font-bold mb-1.5 pl-1">Last Name</label>
                 <input
                   type="text"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   placeholder="Last Name"
-                  className="w-full h-14 bg-white/60 border-none rounded-2xl px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none text-gray-800 transition-shadow"
+                  className="w-full h-14 bg-white text-black font-semibold border-none rounded-2xl px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-white outline-none transition-shadow shadow-lg"
                 />
               </div>
             </div>
@@ -618,23 +618,23 @@ export default function CheckoutPage() {
 
         {/* Helmets & Accessories */}
         <section>
-          <h2 className="text-[18px] font-semibold text-gray-900 mb-4">Accessories</h2>
-          <div className="bg-white/60 rounded-3xl p-5 flex items-center justify-between border border-transparent hover:border-gray-100 transition-colors">
+          <h2 className="text-[18px] font-bold text-white mb-4">Accessories</h2>
+          <div className="bg-white text-black rounded-3xl p-5 flex items-center justify-between border border-white/20 shadow-xl">
             <div>
-              <p className="font-medium text-gray-900 text-[15px]">Helmets</p>
+              <p className="font-bold text-black text-[15px]">Helmets</p>
               <p className="text-[13px] text-gray-500 mt-0.5">Included in rental</p>
             </div>
-            <div className="flex items-center justify-between bg-white rounded-full p-1 shadow-sm border border-gray-100 min-w-[110px]">
+            <div className="flex items-center justify-between bg-neutral-100 rounded-full p-1 border border-neutral-200 min-w-[110px]">
               <button
                 onClick={() => setHelmets(Math.max(1, helmets - 1))}
-                className="w-9 h-9 rounded-full bg-gray-50 flex items-center justify-center text-gray-600 hover:bg-gray-100 active:scale-95 transition-all"
+                className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-black shadow-xs hover:bg-neutral-200 active:scale-95 transition-all"
               >
                 <Minus className="w-4 h-4" />
               </button>
-              <span className="font-semibold text-[15px] w-6 text-center">{helmets}</span>
+              <span className="font-black text-[15px] w-6 text-center text-black">{helmets}</span>
               <button
                 onClick={() => setHelmets(helmets + 1)}
-                className="w-9 h-9 rounded-full bg-black flex items-center justify-center text-white shadow-sm hover:bg-gray-800 active:scale-95 transition-all"
+                className="w-9 h-9 rounded-full bg-black flex items-center justify-center text-white shadow-sm hover:bg-neutral-800 active:scale-95 transition-all"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -644,44 +644,44 @@ export default function CheckoutPage() {
 
         {/* Delivery Method */}
         <section>
-          <h2 className="text-[18px] font-semibold text-gray-900 mb-4">Collection Method</h2>
+          <h2 className="text-[18px] font-bold text-white mb-4">Collection Method</h2>
           <div className="grid grid-cols-2 gap-3 mb-4">
             <button
               onClick={() => setDeliveryMethod("pickup")}
-              className={`p-3 rounded-2xl border-2 flex items-center gap-3 transition-all ${deliveryMethod === "pickup" ? 'border-black bg-white shadow-sm scale-[1.02]' : 'border-transparent bg-white/60 hover:bg-white/80'}`}
+              className={`p-3.5 rounded-2xl border-2 flex items-center gap-3 transition-all ${deliveryMethod === "pickup" ? 'border-white bg-white text-black shadow-xl scale-[1.02]' : 'border-white/10 bg-white/90 text-black hover:bg-white'}`}
             >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors ${deliveryMethod === "pickup" ? 'bg-black text-white' : 'bg-gray-100 text-gray-900'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors ${deliveryMethod === "pickup" ? 'bg-black text-white' : 'bg-gray-200 text-black'}`}>
                 <MapPin className="w-4 h-4" />
               </div>
-              <h3 className="font-semibold text-gray-900 text-[14px]">Pick Up</h3>
+              <h3 className="font-bold text-black text-[14px]">Pick Up</h3>
             </button>
             <button
               onClick={() => setDeliveryMethod("delivery")}
-              className={`p-3 rounded-2xl border-2 flex items-center gap-3 transition-all ${deliveryMethod === "delivery" ? 'border-black bg-white shadow-sm scale-[1.02]' : 'border-transparent bg-white/60 hover:bg-white/80'}`}
+              className={`p-3.5 rounded-2xl border-2 flex items-center gap-3 transition-all ${deliveryMethod === "delivery" ? 'border-white bg-white text-black shadow-xl scale-[1.02]' : 'border-white/10 bg-white/90 text-black hover:bg-white'}`}
             >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors ${deliveryMethod === "delivery" ? 'bg-black text-white' : 'bg-gray-100 text-gray-900'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors ${deliveryMethod === "delivery" ? 'bg-black text-white' : 'bg-gray-200 text-black'}`}>
                 <Map className="w-4 h-4" />
               </div>
-              <h3 className="font-semibold text-gray-900 text-[14px]">Delivery</h3>
+              <h3 className="font-bold text-black text-[14px]">Delivery</h3>
             </button>
           </div>
 
           {deliveryMethod === "delivery" && (
-            <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 animate-in fade-in slide-in-from-top-2">
-              <label className="block text-[14px] text-gray-700 font-medium mb-2 pl-1">Delivery Address</label>
+            <div className="bg-white text-black rounded-3xl p-5 shadow-xl border border-white/20 animate-in fade-in slide-in-from-top-2">
+              <label className="block text-[13px] text-gray-700 font-bold mb-2 pl-1">Delivery Address</label>
               <input
                 type="text"
                 value={deliveryAddress}
                 onChange={(e) => setDeliveryAddress(e.target.value)}
                 placeholder="Enter your hotel or villa address"
-                className="w-full h-14 bg-gray-50 border-none rounded-2xl px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none text-gray-800 mb-5 transition-shadow"
+                className="w-full h-14 bg-gray-50 border border-gray-200 rounded-2xl px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-black outline-none text-black mb-4 transition-shadow"
               />
               <div className="bg-[#FFF4E5] p-4 rounded-2xl border border-[#FFE0B2] mb-1">
                 <div className="flex gap-3 items-start mb-3">
                   <Info className="w-5 h-5 text-[#E65100] shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-[14px] font-semibold text-[#E65100] mb-1">Delivery Fee Policy</p>
-                    <p className="text-[13px] text-[#E65100]/80 leading-relaxed">
+                    <p className="text-[14px] font-bold text-[#E65100] mb-1">Delivery Fee Policy</p>
+                    <p className="text-[13px] text-[#E65100]/80 leading-relaxed font-medium">
                       Delivery is free up to 5km from the vendor&apos;s location. Beyond 5km, a fee of IDR 10,000/km applies (calculated for both delivery and pickup).
                     </p>
                   </div>
@@ -695,7 +695,7 @@ export default function CheckoutPage() {
                       className="w-4 h-4 accent-[#E65100] cursor-pointer"
                     />
                   </div>
-                  <span className="text-[13px] font-medium text-[#E65100] flex-1 leading-snug">
+                  <span className="text-[13px] font-semibold text-[#E65100] flex-1 leading-snug">
                     I agree to pay the additional delivery and pickup fee if my location is further than 5km.
                   </span>
                 </label>
@@ -707,15 +707,15 @@ export default function CheckoutPage() {
 
       {/* Desktop Confirm Button */}
       <div className="hidden md:block pt-4">
-        <div className="bg-white rounded-[28px] p-5 shadow-sm border border-gray-100 flex flex-col gap-4">
+        <div className="bg-white text-black rounded-[28px] p-5 shadow-xl border border-white/20 flex flex-col gap-4">
           <div className="flex justify-between items-center px-2">
-             <span className="text-[13px] font-bold text-gray-500 uppercase tracking-wider">Total Amount</span>
-             <span className="text-2xl font-black text-gray-900 tracking-tight">Rp {getTotalPrice().toLocaleString()}</span>
+             <span className="text-[12px] font-extrabold text-gray-500 uppercase tracking-wider">Total Amount</span>
+             <span className="text-2xl font-black text-black tracking-tight">Rp {getTotalPrice().toLocaleString()}</span>
           </div>
           <button
             onClick={handleConfirmBooking}
             disabled={isSubmitting || cart.length === 0}
-            className="w-full h-14 bg-black text-white rounded-full text-[17px] font-semibold shadow-xl shadow-black/20 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none transition-all flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full h-14 bg-black text-white rounded-full text-[17px] font-bold shadow-xl shadow-black/20 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             {isSubmitting ? (
               <>
@@ -734,15 +734,15 @@ export default function CheckoutPage() {
       </div>
 
       {/* Bottom Button (Mobile Only) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto px-5 py-5 pb-8 sm:pb-6 bg-white/95 backdrop-blur-xl border-t border-gray-100 z-10 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] rounded-t-[32px]">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto px-5 py-5 pb-8 sm:pb-6 bg-white text-black border-t border-white/20 z-10 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.5)] rounded-t-[32px]">
         <div className="flex items-center justify-between mb-4 px-2">
-           <span className="text-[13px] font-bold text-gray-500 uppercase tracking-wider">Total</span>
-           <span className="text-xl font-black text-gray-900 tracking-tight">Rp {getTotalPrice().toLocaleString()}</span>
+           <span className="text-[12px] font-extrabold text-gray-500 uppercase tracking-wider">Total</span>
+           <span className="text-xl font-black text-black tracking-tight">Rp {getTotalPrice().toLocaleString()}</span>
         </div>
         <button
           onClick={handleConfirmBooking}
           disabled={isSubmitting || cart.length === 0}
-          className="w-full h-14 bg-black text-white rounded-full text-[17px] font-semibold shadow-xl shadow-black/20 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none transition-all flex items-center justify-center gap-2 cursor-pointer"
+          className="w-full h-14 bg-black text-white rounded-full text-[17px] font-bold shadow-xl shadow-black/20 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none transition-all flex items-center justify-center gap-2 cursor-pointer"
         >
           {isSubmitting ? (
             <>

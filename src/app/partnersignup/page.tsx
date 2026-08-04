@@ -118,7 +118,7 @@ export default function PartnerSignUp() {
   }
 
   return (
-    <div className="min-h-screen bg-white md:flex">
+    <div className="min-h-screen bg-[#0A0A0C] text-white md:flex selection:bg-white selection:text-black">
       {/* Left Column: Image & Branding */}
       <div className="hidden md:flex md:w-5/12 lg:w-1/2 relative bg-black flex-col justify-between p-12 text-white overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -147,16 +147,16 @@ export default function PartnerSignUp() {
       </div>
 
       {/* Right Column: Content Area */}
-      <div className="flex-1 flex flex-col justify-center min-h-screen relative bg-[#F8F9FA] md:bg-white">
+      <div className="flex-1 flex flex-col justify-center min-h-screen relative bg-[#0A0A0C]">
         <div className="absolute top-6 left-6 md:hidden">
           <Link href="/" className="inline-block">
-            <h2 className="text-xl font-black text-black tracking-tight leading-none">THE BIKE RENTAL</h2>
+            <h2 className="text-xl font-black text-white tracking-tight leading-none">THE BIKE RENTAL</h2>
           </Link>
         </div>
 
         <div className="w-full max-w-xl mx-auto px-4 py-20 md:px-12">
           {step === 0 && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 bg-white p-8 md:p-10 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
+            <div className="animate-in fade-in slide-in-from-bottom-4 bg-white text-black p-8 md:p-10 rounded-[32px] shadow-2xl border border-white/20">
               <div className="mb-10 text-center">
                 <div className="w-16 h-16 bg-black rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-md">
                   <Store className="w-8 h-8 text-white" />

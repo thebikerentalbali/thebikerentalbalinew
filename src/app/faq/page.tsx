@@ -3,8 +3,8 @@ import { ArrowLeft } from "lucide-react"
 
 export default function FAQ() {
   return (
-    <div className="min-h-screen bg-[#F0F2F5] px-6 py-12 md:px-12 md:py-24">
-      <div className="max-w-3xl mx-auto bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-gray-100">
+    <div className="min-h-screen bg-[#0A0A0C] text-white px-6 py-12 md:px-12 md:py-24 selection:bg-white selection:text-black">
+      <div className="max-w-3xl mx-auto bg-white text-black rounded-3xl p-8 md:p-12 shadow-2xl border border-white/20">
         <Link href="/" className="inline-flex items-center gap-2 text-gray-500 hover:text-black transition-colors mb-8">
           <ArrowLeft className="w-4 h-4" />
           <span className="font-semibold text-sm">Back to Home</span>
