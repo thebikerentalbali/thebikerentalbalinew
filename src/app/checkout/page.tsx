@@ -564,24 +564,24 @@ export default function CheckoutPage() {
           <div className="space-y-8">
         {/* Rental Period */}
         <section>
-          <h2 className="text-[18px] font-bold text-white mb-4">Rental Period</h2>
+          <h2 className="text-[18px] font-bold text-gray-900 mb-4">Rental Period</h2>
           <div className="flex gap-3 sm:gap-4">
             <div className="flex-1 min-w-0">
-              <label className="block text-[13px] text-gray-300 font-bold mb-1.5 pl-1 truncate">Start Date</label>
+              <label className="block text-[13px] text-gray-700 font-semibold mb-1.5 pl-1 truncate">Start Date</label>
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => handleStartDateChange(e.target.value)}
-                className="w-full min-w-0 h-14 bg-white text-black font-semibold border-none rounded-2xl px-3 sm:px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-white outline-none transition-shadow shadow-lg"
+                className="w-full min-w-0 h-14 bg-white text-gray-900 font-semibold border border-gray-200/80 rounded-2xl px-3 sm:px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none transition-shadow shadow-xs"
               />
             </div>
             <div className="flex-1 min-w-0">
-              <label className="block text-[13px] text-gray-300 font-bold mb-1.5 pl-1 truncate">End Date</label>
+              <label className="block text-[13px] text-gray-700 font-semibold mb-1.5 pl-1 truncate">End Date</label>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => handleEndDateChange(e.target.value)}
-                className="w-full min-w-0 h-14 bg-white text-black font-semibold border-none rounded-2xl px-3 sm:px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-white outline-none transition-shadow shadow-lg"
+                className="w-full min-w-0 h-14 bg-white text-gray-900 font-semibold border border-gray-200/80 rounded-2xl px-3 sm:px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none transition-shadow shadow-xs"
               />
             </div>
           </div>
@@ -589,27 +589,27 @@ export default function CheckoutPage() {
 
         {/* Customer Details Form */}
         <section>
-          <h2 className="text-[18px] font-bold text-white mb-4">Customer Details</h2>
+          <h2 className="text-[18px] font-bold text-gray-900 mb-4">Customer Details</h2>
           <div className="space-y-3">
             <div className="flex gap-4">
               <div className="flex-1">
-                <label className="block text-[13px] text-gray-300 font-bold mb-1.5 pl-1">First Name</label>
+                <label className="block text-[13px] text-gray-700 font-semibold mb-1.5 pl-1">First Name</label>
                 <input
                   type="text"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   placeholder="First Name"
-                  className="w-full h-14 bg-white text-black font-semibold border-none rounded-2xl px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-white outline-none transition-shadow shadow-lg"
+                  className="w-full h-14 bg-white text-gray-900 font-semibold border border-gray-200/80 rounded-2xl px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none transition-shadow shadow-xs"
                 />
               </div>
               <div className="flex-1">
-                <label className="block text-[13px] text-gray-300 font-bold mb-1.5 pl-1">Last Name</label>
+                <label className="block text-[13px] text-gray-700 font-semibold mb-1.5 pl-1">Last Name</label>
                 <input
                   type="text"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   placeholder="Last Name"
-                  className="w-full h-14 bg-white text-black font-semibold border-none rounded-2xl px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-white outline-none transition-shadow shadow-lg"
+                  className="w-full h-14 bg-white text-gray-900 font-semibold border border-gray-200/80 rounded-2xl px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none transition-shadow shadow-xs"
                 />
               </div>
             </div>
@@ -618,20 +618,20 @@ export default function CheckoutPage() {
 
         {/* Helmets & Accessories */}
         <section>
-          <h2 className="text-[18px] font-bold text-white mb-4">Accessories</h2>
-          <div className="bg-white text-black rounded-3xl p-5 flex items-center justify-between border border-white/20 shadow-xl">
+          <h2 className="text-[18px] font-bold text-gray-900 mb-4">Accessories</h2>
+          <div className="bg-white rounded-3xl p-5 flex items-center justify-between border border-gray-100 shadow-sm">
             <div>
-              <p className="font-bold text-black text-[15px]">Helmets</p>
+              <p className="font-bold text-gray-900 text-[15px]">Helmets</p>
               <p className="text-[13px] text-gray-500 mt-0.5">Included in rental</p>
             </div>
-            <div className="flex items-center justify-between bg-neutral-100 rounded-full p-1 border border-neutral-200 min-w-[110px]">
+            <div className="flex items-center justify-between bg-gray-50 rounded-full p-1 border border-gray-100 min-w-[110px]">
               <button
                 onClick={() => setHelmets(Math.max(1, helmets - 1))}
-                className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-black shadow-xs hover:bg-neutral-200 active:scale-95 transition-all"
+                className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-gray-700 shadow-xs hover:bg-gray-100 active:scale-95 transition-all"
               >
                 <Minus className="w-4 h-4" />
               </button>
-              <span className="font-black text-[15px] w-6 text-center text-black">{helmets}</span>
+              <span className="font-bold text-[15px] w-6 text-center text-gray-900">{helmets}</span>
               <button
                 onClick={() => setHelmets(helmets + 1)}
                 className="w-9 h-9 rounded-full bg-black flex items-center justify-center text-white shadow-sm hover:bg-neutral-800 active:scale-95 transition-all"
@@ -644,7 +644,7 @@ export default function CheckoutPage() {
 
         {/* Delivery Method */}
         <section>
-          <h2 className="text-[18px] font-bold text-white mb-4">Collection Method</h2>
+          <h2 className="text-[18px] font-bold text-gray-900 mb-4">Collection Method</h2>
           <div className="grid grid-cols-2 gap-3 mb-4">
             <button
               onClick={() => setDeliveryMethod("pickup")}
