@@ -224,9 +224,6 @@ export default function HomeClient({
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-heading font-extrabold leading-[1.08] text-gray-900 tracking-tight">
               Find Your <br className="md:hidden" /> Perfect Ride
             </h1>
-            <p className="text-xs sm:text-sm md:text-base text-gray-500 font-medium mt-2 max-w-md">
-              Verified local scooter rentals across Bali
-            </p>
           </div>
           <button
             onClick={() => setIsSavedModalOpen(true)}

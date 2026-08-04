@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -21,8 +21,10 @@ import {
   KeyRound,
   Disc,
   Share2,
-  Phone,
-  Check
+  Check,
+  Navigation,
+  Building2,
+  RotateCcw
 } from "lucide-react"
 import { fetchScooterDetail } from "@/lib/api/catalogService"
 import { subscribeToPlatformSettings } from "@/utils/pricing"
@@ -45,7 +47,6 @@ export default function ScooterDetailClient({
   const [vendor, setVendor] = useState<any>(initialVendor)
   const [loading, setLoading] = useState<boolean>(!initialScooter)
   const [isLiked, setIsLiked] = useState(false)
-  const [selectedPlan, setSelectedPlan] = useState<"daily" | "weekly" | "monthly">("daily")
   const [copiedToast, setCopiedToast] = useState(false)
 
   const handleBack = (e?: React.MouseEvent) => {
@@ -137,34 +138,6 @@ export default function ScooterDetailClient({
     }
     return `${address} and surrounding area (10km radius)`
   }
-
-  // Price calculations
-  const priceDaily = useMemo(() => Number(scooter?.price_daily || scooter?.price || 0), [scooter])
-  const priceWeekly = useMemo(() => {
-    if (scooter?.price_weekly && Number(scooter.price_weekly) > 0) {
-      return Number(scooter.price_weekly)
-    }
-    return priceDaily * 7 * 0.9 // 10% default discount for weekly
-  }, [scooter, priceDaily])
-
-  const priceMonthly = useMemo(() => {
-    if (scooter?.price_monthly && Number(scooter.price_monthly) > 0) {
-      return Number(scooter.price_monthly)
-    }
-    return priceDaily * 30 * 0.75 // 25% default discount for monthly
-  }, [scooter, priceDaily])
-
-  const activeDisplayPrice = useMemo(() => {
-    if (selectedPlan === "weekly") return Math.round(priceWeekly)
-    if (selectedPlan === "monthly") return Math.round(priceMonthly)
-    return priceDaily
-  }, [selectedPlan, priceDaily, priceWeekly, priceMonthly])
-
-  const activeDurationLabel = useMemo(() => {
-    if (selectedPlan === "weekly") return "/ week"
-    if (selectedPlan === "monthly") return "/ month"
-    return "/ day"
-  }, [selectedPlan])
 
   if (!scooter && !loading) {
     return (
@@ -280,19 +253,21 @@ export default function ScooterDetailClient({
                 />
               </div>
 
-              {/* Highlights Feature Strip */}
-              <div className="grid grid-cols-3 gap-2 pt-3 border-t border-gray-100 text-center">
-                <div className="p-2 bg-[#F8F9FA] rounded-2xl border border-gray-200/60">
-                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Cleanliness</span>
-                  <span className="text-xs font-extrabold text-gray-900 block mt-0.5">Sanitized</span>
+              {/* Clean Feature Strip (No full tank title) */}
+              <div className="grid grid-cols-2 gap-2.5 pt-3 border-t border-gray-100 text-center">
+                <div className="p-2.5 bg-[#F8F9FA] rounded-2xl border border-gray-200/60 flex items-center justify-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-black shrink-0" aria-hidden="true" />
+                  <div className="text-left">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Cleanliness</span>
+                    <span className="text-xs font-extrabold text-gray-900 block">Sanitized & Cleaned</span>
+                  </div>
                 </div>
-                <div className="p-2 bg-[#F8F9FA] rounded-2xl border border-gray-200/60">
-                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Fuel Tank</span>
-                  <span className="text-xs font-extrabold text-gray-900 block mt-0.5">{fuelDisplay}</span>
-                </div>
-                <div className="p-2 bg-[#F8F9FA] rounded-2xl border border-gray-200/60">
-                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Status</span>
-                  <span className="text-xs font-extrabold text-gray-900 block mt-0.5">{availableUnits} Available</span>
+                <div className="p-2.5 bg-[#F8F9FA] rounded-2xl border border-gray-200/60 flex items-center justify-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-black shrink-0" aria-hidden="true" />
+                  <div className="text-left">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Fleet Status</span>
+                    <span className="text-xs font-extrabold text-gray-900 block">{availableUnits} Available</span>
+                  </div>
                 </div>
               </div>
             </article>
@@ -402,107 +377,28 @@ export default function ScooterDetailClient({
 
 
           {/* ========================================================================= */}
-          {/* RIGHT COLUMN: PRICING, VENDOR, INCLUDED GEAR & DIRECT BOOKING */}
+          {/* RIGHT COLUMN: IDENTITY, VENDOR, INCLUDED GEAR, ITINERARY & BOOKING */}
           {/* ========================================================================= */}
           <div className="flex flex-col w-full space-y-4 sm:space-y-5">
             
-            {/* 1. Identity & Pricing Breakdown Card */}
-            <section aria-labelledby="pricing-heading" className="bg-white rounded-[32px] p-5 sm:p-6 shadow-xs border border-gray-200/80">
-              <div className="flex items-start justify-between gap-3 mb-4">
+            {/* 1. Identity Header Card (Clean - No Price Display) */}
+            <section aria-labelledby="scooter-title-heading" className="bg-white rounded-[32px] p-5 sm:p-6 shadow-xs border border-gray-200/80">
+              <div className="flex items-start justify-between gap-3">
                 <div>
                   <span className="text-[11px] font-bold uppercase tracking-widest text-gray-400 block mb-1">
-                    {brandDisplay} Rental
+                    {brandDisplay} Fleet
                   </span>
-                  <h1 id="pricing-heading" className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight leading-tight">
+                  <h1 id="scooter-title-heading" className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight leading-tight">
                     {scooter.name}
                   </h1>
+                  <p className="text-xs text-gray-500 font-medium mt-1">
+                    {yearDisplay} • {engineDisplay} • {transmissionDisplay}
+                  </p>
                 </div>
-                <div className="flex items-center gap-1 bg-black text-white text-xs font-extrabold px-3 py-1.5 rounded-full shrink-0 shadow-xs">
+                <div className="flex items-center gap-1.5 bg-black text-white text-xs font-extrabold px-3 py-1.5 rounded-full shrink-0 shadow-xs">
                   <Star className="w-3.5 h-3.5 fill-white text-white" aria-hidden="true" />
                   <span>{vendor?.rating ? Number(vendor.rating).toFixed(1) : "5.0"}</span>
                 </div>
-              </div>
-
-              {/* 3-Tier Rental Plan Selector Pills */}
-              <div className="mb-4">
-                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block mb-2">
-                  Select Rental Duration Plan
-                </span>
-                <div className="grid grid-cols-3 gap-2">
-                  
-                  {/* Daily Plan */}
-                  <button
-                    type="button"
-                    onClick={() => setSelectedPlan("daily")}
-                    className={`p-3 rounded-2xl text-left border transition-all cursor-pointer ${
-                      selectedPlan === "daily"
-                        ? "bg-black text-white border-black shadow-sm"
-                        : "bg-[#F8F9FA] text-gray-900 border-gray-200 hover:border-black"
-                    }`}
-                  >
-                    <span className={`text-[10px] font-bold uppercase tracking-wider block ${selectedPlan === "daily" ? "text-gray-300" : "text-gray-500"}`}>
-                      Daily
-                    </span>
-                    <p className="text-xs sm:text-sm font-extrabold mt-0.5 truncate">
-                      Rp {priceDaily.toLocaleString()}
-                    </p>
-                  </button>
-
-                  {/* Weekly Plan */}
-                  <button
-                    type="button"
-                    onClick={() => setSelectedPlan("weekly")}
-                    className={`p-3 rounded-2xl text-left border transition-all cursor-pointer relative ${
-                      selectedPlan === "weekly"
-                        ? "bg-black text-white border-black shadow-sm"
-                        : "bg-[#F8F9FA] text-gray-900 border-gray-200 hover:border-black"
-                    }`}
-                  >
-                    <span className={`text-[10px] font-bold uppercase tracking-wider block ${selectedPlan === "weekly" ? "text-gray-300" : "text-gray-500"}`}>
-                      Weekly
-                    </span>
-                    <p className="text-xs sm:text-sm font-extrabold mt-0.5 truncate">
-                      Rp {Math.round(priceWeekly).toLocaleString()}
-                    </p>
-                  </button>
-
-                  {/* Monthly Plan */}
-                  <button
-                    type="button"
-                    onClick={() => setSelectedPlan("monthly")}
-                    className={`p-3 rounded-2xl text-left border transition-all cursor-pointer relative ${
-                      selectedPlan === "monthly"
-                        ? "bg-black text-white border-black shadow-sm"
-                        : "bg-[#F8F9FA] text-gray-900 border-gray-200 hover:border-black"
-                    }`}
-                  >
-                    <span className={`text-[10px] font-bold uppercase tracking-wider block ${selectedPlan === "monthly" ? "text-gray-300" : "text-gray-500"}`}>
-                      Monthly
-                    </span>
-                    <p className="text-xs sm:text-sm font-extrabold mt-0.5 truncate">
-                      Rp {Math.round(priceMonthly).toLocaleString()}
-                    </p>
-                  </button>
-
-                </div>
-              </div>
-
-              {/* Active Rate Highlight Bar */}
-              <div className="bg-[#F8F9FA] rounded-2xl p-4 border border-gray-200/80 flex items-center justify-between">
-                <div>
-                  <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">
-                    Calculated Rate
-                  </span>
-                  <div className="flex items-baseline gap-1.5 mt-0.5">
-                    <span className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
-                      Rp {activeDisplayPrice.toLocaleString()}
-                    </span>
-                    <span className="text-xs text-gray-500 font-bold">{activeDurationLabel}</span>
-                  </div>
-                </div>
-                <span className="text-[11px] font-extrabold text-black bg-white border border-gray-200 px-3 py-1.5 rounded-full shadow-xs">
-                  Tax & Helmets Incl.
-                </span>
               </div>
             </section>
 
@@ -569,7 +465,7 @@ export default function ScooterDetailClient({
             )}
 
 
-            {/* 3. Included Equipment & Support (Strictly Black & White, NO Free 24h Cancellation) */}
+            {/* 3. Included Equipment & Support */}
             <section aria-labelledby="inclusions-heading" className="bg-white rounded-[32px] p-5 sm:p-6 shadow-xs border border-gray-200/80">
               <div className="flex items-center justify-between pb-3 mb-3 border-b border-gray-100">
                 <div className="flex items-center gap-2">
@@ -621,42 +517,77 @@ export default function ScooterDetailClient({
             </section>
 
 
-            {/* 4. Delivery & Pickup Coverage Zone */}
-            <section aria-labelledby="delivery-heading" className="bg-white rounded-[32px] p-5 sm:p-6 shadow-xs border border-gray-200/80">
-              <div className="flex items-center justify-between pb-3 mb-3 border-b border-gray-100">
+            {/* 4. Trip Itinerary: Delivery & Pickup Route */}
+            <section aria-labelledby="itinerary-heading" className="bg-white rounded-[32px] p-5 sm:p-6 shadow-xs border border-gray-200/80">
+              <div className="flex items-center justify-between pb-3 mb-4 border-b border-gray-100">
                 <div className="flex items-center gap-2">
-                  <MapPin className="w-5 h-5 text-black" aria-hidden="true" />
-                  <h2 id="delivery-heading" className="text-base font-extrabold text-gray-900 tracking-tight">
-                    Delivery & Pickup
+                  <Navigation className="w-5 h-5 text-black" aria-hidden="true" />
+                  <h2 id="itinerary-heading" className="text-base font-extrabold text-gray-900 tracking-tight">
+                    Delivery & Pickup Itinerary
                   </h2>
                 </div>
                 <span className="text-[11px] font-extrabold text-black bg-neutral-100 border border-neutral-200 px-2.5 py-0.5 rounded-full">
-                  Direct Handover
+                  Trip Route
                 </span>
               </div>
 
-              <div className="bg-[#F8F9FA] rounded-2xl p-4 border border-gray-200/80 mb-3">
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">
-                  Primary Delivery Coverage
-                </span>
-                <p className="text-xs font-extrabold text-gray-900 leading-relaxed">
-                  {vendor?.delivery_area || getDeliveryArea(vendor?.address)}
-                </p>
-                <div className="mt-2.5 pt-2.5 border-t border-gray-200/60 flex items-center justify-between text-xs text-gray-500">
-                  <span>Garage Dispatch:</span>
-                  <span className="font-bold text-black truncate max-w-[190px]">{vendor?.address || "Bali, Indonesia"}</span>
+              {/* Connected Itinerary Timeline */}
+              <div className="relative pl-6 sm:pl-8 space-y-4 sm:space-y-5 before:absolute before:top-3 before:bottom-3 before:left-[11px] sm:before:left-[15px] before:w-[2px] before:bg-gray-200">
+                
+                {/* Stop 1: Garage Hub & Dispatch */}
+                <div className="relative flex items-start">
+                  <div className="absolute -left-6 sm:-left-8 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-black text-white font-extrabold text-[10px] sm:text-xs flex items-center justify-center border-2 border-white shadow-xs z-10">
+                    01
+                  </div>
+                  <div className="bg-[#F8F9FA] rounded-2xl p-3.5 sm:p-4 border border-gray-200/80 w-full ml-1 sm:ml-2">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className="text-[10px] font-extrabold uppercase tracking-widest text-black bg-white border border-gray-200 px-2 py-0.5 rounded-full">
+                        Pickup Hub
+                      </span>
+                      <span className="text-[11px] text-gray-400 font-bold">Fast Handover</span>
+                    </div>
+                    <h3 className="text-xs sm:text-sm font-extrabold text-gray-900">Garage Dispatch & Departure</h3>
+                    <p className="text-xs text-gray-700 font-semibold mt-0.5">{vendor?.address || "Bali, Indonesia"}</p>
+                    <p className="text-[11px] text-gray-500 mt-1">Direct collection available with instant 5-minute vehicle handover and helmet sizing.</p>
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-2 text-xs text-gray-600">
-                <div className="flex items-start gap-2">
-                  <span className="font-bold text-black">•</span>
-                  <p><strong className="text-gray-900">Hotel / Villa Delivery:</strong> Handed over directly to your lobby or accommodation.</p>
+                {/* Stop 2: Hotel / Villa Delivery Handover */}
+                <div className="relative flex items-start">
+                  <div className="absolute -left-6 sm:-left-8 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-black text-white font-extrabold text-[10px] sm:text-xs flex items-center justify-center border-2 border-white shadow-xs z-10">
+                    02
+                  </div>
+                  <div className="bg-[#F8F9FA] rounded-2xl p-3.5 sm:p-4 border border-gray-200/80 w-full ml-1 sm:ml-2">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className="text-[10px] font-extrabold uppercase tracking-widest text-black bg-white border border-gray-200 px-2 py-0.5 rounded-full">
+                        Hotel & Villa Delivery
+                      </span>
+                      <span className="text-[11px] text-gray-400 font-bold">Door-to-Door</span>
+                    </div>
+                    <h3 className="text-xs sm:text-sm font-extrabold text-gray-900">Destination Delivery Handover</h3>
+                    <p className="text-xs text-gray-700 font-semibold mt-0.5">{vendor?.delivery_area || getDeliveryArea(vendor?.address)}</p>
+                    <p className="text-[11px] text-gray-500 mt-1">Delivered directly to your resort lobby, private villa entrance, or Airbnb accommodation.</p>
+                  </div>
                 </div>
-                <div className="flex items-start gap-2">
-                  <span className="font-bold text-black">•</span>
-                  <p><strong className="text-gray-900">Direct Shop Pickup:</strong> Collect instantly at the partner shop garage.</p>
+
+                {/* Stop 3: Trip End & Seamless Return */}
+                <div className="relative flex items-start">
+                  <div className="absolute -left-6 sm:-left-8 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-black text-white font-extrabold text-[10px] sm:text-xs flex items-center justify-center border-2 border-white shadow-xs z-10">
+                    03
+                  </div>
+                  <div className="bg-[#F8F9FA] rounded-2xl p-3.5 sm:p-4 border border-gray-200/80 w-full ml-1 sm:ml-2">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className="text-[10px] font-extrabold uppercase tracking-widest text-black bg-white border border-gray-200 px-2 py-0.5 rounded-full">
+                        Return Handover
+                      </span>
+                      <span className="text-[11px] text-gray-400 font-bold">Flexible Return</span>
+                    </div>
+                    <h3 className="text-xs sm:text-sm font-extrabold text-gray-900">Trip Conclusion & Collection</h3>
+                    <p className="text-xs text-gray-700 font-semibold mt-0.5">Same Location or Flexible Pick-up Point</p>
+                    <p className="text-[11px] text-gray-500 mt-1">Easily coordinate return collection at your villa or drop off at the garage via WhatsApp.</p>
+                  </div>
                 </div>
+
               </div>
             </section>
 
@@ -694,14 +625,11 @@ export default function ScooterDetailClient({
             <div className="hidden lg:flex flex-col bg-white rounded-[32px] p-6 shadow-sm border border-gray-200/80 space-y-3.5">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Total Estimated Rate</span>
-                  <div className="flex items-baseline gap-1.5 mt-0.5">
-                    <span className="text-2xl font-black text-gray-900 tracking-tight">Rp {activeDisplayPrice.toLocaleString()}</span>
-                    <span className="text-xs text-gray-500 font-bold">{activeDurationLabel}</span>
-                  </div>
+                  <span className="text-sm font-extrabold text-gray-900 tracking-tight block">Instant Reservation</span>
+                  <span className="text-xs text-gray-500 font-medium">Free helmet fitting & fast delivery</span>
                 </div>
                 <span className="text-xs font-extrabold bg-neutral-100 text-black border border-neutral-200 px-3 py-1.5 rounded-full">
-                  Instant Confirmation
+                  Ready to Ride
                 </span>
               </div>
 
@@ -722,20 +650,19 @@ export default function ScooterDetailClient({
       
       {/* Mobile Floating Sticky Booking Footer Bar */}
       <nav aria-label="Quick Booking Bar" className="lg:hidden fixed bottom-4 left-4 right-4 mx-auto bg-black text-white rounded-full px-5 py-3.5 flex items-center justify-between shadow-2xl z-40 border border-neutral-800">
-        <div className="flex flex-col">
+        <div className="flex flex-col min-w-0 pr-2">
           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-            {selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} Rate
+            {brandDisplay} Fleet
           </span>
-          <div className="flex items-baseline gap-1">
-            <span className="text-base sm:text-lg font-black text-white tracking-tight">Rp {activeDisplayPrice.toLocaleString()}</span>
-            <span className="text-[11px] text-gray-400 font-medium">{activeDurationLabel}</span>
-          </div>
+          <span className="text-sm sm:text-base font-extrabold text-white tracking-tight truncate max-w-[180px]">
+            {scooter.name}
+          </span>
         </div>
         
         <Link 
           href={`/checkout?scooterId=${scooter.id}`} 
           prefetch={true}
-          className="bg-white text-black px-6 py-2.5 rounded-full text-xs sm:text-sm font-extrabold shadow-xs hover:bg-neutral-100 active-press transition-all flex items-center gap-1.5"
+          className="bg-white text-black px-6 py-2.5 rounded-full text-xs sm:text-sm font-extrabold shadow-xs hover:bg-neutral-100 active-press transition-all flex items-center gap-1.5 shrink-0"
         >
           <span>Book Now</span>
           <ChevronRight className="w-3.5 h-3.5 text-black" />
