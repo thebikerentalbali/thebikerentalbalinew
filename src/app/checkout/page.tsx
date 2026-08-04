@@ -106,7 +106,7 @@ export default function CheckoutPage() {
     return []
   })
   const [showAddModal, setShowAddModal] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   const supabase = createClient()
 
@@ -367,7 +367,40 @@ export default function CheckoutPage() {
         </header>
 
         {loading ? (
-          <div className="flex-1 flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-gray-400" /></div>
+          <div className="flex flex-col md:grid md:grid-cols-2 md:gap-12 flex-1 animate-pulse">
+            {/* Left Skeleton Column */}
+            <div className="flex flex-col gap-6 mb-6">
+              <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 flex flex-col gap-5">
+                <div className="flex items-center gap-4">
+                  <div className="w-24 h-24 bg-gray-100 rounded-2xl shrink-0"></div>
+                  <div className="flex-1 space-y-2.5">
+                    <div className="h-5 bg-gray-200 rounded-lg w-3/4"></div>
+                    <div className="h-4 bg-gray-100 rounded-md w-1/3"></div>
+                    <div className="h-6 bg-gray-200 rounded-lg w-1/2 mt-2"></div>
+                  </div>
+                </div>
+                <div className="border-t border-gray-100 pt-4 space-y-3">
+                  <div className="h-4 bg-gray-100 rounded-md w-1/4"></div>
+                  <div className="h-11 bg-gray-100 rounded-xl w-full"></div>
+                  <div className="h-12 bg-gray-50 rounded-xl w-full mt-2"></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Skeleton Column */}
+            <div className="flex flex-col gap-6">
+              <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 space-y-4">
+                <div className="h-5 bg-gray-200 rounded-lg w-1/3"></div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="h-12 bg-gray-100 rounded-xl"></div>
+                  <div className="h-12 bg-gray-100 rounded-xl"></div>
+                </div>
+                <div className="h-12 bg-gray-100 rounded-xl"></div>
+                <div className="h-12 bg-gray-100 rounded-xl"></div>
+                <div className="h-14 bg-gray-200 rounded-2xl w-full mt-4"></div>
+              </div>
+            </div>
+          </div>
         ) : (
           <div className="flex flex-col md:grid md:grid-cols-2 md:gap-12 flex-1">
             
@@ -376,8 +409,10 @@ export default function CheckoutPage() {
               
               {cart.length === 0 ? (
                 <div className="flex-1 bg-white rounded-3xl p-8 flex flex-col items-center justify-center shadow-sm text-center mb-6">
-                  <p className="text-gray-500 mb-4">Your cart is empty.</p>
-                  <button onClick={() => setShowAddModal(true)} className="px-6 py-2 bg-black text-white rounded-full font-medium">Add Scooters</button>
+                  <p className="text-gray-500 mb-4 font-semibold">Your cart is empty.</p>
+                  <Link href="/" className="px-6 py-2.5 bg-black text-white rounded-full font-bold text-sm hover:bg-neutral-800 transition-all">
+                    Browse Scooters
+                  </Link>
                 </div>
               ) : (
                 cart.map(item => {

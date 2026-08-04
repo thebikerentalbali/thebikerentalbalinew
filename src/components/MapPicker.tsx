@@ -65,31 +65,33 @@ const getVendorIcon = (
   const logoBg = isSelected ? '#ffffff' : '#000000';
 
   const html = `
-    <div style="position:relative;display:flex;align-items:center;gap:7px;padding:4px 10px 4px 4px;border-radius:9999px;cursor:pointer;white-space:nowrap;transition:all 0.2s cubic-bezier(0.16, 1, 0.3, 1);${bgStyle}">
-      <div style="width:26px;height:26px;border-radius:9999px;background:${logoBg};flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:1px;">
-        <div style="width:100%;height:100%;border-radius:9999px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
-          ${logoHtml}
+    <div style="position:absolute;bottom:0;left:50%;transform:translate(-50%, -10px);pointer-events:auto;">
+      <div style="position:relative;display:inline-flex;align-items:center;gap:7px;padding:4px 12px 4px 4px;border-radius:9999px;cursor:pointer;white-space:nowrap;transition:all 0.2s cubic-bezier(0.16, 1, 0.3, 1);${bgStyle}">
+        <div style="width:26px;height:26px;border-radius:9999px;background:${logoBg};flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:1px;">
+          <div style="width:100%;height:100%;border-radius:9999px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+            ${logoHtml}
+          </div>
         </div>
-      </div>
-      <div style="display:flex;flex-direction:column;line-height:1.15;padding-right:2px;">
-        <span style="font-size:11px;font-weight:800;letter-spacing:-0.01em;color:${nameColor};max-width:115px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${name}</span>
-        <div style="display:flex;align-items:center;gap:3px;margin-top:1px;">
-          <svg style="width:9px;height:9px;fill:${starColor};color:${starColor};" viewBox="0 0 24 24">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-          </svg>
-          <span style="font-size:9.5px;font-weight:800;color:${nameColor};">${rating}</span>
+        <div style="display:flex;flex-direction:column;line-height:1.15;padding-right:2px;">
+          <span style="font-size:11.5px;font-weight:800;letter-spacing:-0.01em;color:${nameColor};white-space:nowrap;">${name}</span>
+          <div style="display:flex;align-items:center;gap:3px;margin-top:1px;">
+            <svg style="width:9px;height:9px;fill:${starColor};color:${starColor};" viewBox="0 0 24 24">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+            <span style="font-size:9.5px;font-weight:800;color:${nameColor};">${rating}</span>
+          </div>
         </div>
+        <div style="position:absolute;bottom:-4px;left:50%;margin-left:-4px;width:8px;height:8px;background:${arrowBg};border-right:${arrowBorder};border-bottom:${arrowBorder};transform:rotate(45deg);z-index:0;"></div>
       </div>
-      <div style="position:absolute;bottom:-4px;left:16px;width:8px;height:8px;background:${arrowBg};border-right:${arrowBorder};border-bottom:${arrowBorder};transform:rotate(45deg);z-index:0;"></div>
     </div>
   `;
 
   return L.divIcon({
     html,
     className: 'leaflet-vendor-custom-pin',
-    iconSize: [135, 36],
-    iconAnchor: [20, 40],
-    popupAnchor: [45, -36],
+    iconSize: [0, 0],
+    iconAnchor: [0, 0],
+    popupAnchor: [0, -45],
   });
 };
 

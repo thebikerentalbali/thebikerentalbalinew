@@ -410,43 +410,6 @@ export default function VendorDetailClient({
             )}
           </div>
         </div>
-
-        {/* Location & Map Section on Mobile */}
-        <div className="px-6 mt-8 mb-6">
-          <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 space-y-3.5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center">
-                  <MapPin className="w-4 h-4" />
-                </div>
-                <div>
-                  <h4 className="font-extrabold text-sm text-gray-900 leading-tight">Location & Area</h4>
-                  <p className="text-[11px] text-gray-500 font-medium">{vendor.address || 'Bali, Indonesia'}</p>
-                </div>
-              </div>
-
-              <a
-                href={
-                  vendor.lat && vendor.lng && Number(vendor.lat) !== 0
-                    ? `https://www.google.com/maps/search/?api=1&query=${Number(vendor.lat)},${Number(vendor.lng)}`
-                    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(vendor.name + ' ' + (vendor.address || 'Bali Indonesia'))}`
-                }
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-black hover:bg-neutral-800 text-white text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 shadow-xs active:scale-95 transition-all"
-              >
-                <span>Google Maps</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
-            </div>
-
-            {vendor.delivery_area && (
-              <p className="text-xs text-gray-600 bg-gray-50 p-2.5 rounded-xl border border-gray-100">
-                🚚 <strong>Delivery Coverage:</strong> {vendor.delivery_area}
-              </p>
-            )}
-          </div>
-        </div>
       </div>
 
       {/* ======================================================== */}

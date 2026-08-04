@@ -737,12 +737,12 @@ export default function HomeClient({ initialVendors = [], initialScooters = [], 
                           )}
                         </div>
 
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className="font-extrabold text-base text-gray-900 truncate leading-tight">
+                            <h4 className="font-extrabold text-sm md:text-base text-gray-900 leading-tight">
                               {selectedMapVendor.name}
                             </h4>
-                            <span className="flex items-center gap-1 bg-black text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full">
+                            <span className="flex items-center gap-1 bg-black text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full shrink-0">
                               <Star className="w-3 h-3 fill-white text-white" />
                               <span>{selectedMapVendor.rating ? Number(selectedMapVendor.rating).toFixed(1) : '5.0'}</span>
                             </span>
