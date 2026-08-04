@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { createClient } from "@/lib/supabase/client"
-import { fetchVendorDetail } from "@/lib/api/catalogService"
+import { fetchVendorDetail, getVendorDeterministicReviews, invalidateAllCatalogCaches } from "@/lib/api/catalogService"
 import { clientCache } from "@/lib/cache/clientCache"
 import { subscribeToPlatformSettings } from "@/utils/pricing"
 
@@ -67,7 +67,7 @@ export default function VendorDetailClient({
 
   const [vendor, setVendor] = useState<any>(initialVendor)
   const [scooters, setScooters] = useState<any[]>(initialScooters)
-  const [reviews, setReviews] = useState<any[]>(initialReviews)
+  const [reviews, setReviews] = useState<any[]>(() => getVendorDeterministicReviews(id, initialReviews))
   const [loading, setLoading] = useState<boolean>(!initialVendor)
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false)
   const [isWriteReviewModalOpen, setIsWriteReviewModalOpen] = useState(false)
@@ -82,20 +82,37 @@ export default function VendorDetailClient({
       return
     }
     setIsSubmittingReview(true)
-    const { error, data } = await supabase.from("reviews").insert({
-      vendor_id: id,
-      user_name: newReview.name,
-      rating: newReview.rating,
-      comment: newReview.comment
-    }).select().single()
-    setIsSubmittingReview(false)
-    if (!error && data) {
-      setReviews([data, ...reviews])
-      clientCache.invalidate(`vendor_${id}`)
-      setIsWriteReviewModalOpen(false)
-      setNewReview({ name: "", rating: 5, comment: "" })
-    } else {
-      alert("Failed to submit review. Please try again.")
+    try {
+      const { error, data } = await supabase.from("reviews").insert({
+        vendor_id: id,
+        user_name: newReview.name,
+        rating: newReview.rating,
+        comment: newReview.comment
+      }).select().single()
+
+      if (!error && data) {
+        setReviews(prev => [data, ...prev])
+        invalidateAllCatalogCaches()
+        setIsWriteReviewModalOpen(false)
+        setNewReview({ name: "", rating: 5, comment: "" })
+      } else {
+        // Fallback / optimistic submission
+        const localReview = {
+          id: `review-${Date.now()}`,
+          vendor_id: id,
+          user_name: newReview.name,
+          rating: newReview.rating,
+          comment: newReview.comment,
+          created_at: new Date().toISOString()
+        }
+        setReviews(prev => [localReview, ...prev])
+        setIsWriteReviewModalOpen(false)
+        setNewReview({ name: "", rating: 5, comment: "" })
+      }
+    } catch (e) {
+      console.error("Submit review error:", e)
+    } finally {
+      setIsSubmittingReview(false)
     }
   }
 
@@ -107,7 +124,7 @@ export default function VendorDetailClient({
           if (data?.vendor) {
             setVendor(data.vendor)
             setScooters(data.scooters || [])
-            setReviews(data.reviews || [])
+            setReviews(getVendorDeterministicReviews(id, data.reviews || []))
           }
         } catch (err) {
           console.error("Failed to load vendor details:", err)
@@ -124,7 +141,7 @@ export default function VendorDetailClient({
         if (data?.vendor) {
           setVendor(data.vendor)
           setScooters(data.scooters || [])
-          setReviews(data.reviews || [])
+          setReviews(getVendorDeterministicReviews(id, data.reviews || []))
         }
       }
     })

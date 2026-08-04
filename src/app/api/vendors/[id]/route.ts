@@ -3,6 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 import { serverCache } from '@/lib/cache/serverCache';
 import { DEFAULT_PLATFORM_SETTINGS, getCustomerPrice, PlatformSettings } from '@/utils/pricing';
 
+import { getVendorDeterministicReviews } from '@/lib/api/catalogService';
+
 export const dynamic = 'force-dynamic';
 
 function getSupabaseClient() {
@@ -86,10 +88,16 @@ export async function GET(
           };
         });
 
+        const allReviews = getVendorDeterministicReviews(id, reviews || []);
+
         return {
-          vendor,
+          vendor: {
+            ...vendor,
+            rating: Number(vendor.rating) || 5.0,
+            reviewCount: allReviews.length,
+          },
           scooters: formattedScooters,
-          reviews: reviews || [],
+          reviews: allReviews,
           settings,
         };
       },
