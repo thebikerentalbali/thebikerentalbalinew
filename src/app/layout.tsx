@@ -11,14 +11,18 @@ const inter = Inter({
   subsets: ["latin"],
   display: "swap",
   preload: true,
+  fallback: ['system-ui', '-apple-system', 'sans-serif'],
+  adjustFontFallback: true,
 });
 
 const poppins = Poppins({
   variable: "--font-heading",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["500", "600", "700"],
   display: "swap",
   preload: true,
+  fallback: ['system-ui', '-apple-system', 'sans-serif'],
+  adjustFontFallback: true,
 });
 
 export const viewport: Viewport = {
@@ -131,6 +135,8 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <link rel="preconnect" href="https://images.unsplash.com" />
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
+        <link rel="preconnect" href="https://runupdfoqyedncgqiday.supabase.co" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://runupdfoqyedncgqiday.supabase.co" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="application-name" content="Vendor Portal" />

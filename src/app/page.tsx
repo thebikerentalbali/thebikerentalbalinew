@@ -3,7 +3,7 @@ import { getCatalogServerData } from '@/lib/api/catalogService';
 import HomeClient from '@/components/HomeClient';
 import { getLocalBusinessSchema, getFAQSchema } from '@/lib/seo/schemaGenerator';
 
-export const revalidate = 30;
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: 'Scooter Rental Bali | Compare Prices, Trusted Vendors & Fast Delivery',

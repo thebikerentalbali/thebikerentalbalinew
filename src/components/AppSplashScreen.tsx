@@ -16,9 +16,9 @@ export default function AppSplashScreen() {
 
     const scheduleIdleTask = (callback: () => void) => {
       if ("requestIdleCallback" in window) {
-        (window as any).requestIdleCallback(callback, { timeout: 2000 })
+        (window as any).requestIdleCallback(callback, { timeout: 4000 })
       } else {
-        setTimeout(callback, 200)
+        setTimeout(callback, 3500)
       }
     }
 

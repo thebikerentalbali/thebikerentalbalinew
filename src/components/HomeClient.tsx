@@ -261,7 +261,7 @@ export default function HomeClient({ initialVendors = [], initialScooters = [], 
               <h2 className="text-xl md:text-2xl font-bold text-gray-900">Nearby Vendors</h2>
             </div>
             <div className="flex gap-4 md:gap-8 overflow-x-auto md:overflow-visible pb-2 scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0">
-              {topVendors.map((vendor) => (
+              {topVendors.map((vendor, idx) => (
                 <Link key={vendor.id} href={`/vendor/${vendor.id}`} prefetch={true} className="flex flex-col items-center gap-2 md:gap-3 min-w-[80px] md:min-w-[100px] transition-transform hover:scale-105 active-press">
                   {/* Instagram-style Ring */}
                   <div className="p-[2px] md:p-[3px] rounded-full bg-gradient-to-tr from-yellow-400 to-orange-500">
@@ -275,7 +275,7 @@ export default function HomeClient({ initialVendors = [], initialScooters = [], 
                             height={80}
                             className="w-full h-full object-cover"
                             sizes="(max-width: 768px) 64px, 80px"
-                            loading="eager"
+                            loading={idx < 3 ? "eager" : "lazy"}
                           />
                         ) : (
                           <span className="text-lg md:text-xl font-bold text-gray-600">{vendor.initials}</span>
@@ -379,9 +379,9 @@ export default function HomeClient({ initialVendors = [], initialScooters = [], 
                       src={scooter.img || "/images/scooter.png"}
                       alt={scooter.name}
                       fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 360px"
                       className="object-contain p-3 drop-shadow-md transition-transform duration-300 hover:scale-105"
-                      priority={index < 2}
+                      priority={index === 0}
                     />
                   </div>
 

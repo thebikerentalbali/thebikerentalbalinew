@@ -3,7 +3,7 @@ import VendorDetailClient from '@/components/VendorDetailClient';
 import { fetchVendorDetailServer } from '@/lib/api/catalogService';
 import { getLocalBusinessSchema, getBreadcrumbSchema, SITE_URL, SITE_NAME } from '@/lib/seo/schemaGenerator';
 
-export const revalidate = 60;
+export const revalidate = 300;
 
 interface PageProps {
   params: Promise<{ id: string }>;
