@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ChevronLeft, Bell, Star, MapPin, Map, Info, Minus, Plus, PlusCircle, X, Trash2, Loader2 } from "lucide-react"
+import { ChevronLeft, Bell, Star, MapPin, Map, Info, Minus, Plus, PlusCircle, X, Trash2, Loader2, Store } from "lucide-react"
 import { createClient } from '@/lib/supabase/client'
 import { fetchCatalogData } from '@/lib/api/catalogService'
 import { clientCache } from '@/lib/cache/clientCache'
@@ -90,6 +90,11 @@ export default function CheckoutPage() {
     return []
   })
 
+  const [vendors, setVendors] = useState<any[]>(() => {
+    const cached = typeof window !== 'undefined' ? (clientCache.get<any>('catalog') || clientCache.get<any>('catalog_data')) : null
+    return cached?.vendors || []
+  })
+
   const [vendorScooters, setVendorScooters] = useState<any[]>(() => {
     const cached = typeof window !== 'undefined' ? (clientCache.get<any>('catalog') || clientCache.get<any>('catalog_data')) : null
     if (cached?.scooters) {
@@ -110,6 +115,19 @@ export default function CheckoutPage() {
 
   const supabase = createClient()
 
+  // Find the vendor of the currently selected scooter(s) in the booking cart
+  const activeVendorId = cart[0]?.vendor_id
+  const activeVendor = useMemo(() => {
+    if (!activeVendorId) return null
+    return vendors.find((v: any) => String(v.id) === String(activeVendorId))
+  }, [vendors, activeVendorId])
+
+  // Filter available scooters to ONLY show those belonging to the active vendor
+  const relatedVendorScooters = useMemo(() => {
+    if (!activeVendorId) return vendorScooters
+    return vendorScooters.filter((s: any) => String(s.vendor_id) === String(activeVendorId))
+  }, [vendorScooters, activeVendorId])
+
   useEffect(() => {
     const today = formatIsoDate(new Date())
     setStartDate(prev => prev || today)
@@ -117,6 +135,9 @@ export default function CheckoutPage() {
     async function loadData(forceRefresh = false) {
       try {
         const catalog = await fetchCatalogData({ forceRefresh })
+        if (catalog?.vendors) {
+          setVendors(catalog.vendors)
+        }
         if (catalog?.scooters) {
           const formatted = catalog.scooters.map((s: any) => ({
             ...s,
@@ -755,7 +776,7 @@ export default function CheckoutPage() {
         </button>
       </div>
 
-      {/* Modal for Adding Vendor Scooters */}
+      {/* Modal for Adding Same Vendor Scooters */}
       {showAddModal && (
         <div 
           onClick={() => setShowAddModal(false)}
@@ -763,10 +784,16 @@ export default function CheckoutPage() {
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom-8 sm:slide-in-from-bottom-0 sm:zoom-in-95 max-h-[85vh] overflow-y-auto"
+            className="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom-8 sm:slide-in-from-bottom-0 sm:zoom-in-95 max-h-[85vh] overflow-y-auto"
           >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">Vendor Fleet</h2>
+            <div className="flex items-start justify-between mb-5 border-b border-gray-100 pb-4">
+              <div>
+                <h2 className="text-lg sm:text-xl font-black text-gray-900 tracking-tight">Add Another Scooter</h2>
+                <div className="flex items-center gap-1.5 mt-1 text-xs text-gray-500 font-medium">
+                  <Store className="w-3.5 h-3.5 text-gray-400" />
+                  <span>Fleet from <strong className="text-gray-900 font-bold">{activeVendor?.name || 'Selected Vendor'}</strong></span>
+                </div>
+              </div>
               <button 
                 type="button"
                 onClick={() => setShowAddModal(false)} 
@@ -776,31 +803,51 @@ export default function CheckoutPage() {
               </button>
             </div>
 
-            <div className="space-y-4">
-              {vendorScooters.map(scooter => (
-                <div key={scooter.id} className="flex gap-4 items-center p-3 border border-gray-100 rounded-2xl">
-                  <div className="w-20 h-20 bg-[#F8F9FA] rounded-xl p-2 shrink-0">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={scooter.img} alt={scooter.name} className="w-full h-full object-contain drop-shadow-md" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between gap-2 mb-0.5">
-                      <h3 className="font-semibold text-gray-900 text-[14px] leading-tight">{scooter.name}</h3>
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold text-white bg-black shadow-sm whitespace-nowrap">
-                        {scooter.available} Available
-                      </span>
+            {relatedVendorScooters.length === 0 ? (
+              <div className="py-8 px-4 text-center bg-gray-50 rounded-2xl border border-gray-100">
+                <p className="text-sm font-bold text-gray-900">No other models listed by this vendor</p>
+                <p className="text-xs text-gray-500 mt-1">You can increase the scooter count of your current selection on the checkout screen.</p>
+              </div>
+            ) : (
+              <div className="space-y-3.5">
+                {relatedVendorScooters.map(scooter => {
+                  const inCartItem = cart.find(i => i.id === scooter.id);
+                  const isAvail = (scooter.available ?? 1) > 0;
+
+                  return (
+                    <div key={scooter.id} className="flex gap-4 items-center p-3.5 border border-gray-100 rounded-2xl bg-white hover:border-gray-200 transition-all shadow-xs">
+                      <div className="w-20 h-20 bg-[#F8F9FA] rounded-2xl p-2 shrink-0 flex items-center justify-center">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={scooter.img} alt={scooter.name} className="w-full h-full object-contain drop-shadow-md" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <h3 className="font-bold text-gray-900 text-[14px] leading-tight truncate">{scooter.name}</h3>
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold whitespace-nowrap ${isAvail ? 'bg-black text-white' : 'bg-gray-100 text-gray-500'}`}>
+                            {scooter.available} Available
+                          </span>
+                        </div>
+                        <p className="text-[13px] font-black text-gray-900 mb-2.5">
+                          Rp {Number(scooter.daily || 0).toLocaleString()} <span className="text-gray-500 text-xs font-normal">/day</span>
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => addToCart(scooter)}
+                          className={`text-xs font-bold px-4 py-2 rounded-full transition-all flex items-center gap-1.5 shadow-sm active:scale-95 ${
+                            inCartItem 
+                              ? 'bg-neutral-800 text-white hover:bg-black' 
+                              : 'bg-black text-white hover:bg-neutral-800'
+                          }`}
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          {inCartItem ? `Add More (x${inCartItem.quantity} In Cart)` : 'Add to Booking'}
+                        </button>
+                      </div>
                     </div>
-                    <p className="text-[12px] text-gray-500 mb-3">Rp {scooter.daily.toLocaleString()}/Day</p>
-                    <button
-                      onClick={() => addToCart(scooter)}
-                      className="text-xs font-semibold bg-black text-white px-4 py-2 rounded-full hover:bg-gray-800 transition-colors"
-                    >
-                      Add to Booking
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       )}

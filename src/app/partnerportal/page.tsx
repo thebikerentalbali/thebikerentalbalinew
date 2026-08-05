@@ -354,6 +354,9 @@ export default function VendorDashboard() {
     }
     
     setIsPublishing(true)
+    const totalUnits = Math.max(1, Number(newScooter.totalUnits) || 1);
+    const availableUnits = totalUnits; // All units automatically set as available on new listing
+
     const { data, error } = await supabase.from('scooters').insert({
       vendor_id: vendorData.id,
       name: newScooter.name,
@@ -365,8 +368,8 @@ export default function VendorDashboard() {
       price_daily: newScooter.price,
       price_weekly: newScooter.priceWeekly || null,
       price_monthly: newScooter.priceMonthly || null,
-      total_units: newScooter.totalUnits,
-      available_units: newScooter.availableUnits,
+      total_units: totalUnits,
+      available_units: availableUnits,
       image_url: newScooter.photos[0] // Save the first photo
     }).select().single()
 
@@ -904,26 +907,42 @@ export default function VendorDashboard() {
                     {/* Action Buttons Row */}
                     <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-50">
                       <button
+                        type="button"
                         disabled={availableUnits >= totalUnits}
                         onClick={async () => {
-                          const newAvail = availableUnits + 1;
+                          const newAvail = Math.min(totalUnits, availableUnits + 1);
                           setFleet(f => f.map(s => s.id === scooter.id ? { ...s, available_units: newAvail } : s));
                           await supabase.from('scooters').update({ available_units: newAvail }).eq('id', scooter.id);
+                          invalidateAllCatalogCaches();
                         }}
-                        className={`py-3 rounded-[14px] font-bold text-sm transition-all ${availableUnits < totalUnits ? 'bg-gray-100 text-gray-900 hover:bg-gray-200' : 'bg-gray-50 text-gray-400 opacity-50 cursor-not-allowed'}`}
+                        className={`py-3 px-3 rounded-[14px] font-bold text-sm transition-all flex items-center justify-center gap-1.5 active:scale-95 ${
+                          availableUnits < totalUnits 
+                            ? 'bg-gray-100 text-gray-900 hover:bg-gray-200 shadow-xs' 
+                            : 'bg-gray-50 text-gray-400 opacity-40 cursor-not-allowed'
+                        }`}
+                        title={availableUnits >= totalUnits ? 'All units are currently in stock' : 'Record returned scooter (+1 available)'}
                       >
-                        Return
+                        <RotateCcw className="w-3.5 h-3.5" />
+                        <span>Return (+1)</span>
                       </button>
                       <button
+                        type="button"
                         disabled={availableUnits === 0}
                         onClick={async () => {
                           const newAvail = Math.max(0, availableUnits - 1);
                           setFleet(f => f.map(s => s.id === scooter.id ? { ...s, available_units: newAvail } : s));
                           await supabase.from('scooters').update({ available_units: newAvail }).eq('id', scooter.id);
+                          invalidateAllCatalogCaches();
                         }}
-                        className={`py-3 rounded-[14px] font-bold text-sm transition-all ${availableUnits > 0 ? 'bg-black text-white hover:bg-gray-800 hover:scale-[1.02] shadow-md shadow-black/10' : 'bg-gray-100 text-gray-400 opacity-50 cursor-not-allowed'}`}
+                        className={`py-3 px-3 rounded-[14px] font-bold text-sm transition-all flex items-center justify-center gap-1.5 active:scale-95 ${
+                          availableUnits > 0 
+                            ? 'bg-black text-white hover:bg-neutral-800 shadow-md shadow-black/10' 
+                            : 'bg-gray-100 text-gray-400 opacity-40 cursor-not-allowed'
+                        }`}
+                        title={availableUnits === 0 ? 'All units are currently rented out' : 'Record rented scooter (-1 available)'}
                       >
-                        Rent Out
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Rent Out (-1)</span>
                       </button>
                     </div>
                   </div>
@@ -1682,8 +1701,22 @@ export default function VendorDashboard() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Total Units</label>
-                    <input type="number" min="1" value={newScooter.totalUnits} onChange={e => setNewScooter({ ...newScooter, totalUnits: e.target.value === '' ? ('' as any) : parseInt(e.target.value) })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1.5">How Many Units In Your Fleet? (Total Units)</label>
+                    <input 
+                      type="number" 
+                      min="1" 
+                      value={newScooter.totalUnits} 
+                      onChange={e => {
+                        const val = e.target.value === '' ? ('' as any) : Math.max(1, parseInt(e.target.value) || 1);
+                        setNewScooter({ 
+                          ...newScooter, 
+                          totalUnits: val,
+                          availableUnits: typeof val === 'number' ? val : 1
+                        });
+                      }} 
+                      className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" 
+                    />
+                    <p className="text-xs text-gray-400 mt-1.5">All {newScooter.totalUnits || 1} units will automatically be set as available for rent. You can adjust availability later using the Return & Rent Out buttons.</p>
                   </div>
                 </div>
 
