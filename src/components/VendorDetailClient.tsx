@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import { 
   ChevronLeft, 
+  ChevronRight,
   MapPin, 
   Star, 
   Share, 
@@ -76,6 +77,80 @@ export default function VendorDetailClient({
   const [isSubmittingReview, setIsSubmittingReview] = useState(false)
   const [selectedBrand, setSelectedBrand] = useState<string>("All")
   const [copiedLink, setCopiedLink] = useState(false)
+
+  // Full frame cover gallery list
+  const coverImages = useMemo(() => {
+    const list: { url: string; scooter?: any }[] = []
+    if (vendor?.cover_image) {
+      list.push({ url: vendor.cover_image })
+    }
+    if (vendor?.image_url && !list.some(l => l.url === vendor.image_url)) {
+      list.push({ url: vendor.image_url })
+    }
+    scooters.forEach(s => {
+      if (s.image_url && !list.some(l => l.url === s.image_url)) {
+        list.push({ url: s.image_url, scooter: s })
+      }
+    })
+    if (list.length === 0) {
+      list.push({ url: "/images/scooter.png" })
+    }
+    return list
+  }, [vendor, scooters])
+
+  const [mobileCoverIndex, setMobileCoverIndex] = useState(0)
+  const mobileCoverRef = useRef<HTMLDivElement>(null)
+
+  const [desktopCoverIndex, setDesktopCoverIndex] = useState(0)
+  const desktopCoverRef = useRef<HTMLDivElement>(null)
+
+  const scrollMobileCover = (direction: "prev" | "next") => {
+    if (mobileCoverRef.current) {
+      const width = mobileCoverRef.current.clientWidth
+      const newIdx = direction === "next" 
+        ? Math.min(mobileCoverIndex + 1, coverImages.length - 1)
+        : Math.max(mobileCoverIndex - 1, 0)
+      mobileCoverRef.current.scrollTo({
+        left: newIdx * width,
+        behavior: "smooth"
+      })
+      setMobileCoverIndex(newIdx)
+    }
+  }
+
+  const scrollDesktopCover = (direction: "prev" | "next") => {
+    if (desktopCoverRef.current) {
+      const width = desktopCoverRef.current.clientWidth
+      const newIdx = direction === "next" 
+        ? Math.min(desktopCoverIndex + 1, coverImages.length - 1)
+        : Math.max(desktopCoverIndex - 1, 0)
+      desktopCoverRef.current.scrollTo({
+        left: newIdx * width,
+        behavior: "smooth"
+      })
+      setDesktopCoverIndex(newIdx)
+    }
+  }
+
+  const handleMobileScroll = () => {
+    if (mobileCoverRef.current) {
+      const scrollLeft = mobileCoverRef.current.scrollLeft
+      const width = mobileCoverRef.current.clientWidth
+      if (width > 0) {
+        setMobileCoverIndex(Math.round(scrollLeft / width))
+      }
+    }
+  }
+
+  const handleDesktopScroll = () => {
+    if (desktopCoverRef.current) {
+      const scrollLeft = desktopCoverRef.current.scrollLeft
+      const width = desktopCoverRef.current.clientWidth
+      if (width > 0) {
+        setDesktopCoverIndex(Math.round(scrollLeft / width))
+      }
+    }
+  }
 
   const handleSubmitReview = async () => {
     if (!newReview.name || !newReview.comment) {
@@ -210,57 +285,104 @@ export default function VendorDetailClient({
         <header className="px-4 pt-4">
           <div className="bg-white rounded-[32px] shadow-xs border border-gray-100 overflow-hidden relative">
             
-            {/* 1. Cover Area with Scooter Rounded Image Cards (GetYourGuide Style) */}
-            <div className="relative min-h-[190px] w-full bg-gradient-to-br from-neutral-900 via-neutral-800 to-black p-4 flex flex-col justify-between overflow-hidden">
+            {/* 1. Full Frame Cover Image Carousel (Swipeable Left & Right) */}
+            <div className="relative w-full h-64 sm:h-72 bg-neutral-900 overflow-hidden select-none group">
               
               {/* Top Action Overlay (Back & Share) */}
-              <div className="flex items-center justify-between z-20 mb-3">
+              <div className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between pointer-events-auto">
                 <button 
                   onClick={handleBack} 
                   aria-label="Go Back"
-                  className="w-10 h-10 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center text-black shadow-xs border border-white/20 active-press cursor-pointer"
+                  className="w-10 h-10 bg-black/60 hover:bg-black/80 backdrop-blur-md rounded-full flex items-center justify-center text-white shadow-md border border-white/20 active-press cursor-pointer"
                 >
-                  <ChevronLeft className="w-5 h-5 text-black" />
+                  <ChevronLeft className="w-5 h-5 text-white" />
                 </button>
 
                 <button 
                   onClick={handleShare}
                   aria-label="Share Vendor Profile"
-                  className="w-10 h-10 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center text-black shadow-xs border border-white/20 active-press cursor-pointer"
+                  className="w-10 h-10 bg-black/60 hover:bg-black/80 backdrop-blur-md rounded-full flex items-center justify-center text-white shadow-md border border-white/20 active-press cursor-pointer"
                 >
-                  {copiedLink ? <Check className="w-4 h-4 text-black" /> : <Share className="w-4 h-4 text-black" />}
+                  {copiedLink ? <Check className="w-4 h-4 text-white" /> : <Share className="w-4 h-4 text-white" />}
                 </button>
               </div>
 
-              {/* Dynamic Scooter Images Rounded Cards Strip on Cover (GetYourGuide Style) */}
-              <div className="relative z-10">
-                <style jsx>{`
-                  .hide-scrollbar::-webkit-scrollbar { display: none; }
-                  .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-                `}</style>
-                <div className="flex gap-2.5 overflow-x-auto pb-1 hide-scrollbar -mx-1 px-1 snap-x">
-                  {scooters.length > 0 ? (
-                    scooters.map((scooter) => (
-                      <Link
-                        key={scooter.id}
-                        href={`/detail/${scooter.id}`}
-                        prefetch={true}
-                        className="relative w-20 h-20 bg-white/95 backdrop-blur-md rounded-2xl p-2 shrink-0 shadow-md border border-white/40 hover:scale-105 active-press transition-all flex items-center justify-center group overflow-hidden snap-start"
-                      >
-                        <Image
-                          src={scooter.image_url || "/images/scooter.png"}
-                          alt={scooter.name || "Scooter"}
-                          fill
-                          sizes="80px"
-                          className="object-contain p-1 group-hover:scale-110 transition-transform drop-shadow-xs"
-                        />
-                      </Link>
-                    ))
-                  ) : (
-                    <div className="text-white/60 text-xs py-2 px-3">No scooters in fleet</div>
-                  )}
-                </div>
+              {/* Full Frame Slider Container */}
+              <style jsx>{`
+                .hide-scrollbar::-webkit-scrollbar { display: none; }
+                .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+              `}</style>
+              <div 
+                ref={mobileCoverRef}
+                onScroll={handleMobileScroll}
+                className="w-full h-full flex overflow-x-auto snap-x snap-mandatory hide-scrollbar scroll-smooth"
+              >
+                {coverImages.map((img, idx) => (
+                  <div key={idx} className="relative min-w-full h-full shrink-0 snap-center bg-neutral-900 flex items-center justify-center">
+                    <Image
+                      src={img.url}
+                      alt={`${vendor.name} cover image ${idx + 1}`}
+                      fill
+                      priority={idx === 0}
+                      sizes="100vw"
+                      className="object-cover object-center"
+                    />
+                    {/* Dark gradient overlay for contrast */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-black/35 pointer-events-none" />
+
+                    {/* Bottom pill if associated with a scooter */}
+                    {img.scooter && (
+                      <div className="absolute bottom-3 left-4 right-4 z-20 flex items-center justify-between pointer-events-auto">
+                        <Link 
+                          href={`/detail/${img.scooter.id}`}
+                          prefetch={true}
+                          className="bg-black/60 backdrop-blur-md text-white text-[11px] font-bold px-3 py-1.5 rounded-full border border-white/20 hover:bg-black/80 flex items-center gap-1 transition-all"
+                        >
+                          <span>{formatTitleCase(img.scooter.name)}</span>
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </Link>
+                        <span className="text-[10px] font-bold text-white bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20">
+                          {idx + 1} / {coverImages.length}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
+
+              {/* Left / Right Swipe Navigation Buttons */}
+              {coverImages.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => scrollMobileCover("prev")}
+                    aria-label="Previous Cover Image"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-md flex items-center justify-center border border-white/20 transition-all z-20 active-press cursor-pointer"
+                  >
+                    <ChevronLeft className="w-4 h-4 text-white" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => scrollMobileCover("next")}
+                    aria-label="Next Cover Image"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-md flex items-center justify-center border border-white/20 transition-all z-20 active-press cursor-pointer"
+                  >
+                    <ChevronRight className="w-4 h-4 text-white" />
+                  </button>
+
+                  {/* Indicator Dots */}
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 pointer-events-none">
+                    {coverImages.map((_, i) => (
+                      <span 
+                        key={i} 
+                        className={`h-1 rounded-full transition-all duration-300 ${
+                          i === mobileCoverIndex ? "w-4 bg-white shadow-xs" : "w-1 bg-white/50"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
 
             </div>
 
@@ -496,30 +618,81 @@ export default function VendorDetailClient({
         {/* Desktop Header Card */}
         <div className="bg-white rounded-[32px] overflow-hidden shadow-xs border border-gray-200/80">
           
-          {/* Cover Area with Scooter Rounded Image Cards Showcase (GetYourGuide Style) */}
-          <div className="relative min-h-[220px] lg:h-64 w-full bg-gradient-to-br from-neutral-900 via-neutral-800 to-black p-6 flex flex-col justify-end overflow-hidden">
+          {/* Full Frame Cover Image Carousel (Swipeable Left & Right) */}
+          <div className="relative w-full h-80 lg:h-96 bg-neutral-900 overflow-hidden select-none group">
             
-            {/* Dynamic Scooter Images Rounded Cards Strip on Cover (GetYourGuide Style) */}
-            <div className="relative z-10">
-              <div className="flex gap-3.5 overflow-x-auto pb-2 hide-scrollbar snap-x">
-                {scooters.map((scooter) => (
-                  <Link
-                    key={scooter.id}
-                    href={`/detail/${scooter.id}`}
-                    prefetch={true}
-                    className="relative w-24 h-24 bg-white/95 backdrop-blur-md rounded-2xl p-2.5 shrink-0 shadow-lg border border-white/30 hover:scale-105 active-press transition-all flex items-center justify-center group overflow-hidden snap-start"
-                  >
-                    <Image
-                      src={scooter.image_url || "/images/scooter.png"}
-                      alt={scooter.name || "Scooter"}
-                      fill
-                      sizes="96px"
-                      className="object-contain p-1 group-hover:scale-110 transition-transform drop-shadow-xs"
-                    />
-                  </Link>
-                ))}
-              </div>
+            {/* Full Frame Slider Container */}
+            <div 
+              ref={desktopCoverRef}
+              onScroll={handleDesktopScroll}
+              className="w-full h-full flex overflow-x-auto snap-x snap-mandatory hide-scrollbar scroll-smooth"
+            >
+              {coverImages.map((img, idx) => (
+                <div key={idx} className="relative min-w-full h-full shrink-0 snap-center bg-neutral-900 flex items-center justify-center">
+                  <Image
+                    src={img.url}
+                    alt={`${vendor.name} cover image ${idx + 1}`}
+                    fill
+                    priority={idx === 0}
+                    sizes="1200px"
+                    className="object-cover object-center"
+                  />
+                  {/* Dark gradient overlay for contrast */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-black/35 pointer-events-none" />
+
+                  {/* Bottom pill if associated with a scooter */}
+                  {img.scooter && (
+                    <div className="absolute bottom-4 left-6 right-6 z-20 flex items-center justify-between pointer-events-auto">
+                      <Link 
+                        href={`/detail/${img.scooter.id}`}
+                        prefetch={true}
+                        className="bg-black/60 backdrop-blur-md text-white text-xs font-bold px-4 py-2 rounded-full border border-white/20 hover:bg-black/80 flex items-center gap-2 transition-all"
+                      >
+                        <span>{formatTitleCase(img.scooter.name)}</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </Link>
+                      <span className="text-xs font-bold text-white bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/20">
+                        {idx + 1} / {coverImages.length}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
+
+            {/* Left / Right Navigation Buttons */}
+            {coverImages.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => scrollDesktopCover("prev")}
+                  aria-label="Previous Cover Image"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-md flex items-center justify-center border border-white/20 transition-all z-20 active-press cursor-pointer"
+                >
+                  <ChevronLeft className="w-5 h-5 text-white" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollDesktopCover("next")}
+                  aria-label="Next Cover Image"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-md flex items-center justify-center border border-white/20 transition-all z-20 active-press cursor-pointer"
+                >
+                  <ChevronRight className="w-5 h-5 text-white" />
+                </button>
+
+                {/* Indicator Dots */}
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 pointer-events-none">
+                  {coverImages.map((_, i) => (
+                    <span 
+                      key={i} 
+                      className={`h-1.5 rounded-full transition-all duration-300 ${
+                        i === desktopCoverIndex ? "w-5 bg-white shadow-xs" : "w-1.5 bg-white/50"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
 
           </div>
 

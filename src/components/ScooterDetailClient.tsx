@@ -79,7 +79,7 @@ export default function ScooterDetailClient({
   const [isLiked, setIsLiked] = useState(false)
   const [copiedToast, setCopiedToast] = useState(false)
   const [imageIndex, setImageIndex] = useState<number>(0)
-  const [activeSection, setActiveSection] = useState<string>("all")
+  const [activeSection, setActiveSection] = useState<string>("specs")
   const [otherScooters, setOtherScooters] = useState<any[]>([])
   const [openInclusions, setOpenInclusions] = useState<Record<string, boolean>>({
     helmets: true,
@@ -362,12 +362,10 @@ export default function ScooterDetailClient({
             `}</style>
             <div className="flex items-center gap-2 overflow-x-auto pb-1 hide-scrollbar snap-x -mx-1 px-1">
               {[
-                { id: "all", label: "All Details" },
                 { id: "specs", label: "Specifications" },
                 { id: "about", label: "About Scooter" },
                 { id: "inclusions", label: "Inclusions" },
                 { id: "requirements", label: "Requirements" },
-                ...(otherScooters.length > 0 ? [{ id: "otherFleet", label: `More Fleet (${otherScooters.length})` }] : []),
               ].map((tab) => {
                 const isActive = activeSection === tab.id
                 return (
@@ -391,10 +389,10 @@ export default function ScooterDetailClient({
         </article>
 
         {/* ========================================================================= */}
-        {/* 2. VEHICLE SPECIFICATIONS (WITH REAL BLACK & WHITE ICONS)                */}
+        {/* 2. VEHICLE SPECIFICATIONS                                                 */}
         {/* ========================================================================= */}
-        {(activeSection === "all" || activeSection === "specs") && (
-          <section className="bg-white rounded-[28px] sm:rounded-3xl p-6 sm:p-7 shadow-sm border border-black/5 animate-in fade-in duration-200">
+        {activeSection === "specs" && (
+          <section className="bg-white rounded-[28px] sm:rounded-3xl p-6 sm:p-7 shadow-xs border border-black/5 animate-in fade-in duration-200">
             <div className="flex items-center gap-2 mb-4">
               <Bike className="w-4 h-4 text-black stroke-[2.2]" />
               <h2 className="text-xs font-black text-neutral-400 uppercase tracking-widest">
@@ -465,8 +463,8 @@ export default function ScooterDetailClient({
         {/* ========================================================================= */}
         {/* 3. ABOUT THIS SCOOTER                                                     */}
         {/* ========================================================================= */}
-        {(activeSection === "all" || activeSection === "about") && (
-          <section className="bg-white rounded-[28px] sm:rounded-3xl p-6 sm:p-7 shadow-sm border border-black/5 animate-in fade-in duration-200">
+        {activeSection === "about" && (
+          <section className="bg-white rounded-[28px] sm:rounded-3xl p-6 sm:p-7 shadow-xs border border-black/5 animate-in fade-in duration-200">
             <h2 className="text-xs font-black text-neutral-400 uppercase tracking-widest mb-3">
               About the {formattedName}
             </h2>
@@ -482,8 +480,8 @@ export default function ScooterDetailClient({
         {/* ========================================================================= */}
         {/* 4. RENTAL INCLUSIONS & GUARANTEE (FAQ / CARD STYLE)                       */}
         {/* ========================================================================= */}
-        {(activeSection === "all" || activeSection === "inclusions") && (
-          <section className="bg-white rounded-[28px] sm:rounded-3xl p-6 sm:p-7 shadow-sm border border-black/5 animate-in fade-in duration-200">
+        {activeSection === "inclusions" && (
+          <section className="bg-white rounded-[28px] sm:rounded-3xl p-6 sm:p-7 shadow-xs border border-black/5 animate-in fade-in duration-200">
             <div className="flex items-center justify-between gap-2 mb-4">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-black stroke-[2.2]" />
@@ -593,8 +591,8 @@ export default function ScooterDetailClient({
         {/* ========================================================================= */}
         {/* 5. RENTAL REQUIREMENTS                                                    */}
         {/* ========================================================================= */}
-        {(activeSection === "all" || activeSection === "requirements") && (
-          <section className="bg-white rounded-[28px] sm:rounded-3xl p-6 sm:p-7 shadow-sm border border-black/5 animate-in fade-in duration-200">
+        {activeSection === "requirements" && (
+          <section className="bg-white rounded-[28px] sm:rounded-3xl p-6 sm:p-7 shadow-xs border border-black/5 animate-in fade-in duration-200">
             <div className="flex items-center gap-2 mb-4">
               <FileCheck className="w-4 h-4 text-black stroke-[2.2]" />
               <h2 className="text-xs font-black text-neutral-400 uppercase tracking-widest">
@@ -620,120 +618,102 @@ export default function ScooterDetailClient({
         )}
 
         {/* ========================================================================= */}
-        {/* 6. MORE LISTINGS FROM SAME VENDOR (DISTINCT UNIQUE CARD DESIGN)           */}
+        {/* 6. ALWAYS DISPLAYED: MORE FROM THIS VENDOR FLEET (CLEAN & RESPONSIVE)     */}
         {/* ========================================================================= */}
-        {(activeSection === "all" || activeSection === "otherFleet") && (
-          <section className="bg-neutral-900 text-white rounded-[32px] sm:rounded-[40px] p-6 sm:p-8 shadow-xl border border-neutral-800 relative overflow-hidden animate-in fade-in duration-200">
-            {/* Ambient Background Glow */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
-
+        {vendor && (
+          <section className="bg-white rounded-[28px] sm:rounded-3xl p-5 sm:p-7 shadow-xs border border-black/5">
+            
             {/* Header */}
-            <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
-                    Same Vendor Fleet
-                  </span>
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-0.5">
+                  <Bike className="w-3.5 h-3.5 text-black stroke-[2.2]" />
+                  <span>Same Vendor Garage</span>
                 </div>
-                <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-                  More from {vendor?.name || "This Provider"}
+                <h2 className="text-sm sm:text-base font-black text-black tracking-tight truncate">
+                  More from {vendor.name}
                 </h2>
-                <p className="text-xs text-neutral-400 mt-0.5">
-                  Explore other verified scooters available for instant booking from this garage hub.
-                </p>
               </div>
 
-              {vendor?.id && (
+              {vendor.id && (
                 <Link
                   href={`/vendor/${vendor.id}`}
                   prefetch={true}
-                  className="self-start sm:self-auto bg-white/10 hover:bg-white/20 text-white border border-white/20 px-4 py-2 rounded-full text-xs font-bold transition-all active-press shrink-0 flex items-center gap-1.5"
+                  className="bg-neutral-100 hover:bg-black hover:text-white text-black px-3.5 py-1.5 rounded-full text-xs font-bold transition-all active-press shrink-0 flex items-center gap-1 border border-black/5"
                 >
-                  <span>View All {vendor.name?.split(" ")[0]} Fleet</span>
-                  <ChevronRight className="w-3.5 h-3.5 text-white" />
+                  <span>View All</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
                 </Link>
               )}
             </div>
 
-            {/* Unique Fleet Showcase Strip */}
+            {/* Responsive Scooter Grid / Horizontal Deck */}
             {otherScooters.length > 0 ? (
-              <div className="relative z-10">
-                <div className="flex gap-4 overflow-x-auto pb-2 hide-scrollbar snap-x -mx-1 px-1">
-                  {otherScooters.map((item) => {
-                    const itemPrice = Number(item.price_daily || item.price || 0)
-                    const itemFormattedName = formatTitleCase(item.name)
-                    return (
-                      <div
-                        key={item.id}
-                        className="snap-start shrink-0 w-[240px] sm:w-[260px] bg-neutral-800/90 hover:bg-neutral-800 backdrop-blur-md rounded-3xl p-4 border border-white/10 flex flex-col justify-between transition-all duration-300 group hover:-translate-y-1 shadow-lg"
-                      >
-                        <div>
-                          {/* Image Box */}
-                          <div className="relative w-full h-36 bg-gradient-to-b from-neutral-900 to-neutral-800 rounded-2xl flex items-center justify-center p-3 mb-3 border border-white/5 overflow-hidden">
-                            <span className="absolute top-2.5 left-2.5 text-[9px] font-black uppercase tracking-wider bg-white/10 text-white px-2 py-0.5 rounded-full border border-white/10 z-10 backdrop-blur-xs">
-                              {item.brand || "Scooter"}
-                            </span>
-                            <Image
-                              src={item.image_url || item.img || "/images/scooter.png"}
-                              alt={itemFormattedName}
-                              fill
-                              sizes="260px"
-                              className="object-contain p-2 group-hover:scale-105 transition-transform duration-300 drop-shadow-lg"
-                            />
-                          </div>
-
-                          {/* Info */}
-                          <div className="space-y-1">
-                            <h3 className="font-extrabold text-sm sm:text-base text-white truncate group-hover:text-neutral-200 transition-colors">
-                              {itemFormattedName}
-                            </h3>
-                            <div className="flex items-center gap-2 text-[11px] text-neutral-400 font-medium">
-                              <span>{item.engine || "125 cc"}</span>
-                              <span>•</span>
-                              <span>{item.transmission || "Automatic"}</span>
-                            </div>
-                          </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {otherScooters.map((item) => {
+                  const itemPrice = Number(item.price_daily || item.price || 0)
+                  const itemFormattedName = formatTitleCase(item.name)
+                  return (
+                    <Link
+                      key={item.id}
+                      href={`/detail/${item.id}`}
+                      prefetch={true}
+                      className="bg-neutral-50 hover:bg-neutral-100/90 rounded-2xl p-3 sm:p-3.5 border border-black/5 transition-all flex items-center justify-between gap-3 group active-press"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        {/* Image Box */}
+                        <div className="relative w-16 h-16 sm:w-18 sm:h-18 bg-white rounded-xl overflow-hidden shrink-0 flex items-center justify-center border border-black/5 shadow-xs">
+                          <Image
+                            src={item.image_url || item.img || "/images/scooter.png"}
+                            alt={itemFormattedName}
+                            fill
+                            sizes="72px"
+                            className="object-contain p-1.5 group-hover:scale-105 transition-transform"
+                          />
                         </div>
 
-                        {/* Pricing & CTA */}
-                        <div className="flex items-center justify-between border-t border-white/10 pt-3 mt-3">
-                          <div>
-                            <span className="text-[10px] uppercase font-bold text-neutral-400 block leading-none mb-0.5">Daily</span>
-                            <span className="text-sm font-black text-white">
+                        {/* Details */}
+                        <div className="min-w-0">
+                          <h3 className="font-bold text-xs sm:text-sm text-black truncate group-hover:text-black leading-snug">
+                            {itemFormattedName}
+                          </h3>
+                          <p className="text-[11px] text-neutral-500 font-medium mt-0.5">
+                            {item.engine || "125 cc"} • {item.transmission || "Automatic"}
+                          </p>
+                          <div className="flex items-baseline gap-1 mt-1">
+                            <span className="text-xs sm:text-sm font-black text-black">
                               Rp {itemPrice.toLocaleString("id-ID")}
                             </span>
+                            <span className="text-[10px] text-neutral-400 font-medium">/ day</span>
                           </div>
-
-                          <Link
-                            href={`/detail/${item.id}`}
-                            prefetch={true}
-                            className="bg-white text-black hover:bg-neutral-200 px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider transition-all active-press shadow-xs flex items-center gap-1"
-                          >
-                            <span>Select</span>
-                            <ChevronRight className="w-3 h-3 text-black stroke-[3]" />
-                          </Link>
                         </div>
                       </div>
-                    )
-                  })}
-                </div>
+
+                      {/* Quick Arrow / Action */}
+                      <div className="w-8 h-8 rounded-full bg-white border border-black/10 flex items-center justify-center text-black shrink-0 group-hover:bg-black group-hover:text-white transition-all shadow-xs">
+                        <ChevronRight className="w-4 h-4" />
+                      </div>
+                    </Link>
+                  )
+                })}
               </div>
             ) : (
-              <div className="relative z-10 bg-neutral-800/60 rounded-2xl p-6 text-center border border-white/10">
-                <Bike className="w-8 h-8 text-neutral-400 mx-auto mb-2" />
-                <p className="text-xs text-neutral-300 font-medium">This is currently the primary featured scooter for this partner.</p>
-                {vendor?.id && (
+              <div className="bg-neutral-50 rounded-2xl p-5 text-center border border-black/5">
+                <p className="text-xs text-neutral-500 font-medium">
+                  Explore the full garage and customer reviews directly on the vendor profile.
+                </p>
+                {vendor.id && (
                   <Link
                     href={`/vendor/${vendor.id}`}
                     prefetch={true}
-                    className="inline-block mt-3 bg-white text-black text-xs font-bold px-5 py-2 rounded-full hover:bg-neutral-200 transition-all active-press"
+                    className="inline-block mt-3 bg-black text-white text-xs font-bold px-4 py-2 rounded-full hover:bg-neutral-800 transition-all active-press"
                   >
-                    View Partner Hub & Reviews
+                    Visit {vendor.name} Profile
                   </Link>
                 )}
               </div>
             )}
+
           </section>
         )}
 
