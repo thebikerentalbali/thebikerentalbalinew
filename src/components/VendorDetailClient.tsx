@@ -390,10 +390,10 @@ export default function VendorDetailClient({
                 <div className="flex items-center gap-3">
                   {/* Smaller Logo */}
                   <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 shadow-xs bg-white flex items-center justify-center shrink-0">
-                    {vendor.image_url ? (
+                    {(vendor.logo || vendor.logo_url) ? (
                       <Image 
-                        src={vendor.image_url} 
-                        alt={vendor.name} 
+                        src={vendor.logo || vendor.logo_url} 
+                        alt={vendor.name || "Vendor"} 
                         width={40} 
                         height={40} 
                         className="w-full h-full object-cover" 
@@ -695,10 +695,10 @@ export default function VendorDetailClient({
               {/* Smaller Logo before Vendor Name & Location Below */}
               <div className="flex items-center gap-4">
                 <div className="relative w-12 h-12 lg:w-14 lg:h-14 rounded-full overflow-hidden bg-white border-2 border-gray-200 shadow-xs shrink-0 flex items-center justify-center">
-                  {vendor.image_url ? (
+                  {(vendor.logo || vendor.logo_url) ? (
                     <Image 
-                      src={vendor.image_url} 
-                      alt={vendor.name} 
+                      src={vendor.logo || vendor.logo_url} 
+                      alt={vendor.name || "Vendor"} 
                       width={56} 
                       height={56} 
                       className="w-full h-full object-cover" 
