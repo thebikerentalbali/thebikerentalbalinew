@@ -39,12 +39,6 @@
   --color-warning: var(--warning);
   --color-error: var(--error);
 
-  /* Neon Green Theme Tokens */
-  --color-neon: var(--neon);
-  --color-neon-hover: var(--neon-hover);
-  --color-neon-muted: var(--neon-muted);
-  --color-neon-glow: var(--neon-glow);
-
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -85,17 +79,11 @@
   
   --border: #E5E5E5;
   --input: #E5E5E5;
-  --ring: #10F580;
+  --ring: #000000;
   
-  --success: #10F580;
+  --success: #27AE60;
   --warning: #F2994A;
   --error: #EB5757;
-
-  /* Neon Theme */
-  --neon: #10F580;
-  --neon-hover: #0be054;
-  --neon-muted: rgba(16, 245, 128, 0.14);
-  --neon-glow: rgba(16, 245, 128, 0.4);
 
   --radius: 1rem;
   
@@ -106,7 +94,7 @@
   --sidebar-accent: #F5F5F5;
   --sidebar-accent-foreground: #000000;
   --sidebar-border: #E5E5E5;
-  --sidebar-ring: #10F580;
+  --sidebar-ring: #000000;
 }
 
 .dark {
@@ -136,16 +124,11 @@
   
   --border: #333333;
   --input: #333333;
-  --ring: #10F580;
+  --ring: #FFFFFF;
   
-  --success: #10F580;
+  --success: #27AE60;
   --warning: #F2994A;
   --error: #EB5757;
-
-  --neon: #10F580;
-  --neon-hover: #0be054;
-  --neon-muted: rgba(16, 245, 128, 0.18);
-  --neon-glow: rgba(16, 245, 128, 0.5);
   
   --sidebar: #111111;
   --sidebar-foreground: #FFFFFF;
@@ -154,7 +137,7 @@
   --sidebar-accent: #222222;
   --sidebar-accent-foreground: #FFFFFF;
   --sidebar-border: #333333;
-  --sidebar-ring: #10F580;
+  --sidebar-ring: #FFFFFF;
 }
 
 @layer base {
@@ -213,47 +196,6 @@
   .hide-scrollbar {
     -ms-overflow-style: none !important;
     scrollbar-width: none !important;
-  }
-
-  /* Neon Utility Classes */
-  .bg-neon {
-    background-color: #10F580;
-    color: #000000;
-  }
-  .text-neon {
-    color: #10F580;
-  }
-  .border-neon {
-    border-color: #10F580;
-  }
-  .shadow-neon {
-    box-shadow: 0 4px 20px rgba(16, 245, 128, 0.4);
-  }
-  .shadow-neon-sm {
-    box-shadow: 0 0 10px rgba(16, 245, 128, 0.3);
-  }
-  .shadow-neon-lg {
-    box-shadow: 0 0 35px rgba(16, 245, 128, 0.55);
-  }
-  .glow-neon {
-    filter: drop-shadow(0 0 12px rgba(16, 245, 128, 0.45));
-  }
-  .badge-neon {
-    background-color: rgba(16, 245, 128, 0.12);
-    color: #048a41;
-    border: 1px solid rgba(16, 245, 128, 0.35);
-  }
-  .neon-btn {
-    background-color: #10F580;
-    color: #000000;
-    font-weight: 800;
-    box-shadow: 0 4px 20px rgba(16, 245, 128, 0.35);
-    transition: all 0.2s ease;
-  }
-  .neon-btn:hover {
-    background-color: #0be054;
-    box-shadow: 0 6px 26px rgba(16, 245, 128, 0.5);
-    transform: translateY(-1px);
   }
 
   /* Hide Leaflet map zoom controls (+ and -) on mobile screens */

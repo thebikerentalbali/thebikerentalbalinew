@@ -191,8 +191,8 @@ export default function HomeClient({
               className="flex items-center gap-2.5 text-left hover:bg-black/5 p-1.5 pr-3 rounded-full transition-colors active-press cursor-pointer"
             >
               <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center shrink-0 shadow-xs relative">
-                <MapPin className="w-4 h-4 text-[#10F580]" aria-hidden="true" />
-                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#10F580] rounded-full border-2 border-white shadow-[0_0_8px_#10F580] animate-pulse" />
+                <MapPin className="w-4 h-4 text-white" aria-hidden="true" />
+                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-black rounded-full border-2 border-white animate-pulse" />
               </div>
               <div className="flex flex-col">
                 <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Nearby</span>
@@ -229,7 +229,7 @@ export default function HomeClient({
                 <span className="text-[12px] font-extrabold text-gray-400 uppercase tracking-wider px-2">Partners</span>
                 <Link href="/partnersignup" onClick={() => setIsNavOpen(false)} prefetch={true} className="text-[16px] font-bold text-black px-2 py-1 hover:text-neutral-600 transition-colors flex justify-between items-center group">
                   Partner Portal
-                  <span className="text-[11px] font-extrabold bg-[#10F580] text-black px-3 py-1 rounded-full shadow-[0_0_12px_rgba(16,245,128,0.35)]">Sign In / Sign Up</span>
+                  <span className="text-[11px] font-bold bg-black text-white px-3 py-1 rounded-full">Sign In / Sign Up</span>
                 </Link>
               </div>
             </div>
@@ -253,7 +253,7 @@ export default function HomeClient({
           >
             <Heart className="w-5 h-5 text-black" aria-hidden="true" />
             {savedScooters.length > 0 && (
-              <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-[#10F580] rounded-full border-2 border-white shadow-[0_0_8px_#10F580]"></span>
+              <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-black rounded-full border-2 border-white"></span>
             )}
           </button>
         </header>
@@ -270,7 +270,7 @@ export default function HomeClient({
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search scooter name or brand..."
               aria-label="Search scooter name or brand"
-              className="w-full pl-12 pr-4 h-14 md:h-16 bg-white border border-transparent focus:border-[#10F580]/40 rounded-full focus:ring-2 focus:ring-[#10F580]/60 outline-none text-[15px] md:text-[16px] placeholder:text-gray-400 text-gray-900 font-medium shadow-sm transition-all"
+              className="w-full pl-12 pr-4 h-14 md:h-16 bg-white border border-transparent focus:border-black/20 rounded-full focus:ring-2 focus:ring-black outline-none text-[15px] md:text-[16px] placeholder:text-gray-400 text-gray-900 font-medium shadow-sm transition-all"
             />
           </div>
           <button
@@ -281,7 +281,7 @@ export default function HomeClient({
           >
             <SlidersHorizontal className="w-5 h-5 md:w-6 md:h-6 text-gray-700" aria-hidden="true" />
             {(maxPrice < 500000 || selectedYear !== "All") && (
-              <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-[#10F580] rounded-full border-2 border-white shadow-[0_0_8px_#10F580]"></span>
+              <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-black rounded-full border-2 border-white"></span>
             )}
           </button>
         </div>
@@ -312,13 +312,13 @@ export default function HomeClient({
                 value={durationFilter}
                 onChange={(e) => setDurationFilter(e.target.value)}
                 aria-label="Filter rental duration plan"
-                className="appearance-none bg-black text-white pl-5 pr-10 h-12 md:h-14 md:text-[16px] rounded-full font-bold text-[15px] outline-none border border-black hover:border-[#10F580]/50 shadow-sm flex items-center cursor-pointer focus:ring-2 focus:ring-[#10F580] transition-all hover:scale-105 active-press"
+                className="appearance-none bg-black text-white pl-5 pr-10 h-12 md:h-14 md:text-[16px] rounded-full font-bold text-[15px] outline-none border border-black shadow-sm flex items-center cursor-pointer focus:ring-2 focus:ring-black transition-all hover:scale-105 active-press"
               >
                 <option value="Daily">Daily</option>
                 <option value="Weekly">Weekly</option>
                 <option value="Monthly">Monthly</option>
               </select>
-              <ChevronDown className="w-4 h-4 text-[#10F580] absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
+              <ChevronDown className="w-4 h-4 text-white absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
             </div>
 
             {/* Brand Chips */}
@@ -332,11 +332,11 @@ export default function HomeClient({
                   aria-pressed={isActive}
                   className={`flex items-center gap-2 px-5 h-12 md:h-14 md:px-6 rounded-full whitespace-nowrap transition-all shadow-sm hover:scale-105 active-press cursor-pointer ${
                     isActive
-                      ? "bg-[#10F580] text-black font-extrabold shadow-[0_4px_16px_rgba(16,245,128,0.35)] scale-105"
+                      ? "bg-black text-white font-bold shadow-md scale-105"
                       : "bg-white text-gray-800 border border-gray-100 hover:border-gray-300"
                   }`}
                 >
-                  <div className={`w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center ${isActive ? "bg-black text-[#10F580]" : "bg-gray-100"}`}>
+                  <div className={`w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center ${isActive ? "bg-white/20 text-white" : "bg-gray-100"}`}>
                     <brand.icon className="w-3.5 h-3.5 md:w-4 md:h-4" aria-hidden="true" />
                   </div>
                   <span className="font-bold text-sm md:text-base">{brand.name}</span>

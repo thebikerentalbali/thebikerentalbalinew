@@ -56,11 +56,11 @@ function InstagramVerifiedBadge({ className = "w-4 h-4" }: { className?: string 
       <title>Verified Partner</title>
       <path
         d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.137V5.15h-6.162L25.358 0l-5.36 3.094Z"
-        fill="#10F580"
+        fill="#000000"
       />
       <path
         d="M16.5 28.5 9 21l2.85-2.85 4.65 4.65 11.65-11.65L31 14l-14.5 14.5Z"
-        fill="#000000"
+        fill="#FFFFFF"
       />
     </svg>
   )
@@ -435,7 +435,7 @@ export default function ScooterDetailClient({
                 Rental Inclusions & Guarantee
               </h2>
             </div>
-            <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#10F580] text-black shadow-[0_0_10px_rgba(16,245,128,0.3)]">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-neutral-100 text-black border border-black/10">
               Included
             </span>
           </div>
@@ -482,7 +482,7 @@ export default function ScooterDetailClient({
                   key={item.id}
                   className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
                     isOpen 
-                      ? "bg-neutral-50/90 border-[#10F580]/30 shadow-xs" 
+                      ? "bg-neutral-50/90 border-black/20 shadow-xs" 
                       : "bg-neutral-50/50 hover:bg-neutral-50 border-black/5"
                   }`}
                 >
@@ -494,7 +494,7 @@ export default function ScooterDetailClient({
                   >
                     <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-                        isOpen ? "bg-[#10F580] text-black shadow-[0_0_10px_rgba(16,245,128,0.35)]" : "bg-neutral-200/70 text-black group-hover:bg-black group-hover:text-white"
+                        isOpen ? "bg-black text-white shadow-xs" : "bg-neutral-200/70 text-black group-hover:bg-black group-hover:text-white"
                       }`}>
                         <IconComponent className="w-4 h-4 stroke-[2.2]" />
                       </div>
@@ -546,15 +546,15 @@ export default function ScooterDetailClient({
 
           <div className="space-y-2.5 text-xs sm:text-sm">
             <div className="flex items-center gap-3 p-3 bg-neutral-50 rounded-2xl border border-black/5">
-              <span className="w-5 h-5 rounded-full bg-[#10F580] text-black font-black text-[10px] flex items-center justify-center shrink-0 shadow-[0_0_8px_rgba(16,245,128,0.35)]">1</span>
+              <span className="w-5 h-5 rounded-full bg-black text-white font-black text-[10px] flex items-center justify-center shrink-0">1</span>
               <span className="font-bold text-black">Valid Passport or ID Photo</span>
             </div>
             <div className="flex items-center gap-3 p-3 bg-neutral-50 rounded-2xl border border-black/5">
-              <span className="w-5 h-5 rounded-full bg-[#10F580] text-black font-black text-[10px] flex items-center justify-center shrink-0 shadow-[0_0_8px_rgba(16,245,128,0.35)]">2</span>
+              <span className="w-5 h-5 rounded-full bg-black text-white font-black text-[10px] flex items-center justify-center shrink-0">2</span>
               <span className="font-bold text-black">Driver License or International Permit</span>
             </div>
             <div className="flex items-center gap-3 p-3 bg-neutral-50 rounded-2xl border border-black/5">
-              <span className="w-5 h-5 rounded-full bg-[#10F580] text-black font-black text-[10px] flex items-center justify-center shrink-0 shadow-[0_0_8px_rgba(16,245,128,0.35)]">3</span>
+              <span className="w-5 h-5 rounded-full bg-black text-white font-black text-[10px] flex items-center justify-center shrink-0">3</span>
               <span className="font-bold text-black">Online Checkout & Free Handover Delivery</span>
             </div>
           </div>
@@ -565,10 +565,10 @@ export default function ScooterDetailClient({
           <Link 
             href={`/checkout?scooterId=${scooter.id}`} 
             prefetch={true}
-            className="w-full bg-[#10F580] hover:bg-[#0be054] text-black py-4 px-8 rounded-2xl text-sm font-black uppercase tracking-wider active-press transition-all flex items-center justify-center gap-2 cursor-pointer shadow-[0_4px_24px_rgba(16,245,128,0.4)]"
+            className="w-full bg-black hover:bg-neutral-800 text-white py-4 px-8 rounded-2xl text-sm font-bold uppercase tracking-wider active-press transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
           >
             <span>Book This Scooter</span>
-            <ChevronRight className="w-4 h-4 text-black stroke-[2.5]" />
+            <ChevronRight className="w-4 h-4 text-white stroke-[2.5]" />
           </Link>
         </div>
 
@@ -591,7 +591,7 @@ export default function ScooterDetailClient({
         <Link 
           href={`/checkout?scooterId=${scooter.id}`} 
           prefetch={true}
-          className="bg-[#10F580] text-black px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider shadow-[0_2px_14px_rgba(16,245,128,0.4)] hover:bg-[#0be054] active-press transition-all flex items-center gap-1.5 shrink-0"
+          className="bg-white text-black px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider shadow-md hover:bg-neutral-100 active-press transition-all flex items-center gap-1.5 shrink-0"
         >
           <span>Rent Now</span>
           <ChevronRight className="w-3.5 h-3.5 text-black stroke-[2.5]" />

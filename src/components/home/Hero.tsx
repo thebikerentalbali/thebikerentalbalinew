@@ -23,7 +23,7 @@ export function Hero() {
           className="text-center max-w-4xl mx-auto mb-12"
         >
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-heading font-bold text-white tracking-tighter mb-6 leading-[1.1]">
-            Find Your <br/> <span className="text-[#10F580] drop-shadow-[0_0_35px_rgba(16,245,128,0.45)]">Perfect Ride</span>
+            Find Your <br/> <span className="text-gray-300">Perfect Ride</span>
           </h1>
           <p className="text-lg md:text-xl text-gray-200 font-medium max-w-2xl mx-auto">
             Premium scooter rental in Bali. Experience the island with our luxury fleet, delivered directly to your door.

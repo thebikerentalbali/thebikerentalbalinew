@@ -51,7 +51,7 @@ function ScooterCardComponent({
         >
           {/* Badge */}
           <div className="absolute top-6 left-6 md:top-8 md:left-8 bg-white/95 backdrop-blur-sm px-3 md:px-4 py-1.5 rounded-full flex items-center gap-1.5 z-20 shadow-xs border border-gray-100">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#10F580] shadow-[0_0_6px_#10F580]"></span>
+            <span className="w-1.5 h-1.5 rounded-full bg-black"></span>
             <span className="text-xs md:text-sm font-extrabold text-gray-900">{scooter.year || "2025"}</span>
           </div>
 
@@ -101,7 +101,7 @@ function ScooterCardComponent({
                 </span>
               </div>
             </div>
-            <span className="bg-black text-white group-hover:bg-[#10F580] group-hover:text-black group-hover:shadow-[0_4px_16px_rgba(16,245,128,0.4)] px-5 sm:px-6 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-extrabold whitespace-nowrap shrink-0 pointer-events-none transition-all duration-200 shadow-xs">
+            <span className="bg-black text-white group-hover:bg-neutral-800 px-5 sm:px-6 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap shrink-0 pointer-events-none transition-all duration-200 shadow-xs">
               Book Now
             </span>
           </div>
@@ -139,7 +139,7 @@ function ScooterCardComponent({
             />
           </button>
           <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-2.5 md:px-3 py-1 md:py-1.5 rounded-full flex items-center gap-1 md:gap-1.5 z-10 shadow-sm border border-gray-100">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#10F580] shadow-[0_0_6px_#10F580]"></span>
+            <span className="w-1.5 h-1.5 rounded-full bg-black"></span>
             <span className="text-[11px] md:text-[13px] font-extrabold text-gray-900">
               {scooter.year || "2025"}
             </span>
@@ -168,7 +168,7 @@ function ScooterCardComponent({
             </div>
           </div>
           <div className="mt-3">
-            <span className="w-full bg-black text-white group-hover:bg-[#10F580] group-hover:text-black group-hover:shadow-[0_4px_14px_rgba(16,245,128,0.4)] py-2 rounded-xl text-xs md:text-sm font-extrabold whitespace-nowrap flex items-center justify-center transition-all duration-200">
+            <span className="w-full bg-black text-white group-hover:bg-neutral-800 py-2 rounded-xl text-xs md:text-sm font-bold whitespace-nowrap flex items-center justify-center transition-all duration-200">
               Book Now
             </span>
           </div>

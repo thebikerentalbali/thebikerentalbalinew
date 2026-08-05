@@ -18,8 +18,8 @@ export default function TransparentLoader({ label, fullScreen = true }: Transpar
       }
     >
       <div className="relative flex flex-col items-center justify-center gap-2.5">
-        {/* Sleek Centered Circular Spinner with Neon Green Accent */}
-        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-[3px] border-black/10 border-t-[#10F580] drop-shadow-[0_0_8px_rgba(16,245,128,0.5)] animate-spin" />
+        {/* Sleek Centered Circular Spinner */}
+        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-[3px] border-black/10 border-t-black animate-spin" />
         {label && (
           <span className="text-[11px] font-bold text-neutral-800 tracking-wider uppercase">
             {label}

@@ -64,7 +64,7 @@ export function Navbar() {
               <ChevronDown className="w-3 h-3" />
             </div>
             <Link href="/#fleet">
-              <Button className="bg-[#10F580] text-black hover:bg-[#0be054] font-extrabold rounded-full px-6 shadow-[0_2px_14px_rgba(16,245,128,0.35)] transition-all cursor-pointer">
+              <Button className="bg-black text-white hover:bg-neutral-800 font-bold rounded-full px-6 shadow-md hover:shadow-lg transition-all cursor-pointer">
                 Book Now
               </Button>
             </Link>
@@ -106,7 +106,7 @@ export function Navbar() {
               </div>
             </div>
             <Link href="/#fleet" onClick={() => setIsMobileMenuOpen(false)}>
-              <Button className="w-full bg-[#10F580] text-black hover:bg-[#0be054] font-extrabold rounded-xl py-6 text-lg mt-2 shadow-[0_4px_20px_rgba(16,245,128,0.35)] cursor-pointer">
+              <Button className="w-full bg-black text-white hover:bg-neutral-800 font-bold rounded-xl py-6 text-lg mt-2 shadow-md cursor-pointer">
                 Book Now
               </Button>
             </Link>

@@ -63,7 +63,7 @@ function HomeFilterModalComponent({
               value={maxPrice}
               onChange={(e) => setMaxPrice(Number(e.target.value))}
               aria-label="Max daily price slider"
-              className="w-full accent-[#10F580] cursor-pointer"
+              className="w-full accent-black cursor-pointer"
             />
             <div className="flex justify-between text-[11px] font-bold text-gray-400 mt-1">
               <span>Rp 50k</span>
@@ -93,9 +93,9 @@ function HomeFilterModalComponent({
                     key={year}
                     type="button"
                     onClick={() => setSelectedYear(year)}
-                    className={`px-3.5 py-2 rounded-xl text-xs md:text-sm font-extrabold transition-all active-press cursor-pointer ${
+                    className={`px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all active-press cursor-pointer ${
                       isSelected
-                        ? "bg-[#10F580] text-black shadow-xs scale-105"
+                        ? "bg-black text-white shadow-xs scale-105"
                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                   >
@@ -110,7 +110,7 @@ function HomeFilterModalComponent({
         <button
           type="button"
           onClick={onClose}
-          className="w-full bg-[#10F580] text-black font-extrabold text-lg py-4 rounded-2xl mt-8 shadow-[0_4px_20px_rgba(16,245,128,0.35)] hover:bg-[#0be054] transition-colors active-press cursor-pointer"
+          className="w-full bg-black text-white font-bold text-lg py-4 rounded-2xl mt-8 shadow-md hover:bg-neutral-800 transition-colors active-press cursor-pointer"
         >
           Apply Filters
         </button>

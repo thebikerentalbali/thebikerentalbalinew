@@ -91,8 +91,8 @@ function HomeSavedModalComponent({
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start">
                       <h4 className="font-bold text-gray-900 text-[14px] truncate">{scooter.name}</h4>
-                      <div className="flex items-center gap-1 bg-[#10F580]/15 text-black border border-[#10F580]/30 px-2 py-0.5 rounded-full flex-shrink-0 ml-2">
-                        <span className="text-[11px] font-extrabold">
+                      <div className="flex items-center gap-1 bg-neutral-100 text-black border border-black/10 px-2 py-0.5 rounded-full flex-shrink-0 ml-2">
+                        <span className="text-[11px] font-bold">
                           {scooter.year || "2024"}
                         </span>
                       </div>
