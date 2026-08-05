@@ -749,6 +749,16 @@ export default function ScooterDetailClient({
           <Link 
             href={`/checkout?scooterId=${scooter.id}`} 
             prefetch={true}
+            onClick={() => {
+              try {
+                sessionStorage.setItem("checkout_prefill", JSON.stringify({ scooter, vendor }))
+              } catch (e) {}
+            }}
+            onPointerDown={() => {
+              try {
+                sessionStorage.setItem("checkout_prefill", JSON.stringify({ scooter, vendor }))
+              } catch (e) {}
+            }}
             className="w-full bg-black hover:bg-neutral-800 text-white py-4 px-8 rounded-2xl text-sm font-bold uppercase tracking-wider active-press transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
           >
             <span>Book This Scooter</span>
@@ -775,7 +785,17 @@ export default function ScooterDetailClient({
         <Link 
           href={`/checkout?scooterId=${scooter.id}`} 
           prefetch={true}
-          className="bg-white text-black px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider shadow-md hover:bg-neutral-100 active-press transition-all flex items-center gap-1.5 shrink-0"
+          onClick={() => {
+            try {
+              sessionStorage.setItem("checkout_prefill", JSON.stringify({ scooter, vendor }))
+            } catch (e) {}
+          }}
+          onPointerDown={() => {
+            try {
+              sessionStorage.setItem("checkout_prefill", JSON.stringify({ scooter, vendor }))
+            } catch (e) {}
+          }}
+          className="bg-white text-black px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider shadow-md hover:bg-neutral-100 active-press transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
         >
           <span>Rent Now</span>
           <ChevronRight className="w-3.5 h-3.5 text-black stroke-[2.5]" />

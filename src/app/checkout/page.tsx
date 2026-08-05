@@ -5,7 +5,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { ChevronLeft, Bell, Star, MapPin, Map, Info, Minus, Plus, PlusCircle, X, Trash2, Loader2, Store } from "lucide-react"
 import { createClient } from '@/lib/supabase/client'
-import { fetchCatalogData } from '@/lib/api/catalogService'
+import { fetchCatalogData, fetchScooterDetail } from '@/lib/api/catalogService'
 import { clientCache } from '@/lib/cache/clientCache'
 import { subscribeToPlatformSettings } from '@/utils/pricing'
 
@@ -67,6 +67,49 @@ export default function CheckoutPage() {
       try {
         const params = new URLSearchParams(window.location.search)
         const sId = params.get("scooterId")
+
+        // 1. Instant sessionStorage prefill from "Rent Now" click
+        const prefillStr = sessionStorage.getItem("checkout_prefill")
+        if (prefillStr) {
+          const prefill = JSON.parse(prefillStr)
+          if (prefill?.scooter && (!sId || String(prefill.scooter.id) === String(sId))) {
+            const s = prefill.scooter
+            return [{
+              ...s,
+              img: s.image_url || s.img || "/images/scooter.png",
+              rating: 5.0,
+              available: s.available_units || 1,
+              daily: s.price_daily || s.daily || 0,
+              weekly: s.price_weekly || s.weekly || 0,
+              monthly: s.price_monthly || s.monthly || 0,
+              quantity: 1,
+              durationMode: "daily",
+              durationCount: 1
+            }]
+          }
+        }
+
+        // 2. ClientCache single scooter
+        if (sId) {
+          const singleCached = clientCache.get<any>(`scooter_${sId}`)
+          if (singleCached?.scooter) {
+            const s = singleCached.scooter
+            return [{
+              ...s,
+              img: s.image_url || s.img || "/images/scooter.png",
+              rating: 5.0,
+              available: s.available_units || 1,
+              daily: s.price_daily || s.daily || 0,
+              weekly: s.price_weekly || s.weekly || 0,
+              monthly: s.price_monthly || s.monthly || 0,
+              quantity: 1,
+              durationMode: "daily",
+              durationCount: 1
+            }]
+          }
+        }
+
+        // 3. ClientCache full catalog
         const cached = clientCache.get<any>('catalog') || clientCache.get<any>('catalog_data')
         if (sId && cached?.scooters) {
           const selected = cached.scooters.find((s: any) => s.id.toString() === sId)
@@ -91,8 +134,18 @@ export default function CheckoutPage() {
   })
 
   const [vendors, setVendors] = useState<any[]>(() => {
-    const cached = typeof window !== 'undefined' ? (clientCache.get<any>('catalog') || clientCache.get<any>('catalog_data')) : null
-    return cached?.vendors || []
+    if (typeof window !== 'undefined') {
+      try {
+        const prefillStr = sessionStorage.getItem("checkout_prefill")
+        if (prefillStr) {
+          const prefill = JSON.parse(prefillStr)
+          if (prefill?.vendor) return [prefill.vendor]
+        }
+      } catch (e) {}
+      const cached = clientCache.get<any>('catalog') || clientCache.get<any>('catalog_data')
+      return cached?.vendors || []
+    }
+    return []
   })
 
   const [vendorScooters, setVendorScooters] = useState<any[]>(() => {
@@ -111,7 +164,24 @@ export default function CheckoutPage() {
     return []
   })
   const [showAddModal, setShowAddModal] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const params = new URLSearchParams(window.location.search)
+        const sId = params.get("scooterId")
+        if (!sId) return false
+        const prefillStr = sessionStorage.getItem("checkout_prefill")
+        if (prefillStr) {
+          const prefill = JSON.parse(prefillStr)
+          if (prefill?.scooter && String(prefill.scooter.id) === String(sId)) return false
+        }
+        if (clientCache.get<any>(`scooter_${sId}`)) return false
+        const cached = clientCache.get<any>('catalog') || clientCache.get<any>('catalog_data')
+        if (cached?.scooters?.some((s: any) => s.id.toString() === sId)) return false
+      } catch (e) {}
+    }
+    return true
+  })
 
   const supabase = createClient()
 
@@ -132,9 +202,41 @@ export default function CheckoutPage() {
     const today = formatIsoDate(new Date())
     setStartDate(prev => prev || today)
 
+    let isMounted = true
+
     async function loadData(forceRefresh = false) {
+      const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
+      const sId = params?.get("scooterId")
+
+      // Fast single scooter fetch if cart is empty and sId provided
+      if (sId && cart.length === 0) {
+        fetchScooterDetail(sId).then((data) => {
+          if (!isMounted || !data?.scooter) return
+          const s = data.scooter
+          const formatted = {
+            ...s,
+            img: s.image_url || s.img || "/images/scooter.png",
+            rating: 5.0,
+            available: s.available_units || 1,
+            daily: s.price_daily || s.daily || 0,
+            weekly: s.price_weekly || s.weekly || 0,
+            monthly: s.price_monthly || s.monthly || 0,
+            quantity: 1,
+            durationMode: "daily",
+            durationCount: 1
+          }
+          setCart([formatted])
+          if (data.vendor) {
+            setVendors(prev => prev.some(v => String(v.id) === String(data.vendor.id)) ? prev : [data.vendor, ...prev])
+          }
+          setLoading(false)
+        }).catch(() => {})
+      }
+
       try {
         const catalog = await fetchCatalogData({ forceRefresh })
+        if (!isMounted) return
+
         if (catalog?.vendors) {
           setVendors(catalog.vendors)
         }
@@ -150,40 +252,51 @@ export default function CheckoutPage() {
           }))
           setVendorScooters(formatted)
 
-          if (typeof window !== 'undefined') {
-            const params = new URLSearchParams(window.location.search)
-            const sId = params.get("scooterId")
-            if (sId) {
-              const selected = formatted.find((s: any) => s.id.toString() === sId)
-              if (selected) {
-                setCart(prev => {
-                  if (prev.length === 0) {
-                    const initialCart = [{ ...selected, quantity: 1, durationMode: "daily", durationCount: 1 }]
-                    const days = getDaysFromCart(initialCart)
-                    setEndDate(addDaysToDate(today, days))
-                    return initialCart
-                  }
-                  return prev
-                })
-              }
-            } else {
-              setEndDate(prev => prev || addDaysToDate(today, 1))
+          if (sId) {
+            const selected = formatted.find((s: any) => s.id.toString() === sId)
+            if (selected) {
+              setCart(prev => {
+                if (prev.length === 0) {
+                  const initialCart = [{ ...selected, quantity: 1, durationMode: "daily", durationCount: 1 }]
+                  const days = getDaysFromCart(initialCart)
+                  setEndDate(addDaysToDate(today, days))
+                  return initialCart
+                }
+                return prev
+              })
             }
+          } else {
+            setEndDate(prev => prev || addDaysToDate(today, 1))
           }
         }
       } catch (err) {
         console.error("Failed to load scooters in checkout:", err)
       } finally {
-        setLoading(false)
+        if (isMounted) setLoading(false)
       }
     }
     
     loadData()
 
-    const unsubscribe = subscribeToPlatformSettings(() => {
-      loadData(true)
+    let unsubscribe: (() => void) | null = null
+    const scheduleIdle = (cb: () => void) => {
+      if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+        (window as any).requestIdleCallback(cb, { timeout: 3500 })
+      } else {
+        setTimeout(cb, 3000)
+      }
+    }
+
+    scheduleIdle(() => {
+      unsubscribe = subscribeToPlatformSettings(() => {
+        loadData(true)
+      })
     })
-    return () => unsubscribe()
+
+    return () => {
+      isMounted = false
+      if (unsubscribe) unsubscribe()
+    }
   }, [])
 
   const handleStartDateChange = (newStart: string) => {
