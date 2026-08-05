@@ -148,33 +148,49 @@ export default function ScooterDetailClient({
       loadData()
     }
 
-    const unsubscribe = subscribeToPlatformSettings(async () => {
-      if (id) {
-        const data = await fetchScooterDetail(id, { forceRefresh: true })
-        if (data) {
-          if (data.scooter) setScooter(data.scooter)
-          if (data.vendor) setVendor(data.vendor)
-        }
+    let unsubscribe: (() => void) | null = null;
+    const scheduleIdle = (cb: () => void) => {
+      if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+        (window as any).requestIdleCallback(cb, { timeout: 3500 });
+      } else {
+        setTimeout(cb, 3000);
       }
-    })
+    };
 
-    return () => unsubscribe()
+    scheduleIdle(() => {
+      unsubscribe = subscribeToPlatformSettings(async () => {
+        if (id) {
+          const data = await fetchScooterDetail(id, { forceRefresh: true });
+          if (data) {
+            if (data.scooter) setScooter(data.scooter);
+            if (data.vendor) setVendor(data.vendor);
+          }
+        }
+      });
+    });
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, [id, initialScooter])
 
-  // Fetch other scooters from the same vendor
+  // Fetch other scooters from the same vendor in background
   useEffect(() => {
     const vendorId = vendor?.id || scooter?.vendor_id
     if (vendorId) {
-      fetchVendorDetail(vendorId).then((vData) => {
-        if (vData?.scooters) {
-          const otherListings = vData.scooters.filter((s: any) => String(s.id) !== String(id))
-          setOtherScooters(otherListings)
-        }
-      }).catch((err) => {
-        console.warn("Could not load vendor fleet:", err)
-      })
+      if (vendor?.scooters && Array.isArray(vendor.scooters)) {
+        const otherListings = vendor.scooters.filter((s: any) => String(s.id) !== String(id))
+        setOtherScooters(otherListings)
+      } else {
+        fetchVendorDetail(vendorId).then((vData) => {
+          if (vData?.scooters) {
+            const otherListings = vData.scooters.filter((s: any) => String(s.id) !== String(id))
+            setOtherScooters(otherListings)
+          }
+        }).catch(() => {})
+      }
     }
-  }, [vendor?.id, scooter?.vendor_id, id])
+  }, [vendor?.id, vendor?.scooters, scooter?.vendor_id, id])
 
   if (loading) {
     return <TransparentLoader />

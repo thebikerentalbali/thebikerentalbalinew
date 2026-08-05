@@ -210,18 +210,31 @@ export default function VendorDetailClient({
       loadData()
     }
 
-    const unsubscribe = subscribeToPlatformSettings(async () => {
-      if (id) {
-        const data = await fetchVendorDetail(id, { forceRefresh: true })
-        if (data?.vendor) {
-          setVendor(data.vendor)
-          setScooters(data.scooters || [])
-          setReviews(getVendorDeterministicReviews(id, data.reviews || []))
-        }
+    let unsubscribe: (() => void) | null = null;
+    const scheduleIdle = (cb: () => void) => {
+      if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+        (window as any).requestIdleCallback(cb, { timeout: 3500 });
+      } else {
+        setTimeout(cb, 3000);
       }
-    })
+    };
 
-    return () => unsubscribe()
+    scheduleIdle(() => {
+      unsubscribe = subscribeToPlatformSettings(async () => {
+        if (id) {
+          const data = await fetchVendorDetail(id, { forceRefresh: true });
+          if (data?.vendor) {
+            setVendor(data.vendor);
+            setScooters(data.scooters || []);
+            setReviews(getVendorDeterministicReviews(id, data.reviews || []));
+          }
+        }
+      });
+    });
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, [id, initialVendor])
 
   const handleBack = (e: React.MouseEvent) => {

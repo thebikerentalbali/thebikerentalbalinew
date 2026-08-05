@@ -2,11 +2,10 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { fetchCatalogData } from "@/lib/api/catalogService"
 
 /**
- * Non-blocking Background Prefetch & Warming Service
- * Warms routes and catalog data during idle cycles without blocking FCP / LCP.
+ * Non-blocking Background Prefetch Service
+ * Warms routes during idle cycles without blocking FCP / LCP.
  */
 export default function AppSplashScreen() {
   const router = useRouter()
@@ -23,7 +22,6 @@ export default function AppSplashScreen() {
     }
 
     scheduleIdleTask(() => {
-      // 1. Prefetch core routes in the background
       try {
         router.prefetch("/checkout")
         router.prefetch("/about")
@@ -31,13 +29,9 @@ export default function AppSplashScreen() {
         router.prefetch("/faq")
         router.prefetch("/contact")
       } catch (e) {}
-
-      // 2. Warm catalog cache in background if not already populated
-      fetchCatalogData().catch(() => {})
     })
   }, [router])
 
-  // Zero render-blocking DOM elements for instant 0ms FCP/LCP
   return null
 }
 

@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef } from "react"
 import { usePathname, useSearchParams } from "next/navigation"
-import TransparentLoader from "@/components/TransparentLoader"
 
 export default function NavigationProgressBar() {
   const pathname = usePathname()
@@ -75,5 +74,9 @@ export default function NavigationProgressBar() {
 
   if (!isNavigating) return null
 
-  return <TransparentLoader />
+  return (
+    <div className="fixed top-0 left-0 right-0 z-[9999] h-1 bg-black/10 overflow-hidden pointer-events-none">
+      <div className="h-full bg-black animate-[shimmer_1s_infinite_linear] w-2/5 rounded-full" />
+    </div>
+  )
 }

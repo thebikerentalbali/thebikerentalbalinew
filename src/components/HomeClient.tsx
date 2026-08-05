@@ -16,13 +16,19 @@ import {
 
 import ScooterCard from "@/components/ScooterCard"
 import VendorStoryItem from "@/components/VendorStoryItem"
-import HomeFilterModal from "@/components/HomeFilterModal"
-import HomeSavedModal from "@/components/HomeSavedModal"
 import { fetchCatalogData } from "@/lib/api/catalogService"
 import { createClient as createBrowserClient } from "@/lib/supabase/client"
 import { subscribeToPlatformSettings } from "@/utils/pricing"
 
-// Dynamic import for the heavy map modal with SSR disabled
+// Dynamic code-split imports for heavy modals - zero JS cost until user clicks
+const HomeFilterModal = dynamic(() => import("@/components/HomeFilterModal"), {
+  ssr: false,
+  loading: () => null,
+})
+const HomeSavedModal = dynamic(() => import("@/components/HomeSavedModal"), {
+  ssr: false,
+  loading: () => null,
+})
 const HomeMapModal = dynamic(() => import("@/components/HomeMapModal"), {
   ssr: false,
   loading: () => null,
@@ -68,45 +74,58 @@ export default function HomeClient({
   const [mapSearchQuery, setMapSearchQuery] = useState("")
   const [isMapCardVisible, setIsMapCardVisible] = useState(false)
 
+  // Non-blocking sync: Trust initial server data on mount, only subscribe to live updates during idle
   useEffect(() => {
-    async function loadData(forceRefresh = false) {
-      try {
-        const data = await fetchCatalogData({ forceRefresh })
-        if (data?.vendors && Array.isArray(data.vendors)) {
-          setTopVendors(data.vendors)
-        }
-        if (data?.scooters && Array.isArray(data.scooters)) {
-          setAllScooters(data.scooters)
-        }
-      } catch (err) {
-        console.error("Failed to load catalog data:", err)
+    let unsubscribeSettings: (() => void) | null = null
+    let supabaseChannel: any = null
+    let supabaseClient: any = null
+
+    // If server passed empty data for any reason, fetch client-side
+    if (initialVendors.length === 0 || initialScooters.length === 0) {
+      fetchCatalogData().then((data) => {
+        if (data?.vendors?.length) setTopVendors(data.vendors)
+        if (data?.scooters?.length) setAllScooters(data.scooters)
+      }).catch(() => {})
+    }
+
+    const scheduleIdleTask = (cb: () => void) => {
+      if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+        (window as any).requestIdleCallback(cb, { timeout: 3500 })
+      } else {
+        setTimeout(cb, 3000)
       }
     }
 
-    // Always run instant client sync on mount to ensure newly added vendors show up immediately
-    loadData(true)
+    // Defer Realtime WebSockets to background idle cycle to protect initial 0-3s FCP/LCP
+    scheduleIdleTask(() => {
+      unsubscribeSettings = subscribeToPlatformSettings(() => {
+        fetchCatalogData({ forceRefresh: true }).then((data) => {
+          if (data?.vendors?.length) setTopVendors(data.vendors)
+          if (data?.scooters?.length) setAllScooters(data.scooters)
+        }).catch(() => {})
+      })
 
-    const unsubscribe = subscribeToPlatformSettings(() => {
-      loadData(true)
+      try {
+        supabaseClient = createBrowserClient()
+        supabaseChannel = supabaseClient
+          .channel('public:catalog_live_updates')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'vendors' }, () => {
+            fetchCatalogData({ forceRefresh: true }).then((d) => d?.vendors && setTopVendors(d.vendors)).catch(() => {})
+          })
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'scooters' }, () => {
+            fetchCatalogData({ forceRefresh: true }).then((d) => d?.scooters && setAllScooters(d.scooters)).catch(() => {})
+          })
+          .subscribe()
+      } catch (e) {}
     })
 
-    // Supabase Realtime Sync for Vendors and Scooters
-    const supabase = createBrowserClient()
-    const channel = supabase
-      .channel('public:catalog_live_updates')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'vendors' }, () => {
-        loadData(true)
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'scooters' }, () => {
-        loadData(true)
-      })
-      .subscribe()
-
     return () => {
-      unsubscribe()
-      supabase.removeChannel(channel)
+      if (unsubscribeSettings) unsubscribeSettings()
+      if (supabaseClient && supabaseChannel) {
+        supabaseClient.removeChannel(supabaseChannel)
+      }
     }
-  }, [])
+  }, [initialVendors.length, initialScooters.length])
 
   const openLocationPicker = useCallback(() => {
     setIsLocationModalOpen(true)
@@ -366,7 +385,7 @@ export default function HomeClient({
                   durationFilter={durationFilter}
                   isSaved={savedScooters.includes(scooter.id)}
                   onToggleSave={toggleSaveScooter}
-                  isHero={index === 0}
+                  isHero={index < 2}
                   variant="popular"
                 />
               ))}
@@ -396,25 +415,29 @@ export default function HomeClient({
           </section>
         )}
 
-        {/* Filter Modal */}
-        <HomeFilterModal
-          isOpen={isFilterOpen}
-          onClose={() => setIsFilterOpen(false)}
-          maxPrice={maxPrice}
-          setMaxPrice={setMaxPrice}
-          selectedYear={selectedYear}
-          setSelectedYear={setSelectedYear}
-        />
+        {/* Filter Modal - Loaded only when requested */}
+        {isFilterOpen && (
+          <HomeFilterModal
+            isOpen={isFilterOpen}
+            onClose={() => setIsFilterOpen(false)}
+            maxPrice={maxPrice}
+            setMaxPrice={setMaxPrice}
+            selectedYear={selectedYear}
+            setSelectedYear={setSelectedYear}
+          />
+        )}
 
-        {/* Saved Scooters Modal */}
-        <HomeSavedModal
-          isOpen={isSavedModalOpen}
-          onClose={() => setIsSavedModalOpen(false)}
-          savedScooters={savedScooters}
-          allScooters={allScooters}
-          durationFilter={durationFilter}
-          onToggleSave={toggleSaveScooter}
-        />
+        {/* Saved Scooters Modal - Loaded only when requested */}
+        {isSavedModalOpen && (
+          <HomeSavedModal
+            isOpen={isSavedModalOpen}
+            onClose={() => setIsSavedModalOpen(false)}
+            savedScooters={savedScooters}
+            allScooters={allScooters}
+            durationFilter={durationFilter}
+            onToggleSave={toggleSaveScooter}
+          />
+        )}
 
         {/* Dynamic Location & Vendor Map Modal */}
         {isLocationModalOpen && (
