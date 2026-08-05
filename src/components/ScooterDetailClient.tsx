@@ -24,11 +24,11 @@ import {
   FileCheck,
   Truck,
   Wrench,
-  CloudRain,
   Sparkles
 } from "lucide-react"
-import { fetchScooterDetail } from "@/lib/api/catalogService"
+import { fetchScooterDetail, fetchVendorDetail } from "@/lib/api/catalogService"
 import { subscribeToPlatformSettings } from "@/utils/pricing"
+import TransparentLoader from "@/components/TransparentLoader"
 
 interface ScooterDetailClientProps {
   id: string
@@ -159,7 +159,11 @@ export default function ScooterDetailClient({
     return () => unsubscribe()
   }, [id, initialScooter])
 
-  if (!scooter && !loading) {
+  if (loading) {
+    return <TransparentLoader />
+  }
+
+  if (!scooter) {
     return (
       <div className="min-h-screen bg-[#F4F5F7] text-black flex flex-col items-center justify-center gap-4 px-6 text-center">
         <div className="w-16 h-16 rounded-full bg-white border border-black/10 flex items-center justify-center shadow-xs">
@@ -172,10 +176,6 @@ export default function ScooterDetailClient({
         </Link>
       </div>
     )
-  }
-
-  if (!scooter) {
-    return null
   }
 
   const rawName = scooter.name || "Scooter"
@@ -297,6 +297,8 @@ export default function ScooterDetailClient({
               <Link 
                 href={`/vendor/${vendor.id}`} 
                 prefetch={true}
+                onPointerEnter={() => fetchVendorDetail(vendor.id)}
+                onTouchStart={() => fetchVendorDetail(vendor.id)}
                 className="group flex items-center justify-between p-3 sm:p-3.5 bg-neutral-50 hover:bg-neutral-100 rounded-2xl sm:rounded-3xl border border-black/5 transition-all cursor-pointer"
               >
                 <div className="flex items-center gap-3 min-w-0">
@@ -443,42 +445,34 @@ export default function ScooterDetailClient({
               {
                 id: "helmets",
                 icon: ShieldCheck,
-                title: "2 Clean Sanitized Helmets & Phone Mount",
-                badge: "Complimentary",
-                summary: "SNI certified helmets + heavy-duty phone mount",
-                description: "Every rental comes equipped with 2 clean, disinfected helmets in your size with fresh hygiene liners, plus a secure vibration-damped handlebar phone holder for smooth GPS navigation across Bali."
+                title: "2 Helmets & Phone Mount",
+                badge: "Included",
+                summary: "Clean sanitized helmets in your size + secure phone mount",
+                description: "Two sanitized SNI-certified helmets matched to your size and an adjustable handlebar phone mount for navigation across Bali."
               },
               {
                 id: "delivery",
                 icon: Truck,
-                title: "Free Hotel & Villa Handover Delivery",
-                badge: "Doorstep Handover",
-                summary: "Prompt delivery across Bali's primary tourist zones",
-                description: "Direct handover right to your villa, hotel, or resort in Canggu, Seminyak, Ubud, Kuta, Sanur, and Uluwatu. Zero transit stress, fast digital verification, and flexible delivery timing."
+                title: "Free Doorstep Delivery & Pickup",
+                badge: "Service Area",
+                summary: "Direct delivery to your hotel, villa, or resort",
+                description: "Direct handover and pickup at your hotel, villa, or accommodation across Canggu, Seminyak, Kuta, Ubud, Sanur, and Uluwatu."
               },
               {
                 id: "assistance",
                 icon: Wrench,
-                title: "24/7 Islandwide Roadside Assistance",
-                badge: "24/7 Support",
-                summary: "Rapid mobile mechanic & vehicle swap guarantee",
-                description: "Ride with total peace of mind. In the rare event of a flat tire puncture, battery failure, or unexpected mechanical issue, our mobile rapid-response mechanics will assist, repair, or swap your scooter anywhere in Bali."
+                title: "24/7 Roadside Assistance",
+                badge: "Islandwide",
+                summary: "On-demand tire repair, battery support, or bike swap",
+                description: "Islandwide rapid mobile mechanic support for puncture repairs, battery jumpstarts, or prompt scooter replacement."
               },
               {
-                id: "insurance",
+                id: "pricing",
                 icon: Sparkles,
-                title: "Instant Confirmation & Transparent Rates",
-                badge: "100% Guaranteed",
-                summary: "Zero hidden charges & no surprise fees",
-                description: "Transparent all-inclusive rates with no hidden fees or unauthorized deposit deductions. Instant WhatsApp booking confirmation, clear digital rental agreement, and priority customer service."
-              },
-              {
-                id: "weather",
-                icon: CloudRain,
-                title: "All-Weather Ponchos & Full Safety Inspection",
-                badge: "Island Ready",
-                summary: "2 rain ponchos + thoroughly sanitized and fueled",
-                description: "Stay prepared for tropical Bali weather with 2 waterproof rain ponchos stored under the seat. Every vehicle undergoes a comprehensive mechanical inspection (brakes, tires, lights, fluids) prior to every delivery."
+                title: "Transparent Pricing & Guaranteed Booking",
+                badge: "Guaranteed",
+                summary: "All-inclusive daily rates with zero hidden charges",
+                description: "Instant digital confirmation, transparent rates with no surprise deposit deductions, and priority customer service."
               }
             ].map((item) => {
               const isOpen = !!openInclusions[item.id]

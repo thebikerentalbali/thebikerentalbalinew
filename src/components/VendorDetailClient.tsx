@@ -15,9 +15,10 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { createClient } from "@/lib/supabase/client"
-import { fetchVendorDetail, getVendorDeterministicReviews, invalidateAllCatalogCaches } from "@/lib/api/catalogService"
+import { fetchVendorDetail, fetchScooterDetail, getVendorDeterministicReviews, invalidateAllCatalogCaches } from "@/lib/api/catalogService"
 import { clientCache } from "@/lib/cache/clientCache"
 import { subscribeToPlatformSettings } from "@/utils/pricing"
+import TransparentLoader from "@/components/TransparentLoader"
 
 interface VendorDetailClientProps {
   id: string
@@ -176,11 +177,7 @@ export default function VendorDetailClient({
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-[#F0F2F5] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    )
+    return <TransparentLoader />
   }
 
   if (!vendor) {
@@ -404,6 +401,8 @@ export default function VendorDetailClient({
                     key={scooter.id} 
                     href={`/detail/${scooter.id}`} 
                     prefetch={true}
+                    onPointerEnter={() => fetchScooterDetail(scooter.id)}
+                    onTouchStart={() => fetchScooterDetail(scooter.id)}
                     className="bg-white rounded-3xl p-4 flex gap-3.5 shadow-xs items-center border border-gray-200/80 active-press transition-colors cursor-pointer"
                   >
                     <div className="relative w-24 h-24 rounded-2xl bg-[#F8F9FA] flex items-center justify-center p-2 shrink-0 overflow-hidden border border-gray-100">
@@ -625,6 +624,8 @@ export default function VendorDetailClient({
                         key={scooter.id} 
                         href={`/detail/${scooter.id}`}
                         prefetch={true}
+                        onPointerEnter={() => fetchScooterDetail(scooter.id)}
+                        onTouchStart={() => fetchScooterDetail(scooter.id)}
                         className="bg-white rounded-3xl p-4 border border-gray-200/80 shadow-xs hover:shadow-md active-press transition-all flex flex-col justify-between cursor-pointer"
                       >
                         <div>

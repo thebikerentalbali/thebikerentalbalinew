@@ -4,6 +4,7 @@ import React, { memo } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Star, MapPin } from "lucide-react"
+import { fetchVendorDetail } from "@/lib/api/catalogService"
 
 interface VendorStoryItemProps {
   vendor: any
@@ -11,11 +12,19 @@ interface VendorStoryItemProps {
 }
 
 function VendorStoryItemComponent({ vendor, isEager = false }: VendorStoryItemProps) {
+  const handleIntentPrefetch = () => {
+    if (vendor?.id) {
+      fetchVendorDetail(String(vendor.id))
+    }
+  }
+
   return (
     <article className="flex-none">
       <Link
         href={`/vendor/${vendor.id}`}
         prefetch={true}
+        onPointerEnter={handleIntentPrefetch}
+        onTouchStart={handleIntentPrefetch}
         className="flex flex-col items-center gap-2 md:gap-3 min-w-[80px] md:min-w-[100px] transition-transform hover:scale-105 active-press group"
       >
         {/* Story Ring */}
