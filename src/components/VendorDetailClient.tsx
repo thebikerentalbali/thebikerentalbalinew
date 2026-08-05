@@ -283,10 +283,10 @@ export default function VendorDetailClient({
         
         {/* Mobile Header Card */}
         <header className="px-4 pt-4">
-          <div className="bg-white rounded-[32px] shadow-xs border border-gray-100 overflow-hidden relative">
+          <div className="bg-black rounded-[32px] shadow-xs border border-neutral-800 overflow-hidden relative">
             
             {/* 1. Full Frame Cover Image Carousel with Rounded Card Bottom */}
-            <div className="relative w-full h-64 sm:h-72 bg-neutral-900 rounded-b-[32px] overflow-hidden select-none shadow-sm">
+            <div className="relative w-full h-64 sm:h-72 bg-neutral-950 rounded-b-[32px] overflow-hidden select-none shadow-sm">
               
               {/* Top Action Overlay (Back & Share) */}
               <div className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between pointer-events-auto">
@@ -299,7 +299,7 @@ export default function VendorDetailClient({
                 </button>
 
                 <button 
-                  onClick={handleShare}
+                  onClick={handleShare} 
                   aria-label="Share Vendor Profile"
                   className="w-10 h-10 bg-black/60 hover:bg-black/80 backdrop-blur-md rounded-full flex items-center justify-center text-white shadow-md border border-white/20 active-press cursor-pointer"
                 >
@@ -382,14 +382,14 @@ export default function VendorDetailClient({
 
             </div>
 
-            {/* 2. Provider Profile Details: Smaller Logo before Vendor Name, Smaller Title, Location below Vendor Name */}
-            <div className="p-5">
+            {/* 2. Provider Profile Details: Black Card with White Typography */}
+            <div className="p-5 bg-black text-white">
               
               {/* Header: Smaller Logo placed BEFORE Vendor Name with Location Directly Below */}
               <div className="mb-2">
                 <div className="flex items-center gap-3">
                   {/* Smaller Logo */}
-                  <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 shadow-xs bg-white flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20 shadow-xs bg-white flex items-center justify-center shrink-0">
                     {(vendor.logo || vendor.logo_url) ? (
                       <Image 
                         src={vendor.logo || vendor.logo_url} 
@@ -406,14 +406,14 @@ export default function VendorDetailClient({
                   {/* Vendor Name Title & Location Below */}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 min-w-0">
-                      <h1 className="text-base sm:text-lg font-bold text-gray-900 leading-tight truncate">
+                      <h1 className="text-base sm:text-lg font-bold text-white leading-tight truncate">
                         {vendor.name}
                       </h1>
                       <InstagramVerifiedBadge className="w-4 h-4 shrink-0" />
                     </div>
                     {/* Location title just below vendor name */}
-                    <div className="flex items-center gap-1 text-xs text-gray-500 font-medium mt-0.5">
-                      <MapPin className="w-3.5 h-3.5 text-black shrink-0" />
+                    <div className="flex items-center gap-1 text-xs text-neutral-400 font-medium mt-0.5">
+                      <MapPin className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
                       <span className="truncate max-w-[240px] sm:max-w-xs">{vendor.address || "Bali, Indonesia"}</span>
                     </div>
                   </div>
@@ -421,30 +421,30 @@ export default function VendorDetailClient({
               </div>
 
               {/* Stats Row */}
-              <div className="flex items-center justify-between border-t border-b border-gray-100 py-3 my-3.5">
+              <div className="flex items-center justify-between border-t border-b border-neutral-800 py-3 my-3.5">
                 {/* Rating */}
                 <div className="flex flex-col items-center justify-center flex-1 cursor-pointer" onClick={() => setIsReviewModalOpen(true)}>
                   <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 fill-black text-black" />
-                    <span className="font-bold text-base text-gray-900">{vendor.rating ? Number(vendor.rating).toFixed(1) : "5.0"}</span>
+                    <Star className="w-4 h-4 fill-white text-white" />
+                    <span className="font-bold text-base text-white">{vendor.rating ? Number(vendor.rating).toFixed(1) : "5.0"}</span>
                   </div>
-                  <span className="text-[10px] text-gray-400 font-bold mt-0.5 uppercase tracking-wider">rating</span>
+                  <span className="text-[10px] text-neutral-400 font-bold mt-0.5 uppercase tracking-wider">rating</span>
                 </div>
 
-                <div className="w-px h-6 bg-gray-200" />
+                <div className="w-px h-6 bg-neutral-800" />
 
                 {/* Reviews */}
                 <div className="flex flex-col items-center justify-center flex-1 cursor-pointer" onClick={() => setIsReviewModalOpen(true)}>
-                  <span className="font-bold text-base text-gray-900">{reviews.length}+</span>
-                  <span className="text-[10px] text-gray-400 font-bold mt-0.5 uppercase tracking-wider">reviews</span>
+                  <span className="font-bold text-base text-white">{reviews.length}+</span>
+                  <span className="text-[10px] text-neutral-400 font-bold mt-0.5 uppercase tracking-wider">reviews</span>
                 </div>
 
-                <div className="w-px h-6 bg-gray-200" />
+                <div className="w-px h-6 bg-neutral-800" />
 
                 {/* Scooters Count */}
                 <div className="flex flex-col items-center justify-center flex-1">
-                  <span className="font-bold text-base text-gray-900">{totalFleetCount}</span>
-                  <span className="text-[10px] text-gray-400 font-bold mt-0.5 uppercase tracking-wider">scooters</span>
+                  <span className="font-bold text-base text-white">{totalFleetCount}</span>
+                  <span className="text-[10px] text-neutral-400 font-bold mt-0.5 uppercase tracking-wider">scooters</span>
                 </div>
               </div>
 
@@ -452,33 +452,33 @@ export default function VendorDetailClient({
               <div>
                 <div className="flex overflow-x-auto gap-3 pb-2 snap-x hide-scrollbar">
                   {reviews.slice(0, 5).map((review) => (
-                    <div key={review.id} className="snap-start shrink-0 w-[260px] bg-[#F8F9FA] rounded-2xl p-3.5 border border-gray-200/80 flex flex-col justify-between">
+                    <div key={review.id} className="snap-start shrink-0 w-[260px] bg-neutral-900 rounded-2xl p-3.5 border border-neutral-800 flex flex-col justify-between">
                       <div>
                         <div className="flex gap-0.5 mb-2">
                           {[...Array(5)].map((_, i) => (
-                            <Star key={i} className={`w-3.5 h-3.5 ${i < (review.rating || 5) ? "fill-black text-black" : "fill-gray-200 text-gray-200"}`} />
+                            <Star key={i} className={`w-3.5 h-3.5 ${i < (review.rating || 5) ? "fill-white text-white" : "fill-neutral-700 text-neutral-700"}`} />
                           ))}
                         </div>
-                        <p className="text-xs text-gray-600 line-clamp-3 mb-2 font-medium">"{review.comment}"</p>
+                        <p className="text-xs text-neutral-300 line-clamp-3 mb-2 font-medium">"{review.comment}"</p>
                       </div>
-                      <p className="font-bold text-xs text-gray-900">- {review.user_name || "Guest"}</p>
+                      <p className="font-bold text-xs text-white">- {review.user_name || "Guest"}</p>
                     </div>
                   ))}
                   {reviews.length === 0 && (
-                    <div className="w-full text-center py-4 text-xs text-gray-500">No reviews yet. Be the first!</div>
+                    <div className="w-full text-center py-4 text-xs text-neutral-400">No reviews yet. Be the first!</div>
                   )}
                 </div>
                 <div className="flex items-center gap-2.5 mt-3">
                   <button 
                     onClick={() => setIsWriteReviewModalOpen(true)}
-                    className="flex-1 bg-black text-white font-bold py-2.5 rounded-full text-xs hover:bg-neutral-800 shadow-sm transition-colors active-press cursor-pointer"
+                    className="flex-1 bg-white text-black font-bold py-2.5 rounded-full text-xs hover:bg-neutral-200 shadow-sm transition-colors active-press cursor-pointer"
                   >
                     Write a Review
                   </button>
                   {reviews.length > 0 && (
                     <button 
                       onClick={() => setIsReviewModalOpen(true)}
-                      className="flex-1 bg-white border border-gray-200 text-black font-bold py-2.5 rounded-full text-xs hover:bg-gray-50 transition-colors active-press cursor-pointer"
+                      className="flex-1 bg-neutral-900 border border-neutral-700 text-white font-bold py-2.5 rounded-full text-xs hover:bg-neutral-800 transition-colors active-press cursor-pointer"
                     >
                       See More
                     </button>
@@ -612,7 +612,7 @@ export default function VendorDetailClient({
         </div>
 
         {/* Desktop Header Card */}
-        <div className="bg-white rounded-[32px] overflow-hidden shadow-xs border border-gray-200/80">
+        <div className="bg-black rounded-[32px] overflow-hidden shadow-xs border border-neutral-800">
           
           {/* Full Frame Cover Image Carousel with Rounded Card Bottom */}
           <div className="relative w-full h-80 lg:h-96 bg-neutral-900 rounded-b-[36px] overflow-hidden select-none shadow-sm">
@@ -632,27 +632,27 @@ export default function VendorDetailClient({
                       alt=""
                       fill
                       aria-hidden="true"
-                      sizes="1200px"
-                      className="object-cover object-center blur-2xl opacity-35 scale-110"
+                      sizes="100vw"
+                      className="object-cover object-center blur-xl opacity-35 scale-110"
                     />
                   </div>
 
-                  {/* Uncropped, perfectly scaled foreground image (never zoomed) */}
-                  <div className="relative w-full h-full flex items-center justify-center p-2 sm:p-4 z-10">
+                  {/* Uncropped foreground image */}
+                  <div className="relative w-full h-full flex items-center justify-center p-3 lg:p-4 z-10">
                     <Image
                       src={img.url}
                       alt={`${vendor.name} cover image ${idx + 1}`}
                       fill
                       priority={idx === 0}
-                      sizes="1200px"
-                      className={`object-contain object-center ${img.scooter ? 'p-4 drop-shadow-md' : ''}`}
+                      sizes="100vw"
+                      className={`object-contain object-center ${img.scooter ? 'p-6 drop-shadow-md' : ''}`}
                     />
                   </div>
 
-                  {/* Subtle dark gradient overlay at bottom for pill & dot readability */}
+                  {/* Bottom gradient */}
                   <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-15 pointer-events-none" />
 
-                  {/* Bottom pill if associated with a scooter */}
+                  {/* Bottom pill if scooter */}
                   {img.scooter && (
                     <div className="absolute bottom-4 left-6 right-6 z-20 flex items-center justify-between pointer-events-auto">
                       <Link 
@@ -688,13 +688,13 @@ export default function VendorDetailClient({
 
           </div>
 
-          {/* Profile Details: Smaller Logo before Vendor Name, Smaller Title, Location Directly Below */}
-          <div className="p-8">
+          {/* Profile Details: Black Card with White Typography */}
+          <div className="p-8 bg-black text-white">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-6">
               
               {/* Smaller Logo before Vendor Name & Location Below */}
               <div className="flex items-center gap-4">
-                <div className="relative w-12 h-12 lg:w-14 lg:h-14 rounded-full overflow-hidden bg-white border-2 border-gray-200 shadow-xs shrink-0 flex items-center justify-center">
+                <div className="relative w-12 h-12 lg:w-14 lg:h-14 rounded-full overflow-hidden bg-white border-2 border-white/20 shadow-xs shrink-0 flex items-center justify-center">
                   {(vendor.logo || vendor.logo_url) ? (
                     <Image 
                       src={vendor.logo || vendor.logo_url} 
@@ -710,12 +710,12 @@ export default function VendorDetailClient({
 
                 <div>
                   <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                    <h1 className="text-lg lg:text-xl font-bold text-gray-900 leading-tight">{vendor.name}</h1>
+                    <h1 className="text-lg lg:text-xl font-bold text-white leading-tight">{vendor.name}</h1>
                     <InstagramVerifiedBadge className="w-5 h-5 shrink-0" />
                   </div>
                   {/* Location directly below vendor name */}
-                  <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium mt-0.5">
-                    <MapPin className="w-3.5 h-3.5 text-black shrink-0" />
+                  <div className="flex items-center gap-1.5 text-xs text-neutral-400 font-medium mt-0.5">
+                    <MapPin className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
                     <span>{vendor.address || "Bali, Indonesia"}</span>
                   </div>
                 </div>
@@ -725,7 +725,7 @@ export default function VendorDetailClient({
               <div className="flex items-center gap-3">
                 <button 
                   onClick={() => setIsWriteReviewModalOpen(true)}
-                  className="bg-black text-white font-bold px-6 py-3 rounded-full hover:bg-neutral-800 shadow-sm transition-colors text-xs cursor-pointer"
+                  className="bg-white text-black font-bold px-6 py-3 rounded-full hover:bg-neutral-200 shadow-sm transition-colors text-xs cursor-pointer active-press"
                 >
                   Write a Review
                 </button>
@@ -734,30 +734,30 @@ export default function VendorDetailClient({
             </div>
 
             {/* 3 Column Stats Bar */}
-            <div className="flex items-center gap-8 py-4 border-t border-gray-100 max-w-md">
+            <div className="flex items-center gap-8 py-4 border-t border-neutral-800 max-w-md">
               {/* Rating */}
               <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setIsReviewModalOpen(true)}>
                 <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 fill-black text-black" />
-                  <span className="font-bold text-base text-gray-900">{vendor.rating ? Number(vendor.rating).toFixed(1) : "5.0"}</span>
+                  <Star className="w-4 h-4 fill-white text-white" />
+                  <span className="font-bold text-base text-white">{vendor.rating ? Number(vendor.rating).toFixed(1) : "5.0"}</span>
                 </div>
-                <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">rating</span>
+                <span className="text-xs text-neutral-400 font-bold uppercase tracking-wider">rating</span>
               </div>
               
-              <div className="w-px h-6 bg-gray-200" />
+              <div className="w-px h-6 bg-neutral-800" />
 
               {/* Reviews */}
               <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setIsReviewModalOpen(true)}>
-                <span className="font-bold text-base text-gray-900">{reviews.length}+</span>
-                <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">reviews</span>
+                <span className="font-bold text-base text-white">{reviews.length}+</span>
+                <span className="text-xs text-neutral-400 font-bold uppercase tracking-wider">reviews</span>
               </div>
 
-              <div className="w-px h-6 bg-gray-200" />
+              <div className="w-px h-6 bg-neutral-800" />
 
               {/* Scooters Count */}
               <div className="flex items-center gap-2.5">
-                <span className="font-bold text-base text-gray-900">{totalFleetCount}</span>
-                <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">scooters</span>
+                <span className="font-bold text-base text-white">{totalFleetCount}</span>
+                <span className="text-xs text-neutral-400 font-bold uppercase tracking-wider">scooters</span>
               </div>
             </div>
 
