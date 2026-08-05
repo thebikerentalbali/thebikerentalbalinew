@@ -388,15 +388,15 @@ export default function VendorDetailClient({
               {/* Header: Smaller Logo placed BEFORE Vendor Name with Location Directly Below */}
               <div className="mb-2">
                 <div className="flex items-center gap-3">
-                  {/* Smaller Vendor Logo / Icon */}
-                  <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center overflow-hidden border border-gray-200 shadow-2xs shrink-0">
-                    {vendor.logo || vendor.image_url ? (
+                  {/* Smaller Logo */}
+                  <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 shadow-xs bg-white flex items-center justify-center shrink-0">
+                    {vendor.image_url ? (
                       <Image 
-                        src={vendor.logo || vendor.image_url} 
+                        src={vendor.image_url} 
                         alt={vendor.name} 
                         width={40} 
                         height={40} 
-                        className="w-full h-full object-contain p-0.5" 
+                        className="w-full h-full object-cover" 
                       />
                     ) : (
                       <span className="font-bold text-xs text-gray-700">{vendor.name?.slice(0, 2).toUpperCase() || "VN"}</span>
@@ -695,13 +695,13 @@ export default function VendorDetailClient({
               {/* Smaller Logo before Vendor Name & Location Below */}
               <div className="flex items-center gap-4">
                 <div className="relative w-12 h-12 lg:w-14 lg:h-14 rounded-full overflow-hidden bg-white border-2 border-gray-200 shadow-xs shrink-0 flex items-center justify-center">
-                  {vendor.logo || vendor.image_url ? (
+                  {vendor.image_url ? (
                     <Image 
-                      src={vendor.logo || vendor.image_url} 
+                      src={vendor.image_url} 
                       alt={vendor.name} 
                       width={56} 
                       height={56} 
-                      className="w-full h-full object-contain p-1" 
+                      className="w-full h-full object-cover" 
                     />
                   ) : (
                     <span className="text-lg font-bold text-gray-700">{(vendor.name || "V").substring(0, 2).toUpperCase()}</span>
