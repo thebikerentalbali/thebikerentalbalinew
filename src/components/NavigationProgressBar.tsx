@@ -10,25 +10,32 @@ export default function NavigationProgressBar() {
   const [isNavigating, setIsNavigating] = useState(false)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Reset when route completes changing
+  // Fast reset when route changes
   useEffect(() => {
     setIsNavigating(false)
-    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+      timeoutRef.current = null
+    }
   }, [pathname, searchParams])
 
   useEffect(() => {
     const handleStart = () => {
       setIsNavigating(true)
-      // Safety timeout: auto-hide after 5 seconds if navigation takes too long or cancels
+      // Fast sub-second auto-dismiss: caps maximum loading overlay display to 600ms
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
       timeoutRef.current = setTimeout(() => {
         setIsNavigating(false)
-      }, 5000)
+        timeoutRef.current = null
+      }, 600)
     }
 
     const handleStop = () => {
       setIsNavigating(false)
-      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+        timeoutRef.current = null
+      }
     }
 
     const handleAnchorClick = (e: MouseEvent) => {
