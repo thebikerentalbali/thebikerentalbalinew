@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ChevronLeft, Bell, Star, MapPin, Map, Info, Minus, Plus, PlusCircle, X, Trash2, Loader2, Store } from "lucide-react"
+import { ChevronLeft, ChevronRight, Bell, Star, MapPin, Map, Info, Minus, Plus, PlusCircle, X, Trash2, Loader2, Store } from "lucide-react"
 import { createClient } from '@/lib/supabase/client'
 import { fetchCatalogData, fetchScooterDetail } from '@/lib/api/catalogService'
 import { clientCache } from '@/lib/cache/clientCache'
@@ -164,7 +164,7 @@ export default function CheckoutPage() {
     return []
   })
   const [showAddModal, setShowAddModal] = useState(false)
-  const [loading, setLoading] = useState(() => {
+  const [isResolvingScooter, setIsResolvingScooter] = useState(() => {
     if (typeof window !== 'undefined') {
       try {
         const params = new URLSearchParams(window.location.search)
@@ -178,10 +178,12 @@ export default function CheckoutPage() {
         if (clientCache.get<any>(`scooter_${sId}`)) return false
         const cached = clientCache.get<any>('catalog') || clientCache.get<any>('catalog_data')
         if (cached?.scooters?.some((s: any) => s.id.toString() === sId)) return false
+        return true
       } catch (e) {}
     }
-    return true
+    return false
   })
+  const [loading, setLoading] = useState(false)
 
   const supabase = createClient()
 
@@ -229,8 +231,11 @@ export default function CheckoutPage() {
           if (data.vendor) {
             setVendors(prev => prev.some(v => String(v.id) === String(data.vendor.id)) ? prev : [data.vendor, ...prev])
           }
+          setIsResolvingScooter(false)
           setLoading(false)
-        }).catch(() => {})
+        }).catch(() => {
+          if (isMounted) setIsResolvingScooter(false)
+        })
       }
 
       try {
@@ -272,7 +277,10 @@ export default function CheckoutPage() {
       } catch (err) {
         console.error("Failed to load scooters in checkout:", err)
       } finally {
-        if (isMounted) setLoading(false)
+        if (isMounted) {
+          setIsResolvingScooter(false)
+          setLoading(false)
+        }
       }
     }
     
@@ -546,11 +554,53 @@ export default function CheckoutPage() {
             {/* Left Column: Cart Items */}
             <div className="flex flex-col h-full">
               
-              {cart.length === 0 ? (
-                <div className="flex-1 bg-white rounded-3xl p-8 flex flex-col items-center justify-center shadow-sm text-center mb-6">
-                  <p className="text-gray-500 mb-4 font-semibold">Your cart is empty.</p>
-                  <Link href="/" className="px-6 py-2.5 bg-black text-white rounded-full font-bold text-sm hover:bg-neutral-800 transition-all">
-                    Browse Scooters
+              {isResolvingScooter ? (
+                <div className="bg-white rounded-[24px] p-5 flex flex-col gap-5 shadow-sm relative border border-gray-100 mb-6 animate-pulse">
+                  {/* Top Row Skeleton */}
+                  <div className="flex gap-4 items-center">
+                    <div className="w-24 h-24 bg-gray-100 rounded-2xl flex items-center justify-center p-2 relative shrink-0">
+                      <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+                    </div>
+                    <div className="flex-1 min-w-0 space-y-2.5">
+                      <div className="h-5 bg-gray-200 rounded-lg w-3/4"></div>
+                      <div className="flex items-center gap-2">
+                        <div className="h-3.5 bg-gray-100 rounded-md w-12"></div>
+                        <div className="h-3.5 bg-gray-100 rounded-md w-16"></div>
+                      </div>
+                      <div className="h-6 bg-gray-200 rounded-lg w-1/2 mt-1"></div>
+                    </div>
+                  </div>
+
+                  {/* Rental Plan Skeleton */}
+                  <div className="border-t border-gray-100 pt-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="h-4 bg-gray-100 rounded-md w-24"></div>
+                      <div className="h-5 bg-gray-100 rounded-full w-28"></div>
+                    </div>
+                    <div className="h-10 bg-gray-100 rounded-xl w-full"></div>
+                  </div>
+
+                  {/* Status indicator */}
+                  <div className="flex items-center justify-center gap-2 pt-2 border-t border-gray-50 text-xs font-semibold text-gray-500">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-black" />
+                    <span>Loading your scooter details...</span>
+                  </div>
+                </div>
+              ) : cart.length === 0 ? (
+                <div className="bg-white rounded-[28px] p-8 flex flex-col items-center justify-center shadow-sm text-center mb-6 border border-gray-100/80">
+                  <div className="w-16 h-16 rounded-2xl bg-neutral-100 flex items-center justify-center mb-4 text-neutral-600">
+                    <Store className="w-8 h-8 stroke-[1.5]" />
+                  </div>
+                  <h3 className="text-base font-bold text-gray-900 mb-1">No Scooter Selected</h3>
+                  <p className="text-xs text-gray-500 max-w-xs mb-5 leading-relaxed">
+                    Select a scooter from our verified Bali rental fleet to calculate rates and confirm your booking.
+                  </p>
+                  <Link
+                    href="/"
+                    className="px-6 py-3 bg-black text-white rounded-full font-bold text-xs uppercase tracking-wider hover:bg-neutral-800 active-press transition-all shadow-sm flex items-center gap-2"
+                  >
+                    <span>Browse Verified Fleet</span>
+                    <ChevronRight className="w-4 h-4" />
                   </Link>
                 </div>
               ) : (
@@ -844,11 +894,17 @@ export default function CheckoutPage() {
         <div className="bg-white rounded-[28px] p-5 shadow-sm border border-gray-100 flex flex-col gap-4">
           <div className="flex justify-between items-center px-2">
              <span className="text-[13px] font-bold text-gray-500 uppercase tracking-wider">Total Amount</span>
-             <span className="text-2xl font-black text-gray-900 tracking-tight">Rp {getTotalPrice().toLocaleString()}</span>
+             <span className="text-2xl font-black text-gray-900 tracking-tight">
+               {isResolvingScooter ? (
+                 <span className="text-base text-gray-400 font-semibold animate-pulse">Calculating...</span>
+               ) : (
+                 `Rp ${getTotalPrice().toLocaleString()}`
+               )}
+             </span>
           </div>
           <button
             onClick={handleConfirmBooking}
-            disabled={isSubmitting || cart.length === 0}
+            disabled={isSubmitting || isResolvingScooter || cart.length === 0}
             className="w-full h-14 bg-black text-white hover:bg-neutral-800 rounded-full text-[17px] font-bold shadow-md hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             {isSubmitting ? (
@@ -856,6 +912,13 @@ export default function CheckoutPage() {
                 <Loader2 className="w-5 h-5 animate-spin text-white" />
                 <span>Recording Booking...</span>
               </>
+            ) : isResolvingScooter ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin text-white" />
+                <span>Loading Scooter...</span>
+              </>
+            ) : cart.length === 0 ? (
+              <span>Select a Scooter</span>
             ) : (
               <span>Confirm via WhatsApp</span>
             )}
@@ -871,11 +934,17 @@ export default function CheckoutPage() {
       <div className="md:hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto px-5 py-5 pb-8 sm:pb-6 bg-white/95 backdrop-blur-xl border-t border-gray-100 z-10 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] rounded-t-[32px]">
         <div className="flex items-center justify-between mb-4 px-2">
            <span className="text-[13px] font-bold text-gray-500 uppercase tracking-wider">Total</span>
-           <span className="text-xl font-black text-gray-900 tracking-tight">Rp {getTotalPrice().toLocaleString()}</span>
+           <span className="text-xl font-black text-gray-900 tracking-tight">
+             {isResolvingScooter ? (
+               <span className="text-sm text-gray-400 font-semibold animate-pulse">Calculating...</span>
+             ) : (
+               `Rp ${getTotalPrice().toLocaleString()}`
+             )}
+           </span>
         </div>
         <button
           onClick={handleConfirmBooking}
-          disabled={isSubmitting || cart.length === 0}
+          disabled={isSubmitting || isResolvingScooter || cart.length === 0}
           className="w-full h-14 bg-black text-white hover:bg-neutral-800 rounded-full text-[17px] font-bold shadow-md hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none transition-all flex items-center justify-center gap-2 cursor-pointer"
         >
           {isSubmitting ? (
@@ -883,6 +952,13 @@ export default function CheckoutPage() {
               <Loader2 className="w-5 h-5 animate-spin text-white" />
               <span>Recording Booking...</span>
             </>
+          ) : isResolvingScooter ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin text-white" />
+              <span>Loading Scooter...</span>
+            </>
+          ) : cart.length === 0 ? (
+            <span>Select a Scooter</span>
           ) : (
             <span>Confirm via WhatsApp</span>
           )}
