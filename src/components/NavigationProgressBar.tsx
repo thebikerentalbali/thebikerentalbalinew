@@ -1,25 +1,36 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { usePathname, useSearchParams } from "next/navigation"
+import TransparentLoader from "@/components/TransparentLoader"
 
 export default function NavigationProgressBar() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [isNavigating, setIsNavigating] = useState(false)
-  const [progress, setProgress] = useState(0)
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Reset when route completes changing
   useEffect(() => {
     setIsNavigating(false)
-    setProgress(100)
-    const timeout = setTimeout(() => {
-      setProgress(0)
-    }, 300)
-    return () => clearTimeout(timeout)
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
   }, [pathname, searchParams])
 
   useEffect(() => {
+    const handleStart = () => {
+      setIsNavigating(true)
+      // Safety timeout: auto-hide after 5 seconds if navigation takes too long or cancels
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+      timeoutRef.current = setTimeout(() => {
+        setIsNavigating(false)
+      }, 5000)
+    }
+
+    const handleStop = () => {
+      setIsNavigating(false)
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
+
     const handleAnchorClick = (e: MouseEvent) => {
       const target = (e.target as HTMLElement).closest("a")
       if (!target) return
@@ -38,32 +49,24 @@ export default function NavigationProgressBar() {
         const targetUrl = href.replace(window.location.origin, "")
 
         if (currentUrl !== targetUrl) {
-          setIsNavigating(true)
-          setProgress(25)
-          setTimeout(() => setProgress(65), 150)
-          setTimeout(() => setProgress(85), 400)
+          handleStart()
         }
       }
     }
 
+    window.addEventListener("app:start-loading", handleStart)
+    window.addEventListener("app:stop-loading", handleStop)
     document.addEventListener("click", handleAnchorClick, { capture: true })
+
     return () => {
+      window.removeEventListener("app:start-loading", handleStart)
+      window.removeEventListener("app:stop-loading", handleStop)
       document.removeEventListener("click", handleAnchorClick, { capture: true })
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
     }
   }, [])
 
-  if (progress === 0 && !isNavigating) return null
+  if (!isNavigating) return null
 
-  return (
-    <div className="fixed top-0 left-0 right-0 z-[99999] pointer-events-none h-[3px] bg-transparent overflow-hidden">
-      <div
-        className="h-full bg-black transition-all duration-300 ease-out shadow-[0_0_8px_rgba(0,0,0,0.6)]"
-        style={{
-          width: `${progress}%`,
-          opacity: progress === 100 ? 0 : 1,
-          transition: progress === 100 ? "width 150ms ease-out, opacity 300ms ease-in" : "width 300ms cubic-bezier(0.4, 0, 0.2, 1)"
-        }}
-      />
-    </div>
-  )
+  return <TransparentLoader />
 }
