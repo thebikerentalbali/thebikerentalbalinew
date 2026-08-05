@@ -285,8 +285,8 @@ export default function VendorDetailClient({
         <header className="px-4 pt-4">
           <div className="bg-white rounded-[32px] shadow-xs border border-gray-100 overflow-hidden relative">
             
-            {/* 1. Full Frame Cover Image Carousel (Swipeable Left & Right) */}
-            <div className="relative w-full h-64 sm:h-72 bg-neutral-900 overflow-hidden select-none group">
+            {/* 1. Full Frame Cover Image Carousel with Rounded Card Bottom */}
+            <div className="relative w-full h-64 sm:h-72 bg-neutral-900 rounded-b-[32px] overflow-hidden select-none shadow-sm">
               
               {/* Top Action Overlay (Back & Share) */}
               <div className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between pointer-events-auto">
@@ -350,38 +350,18 @@ export default function VendorDetailClient({
                 ))}
               </div>
 
-              {/* Left / Right Swipe Navigation Buttons */}
+              {/* Indicator Dots */}
               {coverImages.length > 1 && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => scrollMobileCover("prev")}
-                    aria-label="Previous Cover Image"
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-md flex items-center justify-center border border-white/20 transition-all z-20 active-press cursor-pointer"
-                  >
-                    <ChevronLeft className="w-4 h-4 text-white" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => scrollMobileCover("next")}
-                    aria-label="Next Cover Image"
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-md flex items-center justify-center border border-white/20 transition-all z-20 active-press cursor-pointer"
-                  >
-                    <ChevronRight className="w-4 h-4 text-white" />
-                  </button>
-
-                  {/* Indicator Dots */}
-                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 pointer-events-none">
-                    {coverImages.map((_, i) => (
-                      <span 
-                        key={i} 
-                        className={`h-1 rounded-full transition-all duration-300 ${
-                          i === mobileCoverIndex ? "w-4 bg-white shadow-xs" : "w-1 bg-white/50"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </>
+                <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 pointer-events-none">
+                  {coverImages.map((_, i) => (
+                    <span 
+                      key={i} 
+                      className={`h-1 rounded-full transition-all duration-300 ${
+                        i === mobileCoverIndex ? "w-4 bg-white shadow-xs" : "w-1 bg-white/50"
+                      }`}
+                    />
+                  ))}
+                </div>
               )}
 
             </div>
@@ -618,8 +598,8 @@ export default function VendorDetailClient({
         {/* Desktop Header Card */}
         <div className="bg-white rounded-[32px] overflow-hidden shadow-xs border border-gray-200/80">
           
-          {/* Full Frame Cover Image Carousel (Swipeable Left & Right) */}
-          <div className="relative w-full h-80 lg:h-96 bg-neutral-900 overflow-hidden select-none group">
+          {/* Full Frame Cover Image Carousel with Rounded Card Bottom */}
+          <div className="relative w-full h-80 lg:h-96 bg-neutral-900 rounded-b-[36px] overflow-hidden select-none shadow-sm">
             
             {/* Full Frame Slider Container */}
             <div 
@@ -660,38 +640,18 @@ export default function VendorDetailClient({
               ))}
             </div>
 
-            {/* Left / Right Navigation Buttons */}
+            {/* Indicator Dots */}
             {coverImages.length > 1 && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => scrollDesktopCover("prev")}
-                  aria-label="Previous Cover Image"
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-md flex items-center justify-center border border-white/20 transition-all z-20 active-press cursor-pointer"
-                >
-                  <ChevronLeft className="w-5 h-5 text-white" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => scrollDesktopCover("next")}
-                  aria-label="Next Cover Image"
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-md flex items-center justify-center border border-white/20 transition-all z-20 active-press cursor-pointer"
-                >
-                  <ChevronRight className="w-5 h-5 text-white" />
-                </button>
-
-                {/* Indicator Dots */}
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 pointer-events-none">
-                  {coverImages.map((_, i) => (
-                    <span 
-                      key={i} 
-                      className={`h-1.5 rounded-full transition-all duration-300 ${
-                        i === desktopCoverIndex ? "w-5 bg-white shadow-xs" : "w-1.5 bg-white/50"
-                      }`}
-                    />
-                  ))}
-                </div>
-              </>
+              <div className="absolute bottom-3.5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 pointer-events-none">
+                {coverImages.map((_, i) => (
+                  <span 
+                    key={i} 
+                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                      i === desktopCoverIndex ? "w-5 bg-white shadow-xs" : "w-1.5 bg-white/50"
+                    }`}
+                  />
+                ))}
+              </div>
             )}
 
           </div>

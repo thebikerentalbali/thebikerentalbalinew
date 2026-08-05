@@ -618,22 +618,16 @@ export default function ScooterDetailClient({
         )}
 
         {/* ========================================================================= */}
-        {/* 6. ALWAYS DISPLAYED: MORE FROM THIS VENDOR FLEET (CLEAN & RESPONSIVE)     */}
+        {/* 6. ALWAYS DISPLAYED: SAME VENDOR GARAGE (ROUNDED CARD & MINIMAL TITLE)   */}
         {/* ========================================================================= */}
         {vendor && (
-          <section className="bg-white rounded-[28px] sm:rounded-3xl p-5 sm:p-7 shadow-xs border border-black/5">
+          <section className="bg-white rounded-[32px] sm:rounded-[36px] p-5 sm:p-6 shadow-xs border border-black/5">
             
-            {/* Header */}
+            {/* Minimal Header */}
             <div className="flex items-center justify-between gap-3 mb-4">
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-0.5">
-                  <Bike className="w-3.5 h-3.5 text-black stroke-[2.2]" />
-                  <span>Same Vendor Garage</span>
-                </div>
-                <h2 className="text-sm sm:text-base font-black text-black tracking-tight truncate">
-                  More from {vendor.name}
-                </h2>
-              </div>
+              <h2 className="text-sm sm:text-base font-extrabold text-black tracking-tight truncate">
+                {vendor.name} Garage
+              </h2>
 
               {vendor.id && (
                 <Link
@@ -647,7 +641,7 @@ export default function ScooterDetailClient({
               )}
             </div>
 
-            {/* Responsive Scooter Grid / Horizontal Deck */}
+            {/* Responsive Rounded Scooter Cards */}
             {otherScooters.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {otherScooters.map((item) => {
@@ -658,11 +652,11 @@ export default function ScooterDetailClient({
                       key={item.id}
                       href={`/detail/${item.id}`}
                       prefetch={true}
-                      className="bg-neutral-50 hover:bg-neutral-100/90 rounded-2xl p-3 sm:p-3.5 border border-black/5 transition-all flex items-center justify-between gap-3 group active-press"
+                      className="bg-neutral-50 hover:bg-neutral-100/90 rounded-[24px] p-3 sm:p-3.5 border border-black/5 transition-all flex items-center justify-between gap-3 group active-press"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        {/* Image Box */}
-                        <div className="relative w-16 h-16 sm:w-18 sm:h-18 bg-white rounded-xl overflow-hidden shrink-0 flex items-center justify-center border border-black/5 shadow-xs">
+                        {/* Image Pod */}
+                        <div className="relative w-16 h-16 sm:w-18 sm:h-18 bg-white rounded-2xl overflow-hidden shrink-0 flex items-center justify-center border border-black/5 shadow-2xs">
                           <Image
                             src={item.image_url || item.img || "/images/scooter.png"}
                             alt={itemFormattedName}
@@ -698,7 +692,7 @@ export default function ScooterDetailClient({
                 })}
               </div>
             ) : (
-              <div className="bg-neutral-50 rounded-2xl p-5 text-center border border-black/5">
+              <div className="bg-neutral-50 rounded-[24px] p-5 text-center border border-black/5">
                 <p className="text-xs text-neutral-500 font-medium">
                   Explore the full garage and customer reviews directly on the vendor profile.
                 </p>
