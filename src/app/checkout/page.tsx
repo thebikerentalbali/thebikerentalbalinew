@@ -491,26 +491,26 @@ export default function CheckoutPage() {
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <label className="text-[14px] text-gray-700 font-medium">Rental Plan</label>
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold text-white bg-black shadow-sm">
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-extrabold text-black bg-[#10F580] shadow-[0_0_8px_rgba(16,245,128,0.3)]">
                       {item.available} Units Available
                     </span>
                   </div>
                   <div className="flex bg-gray-50 rounded-xl p-1">
                     <button
                       onClick={() => updateDurationMode(item.id, "daily")}
-                      className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${item.durationMode === "daily" ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                      className={`flex-1 py-2 text-sm font-extrabold rounded-lg transition-all ${item.durationMode === "daily" ? 'bg-[#10F580] text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                     >
                       Daily
                     </button>
                     <button
                       onClick={() => updateDurationMode(item.id, "weekly")}
-                      className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${item.durationMode === "weekly" ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                      className={`flex-1 py-2 text-sm font-extrabold rounded-lg transition-all ${item.durationMode === "weekly" ? 'bg-[#10F580] text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                     >
                       Weekly
                     </button>
                     <button
                       onClick={() => updateDurationMode(item.id, "monthly")}
-                      className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${item.durationMode === "monthly" ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                      className={`flex-1 py-2 text-sm font-extrabold rounded-lg transition-all ${item.durationMode === "monthly" ? 'bg-[#10F580] text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                     >
                       Monthly
                     </button>
@@ -525,16 +525,16 @@ export default function CheckoutPage() {
                     <div className="flex items-center justify-between bg-gray-50 rounded-full p-1 border border-gray-100 max-w-[120px]">
                       <button
                         onClick={() => updateDurationCount(item.id, -1)}
-                        className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-gray-600 shadow-sm active:scale-95 transition-transform"
+                        className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-gray-600 shadow-sm active:scale-95 transition-transform cursor-pointer"
                       >
                         <Minus className="w-3.5 h-3.5" />
                       </button>
                       <span className="font-semibold text-[14px] w-6 text-center">{item.durationCount}</span>
                       <button
                         onClick={() => updateDurationCount(item.id, 1)}
-                        className="w-7 h-7 rounded-full bg-black flex items-center justify-center text-white shadow-sm active:scale-95 transition-transform"
+                        className="w-7 h-7 rounded-full bg-[#10F580] flex items-center justify-center text-black shadow-sm hover:bg-[#0be054] active:scale-95 transition-all cursor-pointer"
                       >
-                        <Plus className="w-3.5 h-3.5" />
+                        <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
                       </button>
                     </div>
                   </div>
@@ -548,16 +548,16 @@ export default function CheckoutPage() {
                     <div className="flex items-center justify-between bg-gray-50 rounded-full p-1 border border-gray-100 max-w-[120px]">
                       <button
                         onClick={() => updateQuantity(item.id, -1)}
-                        className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-gray-600 shadow-sm active:scale-95 transition-transform"
+                        className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-gray-600 shadow-sm active:scale-95 transition-transform cursor-pointer"
                       >
                         <Minus className="w-3.5 h-3.5" />
                       </button>
                       <span className="font-semibold text-[14px] w-6 text-center">{item.quantity}</span>
                       <button
                         onClick={() => updateQuantity(item.id, 1)}
-                        className="w-7 h-7 rounded-full bg-black flex items-center justify-center text-white shadow-sm active:scale-95 transition-transform"
+                        className="w-7 h-7 rounded-full bg-[#10F580] flex items-center justify-center text-black shadow-sm hover:bg-[#0be054] active:scale-95 transition-all cursor-pointer"
                       >
-                        <Plus className="w-3.5 h-3.5" />
+                        <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
                       </button>
                     </div>
                   </div>
@@ -572,9 +572,9 @@ export default function CheckoutPage() {
             {cart.length > 0 && (
               <button
                 onClick={() => setShowAddModal(true)}
-                className="w-full bg-white rounded-3xl p-4 flex items-center justify-center gap-2 mb-8 text-gray-800 font-semibold shadow-sm border border-transparent hover:border-gray-100 transition-colors"
+                className="w-full bg-white rounded-3xl p-4 flex items-center justify-center gap-2 mb-8 text-gray-800 font-semibold shadow-sm border border-transparent hover:border-[#10F580]/40 transition-colors cursor-pointer"
               >
-                <PlusCircle className="w-5 h-5 text-gray-400" />
+                <PlusCircle className="w-5 h-5 text-[#10F580]" />
                 Add Another Scooter
               </button>
             )}
@@ -593,7 +593,7 @@ export default function CheckoutPage() {
                 type="date"
                 value={startDate}
                 onChange={(e) => handleStartDateChange(e.target.value)}
-                className="w-full min-w-0 h-14 bg-white text-gray-900 font-semibold border border-gray-200/80 rounded-2xl px-3 sm:px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none transition-shadow shadow-xs"
+                className="w-full min-w-0 h-14 bg-white text-gray-900 font-semibold border border-gray-200/80 rounded-2xl px-3 sm:px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-[#10F580] focus:border-[#10F580] outline-none transition-shadow shadow-xs"
               />
             </div>
             <div className="flex-1 min-w-0">
@@ -602,7 +602,7 @@ export default function CheckoutPage() {
                 type="date"
                 value={endDate}
                 onChange={(e) => handleEndDateChange(e.target.value)}
-                className="w-full min-w-0 h-14 bg-white text-gray-900 font-semibold border border-gray-200/80 rounded-2xl px-3 sm:px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none transition-shadow shadow-xs"
+                className="w-full min-w-0 h-14 bg-white text-gray-900 font-semibold border border-gray-200/80 rounded-2xl px-3 sm:px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-[#10F580] focus:border-[#10F580] outline-none transition-shadow shadow-xs"
               />
             </div>
           </div>
@@ -620,7 +620,7 @@ export default function CheckoutPage() {
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   placeholder="First Name"
-                  className="w-full h-14 bg-white text-gray-900 font-semibold border border-gray-200/80 rounded-2xl px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none transition-shadow shadow-xs"
+                  className="w-full h-14 bg-white text-gray-900 font-semibold border border-gray-200/80 rounded-2xl px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-[#10F580] focus:border-[#10F580] outline-none transition-shadow shadow-xs"
                 />
               </div>
               <div className="flex-1">
@@ -630,7 +630,7 @@ export default function CheckoutPage() {
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   placeholder="Last Name"
-                  className="w-full h-14 bg-white text-gray-900 font-semibold border border-gray-200/80 rounded-2xl px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none transition-shadow shadow-xs"
+                  className="w-full h-14 bg-white text-gray-900 font-semibold border border-gray-200/80 rounded-2xl px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-[#10F580] focus:border-[#10F580] outline-none transition-shadow shadow-xs"
                 />
               </div>
             </div>
@@ -648,16 +648,16 @@ export default function CheckoutPage() {
             <div className="flex items-center justify-between bg-gray-50 rounded-full p-1 border border-gray-100 min-w-[110px]">
               <button
                 onClick={() => setHelmets(Math.max(1, helmets - 1))}
-                className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-gray-700 shadow-xs hover:bg-gray-100 active:scale-95 transition-all"
+                className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-gray-700 shadow-xs hover:bg-gray-100 active:scale-95 transition-all cursor-pointer"
               >
                 <Minus className="w-4 h-4" />
               </button>
               <span className="font-bold text-[15px] w-6 text-center text-gray-900">{helmets}</span>
               <button
                 onClick={() => setHelmets(helmets + 1)}
-                className="w-9 h-9 rounded-full bg-black flex items-center justify-center text-white shadow-sm hover:bg-neutral-800 active:scale-95 transition-all"
+                className="w-9 h-9 rounded-full bg-[#10F580] flex items-center justify-center text-black shadow-sm hover:bg-[#0be054] active:scale-95 transition-all cursor-pointer"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-4 h-4 stroke-[2.5]" />
               </button>
             </div>
           </div>
@@ -669,18 +669,18 @@ export default function CheckoutPage() {
           <div className="grid grid-cols-2 gap-3 mb-4">
             <button
               onClick={() => setDeliveryMethod("pickup")}
-              className={`p-3 rounded-2xl border-2 flex items-center gap-3 transition-all ${deliveryMethod === "pickup" ? 'border-black bg-white shadow-sm scale-[1.02]' : 'border-transparent bg-white/60 hover:bg-white/80'}`}
+              className={`p-3 rounded-2xl border-2 flex items-center gap-3 transition-all cursor-pointer ${deliveryMethod === "pickup" ? 'border-[#10F580] bg-white shadow-[0_0_14px_rgba(16,245,128,0.2)] scale-[1.02]' : 'border-transparent bg-white/60 hover:bg-white/80'}`}
             >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors ${deliveryMethod === "pickup" ? 'bg-black text-white' : 'bg-gray-100 text-gray-900'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors ${deliveryMethod === "pickup" ? 'bg-[#10F580] text-black shadow-xs' : 'bg-gray-100 text-gray-900'}`}>
                 <MapPin className="w-4 h-4" />
               </div>
               <h3 className="font-semibold text-gray-900 text-[14px]">Pick Up</h3>
             </button>
             <button
               onClick={() => setDeliveryMethod("delivery")}
-              className={`p-3 rounded-2xl border-2 flex items-center gap-3 transition-all ${deliveryMethod === "delivery" ? 'border-black bg-white shadow-sm scale-[1.02]' : 'border-transparent bg-white/60 hover:bg-white/80'}`}
+              className={`p-3 rounded-2xl border-2 flex items-center gap-3 transition-all cursor-pointer ${deliveryMethod === "delivery" ? 'border-[#10F580] bg-white shadow-[0_0_14px_rgba(16,245,128,0.2)] scale-[1.02]' : 'border-transparent bg-white/60 hover:bg-white/80'}`}
             >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors ${deliveryMethod === "delivery" ? 'bg-black text-white' : 'bg-gray-100 text-gray-900'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors ${deliveryMethod === "delivery" ? 'bg-[#10F580] text-black shadow-xs' : 'bg-gray-100 text-gray-900'}`}>
                 <Map className="w-4 h-4" />
               </div>
               <h3 className="font-semibold text-gray-900 text-[14px]">Delivery</h3>
@@ -695,7 +695,7 @@ export default function CheckoutPage() {
                 value={deliveryAddress}
                 onChange={(e) => setDeliveryAddress(e.target.value)}
                 placeholder="Enter your hotel or villa address"
-                className="w-full h-14 bg-gray-50 border-none rounded-2xl px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-1 focus:ring-black outline-none text-gray-800 mb-5 transition-shadow"
+                className="w-full h-14 bg-gray-50 border-none rounded-2xl px-5 text-[16px] sm:text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-[#10F580] outline-none text-gray-800 mb-5 transition-shadow"
               />
               <div className="bg-[#FFF4E5] p-4 rounded-2xl border border-[#FFE0B2] mb-1">
                 <div className="flex gap-3 items-start mb-3">
@@ -736,11 +736,11 @@ export default function CheckoutPage() {
           <button
             onClick={handleConfirmBooking}
             disabled={isSubmitting || cart.length === 0}
-            className="w-full h-14 bg-black text-white rounded-full text-[17px] font-semibold shadow-xl shadow-black/20 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none transition-all flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full h-14 bg-[#10F580] text-black hover:bg-[#0be054] rounded-full text-[17px] font-extrabold shadow-[0_4px_24px_rgba(16,245,128,0.4)] hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="w-5 h-5 animate-spin text-white" />
+                <Loader2 className="w-5 h-5 animate-spin text-black" />
                 <span>Recording Booking...</span>
               </>
             ) : (
@@ -763,11 +763,11 @@ export default function CheckoutPage() {
         <button
           onClick={handleConfirmBooking}
           disabled={isSubmitting || cart.length === 0}
-          className="w-full h-14 bg-black text-white rounded-full text-[17px] font-semibold shadow-xl shadow-black/20 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none transition-all flex items-center justify-center gap-2 cursor-pointer"
+          className="w-full h-14 bg-[#10F580] text-black hover:bg-[#0be054] rounded-full text-[17px] font-extrabold shadow-[0_4px_24px_rgba(16,245,128,0.4)] hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none transition-all flex items-center justify-center gap-2 cursor-pointer"
         >
           {isSubmitting ? (
             <>
-              <Loader2 className="w-5 h-5 animate-spin text-white" />
+              <Loader2 className="w-5 h-5 animate-spin text-black" />
               <span>Recording Booking...</span>
             </>
           ) : (
@@ -823,7 +823,7 @@ export default function CheckoutPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2 mb-1">
                           <h3 className="font-bold text-gray-900 text-[14px] leading-tight truncate">{scooter.name}</h3>
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold whitespace-nowrap ${isAvail ? 'bg-black text-white' : 'bg-gray-100 text-gray-500'}`}>
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold whitespace-nowrap ${isAvail ? 'bg-[#10F580] text-black shadow-xs' : 'bg-gray-100 text-gray-500'}`}>
                             {scooter.available} Available
                           </span>
                         </div>
@@ -833,10 +833,10 @@ export default function CheckoutPage() {
                         <button
                           type="button"
                           onClick={() => addToCart(scooter)}
-                          className={`text-xs font-bold px-4 py-2 rounded-full transition-all flex items-center gap-1.5 shadow-sm active:scale-95 ${
+                          className={`text-xs font-extrabold px-4 py-2 rounded-full transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer ${
                             inCartItem 
                               ? 'bg-neutral-800 text-white hover:bg-black' 
-                              : 'bg-black text-white hover:bg-neutral-800'
+                              : 'bg-[#10F580] text-black hover:bg-[#0be054] shadow-[0_2px_10px_rgba(16,245,128,0.3)]'
                           }`}
                         >
                           <Plus className="w-3.5 h-3.5" />

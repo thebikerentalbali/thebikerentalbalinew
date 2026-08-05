@@ -63,9 +63,11 @@ export function Navbar() {
               <span className="text-sm font-medium">EN / USD</span>
               <ChevronDown className="w-3 h-3" />
             </div>
-            <Button className="rounded-full px-6 font-semibold shadow-md hover:shadow-lg transition-all">
-              Book Now
-            </Button>
+            <Link href="/#fleet">
+              <Button className="bg-[#10F580] text-black hover:bg-[#0be054] font-extrabold rounded-full px-6 shadow-[0_2px_14px_rgba(16,245,128,0.35)] transition-all cursor-pointer">
+                Book Now
+              </Button>
+            </Link>
           </div>
 
           {/* Mobile Menu Toggle */}
@@ -103,9 +105,11 @@ export function Navbar() {
                 <span className="font-medium">EN / USD</span>
               </div>
             </div>
-            <Button className="w-full rounded-xl py-6 text-lg font-semibold mt-2">
-              Book Now
-            </Button>
+            <Link href="/#fleet" onClick={() => setIsMobileMenuOpen(false)}>
+              <Button className="w-full bg-[#10F580] text-black hover:bg-[#0be054] font-extrabold rounded-xl py-6 text-lg mt-2 shadow-[0_4px_20px_rgba(16,245,128,0.35)] cursor-pointer">
+                Book Now
+              </Button>
+            </Link>
           </motion.div>
         )}
       </AnimatePresence>

@@ -47,11 +47,11 @@ function InstagramVerifiedBadge({ className = "w-5 h-5" }: { className?: string 
       <title>Verified Partner</title>
       <path
         d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.137V5.15h-6.162L25.358 0l-5.36 3.094Z"
-        fill="#000000"
+        fill="#10F580"
       />
       <path
         d="M16.5 28.5 9 21l2.85-2.85 4.65 4.65 11.65-11.65L31 14l-14.5 14.5Z"
-        fill="#FFFFFF"
+        fill="#000000"
       />
     </svg>
   )
@@ -337,7 +337,7 @@ export default function VendorDetailClient({
                 <div className="flex items-center gap-2.5 mt-3">
                   <button 
                     onClick={() => setIsWriteReviewModalOpen(true)}
-                    className="flex-1 bg-black text-white font-extrabold py-2.5 rounded-full text-xs hover:bg-neutral-800 transition-colors shadow-xs active-press"
+                    className="flex-1 bg-[#10F580] text-black font-extrabold py-2.5 rounded-full text-xs hover:bg-[#0be054] shadow-[0_2px_14px_rgba(16,245,128,0.3)] transition-colors active-press"
                   >
                     Write a Review
                   </button>
@@ -366,9 +366,9 @@ export default function VendorDetailClient({
                   <button
                     key={brand}
                     onClick={() => setSelectedBrand(brand)}
-                    className={`px-4 py-2 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer active-press ${
+                    className={`px-4 py-2 rounded-full text-xs font-extrabold transition-all shrink-0 cursor-pointer active-press ${
                       selectedBrand === brand
-                        ? "bg-black text-white shadow-xs"
+                        ? "bg-[#10F580] text-black shadow-xs"
                         : "bg-white text-gray-700 border border-gray-200 hover:text-black"
                     }`}
                   >
@@ -388,7 +388,7 @@ export default function VendorDetailClient({
                 <p className="text-gray-500 font-medium text-xs">No scooters available for this brand</p>
                 <button 
                   onClick={() => setSelectedBrand("All")}
-                  className="mt-3 text-xs font-bold bg-black text-white px-4 py-2 rounded-full active-press cursor-pointer"
+                  className="mt-3 text-xs font-extrabold bg-[#10F580] text-black px-4 py-2 rounded-full active-press cursor-pointer shadow-xs"
                 >
                   Reset Filter
                 </button>
@@ -421,7 +421,7 @@ export default function VendorDetailClient({
                         </span>
                         {/* Black and White Available Label */}
                         <div className="flex items-center gap-1.5 bg-black text-white px-2.5 py-0.5 rounded-full shadow-2xs">
-                          <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#10F580] shadow-[0_0_6px_#10F580]"></div>
                           <span className="text-[10px] font-extrabold uppercase tracking-wider">
                             {scooter.available_units || 1} AVAILABLE
                           </span>
@@ -533,7 +533,7 @@ export default function VendorDetailClient({
               <div className="flex items-center gap-3">
                 <button 
                   onClick={() => setIsWriteReviewModalOpen(true)}
-                  className="bg-black text-white font-extrabold px-6 py-3 rounded-full hover:bg-neutral-800 shadow-xs transition-colors text-xs cursor-pointer"
+                  className="bg-[#10F580] text-black font-extrabold px-6 py-3 rounded-full hover:bg-[#0be054] shadow-[0_2px_14px_rgba(16,245,128,0.3)] transition-colors text-xs cursor-pointer"
                 >
                   Write a Review
                 </button>
@@ -592,9 +592,9 @@ export default function VendorDetailClient({
                       <button
                         key={brand}
                         onClick={() => setSelectedBrand(brand)}
-                        className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
                           selectedBrand === brand
-                            ? "bg-black text-white shadow-xs"
+                            ? "bg-[#10F580] text-black shadow-xs"
                             : "text-gray-600 hover:text-black"
                         }`}
                       >
@@ -610,7 +610,7 @@ export default function VendorDetailClient({
                   <p className="text-gray-500 font-medium">No scooters found for this brand filter.</p>
                   <button 
                     onClick={() => setSelectedBrand("All")}
-                    className="mt-4 text-xs font-bold bg-black text-white px-4 py-2 rounded-full"
+                    className="mt-4 text-xs font-extrabold bg-[#10F580] text-black px-4 py-2 rounded-full shadow-xs"
                   >
                     Reset Filter
                   </button>
@@ -637,7 +637,7 @@ export default function VendorDetailClient({
                             
                             {/* Black and White Available Label */}
                             <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-black text-white px-2.5 py-1 rounded-full shadow-xs z-10">
-                              <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
+                              <div className="w-1.5 h-1.5 rounded-full bg-[#10F580] shadow-[0_0_6px_#10F580]"></div>
                               <span className="text-[10px] font-extrabold uppercase tracking-wider">
                                 {scooter.available_units || 1} AVAILABLE
                               </span>
@@ -648,26 +648,26 @@ export default function VendorDetailClient({
                               alt={formattedName} 
                               fill
                               sizes="(max-width: 768px) 100vw, 300px"
-                              className="object-contain p-4 drop-shadow-md hover:scale-105 transition-transform" 
+                              className="object-contain p-2 drop-shadow-md"
                             />
                           </div>
 
                           {/* Title */}
-                          <h3 className="font-extrabold text-gray-900 text-base mb-1">
-                            {formattedName}
-                          </h3>
+                          <h3 className="font-black text-gray-900 text-base mb-1 truncate">{formattedName}</h3>
                         </div>
 
                         {/* Price & CTA */}
-                        <div className="pt-3 border-t border-gray-100 flex items-center justify-between mt-3">
-                          <div className="flex items-baseline gap-1">
-                            <span className="text-lg font-black text-gray-900 leading-none">
+                        <div className="flex items-center justify-between border-t border-gray-100 pt-3 mt-3">
+                          <div>
+                            <span className="text-xs text-gray-400 font-bold block leading-none mb-1">Starting from</span>
+                            <span className="text-base font-black text-gray-900">
                               Rp {scooter.price_daily?.toLocaleString("id-ID") || scooter.price_daily}
+                              <span className="text-xs text-gray-400 font-normal"> / day</span>
                             </span>
-                            <span className="text-xs text-gray-400 font-semibold">Daily</span>
                           </div>
-                          <span className="text-xs font-extrabold bg-black text-white px-4 py-2 rounded-full hover:bg-neutral-800 transition-colors shadow-2xs">
-                            Book Now
+
+                          <span className="bg-black text-white px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-2xs">
+                            View
                           </span>
                         </div>
                       </Link>
@@ -677,26 +677,35 @@ export default function VendorDetailClient({
               )}
             </div>
 
-            {/* Customer Reviews Section */}
+            {/* Verified Reviews Section (Desktop) */}
             <div className="bg-white rounded-[32px] p-6 lg:p-8 shadow-xs border border-gray-200/80">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-xl font-extrabold text-gray-900 tracking-tight">Reviews ({reviews.length})</h2>
+                  <h2 className="text-xl font-extrabold text-gray-900 tracking-tight">Customer Reviews</h2>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-1 bg-yellow-50 px-2 py-0.5 rounded-full border border-yellow-100">
+                      <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+                      <span className="font-black text-xs text-yellow-700">{vendor.rating ? Number(vendor.rating).toFixed(1) : "5.0"}</span>
+                    </div>
+                    <span className="text-xs text-gray-400 font-medium">•</span>
+                    <span className="text-xs text-gray-500 font-medium">{reviews.length} authenticated reviews</span>
+                  </div>
                 </div>
+
                 <button 
                   onClick={() => setIsWriteReviewModalOpen(true)}
-                  className="text-xs font-extrabold bg-black text-white px-4 py-2 rounded-full hover:bg-neutral-800 transition-colors shadow-xs cursor-pointer"
+                  className="bg-[#10F580] text-black font-extrabold px-5 py-2.5 rounded-full text-xs hover:bg-[#0be054] shadow-[0_2px_12px_rgba(16,245,128,0.3)] transition-colors cursor-pointer"
                 >
-                  Write a Review
+                  Write Review
                 </button>
               </div>
 
               {/* Reviews Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {reviews.slice(0, 6).map((review) => (
-                  <div key={review.id} className="bg-[#F8F9FA] rounded-2xl p-4 flex flex-col justify-between border border-gray-200/80">
+                  <div key={review.id} className="bg-[#F8F9FA] rounded-2xl p-4 border border-gray-200/80 flex flex-col justify-between">
                     <div>
-                      <div className="flex items-center gap-0.5 mb-2">
+                      <div className="flex items-center gap-1 mb-2">
                         {[...Array(review.rating || 5)].map((_, i) => (
                           <Star key={i} className={`w-3.5 h-3.5 ${i < (review.rating || 5) ? "fill-black text-black" : "fill-gray-200 text-gray-200"}`} />
                         ))}
@@ -813,7 +822,7 @@ export default function VendorDetailClient({
                   setIsReviewModalOpen(false)
                   setIsWriteReviewModalOpen(true)
                 }}
-                className="w-full bg-black text-white font-extrabold py-3 rounded-full text-xs hover:bg-neutral-800 transition-colors"
+                className="w-full bg-[#10F580] text-black font-extrabold py-3 rounded-full text-xs hover:bg-[#0be054] shadow-[0_4px_18px_rgba(16,245,128,0.35)] transition-colors"
               >
                 Write a Review
               </button>
@@ -884,7 +893,7 @@ export default function VendorDetailClient({
               <button 
                 onClick={handleSubmitReview}
                 disabled={isSubmittingReview}
-                className="w-full bg-black text-white font-extrabold py-3 rounded-full text-xs hover:bg-neutral-800 transition-colors shadow-xs flex items-center justify-center gap-2"
+                className="w-full bg-[#10F580] text-black font-extrabold py-3 rounded-full text-xs hover:bg-[#0be054] shadow-[0_4px_18px_rgba(16,245,128,0.35)] transition-colors flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isSubmittingReview ? "Submitting..." : "Submit Review"}
               </button>

@@ -28,7 +28,7 @@ function VendorStoryItemComponent({ vendor, isEager = false }: VendorStoryItemPr
         className="flex flex-col items-center gap-2 md:gap-3 min-w-[80px] md:min-w-[100px] transition-transform hover:scale-105 active-press group"
       >
         {/* Story Ring */}
-        <div className="p-[2px] md:p-[3px] rounded-full bg-gradient-to-tr from-yellow-400 to-orange-500">
+        <div className="p-[2px] md:p-[3px] rounded-full bg-gradient-to-tr from-[#10F580] via-[#00FF87] to-[#04D167] shadow-[0_0_10px_rgba(16,245,128,0.35)] group-hover:shadow-[0_0_18px_rgba(16,245,128,0.6)] transition-shadow duration-200">
           <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white p-[2px] md:p-[3px]">
             <div className="w-full h-full rounded-full bg-gray-100 flex items-center justify-center border border-gray-200 overflow-hidden">
               {vendor.logo ? (
