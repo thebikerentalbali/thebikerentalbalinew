@@ -1,13 +1,12 @@
 import React from "react"
-import { X, ChevronLeft, ChevronRight } from "lucide-react"
 
 export default function DetailLoading() {
   return (
     <div className="min-h-screen bg-[#F0F2F5] pb-24 w-full touch-pan-y animate-pulse py-4 sm:py-6 md:py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6">
         
         {/* Main Showcase Card Skeleton */}
-        <div className="bg-[#F8F9FA] rounded-[36px] sm:rounded-[44px] p-6 sm:p-8 md:p-10 shadow-lg border border-gray-200/80 mb-8">
+        <div className="bg-[#F8F9FA] rounded-[36px] sm:rounded-[44px] p-6 sm:p-8 md:p-10 shadow-lg border border-gray-200/80 mb-6">
           
           {/* Header */}
           <div className="flex items-start justify-between gap-4 mb-4">
@@ -24,37 +23,23 @@ export default function DetailLoading() {
           </div>
 
           {/* Nav Arrows */}
-          <div className="flex items-center justify-center gap-3 mb-8">
+          <div className="flex items-center justify-center gap-3 mb-6">
             <div className="w-8 h-8 rounded-full bg-white border border-gray-200"></div>
             <div className="w-8 h-8 rounded-full bg-white border border-gray-200"></div>
           </div>
 
-          {/* Custom Scooter Title & Price */}
-          <div className="flex items-baseline justify-between mb-6">
-            <div className="h-6 bg-gray-200 rounded-lg w-36"></div>
-            <div className="h-7 bg-gray-200 rounded-lg w-32"></div>
-          </div>
-
-          {/* Duration Pills */}
-          <div className="h-10 bg-gray-200/70 rounded-2xl mb-6"></div>
-
-          {/* 2x2 Customization Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8">
-            <div className="h-16 bg-gray-200/60 rounded-2xl"></div>
-            <div className="h-16 bg-gray-200/60 rounded-2xl"></div>
-            <div className="h-16 bg-gray-200/60 rounded-2xl"></div>
-            <div className="h-16 bg-gray-200/60 rounded-2xl"></div>
-          </div>
-
-          {/* Rent Button */}
-          <div className="h-14 bg-gray-300 rounded-2xl sm:rounded-3xl w-full"></div>
+          {/* Vendor Card Skeleton */}
+          <div className="w-full h-16 bg-white rounded-2xl sm:rounded-3xl border border-gray-200/80"></div>
         </div>
 
-        {/* Supporting details skeleton */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white rounded-3xl p-6 shadow-xs border border-gray-200/80 h-64"></div>
-          <div className="bg-white rounded-3xl p-6 shadow-xs border border-gray-200/80 h-64"></div>
-        </div>
+        {/* Rates Section Skeleton */}
+        <div className="bg-white rounded-3xl p-6 shadow-xs border border-gray-200/80 mb-6 h-48"></div>
+
+        {/* Specifications Skeleton */}
+        <div className="bg-white rounded-3xl p-6 shadow-xs border border-gray-200/80 mb-6 h-52"></div>
+
+        {/* Requirements Button Skeleton */}
+        <div className="bg-white rounded-3xl p-6 shadow-xs border border-gray-200/80 mb-8 h-20"></div>
 
       </div>
     </div>
