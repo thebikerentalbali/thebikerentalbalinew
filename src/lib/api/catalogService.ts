@@ -34,29 +34,71 @@ export function getNormalizedVendorCoordinates(vendor: any): { lat: number; lng:
   let lat = Number(vendor?.lat);
   let lng = Number(vendor?.lng);
 
-  if (!lat || !lng || isNaN(lat) || isNaN(lng) || (lat === 0 && lng === 0)) {
+  // If vendor already has valid, non-zero coordinates within Bali bounds (Lat: -9.0 to -8.0, Lng: 114.4 to 115.8)
+  const hasValidDbCoords = !isNaN(lat) && !isNaN(lng) && lat < -8.0 && lat > -9.0 && lng > 114.4 && lng < 115.8;
+
+  if (!hasValidDbCoords) {
     const text = `${vendor?.name || ''} ${vendor?.address || ''} ${vendor?.delivery_area || ''}`.toLowerCase();
-    if (text.includes('canggu') || text.includes('berawa') || text.includes('pererenan') || text.includes('batu bolong')) {
-      lat = -8.6478; lng = 115.1385;
-    } else if (text.includes('seminyak') || text.includes('petitenget') || text.includes('kerobokan')) {
-      lat = -8.6892; lng = 115.1686;
-    } else if (text.includes('kuta') || text.includes('legian') || text.includes('airport') || text.includes('tuban')) {
+    
+    // Precise Area Geocoding based on vendor location title
+    if (text.includes('pererenan')) {
+      lat = -8.6430; lng = 115.1240;
+    } else if (text.includes('berawa')) {
+      lat = -8.6610; lng = 115.1430;
+    } else if (text.includes('batu bolong') || text.includes('echo beach') || text.includes('canggu')) {
+      lat = -8.6530; lng = 115.1320;
+    } else if (text.includes('petitenget') || text.includes('batu belig')) {
+      lat = -8.6790; lng = 115.1510;
+    } else if (text.includes('umalas') || text.includes('kerobokan')) {
+      lat = -8.6690; lng = 115.1680;
+    } else if (text.includes('seminyak') || text.includes('kayu aya') || text.includes('dhyana pura')) {
+      lat = -8.6892; lng = 115.1586;
+    } else if (text.includes('legian') || text.includes('padma')) {
+      lat = -8.7050; lng = 115.1670;
+    } else if (text.includes('kuta') || text.includes('pantai kuta')) {
       lat = -8.7185; lng = 115.1686;
-    } else if (text.includes('sanur')) {
+    } else if (text.includes('airport') || text.includes('tuban') || text.includes('ngurah rai')) {
+      lat = -8.7450; lng = 115.1670;
+    } else if (text.includes('sanur') || text.includes('tamblingan')) {
       lat = -8.6882; lng = 115.2635;
-    } else if (text.includes('uluwatu') || text.includes('pecatu') || text.includes('bingin') || text.includes('padang padang')) {
-      lat = -8.8149; lng = 115.1147;
-    } else if (text.includes('nusa dua') || text.includes('benoa')) {
+    } else if (text.includes('bingin') || text.includes('padang padang')) {
+      lat = -8.8050; lng = 115.1080;
+    } else if (text.includes('uluwatu') || text.includes('pecatu') || text.includes('suluban')) {
+      lat = -8.8149; lng = 115.0947;
+    } else if (text.includes('ungasan') || text.includes('balangan')) {
+      lat = -8.8150; lng = 115.1450;
+    } else if (text.includes('nusa dua') || text.includes('itdc')) {
       lat = -8.7985; lng = 115.2243;
-    } else if (text.includes('jimbaran')) {
+    } else if (text.includes('benoa') || text.includes('tanjung benoa')) {
+      lat = -8.7610; lng = 115.2220;
+    } else if (text.includes('jimbaran') || text.includes('kedonganan')) {
       lat = -8.7733; lng = 115.1652;
-    } else if (text.includes('denpasar')) {
+    } else if (text.includes('denpasar') || text.includes('renon') || text.includes('teuku umar')) {
       lat = -8.6705; lng = 115.2126;
+    } else if (text.includes('tegallalang')) {
+      lat = -8.4350; lng = 115.2790;
+    } else if (text.includes('sayan') || text.includes('kedewatan')) {
+      lat = -8.4980; lng = 115.2450;
+    } else if (text.includes('mas') || text.includes('sukawati') || text.includes('celuk')) {
+      lat = -8.5385; lng = 115.2745;
+    } else if (text.includes('tabanan') || text.includes('tanah lot')) {
+      lat = -8.6210; lng = 115.0865;
+    } else if (text.includes('amed') || text.includes('candidasa') || text.includes('padangbai')) {
+      lat = -8.3410; lng = 115.6540;
     } else {
-      lat = -8.5069; lng = 115.2625; // Ubud / Bali Central default
+      lat = -8.5130; lng = 115.2630; // Ubud Centre Default
     }
+
+    // Apply slight deterministic offset so multiple vendors in the same area do not overlap
+    const idKey = String(vendor?.id || vendor?.name || 'v');
+    const hash = idKey.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const offsetLat = (((hash % 7) - 3) * 0.0025);
+    const offsetLng = ((((hash * 3) % 7) - 3) * 0.0025);
+    lat += offsetLat;
+    lng += offsetLng;
   }
-  return { lat, lng };
+
+  return { lat: Number(lat.toFixed(6)), lng: Number(lng.toFixed(6)) };
 }
 
 const FIRST_NAMES = [

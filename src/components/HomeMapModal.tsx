@@ -1,15 +1,16 @@
 "use client"
 
 import React, { memo } from "react"
-import { Search, MapPin, Star, X } from "lucide-react"
+import { Search, MapPin, Star, X, ShieldCheck, Truck, ChevronRight } from "lucide-react"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 
 const MapPicker = dynamic(() => import("@/components/MapPicker"), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full flex items-center justify-center bg-gray-100 animate-pulse">
-      <span className="text-xs font-bold text-gray-500">Loading Interactive Map...</span>
+    <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 gap-3">
+      <div className="w-9 h-9 rounded-full border-[3px] border-black/10 border-t-black animate-spin" />
+      <span className="text-xs font-bold text-gray-600">Loading Vendor Map...</span>
     </div>
   ),
 })
@@ -49,12 +50,12 @@ function HomeMapModalComponent({
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-label="Vendor Location Map"
+      aria-label="Vendor Profile Map"
       className="fixed inset-0 z-[100] flex flex-col bg-black/70 backdrop-blur-sm md:items-center md:justify-center p-0 md:p-6 lg:p-10 animate-in fade-in duration-200"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="flex flex-col w-full h-[100dvh] md:h-[82vh] md:max-h-[780px] md:max-w-5xl bg-white md:rounded-[36px] md:shadow-2xl relative overflow-hidden md:border md:border-gray-200"
+        className="flex flex-col w-full h-[100dvh] md:h-[84vh] md:max-h-[820px] md:max-w-5xl bg-white md:rounded-[36px] md:shadow-2xl relative overflow-hidden md:border md:border-gray-200"
       >
         {/* Top Floating Control Bar */}
         <div className="absolute top-3 left-3 right-3 md:top-5 md:left-5 md:right-5 z-20 flex flex-col gap-2 pointer-events-none">
@@ -79,7 +80,7 @@ function HomeMapModalComponent({
                   onSearchChange(e.target.value)
                   setIsCardVisible(true)
                 }}
-                placeholder="Search area (e.g. Canggu, Ubud, Seminyak)..."
+                placeholder="Search vendor or location (e.g. Canggu, Ubud, Seminyak)..."
                 aria-label="Search vendor area"
                 className="w-full text-xs md:text-sm font-semibold text-black placeholder-gray-400 outline-none bg-transparent"
               />
@@ -97,8 +98,8 @@ function HomeMapModalComponent({
 
             {/* Verified Count Badge */}
             <div className="hidden sm:flex items-center gap-1.5 bg-black text-white px-3.5 py-2.5 rounded-full shadow-md text-xs font-bold shrink-0">
-              <MapPin className="w-3.5 h-3.5" aria-hidden="true" />
-              <span>{vendors.length} Verified</span>
+              <ShieldCheck className="w-3.5 h-3.5 text-white" aria-hidden="true" />
+              <span>{vendors.length} Verified Partners</span>
             </div>
           </div>
 
@@ -141,20 +142,20 @@ function HomeMapModalComponent({
           />
         </div>
 
-        {/* Selected Vendor Floating Bottom Drawer */}
+        {/* Selected Vendor Floating Bottom Drawer (Only Vendor Profile) */}
         {selectedVendor && isCardVisible && (
           <article className="absolute bottom-3 left-3 right-3 md:bottom-5 md:left-5 md:right-auto md:max-w-md z-20 pointer-events-auto animate-in slide-in-from-bottom-4 duration-200">
             <div className="bg-white/95 backdrop-blur-md rounded-3xl p-4 md:p-5 shadow-2xl border border-gray-200 flex flex-col gap-3">
-              {/* Header Row */}
-              <div className="flex items-center justify-between gap-3">
+              {/* Header Row: Vendor Avatar + Title + Rating */}
+              <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
                   {/* Vendor Avatar */}
-                  <div className="w-12 h-12 rounded-2xl bg-black text-white font-extrabold text-sm flex items-center justify-center shrink-0 border border-black overflow-hidden shadow-xs">
+                  <div className="w-13 h-13 rounded-2xl bg-black text-white font-extrabold text-sm flex items-center justify-center shrink-0 border border-black/10 overflow-hidden shadow-xs relative">
                     {selectedVendor.logo || selectedVendor.logo_url || selectedVendor.image_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={selectedVendor.logo || selectedVendor.logo_url || selectedVendor.image_url}
-                        alt={selectedVendor.name || "Vendor logo"}
+                        alt={selectedVendor.name || "Vendor profile"}
                         className="w-full h-full object-cover"
                         loading="lazy"
                       />
@@ -169,12 +170,12 @@ function HomeMapModalComponent({
                         {selectedVendor.name}
                       </h4>
                       <span className="flex items-center gap-1 bg-black text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full shrink-0">
-                        <Star className="w-3 h-3 fill-white text-white" aria-hidden="true" />
+                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" aria-hidden="true" />
                         <span>{selectedVendor.rating ? Number(selectedVendor.rating).toFixed(1) : "5.0"}</span>
                       </span>
                     </div>
-                    <p className="text-xs text-gray-500 font-medium truncate mt-0.5 flex items-center gap-1">
-                      <MapPin className="w-3 h-3 text-black shrink-0" aria-hidden="true" />
+                    <p className="text-xs text-gray-600 font-semibold truncate mt-1 flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-black shrink-0" aria-hidden="true" />
                       <span>{selectedVendor.address || "Bali, Indonesia"}</span>
                     </p>
                   </div>
@@ -191,13 +192,15 @@ function HomeMapModalComponent({
                 </button>
               </div>
 
+              {/* Delivery Coverage Tag */}
               {selectedVendor.delivery_area && (
-                <p className="text-[11px] text-gray-600 bg-gray-50 p-2 rounded-xl border border-gray-100 leading-snug line-clamp-1">
-                  🚚 <strong>Delivery:</strong> {selectedVendor.delivery_area}
-                </p>
+                <div className="text-[11px] text-gray-700 bg-neutral-50 px-3 py-2 rounded-xl border border-neutral-200 flex items-center gap-2">
+                  <Truck className="w-3.5 h-3.5 text-black shrink-0" aria-hidden="true" />
+                  <span className="truncate"><strong>Delivery Area:</strong> {selectedVendor.delivery_area}</span>
+                </div>
               )}
 
-              {/* CTA Button */}
+              {/* CTA Button to Vendor Profile */}
               <button
                 type="button"
                 onClick={() => {
@@ -206,8 +209,8 @@ function HomeMapModalComponent({
                 }}
                 className="w-full bg-black hover:bg-neutral-800 text-white font-bold text-xs md:text-sm py-3 px-4 rounded-2xl transition-all shadow-md active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
               >
-                <span>View Scooters & Profile</span>
-                <span aria-hidden="true">→</span>
+                <span>View Vendor Profile & Fleet</span>
+                <ChevronRight className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
           </article>
@@ -222,7 +225,7 @@ function HomeMapModalComponent({
               className="bg-black text-white text-xs font-bold px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2 hover:bg-neutral-800 transition-all cursor-pointer active-press"
             >
               <MapPin className="w-3.5 h-3.5" aria-hidden="true" />
-              <span>Show {selectedVendor.name}</span>
+              <span>Show {selectedVendor.name} Profile</span>
             </button>
           </div>
         )}
