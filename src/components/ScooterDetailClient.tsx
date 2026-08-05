@@ -206,17 +206,26 @@ export default function ScooterDetailClient({
   const priceDaily = Number(scooter.price_daily || scooter.price || 0)
 
   // Image list for carousel navigation
-  const scooterImages = [
-    scooter.image_url || scooter.img || "/images/scooter.png",
-    scooter.image_url_2 || scooter.image_url || scooter.img || "/images/scooter.png"
-  ]
+  const scooterImages = useMemo(() => {
+    const list: string[] = []
+    if (scooter.image_url) list.push(scooter.image_url)
+    if (scooter.img && !list.includes(scooter.img)) list.push(scooter.img)
+    if (scooter.image_url_2 && !list.includes(scooter.image_url_2)) list.push(scooter.image_url_2)
+    if (scooter.image_url_3 && !list.includes(scooter.image_url_3)) list.push(scooter.image_url_3)
+    if (list.length === 0) list.push("/images/scooter.png")
+    return list
+  }, [scooter])
 
-  const nextImage = () => {
-    setImageIndex((prev) => (prev + 1) % scooterImages.length)
-  }
+  const imageSliderRef = useRef<HTMLDivElement>(null)
 
-  const prevImage = () => {
-    setImageIndex((prev) => (prev - 1 + scooterImages.length) % scooterImages.length)
+  const handleImageScroll = () => {
+    if (imageSliderRef.current) {
+      const scrollLeft = imageSliderRef.current.scrollLeft
+      const width = imageSliderRef.current.clientWidth
+      if (width > 0) {
+        setImageIndex(Math.round(scrollLeft / width))
+      }
+    }
   }
 
   return (
@@ -276,36 +285,44 @@ export default function ScooterDetailClient({
             </div>
           </div>
 
-          {/* Vehicle Stage */}
-          <div className="relative w-full h-[220px] sm:h-[280px] flex items-center justify-center my-3 sm:my-4">
-            <Image
-              src={scooterImages[imageIndex]}
-              alt={`${formattedName} scooter rental Bali`}
-              fill
-              priority
-              sizes="(max-width: 768px) 100vw, 650px"
-              className="object-contain p-2 sm:p-4 drop-shadow-md transition-all duration-300"
-            />
-          </div>
+          {/* Vehicle Rounded Card Display (Never Zoomed & No Arrow Buttons) */}
+          <div className="relative w-full h-[230px] sm:h-[290px] bg-gradient-to-b from-[#F8F9FB] to-[#EEF1F5] rounded-[28px] sm:rounded-[36px] border border-gray-200/80 overflow-hidden my-3 sm:my-4 shadow-2xs">
+            <style jsx>{`
+              .hide-scrollbar::-webkit-scrollbar { display: none; }
+              .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+            `}</style>
+            <div 
+              ref={imageSliderRef}
+              onScroll={handleImageScroll}
+              className="w-full h-full flex overflow-x-auto snap-x snap-mandatory hide-scrollbar scroll-smooth"
+            >
+              {scooterImages.map((imgSrc, idx) => (
+                <div key={idx} className="relative min-w-full h-full shrink-0 snap-center flex items-center justify-center p-3 sm:p-5">
+                  <Image
+                    src={imgSrc}
+                    alt={`${formattedName} scooter rental Bali ${idx + 1}`}
+                    fill
+                    priority={idx === 0}
+                    sizes="(max-width: 768px) 100vw, 650px"
+                    className="object-contain object-center p-2 sm:p-4 drop-shadow-md select-none transition-all duration-300"
+                  />
+                </div>
+              ))}
+            </div>
 
-          {/* Navigation Arrows */}
-          <div className="flex items-center justify-center gap-3 mb-5">
-            <button
-              type="button"
-              onClick={prevImage}
-              aria-label="Previous image"
-              className="w-8 h-8 rounded-full border border-black/10 bg-neutral-50 flex items-center justify-center text-black hover:bg-black hover:text-white active-press transition-all"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={nextImage}
-              aria-label="Next image"
-              className="w-8 h-8 rounded-full border border-black/10 bg-neutral-50 flex items-center justify-center text-black hover:bg-black hover:text-white active-press transition-all"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
+            {/* Minimalist Indicator Dots (only if multiple images) */}
+            {scooterImages.length > 1 && (
+              <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 pointer-events-none">
+                {scooterImages.map((_, i) => (
+                  <span
+                    key={i}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                      i === imageIndex ? "w-4 bg-black shadow-2xs" : "w-1.5 bg-black/20"
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Rounded Vendor Card Below Image Display */}
@@ -320,9 +337,9 @@ export default function ScooterDetailClient({
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="relative w-10 h-10 rounded-full overflow-hidden bg-white border border-black/10 shrink-0 flex items-center justify-center font-black text-xs text-black">
-                    {vendor.logo || vendor.image_url ? (
+                    {(vendor.logo || vendor.logo_url) ? (
                       <Image 
-                        src={vendor.logo || vendor.image_url} 
+                        src={vendor.logo || vendor.logo_url} 
                         alt={vendor.name || "Vendor"} 
                         fill
                         sizes="40px"
