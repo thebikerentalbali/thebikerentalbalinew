@@ -5,6 +5,7 @@ import { Users, Bike, DollarSign, Settings, Bell, Search, Store, BarChart3, Home
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { getPlatformSettings, savePlatformSettings, calculateBookingCommission, calculateRentalDays, fetchPlatformSettings, subscribeToPlatformSettings, PlatformSettings, DEFAULT_PLATFORM_SETTINGS } from "@/utils/pricing"
+import { invalidateAllCatalogCaches } from "@/lib/api/catalogService"
 
 export default function AdminDashboard() {
   // Admin Authentication State
@@ -528,6 +529,7 @@ export default function AdminDashboard() {
       .eq('id', id)
 
     if (!error) {
+      invalidateAllCatalogCaches()
       fetchVendors()
     } else {
       alert("Error approving vendor: " + error.message)
@@ -542,6 +544,7 @@ export default function AdminDashboard() {
       .eq('id', id)
 
     if (!error) {
+      invalidateAllCatalogCaches()
       fetchVendors()
     } else {
       alert("Error suspending vendor: " + error.message)
@@ -556,6 +559,7 @@ export default function AdminDashboard() {
       .eq('id', id)
 
     if (!error) {
+      invalidateAllCatalogCaches()
       fetchVendors()
     } else {
       alert("Error removing vendor: " + error.message)

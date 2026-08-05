@@ -19,6 +19,7 @@ import VendorStoryItem from "@/components/VendorStoryItem"
 import HomeFilterModal from "@/components/HomeFilterModal"
 import HomeSavedModal from "@/components/HomeSavedModal"
 import { fetchCatalogData } from "@/lib/api/catalogService"
+import { createClient as createBrowserClient } from "@/lib/supabase/client"
 import { subscribeToPlatformSettings } from "@/utils/pricing"
 
 // Dynamic import for the heavy map modal with SSR disabled
@@ -71,23 +72,41 @@ export default function HomeClient({
     async function loadData(forceRefresh = false) {
       try {
         const data = await fetchCatalogData({ forceRefresh })
-        if (data?.vendors) setTopVendors(data.vendors)
-        if (data?.scooters) setAllScooters(data.scooters)
+        if (data?.vendors && Array.isArray(data.vendors)) {
+          setTopVendors(data.vendors)
+        }
+        if (data?.scooters && Array.isArray(data.scooters)) {
+          setAllScooters(data.scooters)
+        }
       } catch (err) {
         console.error("Failed to load catalog data:", err)
       }
     }
 
-    if (initialVendors.length === 0 || initialScooters.length === 0) {
-      loadData()
-    }
+    // Always run instant client sync on mount to ensure newly added vendors show up immediately
+    loadData(true)
 
     const unsubscribe = subscribeToPlatformSettings(() => {
       loadData(true)
     })
 
-    return () => unsubscribe()
-  }, [initialVendors, initialScooters, initialSettings])
+    // Supabase Realtime Sync for Vendors and Scooters
+    const supabase = createBrowserClient()
+    const channel = supabase
+      .channel('public:catalog_live_updates')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'vendors' }, () => {
+        loadData(true)
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'scooters' }, () => {
+        loadData(true)
+      })
+      .subscribe()
+
+    return () => {
+      unsubscribe()
+      supabase.removeChannel(channel)
+    }
+  }, [])
 
   const openLocationPicker = useCallback(() => {
     setIsLocationModalOpen(true)

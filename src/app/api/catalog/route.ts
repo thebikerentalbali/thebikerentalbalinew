@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getCatalogServerData, invalidateAllCatalogCaches } from '@/lib/api/catalogService';
 
 export const dynamic = 'force-dynamic';
@@ -15,8 +16,8 @@ export async function GET(request: Request) {
       {
         status: 200,
         headers: {
-          'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=86400',
-          'X-Cache-Status': 'HIT',
+          'Cache-Control': 'no-store, max-age=0, must-revalidate',
+          'X-Cache-Status': 'LIVE',
         },
       }
     );
@@ -31,5 +32,9 @@ export async function GET(request: Request) {
 
 export async function POST() {
   invalidateAllCatalogCaches();
+  try {
+    revalidatePath('/', 'page');
+    revalidatePath('/api/catalog');
+  } catch (e) {}
   return NextResponse.json({ success: true, message: 'Catalog cache revalidated' });
 }

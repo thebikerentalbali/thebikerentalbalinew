@@ -14,6 +14,7 @@ import {
   calculateBookingCommission, 
   calculateRentalDays 
 } from "@/utils/pricing"
+import { invalidateAllCatalogCaches } from "@/lib/api/catalogService"
 
 const MapPicker = dynamic(() => import('@/components/MapPicker'), { ssr: false })
 
@@ -372,6 +373,7 @@ export default function VendorDashboard() {
     setIsPublishing(false)
 
     if (!error && data) {
+      invalidateAllCatalogCaches()
       setFleet([data, ...fleet])
       setIsAddingScooter(false)
       setNewScooter({ name: "", brand: "", cc: "", year: "", fuelCapacity: "", transmission: "", price: 0, priceWeekly: 0, priceMonthly: 0, totalUnits: 1, availableUnits: 1, photos: [] })
@@ -405,6 +407,7 @@ export default function VendorDashboard() {
 
     setIsPublishing(false)
     if (!error && data) {
+      invalidateAllCatalogCaches()
       setFleet(f => f.map(s => s.id === data.id ? data : s));
       setEditingScooter(null);
     } else {
@@ -471,6 +474,7 @@ export default function VendorDashboard() {
       
     setIsSavingSettings(false)
     if (!error) {
+      invalidateAllCatalogCaches()
       alert("Settings saved successfully!")
     } else {
       alert("Error saving settings: " + error.message)
