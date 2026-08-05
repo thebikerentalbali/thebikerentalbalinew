@@ -401,7 +401,7 @@ export default function HomeClient({
             onClose={closeLocationPicker}
             vendors={filteredMapVendors}
             selectedVendorId={selectedMapVendorId}
-            onSelectVendor={setSelectedMapVendorId}
+            onSelectVendor={(id) => setSelectedMapVendorId(typeof id === "number" ? id : Number(id) || null)}
             searchQuery={mapSearchQuery}
             onSearchChange={setMapSearchQuery}
             isCardVisible={isMapCardVisible}

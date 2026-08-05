@@ -8,6 +8,7 @@ import {
   X,
   ChevronLeft, 
   ChevronRight, 
+  ChevronDown,
   Heart, 
   Share2, 
   Check, 
@@ -20,7 +21,11 @@ import {
   Package,
   Calendar,
   CheckCircle2,
-  FileCheck
+  FileCheck,
+  Truck,
+  Wrench,
+  CloudRain,
+  Sparkles
 } from "lucide-react"
 import { fetchScooterDetail } from "@/lib/api/catalogService"
 import { subscribeToPlatformSettings } from "@/utils/pricing"
@@ -74,6 +79,16 @@ export default function ScooterDetailClient({
   const [isLiked, setIsLiked] = useState(false)
   const [copiedToast, setCopiedToast] = useState(false)
   const [imageIndex, setImageIndex] = useState<number>(0)
+  const [openInclusions, setOpenInclusions] = useState<Record<string, boolean>>({
+    helmets: true,
+  })
+
+  const toggleInclusion = (id: string) => {
+    setOpenInclusions((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }))
+  }
 
   const handleBack = (e?: React.MouseEvent) => {
     if (e) e.preventDefault()
@@ -408,41 +423,119 @@ export default function ScooterDetailClient({
         </section>
 
         {/* ========================================================================= */}
-        {/* 4. RENTAL INCLUSIONS & GUARANTEE                                          */}
+        {/* 4. RENTAL INCLUSIONS & GUARANTEE (FAQ / CARD STYLE)                       */}
         {/* ========================================================================= */}
         <section className="bg-white rounded-[28px] sm:rounded-3xl p-6 sm:p-7 shadow-sm border border-black/5">
-          <div className="flex items-center gap-2 mb-4">
-            <ShieldCheck className="w-4 h-4 text-black stroke-[2.2]" />
-            <h2 className="text-xs font-black text-neutral-400 uppercase tracking-widest">
-              Rental Inclusions & Guarantee
-            </h2>
+          <div className="flex items-center justify-between gap-2 mb-4">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-black stroke-[2.2]" />
+              <h2 className="text-xs font-black text-neutral-400 uppercase tracking-widest">
+                Rental Inclusions & Guarantee
+              </h2>
+            </div>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-black text-white">
+              Included
+            </span>
           </div>
 
           <div className="space-y-3">
-            <div className="flex items-center gap-3 text-xs sm:text-sm text-black font-bold">
-              <div className="w-4 h-4 rounded-full bg-black text-white flex items-center justify-center shrink-0">
-                <Check className="w-2.5 h-2.5 text-white stroke-[3]" />
-              </div>
-              <span>2 Clean Sanitized Helmets + Phone Mount Included</span>
-            </div>
-            <div className="flex items-center gap-3 text-xs sm:text-sm text-black font-bold">
-              <div className="w-4 h-4 rounded-full bg-black text-white flex items-center justify-center shrink-0">
-                <Check className="w-2.5 h-2.5 text-white stroke-[3]" />
-              </div>
-              <span>Free Hotel & Villa Delivery in Service Area</span>
-            </div>
-            <div className="flex items-center gap-3 text-xs sm:text-sm text-black font-bold">
-              <div className="w-4 h-4 rounded-full bg-black text-white flex items-center justify-center shrink-0">
-                <Check className="w-2.5 h-2.5 text-white stroke-[3]" />
-              </div>
-              <span>24/7 Roadside Mechanical Assistance Across Bali</span>
-            </div>
-            <div className="flex items-center gap-3 text-xs sm:text-sm text-black font-bold">
-              <div className="w-4 h-4 rounded-full bg-black text-white flex items-center justify-center shrink-0">
-                <Check className="w-2.5 h-2.5 text-white stroke-[3]" />
-              </div>
-              <span>Instant Booking Confirmation & Transparent Rates</span>
-            </div>
+            {[
+              {
+                id: "helmets",
+                icon: ShieldCheck,
+                title: "2 Clean Sanitized Helmets & Phone Mount",
+                badge: "Complimentary",
+                summary: "SNI certified helmets + heavy-duty phone mount",
+                description: "Every rental comes equipped with 2 clean, disinfected helmets in your size with fresh hygiene liners, plus a secure vibration-damped handlebar phone holder for smooth GPS navigation across Bali."
+              },
+              {
+                id: "delivery",
+                icon: Truck,
+                title: "Free Hotel & Villa Handover Delivery",
+                badge: "Doorstep Handover",
+                summary: "Prompt delivery across Bali's primary tourist zones",
+                description: "Direct handover right to your villa, hotel, or resort in Canggu, Seminyak, Ubud, Kuta, Sanur, and Uluwatu. Zero transit stress, fast digital verification, and flexible delivery timing."
+              },
+              {
+                id: "assistance",
+                icon: Wrench,
+                title: "24/7 Islandwide Roadside Assistance",
+                badge: "24/7 Support",
+                summary: "Rapid mobile mechanic & vehicle swap guarantee",
+                description: "Ride with total peace of mind. In the rare event of a flat tire puncture, battery failure, or unexpected mechanical issue, our mobile rapid-response mechanics will assist, repair, or swap your scooter anywhere in Bali."
+              },
+              {
+                id: "insurance",
+                icon: Sparkles,
+                title: "Instant Confirmation & Transparent Rates",
+                badge: "100% Guaranteed",
+                summary: "Zero hidden charges & no surprise fees",
+                description: "Transparent all-inclusive rates with no hidden fees or unauthorized deposit deductions. Instant WhatsApp booking confirmation, clear digital rental agreement, and priority customer service."
+              },
+              {
+                id: "weather",
+                icon: CloudRain,
+                title: "All-Weather Ponchos & Full Safety Inspection",
+                badge: "Island Ready",
+                summary: "2 rain ponchos + thoroughly sanitized and fueled",
+                description: "Stay prepared for tropical Bali weather with 2 waterproof rain ponchos stored under the seat. Every vehicle undergoes a comprehensive mechanical inspection (brakes, tires, lights, fluids) prior to every delivery."
+              }
+            ].map((item) => {
+              const isOpen = !!openInclusions[item.id]
+              const IconComponent = item.icon
+              return (
+                <div
+                  key={item.id}
+                  className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
+                    isOpen 
+                      ? "bg-neutral-50/90 border-black/15 shadow-xs" 
+                      : "bg-neutral-50/50 hover:bg-neutral-50 border-black/5"
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => toggleInclusion(item.id)}
+                    aria-expanded={isOpen}
+                    className="w-full p-3.5 sm:p-4 flex items-center justify-between text-left gap-3 cursor-pointer group select-none"
+                  >
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                        isOpen ? "bg-black text-white" : "bg-neutral-200/70 text-black group-hover:bg-black group-hover:text-white"
+                      }`}>
+                        <IconComponent className="w-4 h-4 stroke-[2.2]" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="font-extrabold text-xs sm:text-sm text-black tracking-tight leading-snug">
+                            {item.title}
+                          </h3>
+                          <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white border border-black/10 text-neutral-700 shrink-0">
+                            {item.badge}
+                          </span>
+                        </div>
+                        {!isOpen && (
+                          <p className="text-[11px] text-neutral-500 font-medium truncate mt-0.5">
+                            {item.summary}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-all duration-200 ${
+                      isOpen ? "bg-black text-white rotate-180" : "bg-white border border-black/10 text-black group-hover:bg-black group-hover:text-white"
+                    }`}>
+                      <ChevronDown className="w-3.5 h-3.5 stroke-[2.5]" />
+                    </div>
+                  </button>
+
+                  {isOpen && (
+                    <div className="px-4 pb-4 pt-1 sm:px-4.5 sm:pb-4.5 text-xs sm:text-sm text-neutral-600 font-medium leading-relaxed border-t border-black/5 animate-in fade-in duration-200">
+                      <p>{item.description}</p>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </div>
         </section>
 
