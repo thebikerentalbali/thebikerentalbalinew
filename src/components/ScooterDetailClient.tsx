@@ -211,15 +211,9 @@ export default function ScooterDetailClient({
               <h1 className="text-2xl sm:text-3xl font-black text-black tracking-tight">
                 {formattedName}
               </h1>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-xs font-extrabold text-neutral-500 uppercase tracking-wider">
-                  {brandDisplay}
-                </span>
-                <span className="text-neutral-300">•</span>
-                <span className="text-xs font-extrabold text-black">
-                  Rp {priceDaily.toLocaleString("id-ID")} <span className="text-neutral-500 font-normal">/ day</span>
-                </span>
-              </div>
+              <p className="text-xs font-extrabold text-neutral-400 mt-1 uppercase tracking-wider">
+                {brandDisplay}
+              </p>
             </div>
 
             <div className="flex items-center gap-2">
