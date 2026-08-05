@@ -318,17 +318,33 @@ export default function VendorDetailClient({
                 className="w-full h-full flex overflow-x-auto snap-x snap-mandatory hide-scrollbar scroll-smooth"
               >
                 {coverImages.map((img, idx) => (
-                  <div key={idx} className="relative min-w-full h-full shrink-0 snap-center bg-neutral-900 flex items-center justify-center">
-                    <Image
-                      src={img.url}
-                      alt={`${vendor.name} cover image ${idx + 1}`}
-                      fill
-                      priority={idx === 0}
-                      sizes="100vw"
-                      className="object-cover object-center"
-                    />
-                    {/* Dark gradient overlay for contrast */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-black/35 pointer-events-none" />
+                  <div key={idx} className="relative min-w-full h-full shrink-0 snap-center bg-neutral-950 flex items-center justify-center overflow-hidden">
+                    {/* Ambient background blur (so frame blends seamlessly with photo colors without black bars) */}
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                      <Image
+                        src={img.url}
+                        alt=""
+                        fill
+                        aria-hidden="true"
+                        sizes="100vw"
+                        className="object-cover object-center blur-xl opacity-35 scale-110"
+                      />
+                    </div>
+
+                    {/* Uncropped, perfectly scaled foreground image (never zoomed) */}
+                    <div className="relative w-full h-full flex items-center justify-center p-1.5 sm:p-2 z-10">
+                      <Image
+                        src={img.url}
+                        alt={`${vendor.name} cover image ${idx + 1}`}
+                        fill
+                        priority={idx === 0}
+                        sizes="100vw"
+                        className={`object-contain object-center ${img.scooter ? 'p-3 drop-shadow-md' : ''}`}
+                      />
+                    </div>
+
+                    {/* Subtle dark gradient overlay at bottom for pill & dot readability */}
+                    <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-15 pointer-events-none" />
 
                     {/* Bottom pill if associated with a scooter */}
                     {img.scooter && (
@@ -371,16 +387,16 @@ export default function VendorDetailClient({
               
               {/* Header: Smaller Logo placed BEFORE Vendor Name with Location Directly Below */}
               <div className="mb-2">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  {/* Smaller Logo */}
-                  <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 shadow-xs bg-white flex items-center justify-center shrink-0">
+                <div className="flex items-center gap-3">
+                  {/* Smaller Vendor Logo / Icon */}
+                  <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center overflow-hidden border border-gray-200 shadow-2xs shrink-0">
                     {vendor.logo || vendor.image_url ? (
                       <Image 
                         src={vendor.logo || vendor.image_url} 
                         alt={vendor.name} 
                         width={40} 
                         height={40} 
-                        className="w-full h-full object-cover" 
+                        className="w-full h-full object-contain p-0.5" 
                       />
                     ) : (
                       <span className="font-bold text-xs text-gray-700">{vendor.name?.slice(0, 2).toUpperCase() || "VN"}</span>
@@ -608,17 +624,33 @@ export default function VendorDetailClient({
               className="w-full h-full flex overflow-x-auto snap-x snap-mandatory hide-scrollbar scroll-smooth"
             >
               {coverImages.map((img, idx) => (
-                <div key={idx} className="relative min-w-full h-full shrink-0 snap-center bg-neutral-900 flex items-center justify-center">
-                  <Image
-                    src={img.url}
-                    alt={`${vendor.name} cover image ${idx + 1}`}
-                    fill
-                    priority={idx === 0}
-                    sizes="1200px"
-                    className="object-cover object-center"
-                  />
-                  {/* Dark gradient overlay for contrast */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-black/35 pointer-events-none" />
+                <div key={idx} className="relative min-w-full h-full shrink-0 snap-center bg-neutral-950 flex items-center justify-center overflow-hidden">
+                  {/* Ambient background blur */}
+                  <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <Image
+                      src={img.url}
+                      alt=""
+                      fill
+                      aria-hidden="true"
+                      sizes="1200px"
+                      className="object-cover object-center blur-2xl opacity-35 scale-110"
+                    />
+                  </div>
+
+                  {/* Uncropped, perfectly scaled foreground image (never zoomed) */}
+                  <div className="relative w-full h-full flex items-center justify-center p-2 sm:p-4 z-10">
+                    <Image
+                      src={img.url}
+                      alt={`${vendor.name} cover image ${idx + 1}`}
+                      fill
+                      priority={idx === 0}
+                      sizes="1200px"
+                      className={`object-contain object-center ${img.scooter ? 'p-4 drop-shadow-md' : ''}`}
+                    />
+                  </div>
+
+                  {/* Subtle dark gradient overlay at bottom for pill & dot readability */}
+                  <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-15 pointer-events-none" />
 
                   {/* Bottom pill if associated with a scooter */}
                   {img.scooter && (
@@ -669,7 +701,7 @@ export default function VendorDetailClient({
                       alt={vendor.name} 
                       width={56} 
                       height={56} 
-                      className="w-full h-full object-cover" 
+                      className="w-full h-full object-contain p-1" 
                     />
                   ) : (
                     <span className="text-lg font-bold text-gray-700">{(vendor.name || "V").substring(0, 2).toUpperCase()}</span>
