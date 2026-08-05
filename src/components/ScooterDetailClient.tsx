@@ -79,6 +79,8 @@ export default function ScooterDetailClient({
   const [isLiked, setIsLiked] = useState(false)
   const [copiedToast, setCopiedToast] = useState(false)
   const [imageIndex, setImageIndex] = useState<number>(0)
+  const [activeSection, setActiveSection] = useState<string>("all")
+  const [otherScooters, setOtherScooters] = useState<any[]>([])
   const [openInclusions, setOpenInclusions] = useState<Record<string, boolean>>({
     helmets: true,
   })
@@ -158,6 +160,21 @@ export default function ScooterDetailClient({
 
     return () => unsubscribe()
   }, [id, initialScooter])
+
+  // Fetch other scooters from the same vendor
+  useEffect(() => {
+    const vendorId = vendor?.id || scooter?.vendor_id
+    if (vendorId) {
+      fetchVendorDetail(vendorId).then((vData) => {
+        if (vData?.scooters) {
+          const otherListings = vData.scooters.filter((s: any) => String(s.id) !== String(id))
+          setOtherScooters(otherListings)
+        }
+      }).catch((err) => {
+        console.warn("Could not load vendor fleet:", err)
+      })
+    }
+  }, [vendor?.id, scooter?.vendor_id, id])
 
   if (loading) {
     return <TransparentLoader />
@@ -337,228 +354,388 @@ export default function ScooterDetailClient({
             </div>
           )}
 
+          {/* Section Navigation Tabs (Swipe Left & Right, directly below vendor name) */}
+          <div className="w-full pt-3.5 mt-3.5 border-t border-black/5">
+            <style jsx>{`
+              .hide-scrollbar::-webkit-scrollbar { display: none; }
+              .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+            `}</style>
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 hide-scrollbar snap-x -mx-1 px-1">
+              {[
+                { id: "all", label: "All Details" },
+                { id: "specs", label: "Specifications" },
+                { id: "about", label: "About Scooter" },
+                { id: "inclusions", label: "Inclusions" },
+                { id: "requirements", label: "Requirements" },
+                ...(otherScooters.length > 0 ? [{ id: "otherFleet", label: `More Fleet (${otherScooters.length})` }] : []),
+              ].map((tab) => {
+                const isActive = activeSection === tab.id
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveSection(tab.id)}
+                    className={`px-4 py-2 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer active-press snap-start ${
+                      isActive 
+                        ? "bg-black text-white shadow-xs" 
+                        : "bg-neutral-100 text-neutral-600 hover:text-black hover:bg-neutral-200 border border-black/5"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
         </article>
 
         {/* ========================================================================= */}
         {/* 2. VEHICLE SPECIFICATIONS (WITH REAL BLACK & WHITE ICONS)                */}
         {/* ========================================================================= */}
-        <section className="bg-white rounded-[28px] sm:rounded-3xl p-6 sm:p-7 shadow-sm border border-black/5">
-          <div className="flex items-center gap-2 mb-4">
-            <Bike className="w-4 h-4 text-black stroke-[2.2]" />
-            <h2 className="text-xs font-black text-neutral-400 uppercase tracking-widest">
-              Vehicle Specifications
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            
-            {/* Engine */}
-            <div className="p-3.5 bg-neutral-50 rounded-2xl border border-black/5 flex flex-col justify-between">
-              <div className="flex items-center gap-1.5 text-neutral-400 mb-1">
-                <Gauge className="w-3.5 h-3.5 text-black stroke-[2.2]" />
-                <span className="text-[10px] font-black uppercase tracking-wider">Engine</span>
-              </div>
-              <span className="text-sm font-black text-black">{engineDisplay}</span>
+        {(activeSection === "all" || activeSection === "specs") && (
+          <section className="bg-white rounded-[28px] sm:rounded-3xl p-6 sm:p-7 shadow-sm border border-black/5 animate-in fade-in duration-200">
+            <div className="flex items-center gap-2 mb-4">
+              <Bike className="w-4 h-4 text-black stroke-[2.2]" />
+              <h2 className="text-xs font-black text-neutral-400 uppercase tracking-widest">
+                Vehicle Specifications
+              </h2>
             </div>
 
-            {/* Transmission */}
-            <div className="p-3.5 bg-neutral-50 rounded-2xl border border-black/5 flex flex-col justify-between">
-              <div className="flex items-center gap-1.5 text-neutral-400 mb-1">
-                <Cog className="w-3.5 h-3.5 text-black stroke-[2.2]" />
-                <span className="text-[10px] font-black uppercase tracking-wider">Transmission</span>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              
+              {/* Engine */}
+              <div className="p-3.5 bg-neutral-50 rounded-2xl border border-black/5 flex flex-col justify-between">
+                <div className="flex items-center gap-1.5 text-neutral-400 mb-1">
+                  <Gauge className="w-3.5 h-3.5 text-black stroke-[2.2]" />
+                  <span className="text-[10px] font-black uppercase tracking-wider">Engine</span>
+                </div>
+                <span className="text-sm font-black text-black">{engineDisplay}</span>
               </div>
-              <span className="text-sm font-black text-black truncate">{transmissionDisplay}</span>
-            </div>
 
-            {/* Fuel Capacity */}
-            <div className="p-3.5 bg-neutral-50 rounded-2xl border border-black/5 flex flex-col justify-between">
-              <div className="flex items-center gap-1.5 text-neutral-400 mb-1">
-                <Fuel className="w-3.5 h-3.5 text-black stroke-[2.2]" />
-                <span className="text-[10px] font-black uppercase tracking-wider">Fuel Tank</span>
+              {/* Transmission */}
+              <div className="p-3.5 bg-neutral-50 rounded-2xl border border-black/5 flex flex-col justify-between">
+                <div className="flex items-center gap-1.5 text-neutral-400 mb-1">
+                  <Cog className="w-3.5 h-3.5 text-black stroke-[2.2]" />
+                  <span className="text-[10px] font-black uppercase tracking-wider">Transmission</span>
+                </div>
+                <span className="text-sm font-black text-black truncate">{transmissionDisplay}</span>
               </div>
-              <span className="text-sm font-black text-black">{fuelDisplay}</span>
-            </div>
 
-            {/* Storage */}
-            <div className="p-3.5 bg-neutral-50 rounded-2xl border border-black/5 flex flex-col justify-between">
-              <div className="flex items-center gap-1.5 text-neutral-400 mb-1">
-                <Package className="w-3.5 h-3.5 text-black stroke-[2.2]" />
-                <span className="text-[10px] font-black uppercase tracking-wider">Storage</span>
+              {/* Fuel Capacity */}
+              <div className="p-3.5 bg-neutral-50 rounded-2xl border border-black/5 flex flex-col justify-between">
+                <div className="flex items-center gap-1.5 text-neutral-400 mb-1">
+                  <Fuel className="w-3.5 h-3.5 text-black stroke-[2.2]" />
+                  <span className="text-[10px] font-black uppercase tracking-wider">Fuel Tank</span>
+                </div>
+                <span className="text-sm font-black text-black">{fuelDisplay}</span>
               </div>
-              <span className="text-sm font-black text-black">Underseat Trunk</span>
-            </div>
 
-            {/* Year */}
-            <div className="p-3.5 bg-neutral-50 rounded-2xl border border-black/5 flex flex-col justify-between">
-              <div className="flex items-center gap-1.5 text-neutral-400 mb-1">
-                <Calendar className="w-3.5 h-3.5 text-black stroke-[2.2]" />
-                <span className="text-[10px] font-black uppercase tracking-wider">Model Year</span>
+              {/* Storage */}
+              <div className="p-3.5 bg-neutral-50 rounded-2xl border border-black/5 flex flex-col justify-between">
+                <div className="flex items-center gap-1.5 text-neutral-400 mb-1">
+                  <Package className="w-3.5 h-3.5 text-black stroke-[2.2]" />
+                  <span className="text-[10px] font-black uppercase tracking-wider">Storage</span>
+                </div>
+                <span className="text-sm font-black text-black">Underseat Trunk</span>
               </div>
-              <span className="text-sm font-black text-black">{yearDisplay}</span>
-            </div>
 
-            {/* Availability */}
-            <div className="p-3.5 bg-neutral-50 rounded-2xl border border-black/5 flex flex-col justify-between">
-              <div className="flex items-center gap-1.5 text-neutral-400 mb-1">
-                <CheckCircle2 className="w-3.5 h-3.5 text-black stroke-[2.2]" />
-                <span className="text-[10px] font-black uppercase tracking-wider">Availability</span>
+              {/* Year */}
+              <div className="p-3.5 bg-neutral-50 rounded-2xl border border-black/5 flex flex-col justify-between">
+                <div className="flex items-center gap-1.5 text-neutral-400 mb-1">
+                  <Calendar className="w-3.5 h-3.5 text-black stroke-[2.2]" />
+                  <span className="text-[10px] font-black uppercase tracking-wider">Model Year</span>
+                </div>
+                <span className="text-sm font-black text-black">{yearDisplay}</span>
               </div>
-              <span className="text-sm font-black text-black">{availableUnits} Available</span>
-            </div>
 
-          </div>
-        </section>
+              {/* Availability */}
+              <div className="p-3.5 bg-neutral-50 rounded-2xl border border-black/5 flex flex-col justify-between">
+                <div className="flex items-center gap-1.5 text-neutral-400 mb-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-black stroke-[2.2]" />
+                  <span className="text-[10px] font-black uppercase tracking-wider">Availability</span>
+                </div>
+                <span className="text-sm font-black text-black">{availableUnits} Available</span>
+              </div>
+
+            </div>
+          </section>
+        )}
 
         {/* ========================================================================= */}
         {/* 3. ABOUT THIS SCOOTER                                                     */}
         {/* ========================================================================= */}
-        <section className="bg-white rounded-[28px] sm:rounded-3xl p-6 sm:p-7 shadow-sm border border-black/5">
-          <h2 className="text-xs font-black text-neutral-400 uppercase tracking-widest mb-3">
-            About the {formattedName}
-          </h2>
-          <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed font-medium">
-            {scooter.description && !scooter.description.includes("FAZZIO") 
-              ? scooter.description 
-              : `The ${formattedName} is engineered for agile maneuverability, effortless handling, and exceptional fuel economy across Bali. Equipped with a smooth automatic CVT transmission, comfortable dual seating, and convenient underseat storage, it delivers an easy and dependable ride whether you are navigating coastal roads in Canggu and Seminyak, touring Ubud's scenic routes, or exploring the beaches of Uluwatu. Thoroughly sanitized, fueled, and safety-inspected prior to handover.`
-            }
-          </p>
-        </section>
+        {(activeSection === "all" || activeSection === "about") && (
+          <section className="bg-white rounded-[28px] sm:rounded-3xl p-6 sm:p-7 shadow-sm border border-black/5 animate-in fade-in duration-200">
+            <h2 className="text-xs font-black text-neutral-400 uppercase tracking-widest mb-3">
+              About the {formattedName}
+            </h2>
+            <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed font-medium">
+              {scooter.description && !scooter.description.includes("FAZZIO") 
+                ? scooter.description 
+                : `The ${formattedName} is engineered for agile maneuverability, effortless handling, and exceptional fuel economy across Bali. Equipped with a smooth automatic CVT transmission, comfortable dual seating, and convenient underseat storage, it delivers an easy and dependable ride whether you are navigating coastal roads in Canggu and Seminyak, touring Ubud's scenic routes, or exploring the beaches of Uluwatu. Thoroughly sanitized, fueled, and safety-inspected prior to handover.`
+              }
+            </p>
+          </section>
+        )}
 
         {/* ========================================================================= */}
         {/* 4. RENTAL INCLUSIONS & GUARANTEE (FAQ / CARD STYLE)                       */}
         {/* ========================================================================= */}
-        <section className="bg-white rounded-[28px] sm:rounded-3xl p-6 sm:p-7 shadow-sm border border-black/5">
-          <div className="flex items-center justify-between gap-2 mb-4">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-black stroke-[2.2]" />
-              <h2 className="text-xs font-black text-neutral-400 uppercase tracking-widest">
-                Rental Inclusions & Guarantee
-              </h2>
+        {(activeSection === "all" || activeSection === "inclusions") && (
+          <section className="bg-white rounded-[28px] sm:rounded-3xl p-6 sm:p-7 shadow-sm border border-black/5 animate-in fade-in duration-200">
+            <div className="flex items-center justify-between gap-2 mb-4">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-black stroke-[2.2]" />
+                <h2 className="text-xs font-black text-neutral-400 uppercase tracking-widest">
+                  Rental Inclusions & Guarantee
+                </h2>
+              </div>
+              <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-neutral-100 text-black border border-black/10">
+                Included
+              </span>
             </div>
-            <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-neutral-100 text-black border border-black/10">
-              Included
-            </span>
-          </div>
 
-          <div className="space-y-3">
-            {[
-              {
-                id: "helmets",
-                icon: ShieldCheck,
-                title: "2 Helmets & Phone Mount",
-                badge: "Included",
-                summary: "Clean sanitized helmets in your size + secure phone mount",
-                description: "Two sanitized SNI-certified helmets matched to your size and an adjustable handlebar phone mount for navigation across Bali."
-              },
-              {
-                id: "delivery",
-                icon: Truck,
-                title: "Free Doorstep Delivery & Pickup",
-                badge: "Service Area",
-                summary: "Direct delivery to your hotel, villa, or resort",
-                description: "Direct handover and pickup at your hotel, villa, or accommodation across Canggu, Seminyak, Kuta, Ubud, Sanur, and Uluwatu."
-              },
-              {
-                id: "assistance",
-                icon: Wrench,
-                title: "24/7 Roadside Assistance",
-                badge: "Islandwide",
-                summary: "On-demand tire repair, battery support, or bike swap",
-                description: "Islandwide rapid mobile mechanic support for puncture repairs, battery jumpstarts, or prompt scooter replacement."
-              },
-              {
-                id: "pricing",
-                icon: Sparkles,
-                title: "Transparent Pricing & Guaranteed Booking",
-                badge: "Guaranteed",
-                summary: "All-inclusive daily rates with zero hidden charges",
-                description: "Instant digital confirmation, transparent rates with no surprise deposit deductions, and priority customer service."
-              }
-            ].map((item) => {
-              const isOpen = !!openInclusions[item.id]
-              const IconComponent = item.icon
-              return (
-                <div
-                  key={item.id}
-                  className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
-                    isOpen 
-                      ? "bg-neutral-50/90 border-black/20 shadow-xs" 
-                      : "bg-neutral-50/50 hover:bg-neutral-50 border-black/5"
-                  }`}
-                >
-                  <button
-                    type="button"
-                    onClick={() => toggleInclusion(item.id)}
-                    aria-expanded={isOpen}
-                    className="w-full p-3.5 sm:p-4 flex items-center justify-between text-left gap-3 cursor-pointer group select-none"
+            <div className="space-y-3">
+              {[
+                {
+                  id: "helmets",
+                  icon: ShieldCheck,
+                  title: "2 Helmets & Phone Mount",
+                  badge: "Included",
+                  summary: "Clean sanitized helmets in your size + secure phone mount",
+                  description: "Two sanitized SNI-certified helmets matched to your size and an adjustable handlebar phone mount for navigation across Bali."
+                },
+                {
+                  id: "delivery",
+                  icon: Truck,
+                  title: "Free Doorstep Delivery & Pickup",
+                  badge: "Service Area",
+                  summary: "Direct delivery to your hotel, villa, or resort",
+                  description: "Direct handover and pickup at your hotel, villa, or accommodation across Canggu, Seminyak, Kuta, Ubud, Sanur, and Uluwatu."
+                },
+                {
+                  id: "assistance",
+                  icon: Wrench,
+                  title: "24/7 Roadside Assistance",
+                  badge: "Islandwide",
+                  summary: "On-demand tire repair, battery support, or bike swap",
+                  description: "Islandwide rapid mobile mechanic support for puncture repairs, battery jumpstarts, or prompt scooter replacement."
+                },
+                {
+                  id: "pricing",
+                  icon: Sparkles,
+                  title: "Transparent Pricing & Guaranteed Booking",
+                  badge: "Guaranteed",
+                  summary: "All-inclusive daily rates with zero hidden charges",
+                  description: "Instant digital confirmation, transparent rates with no surprise deposit deductions, and priority customer service."
+                }
+              ].map((item) => {
+                const isOpen = !!openInclusions[item.id]
+                const IconComponent = item.icon
+                return (
+                  <div
+                    key={item.id}
+                    className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
+                      isOpen 
+                        ? "bg-neutral-50/90 border-black/20 shadow-xs" 
+                        : "bg-neutral-50/50 hover:bg-neutral-50 border-black/5"
+                    }`}
                   >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-                        isOpen ? "bg-black text-white shadow-xs" : "bg-neutral-200/70 text-black group-hover:bg-black group-hover:text-white"
-                      }`}>
-                        <IconComponent className="w-4 h-4 stroke-[2.2]" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-extrabold text-xs sm:text-sm text-black tracking-tight leading-snug">
-                            {item.title}
-                          </h3>
-                          <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white border border-black/10 text-neutral-700 shrink-0">
-                            {item.badge}
-                          </span>
+                    <button
+                      type="button"
+                      onClick={() => toggleInclusion(item.id)}
+                      aria-expanded={isOpen}
+                      className="w-full p-3.5 sm:p-4 flex items-center justify-between text-left gap-3 cursor-pointer group select-none"
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                          isOpen ? "bg-black text-white shadow-xs" : "bg-neutral-200/70 text-black group-hover:bg-black group-hover:text-white"
+                        }`}>
+                          <IconComponent className="w-4 h-4 stroke-[2.2]" />
                         </div>
-                        {!isOpen && (
-                          <p className="text-[11px] text-neutral-500 font-medium truncate mt-0.5">
-                            {item.summary}
-                          </p>
-                        )}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h3 className="font-extrabold text-xs sm:text-sm text-black tracking-tight leading-snug">
+                              {item.title}
+                            </h3>
+                            <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white border border-black/10 text-neutral-700 shrink-0">
+                              {item.badge}
+                            </span>
+                          </div>
+                          {!isOpen && (
+                            <p className="text-[11px] text-neutral-500 font-medium truncate mt-0.5">
+                              {item.summary}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
 
-                    <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-all duration-200 ${
-                      isOpen ? "bg-black text-white rotate-180" : "bg-white border border-black/10 text-black group-hover:bg-black group-hover:text-white"
-                    }`}>
-                      <ChevronDown className="w-3.5 h-3.5 stroke-[2.5]" />
-                    </div>
-                  </button>
+                      <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-all duration-200 ${
+                        isOpen ? "bg-black text-white rotate-180" : "bg-white border border-black/10 text-black group-hover:bg-black group-hover:text-white"
+                      }`}>
+                        <ChevronDown className="w-3.5 h-3.5 stroke-[2.5]" />
+                      </div>
+                    </button>
 
-                  {isOpen && (
-                    <div className="px-4 pb-4 pt-1 sm:px-4.5 sm:pb-4.5 text-xs sm:text-sm text-neutral-600 font-medium leading-relaxed border-t border-black/5 animate-in fade-in duration-200">
-                      <p>{item.description}</p>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </section>
+                    {isOpen && (
+                      <div className="px-4 pb-4 pt-1 sm:px-4.5 sm:pb-4.5 text-xs sm:text-sm text-neutral-600 font-medium leading-relaxed border-t border-black/5 animate-in fade-in duration-200">
+                        <p>{item.description}</p>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </section>
+        )}
 
         {/* ========================================================================= */}
         {/* 5. RENTAL REQUIREMENTS                                                    */}
         {/* ========================================================================= */}
-        <section className="bg-white rounded-[28px] sm:rounded-3xl p-6 sm:p-7 shadow-sm border border-black/5">
-          <div className="flex items-center gap-2 mb-4">
-            <FileCheck className="w-4 h-4 text-black stroke-[2.2]" />
-            <h2 className="text-xs font-black text-neutral-400 uppercase tracking-widest">
-              Rental Requirements
-            </h2>
-          </div>
+        {(activeSection === "all" || activeSection === "requirements") && (
+          <section className="bg-white rounded-[28px] sm:rounded-3xl p-6 sm:p-7 shadow-sm border border-black/5 animate-in fade-in duration-200">
+            <div className="flex items-center gap-2 mb-4">
+              <FileCheck className="w-4 h-4 text-black stroke-[2.2]" />
+              <h2 className="text-xs font-black text-neutral-400 uppercase tracking-widest">
+                Rental Requirements
+              </h2>
+            </div>
 
-          <div className="space-y-2.5 text-xs sm:text-sm">
-            <div className="flex items-center gap-3 p-3 bg-neutral-50 rounded-2xl border border-black/5">
-              <span className="w-5 h-5 rounded-full bg-black text-white font-black text-[10px] flex items-center justify-center shrink-0">1</span>
-              <span className="font-bold text-black">Valid Passport or ID Photo</span>
+            <div className="space-y-2.5 text-xs sm:text-sm">
+              <div className="flex items-center gap-3 p-3 bg-neutral-50 rounded-2xl border border-black/5">
+                <span className="w-5 h-5 rounded-full bg-black text-white font-black text-[10px] flex items-center justify-center shrink-0">1</span>
+                <span className="font-bold text-black">Valid Passport or ID Photo</span>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-neutral-50 rounded-2xl border border-black/5">
+                <span className="w-5 h-5 rounded-full bg-black text-white font-black text-[10px] flex items-center justify-center shrink-0">2</span>
+                <span className="font-bold text-black">Driver License or International Permit</span>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-neutral-50 rounded-2xl border border-black/5">
+                <span className="w-5 h-5 rounded-full bg-black text-white font-black text-[10px] flex items-center justify-center shrink-0">3</span>
+                <span className="font-bold text-black">Online Checkout & Free Handover Delivery</span>
+              </div>
             </div>
-            <div className="flex items-center gap-3 p-3 bg-neutral-50 rounded-2xl border border-black/5">
-              <span className="w-5 h-5 rounded-full bg-black text-white font-black text-[10px] flex items-center justify-center shrink-0">2</span>
-              <span className="font-bold text-black">Driver License or International Permit</span>
+          </section>
+        )}
+
+        {/* ========================================================================= */}
+        {/* 6. MORE LISTINGS FROM SAME VENDOR (DISTINCT UNIQUE CARD DESIGN)           */}
+        {/* ========================================================================= */}
+        {(activeSection === "all" || activeSection === "otherFleet") && (
+          <section className="bg-neutral-900 text-white rounded-[32px] sm:rounded-[40px] p-6 sm:p-8 shadow-xl border border-neutral-800 relative overflow-hidden animate-in fade-in duration-200">
+            {/* Ambient Background Glow */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+
+            {/* Header */}
+            <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
+                    Same Vendor Fleet
+                  </span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                  More from {vendor?.name || "This Provider"}
+                </h2>
+                <p className="text-xs text-neutral-400 mt-0.5">
+                  Explore other verified scooters available for instant booking from this garage hub.
+                </p>
+              </div>
+
+              {vendor?.id && (
+                <Link
+                  href={`/vendor/${vendor.id}`}
+                  prefetch={true}
+                  className="self-start sm:self-auto bg-white/10 hover:bg-white/20 text-white border border-white/20 px-4 py-2 rounded-full text-xs font-bold transition-all active-press shrink-0 flex items-center gap-1.5"
+                >
+                  <span>View All {vendor.name?.split(" ")[0]} Fleet</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-white" />
+                </Link>
+              )}
             </div>
-            <div className="flex items-center gap-3 p-3 bg-neutral-50 rounded-2xl border border-black/5">
-              <span className="w-5 h-5 rounded-full bg-black text-white font-black text-[10px] flex items-center justify-center shrink-0">3</span>
-              <span className="font-bold text-black">Online Checkout & Free Handover Delivery</span>
-            </div>
-          </div>
-        </section>
+
+            {/* Unique Fleet Showcase Strip */}
+            {otherScooters.length > 0 ? (
+              <div className="relative z-10">
+                <div className="flex gap-4 overflow-x-auto pb-2 hide-scrollbar snap-x -mx-1 px-1">
+                  {otherScooters.map((item) => {
+                    const itemPrice = Number(item.price_daily || item.price || 0)
+                    const itemFormattedName = formatTitleCase(item.name)
+                    return (
+                      <div
+                        key={item.id}
+                        className="snap-start shrink-0 w-[240px] sm:w-[260px] bg-neutral-800/90 hover:bg-neutral-800 backdrop-blur-md rounded-3xl p-4 border border-white/10 flex flex-col justify-between transition-all duration-300 group hover:-translate-y-1 shadow-lg"
+                      >
+                        <div>
+                          {/* Image Box */}
+                          <div className="relative w-full h-36 bg-gradient-to-b from-neutral-900 to-neutral-800 rounded-2xl flex items-center justify-center p-3 mb-3 border border-white/5 overflow-hidden">
+                            <span className="absolute top-2.5 left-2.5 text-[9px] font-black uppercase tracking-wider bg-white/10 text-white px-2 py-0.5 rounded-full border border-white/10 z-10 backdrop-blur-xs">
+                              {item.brand || "Scooter"}
+                            </span>
+                            <Image
+                              src={item.image_url || item.img || "/images/scooter.png"}
+                              alt={itemFormattedName}
+                              fill
+                              sizes="260px"
+                              className="object-contain p-2 group-hover:scale-105 transition-transform duration-300 drop-shadow-lg"
+                            />
+                          </div>
+
+                          {/* Info */}
+                          <div className="space-y-1">
+                            <h3 className="font-extrabold text-sm sm:text-base text-white truncate group-hover:text-neutral-200 transition-colors">
+                              {itemFormattedName}
+                            </h3>
+                            <div className="flex items-center gap-2 text-[11px] text-neutral-400 font-medium">
+                              <span>{item.engine || "125 cc"}</span>
+                              <span>•</span>
+                              <span>{item.transmission || "Automatic"}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Pricing & CTA */}
+                        <div className="flex items-center justify-between border-t border-white/10 pt-3 mt-3">
+                          <div>
+                            <span className="text-[10px] uppercase font-bold text-neutral-400 block leading-none mb-0.5">Daily</span>
+                            <span className="text-sm font-black text-white">
+                              Rp {itemPrice.toLocaleString("id-ID")}
+                            </span>
+                          </div>
+
+                          <Link
+                            href={`/detail/${item.id}`}
+                            prefetch={true}
+                            className="bg-white text-black hover:bg-neutral-200 px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider transition-all active-press shadow-xs flex items-center gap-1"
+                          >
+                            <span>Select</span>
+                            <ChevronRight className="w-3 h-3 text-black stroke-[3]" />
+                          </Link>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div className="relative z-10 bg-neutral-800/60 rounded-2xl p-6 text-center border border-white/10">
+                <Bike className="w-8 h-8 text-neutral-400 mx-auto mb-2" />
+                <p className="text-xs text-neutral-300 font-medium">This is currently the primary featured scooter for this partner.</p>
+                {vendor?.id && (
+                  <Link
+                    href={`/vendor/${vendor.id}`}
+                    prefetch={true}
+                    className="inline-block mt-3 bg-white text-black text-xs font-bold px-5 py-2 rounded-full hover:bg-neutral-200 transition-all active-press"
+                  >
+                    View Partner Hub & Reviews
+                  </Link>
+                )}
+              </div>
+            )}
+          </section>
+        )}
 
         {/* Desktop Book Button */}
         <div className="hidden sm:block pt-2">

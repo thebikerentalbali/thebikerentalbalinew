@@ -210,7 +210,7 @@ export default function VendorDetailClient({
         <header className="px-4 pt-4">
           <div className="bg-white rounded-[32px] shadow-xs border border-gray-100 overflow-hidden relative">
             
-            {/* 1. Cover Area with Scooter Rounded Cards Showcase */}
+            {/* 1. Cover Area with Scooter Rounded Image Cards (GetYourGuide Style) */}
             <div className="relative min-h-[190px] w-full bg-gradient-to-br from-neutral-900 via-neutral-800 to-black p-4 flex flex-col justify-between overflow-hidden">
               
               {/* Top Action Overlay (Back & Share) */}
@@ -223,11 +223,6 @@ export default function VendorDetailClient({
                   <ChevronLeft className="w-5 h-5 text-black" />
                 </button>
 
-                <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
-                  <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                  <span className="text-[11px] font-bold text-white uppercase tracking-wider">Fleet Showcase</span>
-                </div>
-
                 <button 
                   onClick={handleShare}
                   aria-label="Share Vendor Profile"
@@ -237,38 +232,28 @@ export default function VendorDetailClient({
                 </button>
               </div>
 
-              {/* Dynamic Scooter Images Rounded Cards Strip on Cover */}
+              {/* Dynamic Scooter Images Rounded Cards Strip on Cover (GetYourGuide Style) */}
               <div className="relative z-10">
                 <style jsx>{`
                   .hide-scrollbar::-webkit-scrollbar { display: none; }
                   .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
                 `}</style>
-                <div className="flex gap-2.5 overflow-x-auto pb-1 hide-scrollbar -mx-1 px-1">
+                <div className="flex gap-2.5 overflow-x-auto pb-1 hide-scrollbar -mx-1 px-1 snap-x">
                   {scooters.length > 0 ? (
                     scooters.map((scooter) => (
                       <Link
                         key={scooter.id}
                         href={`/detail/${scooter.id}`}
                         prefetch={true}
-                        className="bg-white/95 backdrop-blur-md rounded-2xl p-2 pr-3 flex items-center gap-2.5 shrink-0 shadow-md border border-white/40 hover:scale-105 active-press transition-all"
+                        className="relative w-20 h-20 bg-white/95 backdrop-blur-md rounded-2xl p-2 shrink-0 shadow-md border border-white/40 hover:scale-105 active-press transition-all flex items-center justify-center group overflow-hidden snap-start"
                       >
-                        <div className="relative w-12 h-12 bg-neutral-100 rounded-xl overflow-hidden shrink-0 flex items-center justify-center">
-                          <Image
-                            src={scooter.image_url || "/images/scooter.png"}
-                            alt={scooter.name}
-                            fill
-                            sizes="48px"
-                            className="object-contain p-1"
-                          />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-[11px] font-bold text-black truncate max-w-[100px] leading-tight">
-                            {formatTitleCase(scooter.name)}
-                          </span>
-                          <span className="text-[10px] font-semibold text-neutral-500">
-                            Rp {Number(scooter.price_daily || 0).toLocaleString("id-ID")}/d
-                          </span>
-                        </div>
+                        <Image
+                          src={scooter.image_url || "/images/scooter.png"}
+                          alt={scooter.name || "Scooter"}
+                          fill
+                          sizes="80px"
+                          className="object-contain p-1 group-hover:scale-110 transition-transform drop-shadow-xs"
+                        />
                       </Link>
                     ))
                   ) : (
@@ -279,11 +264,11 @@ export default function VendorDetailClient({
 
             </div>
 
-            {/* 2. Provider Profile Details: Smaller Logo before Vendor Name, Smaller Title */}
+            {/* 2. Provider Profile Details: Smaller Logo before Vendor Name, Smaller Title, Location below Vendor Name */}
             <div className="p-5">
               
-              {/* Header Row: Smaller Logo placed BEFORE Vendor Name with Smaller Title */}
-              <div className="flex items-center justify-between gap-3 mb-2 flex-wrap">
+              {/* Header: Smaller Logo placed BEFORE Vendor Name with Location Directly Below */}
+              <div className="mb-2">
                 <div className="flex items-center gap-2.5 min-w-0">
                   {/* Smaller Logo */}
                   <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 shadow-xs bg-white flex items-center justify-center shrink-0">
@@ -300,20 +285,21 @@ export default function VendorDetailClient({
                     )}
                   </div>
 
-                  {/* Smaller Title & Verified Badge */}
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <h1 className="text-base sm:text-lg font-bold text-gray-900 leading-tight truncate">
-                      {vendor.name}
-                    </h1>
-                    <InstagramVerifiedBadge className="w-4 h-4 shrink-0" />
+                  {/* Vendor Name Title & Location Below */}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <h1 className="text-base sm:text-lg font-bold text-gray-900 leading-tight truncate">
+                        {vendor.name}
+                      </h1>
+                      <InstagramVerifiedBadge className="w-4 h-4 shrink-0" />
+                    </div>
+                    {/* Location title just below vendor name */}
+                    <div className="flex items-center gap-1 text-xs text-gray-500 font-medium mt-0.5">
+                      <MapPin className="w-3.5 h-3.5 text-black shrink-0" />
+                      <span className="truncate max-w-[240px] sm:max-w-xs">{vendor.address || "Bali, Indonesia"}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-
-              {/* Address */}
-              <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium pl-0.5">
-                <MapPin className="w-3.5 h-3.5 text-black shrink-0" />
-                <span className="truncate max-w-[280px]">{vendor.address || "Bali, Indonesia"}</span>
               </div>
 
               {/* Stats Row */}
@@ -510,45 +496,26 @@ export default function VendorDetailClient({
         {/* Desktop Header Card */}
         <div className="bg-white rounded-[32px] overflow-hidden shadow-xs border border-gray-200/80">
           
-          {/* Cover Area with Scooter Fleet Rounded Cards Showcase */}
-          <div className="relative min-h-[220px] lg:h-64 w-full bg-gradient-to-br from-neutral-900 via-neutral-800 to-black p-6 flex flex-col justify-between overflow-hidden">
+          {/* Cover Area with Scooter Rounded Image Cards Showcase (GetYourGuide Style) */}
+          <div className="relative min-h-[220px] lg:h-64 w-full bg-gradient-to-br from-neutral-900 via-neutral-800 to-black p-6 flex flex-col justify-end overflow-hidden">
             
-            {/* Top Label */}
-            <div className="flex items-center justify-between z-10">
-              <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10">
-                <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                <span className="text-xs font-bold text-white uppercase tracking-wider">Fleet Showcase</span>
-              </div>
-              <span className="text-xs font-semibold text-neutral-400">{scooters.length} Models in Fleet</span>
-            </div>
-
-            {/* Dynamic Scooter Images Rounded Cards Strip on Cover */}
-            <div className="relative z-10 pt-4">
-              <div className="flex gap-3.5 overflow-x-auto pb-2 hide-scrollbar">
+            {/* Dynamic Scooter Images Rounded Cards Strip on Cover (GetYourGuide Style) */}
+            <div className="relative z-10">
+              <div className="flex gap-3.5 overflow-x-auto pb-2 hide-scrollbar snap-x">
                 {scooters.map((scooter) => (
                   <Link
                     key={scooter.id}
                     href={`/detail/${scooter.id}`}
                     prefetch={true}
-                    className="bg-white/95 backdrop-blur-md rounded-2xl p-3 pr-4 flex items-center gap-3 shrink-0 shadow-lg border border-white/30 hover:scale-105 active-press transition-all group"
+                    className="relative w-24 h-24 bg-white/95 backdrop-blur-md rounded-2xl p-2.5 shrink-0 shadow-lg border border-white/30 hover:scale-105 active-press transition-all flex items-center justify-center group overflow-hidden snap-start"
                   >
-                    <div className="relative w-14 h-14 bg-neutral-100 rounded-xl overflow-hidden shrink-0 flex items-center justify-center">
-                      <Image
-                        src={scooter.image_url || "/images/scooter.png"}
-                        alt={scooter.name}
-                        fill
-                        sizes="56px"
-                        className="object-contain p-1 group-hover:scale-110 transition-transform"
-                      />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-xs font-bold text-black truncate max-w-[130px] leading-tight">
-                        {formatTitleCase(scooter.name)}
-                      </span>
-                      <span className="text-xs font-extrabold text-neutral-900 mt-0.5">
-                        Rp {Number(scooter.price_daily || 0).toLocaleString("id-ID")} <span className="text-[10px] font-normal text-neutral-500">/ day</span>
-                      </span>
-                    </div>
+                    <Image
+                      src={scooter.image_url || "/images/scooter.png"}
+                      alt={scooter.name || "Scooter"}
+                      fill
+                      sizes="96px"
+                      className="object-contain p-1 group-hover:scale-110 transition-transform drop-shadow-xs"
+                    />
                   </Link>
                 ))}
               </div>
@@ -556,11 +523,11 @@ export default function VendorDetailClient({
 
           </div>
 
-          {/* Profile Details: Smaller Logo before Vendor Name, Smaller Title */}
+          {/* Profile Details: Smaller Logo before Vendor Name, Smaller Title, Location Directly Below */}
           <div className="p-8">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-6">
               
-              {/* Smaller Logo before Vendor Name & Smaller Title */}
+              {/* Smaller Logo before Vendor Name & Location Below */}
               <div className="flex items-center gap-4">
                 <div className="relative w-12 h-12 lg:w-14 lg:h-14 rounded-full overflow-hidden bg-white border-2 border-gray-200 shadow-xs shrink-0 flex items-center justify-center">
                   {vendor.logo || vendor.image_url ? (
@@ -581,7 +548,8 @@ export default function VendorDetailClient({
                     <h1 className="text-lg lg:text-xl font-bold text-gray-900 leading-tight">{vendor.name}</h1>
                     <InstagramVerifiedBadge className="w-5 h-5 shrink-0" />
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
+                  {/* Location directly below vendor name */}
+                  <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium mt-0.5">
                     <MapPin className="w-3.5 h-3.5 text-black shrink-0" />
                     <span>{vendor.address || "Bali, Indonesia"}</span>
                   </div>
