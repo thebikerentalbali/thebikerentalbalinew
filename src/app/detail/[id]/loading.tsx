@@ -1,52 +1,59 @@
 import React from "react"
-import { ChevronLeft, Heart } from "lucide-react"
+import { X, ChevronLeft, ChevronRight } from "lucide-react"
 
 export default function DetailLoading() {
   return (
     <div className="min-h-screen bg-[#F0F2F5] pb-24 w-full touch-pan-y animate-pulse py-4 sm:py-6 md:py-8">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6">
         
-        {/* Header Skeleton */}
-        <header className="flex justify-between items-center py-3 mb-4 sm:mb-6">
-          <div className="w-11 h-11 bg-white rounded-full border border-gray-100 shadow-sm flex items-center justify-center">
-            <ChevronLeft className="w-5 h-5 text-gray-300" />
-          </div>
-          <div className="h-5 bg-gray-200 rounded-md w-36"></div>
-          <div className="w-11 h-11 bg-white rounded-full border border-gray-100 shadow-sm flex items-center justify-center">
-            <Heart className="w-5 h-5 text-gray-300" />
-          </div>
-        </header>
-
-        {/* Responsive Grid Skeleton */}
-        <div className="flex flex-col md:grid md:grid-cols-[1.1fr_1fr] lg:grid-cols-[1.15fr_1fr] gap-6 md:gap-8 lg:gap-10">
+        {/* Main Showcase Card Skeleton */}
+        <div className="bg-[#F8F9FA] rounded-[36px] sm:rounded-[44px] p-6 sm:p-8 md:p-10 shadow-lg border border-gray-200/80 mb-8">
           
-          {/* Left Column */}
-          <div className="flex flex-col space-y-4">
-            <div className="w-full h-[320px] sm:h-[380px] md:h-[450px] bg-white rounded-[32px] border border-gray-100 shadow-sm p-8 flex items-center justify-center">
-              <div className="w-48 h-48 bg-gray-100 rounded-2xl"></div>
+          {/* Header */}
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <div className="space-y-2">
+              <div className="h-8 sm:h-9 bg-gray-200 rounded-xl w-48 sm:w-64"></div>
+              <div className="h-4 bg-gray-200 rounded-lg w-20"></div>
             </div>
-
-            <div className="hidden md:flex items-center gap-3">
-              <div className="w-20 h-20 rounded-2xl bg-white border border-gray-200"></div>
-              <div className="w-20 h-20 rounded-2xl bg-white border border-gray-200"></div>
-            </div>
+            <div className="w-10 h-10 bg-white rounded-full border border-gray-200"></div>
           </div>
 
-          {/* Right Column */}
-          <div className="space-y-4">
-            <div className="bg-white rounded-[28px] p-5 border border-gray-100 shadow-sm h-24"></div>
-            <div className="bg-white rounded-[28px] p-6 border border-gray-100 shadow-sm space-y-4">
-              <div className="h-16 bg-gray-50 rounded-2xl"></div>
-              <div className="h-20 bg-gray-50 rounded-2xl"></div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="h-14 bg-gray-50 rounded-xl"></div>
-                <div className="h-14 bg-gray-50 rounded-xl"></div>
-              </div>
-            </div>
-            <div className="bg-white rounded-[28px] p-6 border border-gray-100 shadow-sm h-40"></div>
-            <div className="bg-white rounded-[28px] p-6 border border-gray-100 shadow-sm h-40"></div>
+          {/* Vehicle Stage */}
+          <div className="w-full h-[230px] sm:h-[300px] md:h-[340px] flex items-center justify-center my-4">
+            <div className="w-60 h-44 sm:w-80 sm:h-56 bg-gray-200/70 rounded-3xl"></div>
           </div>
 
+          {/* Nav Arrows */}
+          <div className="flex items-center justify-center gap-3 mb-8">
+            <div className="w-8 h-8 rounded-full bg-white border border-gray-200"></div>
+            <div className="w-8 h-8 rounded-full bg-white border border-gray-200"></div>
+          </div>
+
+          {/* Custom Scooter Title & Price */}
+          <div className="flex items-baseline justify-between mb-6">
+            <div className="h-6 bg-gray-200 rounded-lg w-36"></div>
+            <div className="h-7 bg-gray-200 rounded-lg w-32"></div>
+          </div>
+
+          {/* Duration Pills */}
+          <div className="h-10 bg-gray-200/70 rounded-2xl mb-6"></div>
+
+          {/* 2x2 Customization Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8">
+            <div className="h-16 bg-gray-200/60 rounded-2xl"></div>
+            <div className="h-16 bg-gray-200/60 rounded-2xl"></div>
+            <div className="h-16 bg-gray-200/60 rounded-2xl"></div>
+            <div className="h-16 bg-gray-200/60 rounded-2xl"></div>
+          </div>
+
+          {/* Rent Button */}
+          <div className="h-14 bg-gray-300 rounded-2xl sm:rounded-3xl w-full"></div>
+        </div>
+
+        {/* Supporting details skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white rounded-3xl p-6 shadow-xs border border-gray-200/80 h-64"></div>
+          <div className="bg-white rounded-3xl p-6 shadow-xs border border-gray-200/80 h-64"></div>
         </div>
 
       </div>
