@@ -1,10 +1,12 @@
 "use client"
 
 import { useState, useEffect, useMemo, useCallback } from "react"
-import { Users, Bike, DollarSign, Settings, Bell, Search, Store, BarChart3, Home, ChevronRight, ChevronLeft, ChevronDown, ChevronUp, Calendar, TrendingUp, CalendarDays, MoreVertical, Filter, ArrowUpRight, CheckCircle2, AlertCircle, Menu, UserCheck, MoreHorizontal, Loader2, XCircle, RotateCcw, Clock, Check, Calculator, Sparkles, Coins, LogOut, Lock, Mail, Eye, EyeOff, ShieldCheck } from "lucide-react"
+import { Users, Bike, DollarSign, Settings, Bell, Search, Store, BarChart3, Home, ChevronRight, ChevronLeft, ChevronDown, ChevronUp, Calendar, TrendingUp, CalendarDays, MoreVertical, Filter, ArrowUpRight, CheckCircle2, AlertCircle, Menu, UserCheck, MoreHorizontal, Loader2, XCircle, RotateCcw, Clock, Check, Calculator, Sparkles, Coins, LogOut, Lock, Mail, Eye, EyeOff, ShieldCheck, Plus, Trash2, Edit3, Image as ImageIcon, UploadCloud, Flame, Tag, Layers, ExternalLink, ArrowRight } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 import { createClient } from "@/lib/supabase/client"
 import { getPlatformSettings, savePlatformSettings, calculateBookingCommission, calculateRentalDays, fetchPlatformSettings, subscribeToPlatformSettings, PlatformSettings, DEFAULT_PLATFORM_SETTINGS } from "@/utils/pricing"
+import { Campaign, CampaignTheme, getCampaigns, fetchCampaigns, saveCampaign, deleteCampaign, subscribeToCampaigns, DEFAULT_CAMPAIGNS } from "@/utils/campaigns"
 import { invalidateAllCatalogCaches } from "@/lib/api/catalogService"
 
 export default function AdminDashboard() {
@@ -52,6 +54,27 @@ export default function AdminDashboard() {
   const [totalFleetCount, setTotalFleetCount] = useState(0)
   const [isLoadingApprovals, setIsLoadingApprovals] = useState(false)
   const supabase = createClient()
+
+  // Campaigns State
+  const [campaigns, setCampaigns] = useState<Campaign[]>(() => getCampaigns(true))
+  const [isCampaignModalOpen, setIsCampaignModalOpen] = useState(false)
+  const [editingCampaignId, setEditingCampaignId] = useState<string | null>(null)
+  const [campaignForm, setCampaignForm] = useState<Campaign>({
+    id: 'campaign-1',
+    title: 'Explore Bali on Two Wheels',
+    subtitle: 'Rent Honda, Yamaha & Vespa scooters with free doorstep delivery across Bali & 2 helmets included.',
+    badge: '🔥 LIMITED PROMO',
+    discount_text: 'SAVE UP TO 25% TODAY',
+    cta_text: 'Rent Now',
+    cta_link: '#all-scooters',
+    image_url: '/images/scooter.png',
+    theme: 'dark',
+    is_active: true,
+    order: 1,
+  })
+  const [isUploadingCampaignImg, setIsUploadingCampaignImg] = useState(false)
+  const [campaignSaveSuccess, setCampaignSaveSuccess] = useState(false)
+  const [isSavingCampaign, setIsSavingCampaign] = useState(false)
 
   // Verify Admin Session on Mount
   useEffect(() => {
@@ -415,8 +438,18 @@ export default function AdminDashboard() {
       )
       .subscribe()
 
+    // Fetch campaigns
+    fetchCampaigns(true).then((data) => {
+      if (data && data.length > 0) setCampaigns(data)
+    }).catch(() => {})
+
+    const unsubscribeCampaigns = subscribeToCampaigns(() => {
+      setCampaigns(getCampaigns(true))
+    })
+
     return () => {
       unsubscribeSettings()
+      unsubscribeCampaigns()
       supabase.removeChannel(bookingsSubscription)
     }
   }, [])
@@ -432,6 +465,105 @@ export default function AdminDashboard() {
     setPlatformSettings(newSettings)
     setSettingsSaveSuccess(true)
     setTimeout(() => setSettingsSaveSuccess(false), 3500)
+  }
+
+  // Campaign Management Handlers
+  const handleOpenCreateCampaign = () => {
+    setEditingCampaignId(null)
+    setCampaignForm({
+      id: `campaign-${Date.now()}`,
+      title: '',
+      subtitle: '',
+      badge: '🔥 SPECIAL OFFER',
+      discount_text: 'SAVE 20% TODAY',
+      cta_text: 'Rent Now',
+      cta_link: '#all-scooters',
+      image_url: '/images/scooter.png',
+      theme: 'dark',
+      is_active: true,
+      order: (campaigns.length || 0) + 1,
+    })
+    setIsCampaignModalOpen(true)
+  }
+
+  const handleOpenEditCampaign = (campaign: Campaign) => {
+    setEditingCampaignId(campaign.id)
+    setCampaignForm({ ...campaign })
+    setIsCampaignModalOpen(true)
+  }
+
+  const handleCampaignImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsUploadingCampaignImg(true)
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `campaign-${Date.now()}.${fileExt}`
+      const filePath = `campaigns/${fileName}`
+
+      // Attempt upload to Supabase storage bucket
+      const { error: uploadError } = await supabase.storage
+        .from('scooter-image')
+        .upload(filePath, file, { cacheControl: '3600', upsert: true })
+
+      if (!uploadError) {
+        const { data: { publicUrl } } = supabase.storage
+          .from('scooter-image')
+          .getPublicUrl(filePath)
+        setCampaignForm(prev => ({ ...prev, image_url: publicUrl }))
+      } else {
+        // Local base64 fallback
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          setCampaignForm(prev => ({ ...prev, image_url: reader.result as string }))
+        }
+        reader.readAsDataURL(file)
+      }
+    } catch (err) {
+      console.warn("Upload fallback error:", err)
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setCampaignForm(prev => ({ ...prev, image_url: reader.result as string }))
+      }
+      reader.readAsDataURL(file)
+    } finally {
+      setIsUploadingCampaignImg(false)
+    }
+  }
+
+  const handleSaveCampaignSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!campaignForm.title.trim()) {
+      alert("Please provide a campaign title.")
+      return
+    }
+
+    setIsSavingCampaign(true)
+    try {
+      const updatedList = await saveCampaign(campaignForm)
+      setCampaigns(updatedList)
+      setCampaignSaveSuccess(true)
+      setIsCampaignModalOpen(false)
+      setTimeout(() => setCampaignSaveSuccess(false), 3500)
+    } catch (err) {
+      console.error("Failed to save campaign:", err)
+    } finally {
+      setIsSavingCampaign(false)
+    }
+  }
+
+  const handleToggleCampaignActive = async (campaign: Campaign) => {
+    const updated = { ...campaign, is_active: !campaign.is_active }
+    const updatedList = await saveCampaign(updated)
+    setCampaigns(updatedList)
+  }
+
+  const handleDeleteCampaignAction = async (id: string) => {
+    if (confirm("Are you sure you want to delete this campaign?")) {
+      const updatedList = await deleteCampaign(id)
+      setCampaigns(updatedList)
+    }
   }
 
   const handleConfirmBooking = async (booking: any) => {
@@ -715,6 +847,11 @@ export default function AdminDashboard() {
             <Store className="w-5 h-5" />
             <span className="font-semibold text-[15px]">Vendors</span>
           </button>
+          <button onClick={() => setActiveTab('campaigns')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors relative ${activeTab === 'campaigns' ? 'bg-white/10 text-white shadow-sm shadow-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
+            <Sparkles className="w-5 h-5 text-amber-400" />
+            <span className="font-semibold text-[15px]">Campaigns</span>
+            <span className="absolute right-4 bg-amber-400 text-black text-[10px] font-bold px-2 py-0.5 rounded-full">{campaigns.filter(c => c.is_active).length} Active</span>
+          </button>
 
           <button onClick={() => setActiveTab('revenue')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors ${activeTab === 'revenue' ? 'bg-white/10 text-white shadow-sm shadow-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
             <DollarSign className="w-5 h-5" />
@@ -773,16 +910,18 @@ export default function AdminDashboard() {
                 {activeTab === 'home' ? 'Platform Overview' :
                   activeTab === 'approvals' ? 'Pending Approvals' :
                     activeTab === 'vendors' ? 'Vendors Management' :
-                      activeTab === 'users' ? 'Users Management' :
-                        activeTab === 'bookings' ? 'Platform Bookings' :
-                          activeTab === 'revenue' ? 'Revenue Analytics' : 'Platform Settings'}
+                      activeTab === 'campaigns' ? 'Homepage Campaigns' :
+                        activeTab === 'users' ? 'Users Management' :
+                          activeTab === 'bookings' ? 'Platform Bookings' :
+                            activeTab === 'revenue' ? 'Revenue Analytics' : 'Platform Settings'}
               </h1>
               <p className="text-xs font-medium text-gray-500 md:text-sm md:mt-1 hidden md:block">
                 {activeTab === 'home' ? 'System-wide metrics and performance' :
                   activeTab === 'approvals' ? 'Review and manage vendor sign-up applications' :
                     activeTab === 'vendors' ? 'Manage and monitor all platform vendors' :
-                      activeTab === 'users' ? 'Manage platform users and roles' :
-                        activeTab === 'bookings' ? 'Global overview of all active and past bookings' : 'Configure system settings'}
+                      activeTab === 'campaigns' ? 'Upload content, images, badges, and discounts for homepage campaign cards' :
+                        activeTab === 'users' ? 'Manage platform users and roles' :
+                          activeTab === 'bookings' ? 'Global overview of all active and past bookings' : 'Configure system settings'}
               </p>
             </div>
           </div>
@@ -1830,6 +1969,475 @@ export default function AdminDashboard() {
                       )}
                   </div>
           </div>
+        ) : activeTab === 'campaigns' ? (
+          <div className="p-4 sm:p-6 md:p-8 animate-in fade-in max-w-5xl mx-auto space-y-8">
+            
+            {/* Header & Quick Action */}
+            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-black/10 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-[11px] font-black uppercase tracking-wider mb-2.5">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                  Homepage Marketing
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">Campaign Banners & Deals</h2>
+                <p className="text-xs sm:text-sm text-gray-500 mt-1 max-w-xl font-medium">
+                  Create and manage rounded campaign cards displayed on the customer homepage. Upload custom graphics, set promo badges, and target promotions.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleOpenCreateCampaign}
+                className="bg-black text-white hover:bg-neutral-800 px-6 py-3.5 rounded-2xl font-bold text-xs uppercase tracking-wider active-press transition-all flex items-center justify-center gap-2 shadow-md shrink-0 cursor-pointer"
+              >
+                <Plus className="w-4 h-4 stroke-[2.5]" />
+                <span>Create Campaign</span>
+              </button>
+            </div>
+
+            {/* Success Alert */}
+            {campaignSaveSuccess && (
+              <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-5 py-3.5 rounded-2xl flex items-center gap-3 text-xs sm:text-sm font-bold shadow-xs animate-in slide-in-from-top-2">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                <span>Campaign changes published successfully to the homepage!</span>
+              </div>
+            )}
+
+            {/* Campaign Cards List */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base sm:text-lg font-black text-gray-900">Active & Configured Campaigns ({campaigns.length})</h3>
+                <span className="text-xs text-gray-400 font-semibold">Ordered by display priority</span>
+              </div>
+
+              {campaigns.length === 0 ? (
+                <div className="bg-white rounded-3xl p-10 text-center border border-gray-100 shadow-xs">
+                  <div className="w-16 h-16 rounded-2xl bg-neutral-100 flex items-center justify-center mx-auto mb-4 text-neutral-400">
+                    <Sparkles className="w-8 h-8" />
+                  </div>
+                  <h4 className="text-base font-bold text-gray-900 mb-1">No campaigns created yet</h4>
+                  <p className="text-xs text-gray-500 max-w-sm mx-auto mb-5">Click below to create your first rounded campaign banner for the homepage.</p>
+                  <button
+                    onClick={handleOpenCreateCampaign}
+                    className="px-5 py-2.5 bg-black text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-neutral-800 transition-all"
+                  >
+                    + Create First Campaign
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-5">
+                  {campaigns.map((camp) => {
+                    const themeGradients: Record<string, string> = {
+                      dark: "from-neutral-950 to-black text-white border-white/10",
+                      sunset: "from-amber-700 to-rose-700 text-white border-white/20",
+                      ocean: "from-cyan-950 to-blue-950 text-white border-white/20",
+                      emerald: "from-emerald-950 to-green-950 text-white border-white/20",
+                      violet: "from-purple-950 to-neutral-950 text-white border-white/20",
+                      amber: "from-amber-950 to-stone-900 text-white border-amber-500/20",
+                    }
+                    const gradientClass = themeGradients[camp.theme || 'dark'] || themeGradients.dark
+
+                    return (
+                      <div
+                        key={camp.id}
+                        className="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-5 transition-all hover:shadow-md"
+                      >
+                        {/* Left Card Visual Preview Pill */}
+                        <div className={`w-full md:w-72 h-36 rounded-2xl p-4 bg-gradient-to-br ${gradientClass} relative overflow-hidden flex flex-col justify-between shrink-0 shadow-inner`}>
+                          <div className="flex items-center justify-between">
+                            {camp.badge ? (
+                              <span className="px-2 py-0.5 rounded-full bg-white/20 text-[9px] font-black uppercase tracking-wider backdrop-blur-md">
+                                {camp.badge}
+                              </span>
+                            ) : <span />}
+                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${camp.is_active ? 'bg-emerald-400 text-black' : 'bg-neutral-600 text-white'}`}>
+                              {camp.is_active ? 'Active' : 'Inactive'}
+                            </span>
+                          </div>
+
+                          <div className="z-10 pr-20">
+                            <p className="text-xs font-black leading-tight line-clamp-2">{camp.title || 'Untitled Campaign'}</p>
+                            {camp.discount_text && (
+                              <p className="text-[10px] font-extrabold text-amber-300 mt-0.5 truncate">{camp.discount_text}</p>
+                            )}
+                          </div>
+
+                          {camp.image_url && (
+                            <div className="absolute right-1 bottom-1 w-24 h-20">
+                              <Image
+                                src={camp.image_url}
+                                alt="preview"
+                                fill
+                                className="object-contain drop-shadow-md"
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Middle Details */}
+                        <div className="flex-1 min-w-0 space-y-1.5">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="text-base sm:text-lg font-black text-gray-900 truncate">{camp.title}</h4>
+                            <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-md bg-neutral-100 text-neutral-600 uppercase">
+                              Theme: {camp.theme || 'dark'}
+                            </span>
+                          </div>
+
+                          {camp.subtitle && (
+                            <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">{camp.subtitle}</p>
+                          )}
+
+                          <div className="flex items-center gap-4 text-xs text-gray-400 pt-1 flex-wrap">
+                            <span className="font-semibold text-gray-600">Button: <strong className="text-gray-900">{camp.cta_text || 'Rent Now'}</strong></span>
+                            <span className="font-semibold text-gray-600">Target: <strong className="text-gray-900">{camp.cta_link || '#all-scooters'}</strong></span>
+                            <span>Order: #{camp.order || 1}</span>
+                          </div>
+                        </div>
+
+                        {/* Right Action Buttons */}
+                        <div className="flex items-center gap-2.5 shrink-0 self-end md:self-center">
+                          <button
+                            type="button"
+                            onClick={() => handleToggleCampaignActive(camp)}
+                            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
+                              camp.is_active 
+                                ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200' 
+                                : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 border border-neutral-200'
+                            }`}
+                          >
+                            {camp.is_active ? 'Active' : 'Disabled'}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditCampaign(camp)}
+                            className="p-2.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 transition-colors cursor-pointer"
+                            title="Edit Campaign"
+                          >
+                            <Edit3 className="w-4 h-4" />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteCampaignAction(camp.id)}
+                            className="p-2.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 transition-colors cursor-pointer"
+                            title="Delete Campaign"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Campaign Modal (Create / Edit) */}
+            {isCampaignModalOpen && (
+              <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+                <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 space-y-6 border border-gray-100 my-auto animate-in zoom-in-95">
+                  
+                  {/* Modal Header */}
+                  <div className="flex items-center justify-between pb-4 border-b border-gray-100">
+                    <div>
+                      <h3 className="text-xl sm:text-2xl font-black text-gray-900">
+                        {editingCampaignId ? 'Edit Campaign Card' : 'Create New Campaign Card'}
+                      </h3>
+                      <p className="text-xs text-gray-500 mt-0.5">Customize copy, badge, visual theme, and upload banner graphics.</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsCampaignModalOpen(false)}
+                      className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-black transition-colors"
+                    >
+                      <XCircle className="w-6 h-6" />
+                    </button>
+                  </div>
+
+                  {/* Form */}
+                  <form onSubmit={handleSaveCampaignSubmit} className="space-y-5">
+                    
+                    {/* Live Preview Inside Modal */}
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                        Live Preview (Homepage Style)
+                      </label>
+                      <div className={`rounded-3xl p-5 sm:p-6 text-white relative overflow-hidden border shadow-md bg-gradient-to-br ${
+                        campaignForm.theme === 'sunset' ? 'from-amber-700 via-orange-600 to-rose-700 border-white/20' :
+                        campaignForm.theme === 'ocean' ? 'from-cyan-950 via-sky-900 to-blue-950 border-white/20' :
+                        campaignForm.theme === 'emerald' ? 'from-emerald-950 via-teal-900 to-green-950 border-white/20' :
+                        campaignForm.theme === 'violet' ? 'from-purple-950 via-indigo-900 to-neutral-950 border-white/20' :
+                        campaignForm.theme === 'amber' ? 'from-stone-950 via-amber-950 to-neutral-900 border-amber-500/20' :
+                        'from-neutral-950 via-neutral-900 to-black border-white/15'
+                      }`}>
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="space-y-2 flex-1 max-w-sm">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {campaignForm.badge && (
+                                <span className="px-2.5 py-0.5 rounded-full bg-white/15 text-[10px] font-black uppercase tracking-wider backdrop-blur-md border border-white/20">
+                                  {campaignForm.badge}
+                                </span>
+                              )}
+                              {campaignForm.discount_text && (
+                                <span className="text-[11px] font-black text-amber-300 tracking-wide flex items-center gap-1">
+                                  <Sparkles className="w-3 h-3" />
+                                  {campaignForm.discount_text}
+                                </span>
+                              )}
+                            </div>
+                            <h4 className="text-lg sm:text-xl font-black leading-tight text-white">
+                              {campaignForm.title || 'Your Campaign Headline Here'}
+                            </h4>
+                            <p className="text-xs text-neutral-200 line-clamp-2 leading-relaxed">
+                              {campaignForm.subtitle || 'Your campaign promo description will be displayed here on the homepage banner.'}
+                            </p>
+                            <div className="pt-1">
+                              <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white text-black text-xs font-bold uppercase tracking-wider shadow-sm">
+                                {campaignForm.cta_text || 'Rent Now'}
+                                <ArrowRight className="w-3.5 h-3.5" />
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="relative w-28 h-24 sm:w-36 sm:h-28 shrink-0">
+                            <Image
+                              src={campaignForm.image_url || '/images/scooter.png'}
+                              alt="preview"
+                              fill
+                              className="object-contain drop-shadow-xl"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Campaign Title */}
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                        Campaign Title <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={campaignForm.title}
+                        onChange={(e) => setCampaignForm(prev => ({ ...prev, title: e.target.value }))}
+                        placeholder="e.g. Explore Bali on Two Wheels"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black"
+                      />
+                    </div>
+
+                    {/* Subtitle / Description */}
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                        Promo Description / Subtitle
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={campaignForm.subtitle}
+                        onChange={(e) => setCampaignForm(prev => ({ ...prev, subtitle: e.target.value }))}
+                        placeholder="e.g. Rent Honda, Yamaha & Vespa scooters with free doorstep delivery across Bali & 2 helmets included."
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-black resize-none"
+                      />
+                    </div>
+
+                    {/* Badge & Discount Row */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                          Badge / Tag Text
+                        </label>
+                        <input
+                          type="text"
+                          value={campaignForm.badge || ''}
+                          onChange={(e) => setCampaignForm(prev => ({ ...prev, badge: e.target.value }))}
+                          placeholder="e.g. 🔥 LIMITED PROMO"
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                          Discount / Highlight Text
+                        </label>
+                        <input
+                          type="text"
+                          value={campaignForm.discount_text || ''}
+                          onChange={(e) => setCampaignForm(prev => ({ ...prev, discount_text: e.target.value }))}
+                          placeholder="e.g. SAVE UP TO 25% TODAY"
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black"
+                        />
+                      </div>
+                    </div>
+
+                    {/* CTA Label & Link */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                          CTA Button Label
+                        </label>
+                        <input
+                          type="text"
+                          value={campaignForm.cta_text || 'Rent Now'}
+                          onChange={(e) => setCampaignForm(prev => ({ ...prev, cta_text: e.target.value }))}
+                          placeholder="Rent Now"
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                          CTA Button Link
+                        </label>
+                        <input
+                          type="text"
+                          value={campaignForm.cta_link || '#all-scooters'}
+                          onChange={(e) => setCampaignForm(prev => ({ ...prev, cta_link: e.target.value }))}
+                          placeholder="#all-scooters or /checkout?scooterId=..."
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Color Theme Selector */}
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                        Visual Theme Gradient
+                      </label>
+                      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
+                        {[
+                          { id: 'dark', name: 'Dark Luxe', color: 'bg-neutral-900 border-neutral-700' },
+                          { id: 'sunset', name: 'Sunset', color: 'bg-gradient-to-r from-amber-600 to-rose-600 border-orange-400' },
+                          { id: 'ocean', name: 'Ocean', color: 'bg-gradient-to-r from-cyan-900 to-blue-900 border-cyan-400' },
+                          { id: 'emerald', name: 'Emerald', color: 'bg-gradient-to-r from-emerald-900 to-green-900 border-emerald-400' },
+                          { id: 'violet', name: 'Violet', color: 'bg-gradient-to-r from-purple-900 to-indigo-900 border-purple-400' },
+                          { id: 'amber', name: 'Amber', color: 'bg-gradient-to-r from-amber-900 to-stone-900 border-amber-400' },
+                        ].map((t) => (
+                          <button
+                            key={t.id}
+                            type="button"
+                            onClick={() => setCampaignForm(prev => ({ ...prev, theme: t.id as CampaignTheme }))}
+                            className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                              campaignForm.theme === t.id 
+                                ? 'ring-2 ring-black scale-105 shadow-md border-black' 
+                                : 'opacity-80 hover:opacity-100 border-gray-200'
+                            }`}
+                          >
+                            <div className={`w-full h-5 rounded-lg mb-1.5 ${t.color}`} />
+                            <span className="text-[10px] font-bold text-gray-800 block truncate">{t.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Image Upload Section */}
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                        Campaign Banner / Scooter Image
+                      </label>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <label className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-gray-300 hover:border-black cursor-pointer bg-gray-50 hover:bg-white transition-all text-xs font-bold text-gray-700">
+                            {isUploadingCampaignImg ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin text-black" />
+                                <span>Uploading image...</span>
+                              </>
+                            ) : (
+                              <>
+                                <UploadCloud className="w-4 h-4 text-gray-500" />
+                                <span>Upload Image File (PNG, JPG, WebP)</span>
+                              </>
+                            )}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleCampaignImageUpload}
+                              className="hidden"
+                              disabled={isUploadingCampaignImg}
+                            />
+                          </label>
+                        </div>
+
+                        <div>
+                          <input
+                            type="text"
+                            value={campaignForm.image_url || ''}
+                            onChange={(e) => setCampaignForm(prev => ({ ...prev, image_url: e.target.value }))}
+                            placeholder="Or paste image URL (e.g. /images/scooter.png)"
+                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-black"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Order & Active Switch */}
+                    <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                          Display Order
+                        </label>
+                        <input
+                          type="number"
+                          min={1}
+                          max={99}
+                          value={campaignForm.order || 1}
+                          onChange={(e) => setCampaignForm(prev => ({ ...prev, order: Number(e.target.value) || 1 }))}
+                          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                          Campaign Status
+                        </label>
+                        <div className="flex items-center gap-3 pt-2">
+                          <input
+                            type="checkbox"
+                            id="campaign-active-toggle"
+                            checked={campaignForm.is_active}
+                            onChange={(e) => setCampaignForm(prev => ({ ...prev, is_active: e.target.checked }))}
+                            className="w-5 h-5 rounded accent-black cursor-pointer"
+                          />
+                          <label htmlFor="campaign-active-toggle" className="text-xs font-bold text-gray-800 cursor-pointer">
+                            Active (Visible on Homepage)
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Modal Submit Actions */}
+                    <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+                      <button
+                        type="button"
+                        onClick={() => setIsCampaignModalOpen(false)}
+                        className="px-5 py-3 rounded-xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+
+                      <button
+                        type="submit"
+                        disabled={isSavingCampaign}
+                        className="bg-black text-white hover:bg-neutral-800 px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider shadow-md active-press transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                      >
+                        {isSavingCampaign ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span>Saving...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Check className="w-4 h-4 stroke-[2.5]" />
+                            <span>Save & Publish</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                  </form>
+                </div>
+              </div>
+            )}
+
+          </div>
         ) : activeTab === 'revenue' ? (
           <div className="p-5 md:px-8 md:pb-12 flex flex-col items-center justify-center flex-1 min-h-[50vh] text-center animate-in fade-in">
             <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mb-4">
@@ -2279,8 +2887,14 @@ export default function AdminDashboard() {
             <div className="absolute bottom-full right-4 mb-2 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden w-48 animate-in slide-in-from-bottom-2 fade-in">
               <div className="flex flex-col">
                 <button
+                  onClick={() => { setActiveTab('campaigns'); setIsMobileMenuOpen(false); }}
+                  className={`flex items-center gap-3 px-4 py-3 text-sm font-bold transition-colors ${activeTab === 'campaigns' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`}
+                >
+                  <Sparkles className="w-4 h-4 text-amber-500" /> Campaigns
+                </button>
+                <button
                   onClick={() => { setActiveTab('revenue'); setIsMobileMenuOpen(false); }}
-                  className={`flex items-center gap-3 px-4 py-3 text-sm font-bold transition-colors ${activeTab === 'revenue' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`}
+                  className={`flex items-center gap-3 px-4 py-3 text-sm font-bold transition-colors border-t border-gray-50 ${activeTab === 'revenue' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`}
                 >
                   <DollarSign className="w-4 h-4" /> Revenue
                 </button>

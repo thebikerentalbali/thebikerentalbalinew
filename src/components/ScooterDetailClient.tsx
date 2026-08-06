@@ -24,7 +24,8 @@ import {
   FileCheck,
   Truck,
   Wrench,
-  Sparkles
+  Sparkles,
+  Loader2
 } from "lucide-react"
 import { fetchScooterDetail, fetchVendorDetail } from "@/lib/api/catalogService"
 import { subscribeToPlatformSettings } from "@/utils/pricing"
@@ -78,6 +79,7 @@ export default function ScooterDetailClient({
   const [loading, setLoading] = useState<boolean>(!initialScooter)
   const [isLiked, setIsLiked] = useState(false)
   const [copiedToast, setCopiedToast] = useState(false)
+  const [isNavigatingToCheckout, setIsNavigatingToCheckout] = useState(false)
   const [imageIndex, setImageIndex] = useState<number>(0)
   const [activeSection, setActiveSection] = useState<string>("specs")
   const [otherScooters, setOtherScooters] = useState<any[]>([])
@@ -90,6 +92,15 @@ export default function ScooterDetailClient({
       ...prev,
       [id]: !prev[id],
     }))
+  }
+
+  const handleRentNow = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault()
+    setIsNavigatingToCheckout(true)
+    try {
+      sessionStorage.setItem("checkout_prefill", JSON.stringify({ scooter, vendor }))
+    } catch (err) {}
+    router.push(`/checkout?scooterId=${scooter?.id}`)
   }
 
   const handleBack = (e?: React.MouseEvent) => {
@@ -746,24 +757,24 @@ export default function ScooterDetailClient({
 
         {/* Desktop Book Button */}
         <div className="hidden sm:block pt-2">
-          <Link 
-            href={`/checkout?scooterId=${scooter.id}`} 
-            prefetch={true}
-            onClick={() => {
-              try {
-                sessionStorage.setItem("checkout_prefill", JSON.stringify({ scooter, vendor }))
-              } catch (e) {}
-            }}
-            onPointerDown={() => {
-              try {
-                sessionStorage.setItem("checkout_prefill", JSON.stringify({ scooter, vendor }))
-              } catch (e) {}
-            }}
-            className="w-full bg-black hover:bg-neutral-800 text-white py-4 px-8 rounded-2xl text-sm font-bold uppercase tracking-wider active-press transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
+          <button 
+            type="button"
+            disabled={isNavigatingToCheckout}
+            onClick={handleRentNow}
+            className="w-full bg-black hover:bg-neutral-800 text-white py-4 px-8 rounded-2xl text-sm font-bold uppercase tracking-wider active-press transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-80"
           >
-            <span>Book This Scooter</span>
-            <ChevronRight className="w-4 h-4 text-white stroke-[2.5]" />
-          </Link>
+            {isNavigatingToCheckout ? (
+              <>
+                <Loader2 className="w-4 h-4 text-white animate-spin" />
+                <span>Loading Checkout...</span>
+              </>
+            ) : (
+              <>
+                <span>Book This Scooter</span>
+                <ChevronRight className="w-4 h-4 text-white stroke-[2.5]" />
+              </>
+            )}
+          </button>
         </div>
 
       </div>
@@ -782,24 +793,24 @@ export default function ScooterDetailClient({
           </div>
         </div>
         
-        <Link 
-          href={`/checkout?scooterId=${scooter.id}`} 
-          prefetch={true}
-          onClick={() => {
-            try {
-              sessionStorage.setItem("checkout_prefill", JSON.stringify({ scooter, vendor }))
-            } catch (e) {}
-          }}
-          onPointerDown={() => {
-            try {
-              sessionStorage.setItem("checkout_prefill", JSON.stringify({ scooter, vendor }))
-            } catch (e) {}
-          }}
-          className="bg-white text-black px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider shadow-md hover:bg-neutral-100 active-press transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
+        <button 
+          type="button"
+          disabled={isNavigatingToCheckout}
+          onClick={handleRentNow}
+          className="bg-white text-black px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider shadow-md hover:bg-neutral-100 active-press transition-all flex items-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-80"
         >
-          <span>Rent Now</span>
-          <ChevronRight className="w-3.5 h-3.5 text-black stroke-[2.5]" />
-        </Link>
+          {isNavigatingToCheckout ? (
+            <>
+              <Loader2 className="w-3.5 h-3.5 text-black animate-spin" />
+              <span>Loading...</span>
+            </>
+          ) : (
+            <>
+              <span>Rent Now</span>
+              <ChevronRight className="w-3.5 h-3.5 text-black stroke-[2.5]" />
+            </>
+          )}
+        </button>
       </nav>
 
     </div>

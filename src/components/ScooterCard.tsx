@@ -35,6 +35,16 @@ function ScooterCardComponent({
         <Link
           href={`/detail/${scooter.id}`}
           prefetch={true}
+          onClick={() => {
+            try {
+              sessionStorage.setItem("checkout_prefill", JSON.stringify({ scooter }))
+            } catch (e) {}
+          }}
+          onPointerDown={() => {
+            try {
+              sessionStorage.setItem("checkout_prefill", JSON.stringify({ scooter }))
+            } catch (e) {}
+          }}
           className="bg-white rounded-[32px] md:rounded-[40px] p-5 md:p-6 shadow-sm border border-gray-50 flex flex-col relative group transition-all duration-200 hover:scale-[1.02] hover:shadow-md block active-press"
         >
           {/* Badge */}
@@ -104,6 +114,16 @@ function ScooterCardComponent({
       <Link
         href={`/detail/${scooter.id}`}
         prefetch={true}
+        onClick={() => {
+          try {
+            sessionStorage.setItem("checkout_prefill", JSON.stringify({ scooter }))
+          } catch (e) {}
+        }}
+        onPointerDown={() => {
+          try {
+            sessionStorage.setItem("checkout_prefill", JSON.stringify({ scooter }))
+          } catch (e) {}
+        }}
         className="bg-white rounded-[24px] md:rounded-[32px] p-3 md:p-4 shadow-sm border border-gray-50 flex flex-col group transition-all hover:scale-[1.02] hover:shadow-md active-press"
       >
         <div className="relative w-full aspect-square mb-3 md:mb-4 rounded-2xl bg-[#F8F9FA] flex items-center justify-center p-3 md:p-5">

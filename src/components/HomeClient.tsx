@@ -15,7 +15,7 @@ import {
 } from "lucide-react"
 
 import ScooterCard from "@/components/ScooterCard"
-import VendorStoryItem from "@/components/VendorStoryItem"
+import CampaignCard from "@/components/CampaignCard"
 import { fetchCatalogData } from "@/lib/api/catalogService"
 import { createClient as createBrowserClient } from "@/lib/supabase/client"
 import { subscribeToPlatformSettings } from "@/utils/pricing"
@@ -305,19 +305,9 @@ export default function HomeClient({
           </button>
         </div>
 
-        {/* Top Vendors (Story Layout) */}
-        {topVendors.length > 0 && (
-          <section aria-labelledby="nearby-vendors-heading" className="mb-10 md:mb-12">
-            <div className="flex justify-between items-center mb-4 md:mb-6">
-              <h2 id="nearby-vendors-heading" className="text-xl md:text-2xl font-bold text-gray-900">Nearby Vendors</h2>
-            </div>
-            <div className="flex gap-4 md:gap-8 overflow-x-auto md:overflow-visible pb-2 scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0">
-              {topVendors.map((vendor, idx) => (
-                <VendorStoryItem key={vendor.id} vendor={vendor} isEager={idx < 3} />
-              ))}
-            </div>
-          </section>
-        )}
+        {/* Promotional Campaign Card (Rounded Style) */}
+        <CampaignCard />
+
 
         {/* Filter and Brands */}
         <section aria-labelledby="brands-heading" className="mb-10 md:mb-12">

@@ -554,36 +554,16 @@ export default function CheckoutPage() {
             {/* Left Column: Cart Items */}
             <div className="flex flex-col h-full">
               
-              {isResolvingScooter ? (
-                <div className="bg-white rounded-[24px] p-5 flex flex-col gap-5 shadow-sm relative border border-gray-100 mb-6 animate-pulse">
-                  {/* Top Row Skeleton */}
-                  <div className="flex gap-4 items-center">
-                    <div className="w-24 h-24 bg-gray-100 rounded-2xl flex items-center justify-center p-2 relative shrink-0">
-                      <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
-                    </div>
-                    <div className="flex-1 min-w-0 space-y-2.5">
-                      <div className="h-5 bg-gray-200 rounded-lg w-3/4"></div>
-                      <div className="flex items-center gap-2">
-                        <div className="h-3.5 bg-gray-100 rounded-md w-12"></div>
-                        <div className="h-3.5 bg-gray-100 rounded-md w-16"></div>
-                      </div>
-                      <div className="h-6 bg-gray-200 rounded-lg w-1/2 mt-1"></div>
-                    </div>
+              {isResolvingScooter || (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get("scooterId") && cart.length === 0) ? (
+                <div className="bg-white rounded-[24px] p-6 sm:p-8 flex flex-col items-center justify-center text-center gap-4 shadow-sm relative border border-gray-100 mb-6 animate-pulse">
+                  <div className="w-16 h-16 rounded-2xl bg-neutral-100 flex items-center justify-center text-black">
+                    <Loader2 className="w-8 h-8 text-black animate-spin stroke-[2.2]" />
                   </div>
-
-                  {/* Rental Plan Skeleton */}
-                  <div className="border-t border-gray-100 pt-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="h-4 bg-gray-100 rounded-md w-24"></div>
-                      <div className="h-5 bg-gray-100 rounded-full w-28"></div>
-                    </div>
-                    <div className="h-10 bg-gray-100 rounded-xl w-full"></div>
-                  </div>
-
-                  {/* Status indicator */}
-                  <div className="flex items-center justify-center gap-2 pt-2 border-t border-gray-50 text-xs font-semibold text-gray-500">
-                    <Loader2 className="w-3.5 h-3.5 animate-spin text-black" />
-                    <span>Loading your scooter details...</span>
+                  <div className="space-y-1">
+                    <h3 className="text-base sm:text-lg font-black text-gray-900">Loading Your Selected Scooter</h3>
+                    <p className="text-xs text-gray-500 max-w-xs leading-relaxed">
+                      Retrieving vehicle specifications, included helmets, insurance, and verified rates...
+                    </p>
                   </div>
                 </div>
               ) : cart.length === 0 ? (
@@ -597,7 +577,7 @@ export default function CheckoutPage() {
                   </p>
                   <Link
                     href="/"
-                    className="px-6 py-3 bg-black text-white rounded-full font-bold text-xs uppercase tracking-wider hover:bg-neutral-800 active-press transition-all shadow-sm flex items-center gap-2"
+                    className="px-6 py-3 bg-black text-white rounded-full font-bold text-xs uppercase tracking-wider hover:bg-neutral-800 active-press transition-all shadow-sm flex items-center gap-2 cursor-pointer"
                   >
                     <span>Browse Verified Fleet</span>
                     <ChevronRight className="w-4 h-4" />
