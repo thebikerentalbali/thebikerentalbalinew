@@ -1,12 +1,12 @@
 "use client"
 
 import { useState, useEffect, useMemo, useCallback } from "react"
-import { Users, Bike, DollarSign, Settings, Bell, Search, Store, BarChart3, Home, ChevronRight, ChevronLeft, ChevronDown, ChevronUp, Calendar, TrendingUp, CalendarDays, MoreVertical, Filter, ArrowUpRight, CheckCircle2, AlertCircle, Menu, UserCheck, MoreHorizontal, Loader2, XCircle, RotateCcw, Clock, Check, Calculator, Sparkles, Coins, LogOut, Lock, Mail, Eye, EyeOff, ShieldCheck, Plus, Trash2, Edit3, Image as ImageIcon, UploadCloud, Flame, Tag, Layers, ExternalLink, ArrowRight } from "lucide-react"
+import { Users, Bike, DollarSign, Settings, Bell, Search, Store, BarChart3, Home, ChevronRight, ChevronLeft, ChevronDown, ChevronUp, Calendar, TrendingUp, CalendarDays, MoreVertical, Filter, ArrowUpRight, CheckCircle2, AlertCircle, Menu, UserCheck, MoreHorizontal, Loader2, XCircle, RotateCcw, Clock, Check, Calculator, Sparkles, Coins, LogOut, Lock, Mail, Eye, EyeOff, ShieldCheck, Plus, Trash2, Edit3, Image as ImageIcon, UploadCloud, Flame, Tag, Layers, ExternalLink, ArrowRight, Play, Video, Gift, MapPin, MessageCircle, HeartHandshake } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { createClient } from "@/lib/supabase/client"
 import { getPlatformSettings, savePlatformSettings, calculateBookingCommission, calculateRentalDays, fetchPlatformSettings, subscribeToPlatformSettings, PlatformSettings, DEFAULT_PLATFORM_SETTINGS } from "@/utils/pricing"
-import { Campaign, CampaignTheme, getCampaigns, fetchCampaigns, saveCampaign, deleteCampaign, subscribeToCampaigns, DEFAULT_CAMPAIGNS } from "@/utils/campaigns"
+import { Campaign, CampaignCategory, CampaignTheme, getCampaigns, fetchCampaigns, saveCampaign, deleteCampaign, subscribeToCampaigns, extractYouTubeId, DEFAULT_CAMPAIGNS } from "@/utils/campaigns"
 import { invalidateAllCatalogCaches } from "@/lib/api/catalogService"
 
 export default function AdminDashboard() {
@@ -61,18 +61,27 @@ export default function AdminDashboard() {
   const [editingCampaignId, setEditingCampaignId] = useState<string | null>(null)
   const [campaignForm, setCampaignForm] = useState<Campaign>({
     id: 'campaign-1',
-    title: 'Explore Bali on Two Wheels',
-    subtitle: 'Rent Honda, Yamaha & Vespa scooters with free doorstep delivery across Bali & 2 helmets included.',
-    badge: '🔥 LIMITED PROMO',
-    discount_text: 'SAVE UP TO 25% TODAY',
-    cta_text: 'Rent Now',
-    cta_link: '#all-scooters',
+    title: 'Exclusive Spa & Wellness Collaboration',
+    partner_name: 'Sanctuary Spa & Massage Bali',
+    partner_logo_url: undefined,
+    category: 'spa',
+    subtitle: 'Show your scooter rental booking confirmation to claim 25% off all traditional Balinese massage & body scrub treatments.',
+    badge: '💆 25% SPA DISCOUNT',
+    discount_text: 'EXCLUSIVE FOR OUR RIDERS',
+    voucher_code: 'BALIRIDER25',
+    partner_whatsapp: '6281234567890',
+    partner_location: 'Seminyak, Canggu & Ubud, Bali',
+    voucher_terms: 'Valid with any active scooter booking confirmation. Present voucher code upon arrival.',
+    hero_overlay_text: 'RELAX & RECHARGE',
+    cta_text: 'Claim Spa Voucher',
+    cta_link: '#claim-voucher',
     image_url: '/images/scooter.png',
-    theme: 'dark',
+    theme: 'sunset',
     is_active: true,
     order: 1,
   })
   const [isUploadingCampaignImg, setIsUploadingCampaignImg] = useState(false)
+  const [isUploadingPartnerLogo, setIsUploadingPartnerLogo] = useState(false)
   const [campaignSaveSuccess, setCampaignSaveSuccess] = useState(false)
   const [isSavingCampaign, setIsSavingCampaign] = useState(false)
 
@@ -468,21 +477,73 @@ export default function AdminDashboard() {
   }
 
   // Campaign Management Handlers
-  const handleOpenCreateCampaign = () => {
+  const handleOpenCreateCampaign = (category: CampaignCategory = 'spa') => {
     setEditingCampaignId(null)
-    setCampaignForm({
-      id: `campaign-${Date.now()}`,
-      title: '',
-      subtitle: '',
-      badge: '🔥 SPECIAL OFFER',
-      discount_text: 'SAVE 20% TODAY',
-      cta_text: 'Rent Now',
-      cta_link: '#all-scooters',
-      image_url: '/images/scooter.png',
-      theme: 'dark',
-      is_active: true,
-      order: (campaigns.length || 0) + 1,
-    })
+    
+    if (category === 'spa') {
+      setCampaignForm({
+        id: `campaign-${Date.now()}`,
+        title: 'Exclusive Spa & Wellness Collaboration',
+        partner_name: 'Sanctuary Spa Bali',
+        partner_logo_url: undefined,
+        category: 'spa',
+        subtitle: 'Show your scooter rental booking confirmation to claim 25% off all traditional Balinese massage & body scrub treatments.',
+        badge: '💆 25% SPA DISCOUNT',
+        discount_text: 'EXCLUSIVE FOR OUR RIDERS',
+        voucher_code: 'BALIRIDER25',
+        partner_whatsapp: '6281234567890',
+        partner_location: 'Seminyak & Ubud, Bali',
+        voucher_terms: 'Valid with any active scooter booking confirmation on The Bike Rental Bali.',
+        hero_overlay_text: 'RELAX & RECHARGE',
+        cta_text: 'Claim Spa Voucher',
+        cta_link: '#claim-voucher',
+        image_url: '/images/scooter.png',
+        theme: 'sunset',
+        is_active: true,
+        order: (campaigns.length || 0) + 1,
+      })
+    } else if (category === 'video') {
+      setCampaignForm({
+        id: `campaign-${Date.now()}`,
+        title: 'Bali Travel Guide | Best Places & Scenic Routes',
+        partner_name: 'Bali Head Tour',
+        partner_logo_url: undefined,
+        category: 'video',
+        subtitle: 'Experience Bali through its culture, secret waterfalls, and scenic mountain roads. Watch our ultimate rider guide.',
+        badge: '🎥 ISLAND GUIDE',
+        discount_text: 'TOP HIDDEN SPOTS',
+        video_url: 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
+        youtube_id: 'ScMzIvxBSi4',
+        hero_overlay_text: 'EXPLORE the island of God',
+        cta_text: 'Watch Video Guide',
+        cta_link: 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
+        partner_location: 'Bali, Indonesia',
+        image_url: '/images/scooter.png',
+        theme: 'dark',
+        is_active: true,
+        order: (campaigns.length || 0) + 1,
+      })
+    } else {
+      setCampaignForm({
+        id: `campaign-${Date.now()}`,
+        title: 'Explore Bali on Two Wheels',
+        partner_name: 'The Bike Rental Bali',
+        partner_logo_url: '/images/scooter.png',
+        category: 'scooter',
+        subtitle: 'Rent Honda, Yamaha & Vespa scooters with free doorstep delivery across Bali & 2 helmets included.',
+        badge: '🔥 LIMITED PROMO',
+        discount_text: 'SAVE UP TO 25% TODAY',
+        hero_overlay_text: 'RIDE WITH FREEDOM',
+        cta_text: 'Rent Now',
+        cta_link: '#all-scooters',
+        partner_location: 'All Bali Delivery',
+        image_url: '/images/scooter.png',
+        theme: 'ocean',
+        is_active: true,
+        order: (campaigns.length || 0) + 1,
+      })
+    }
+
     setIsCampaignModalOpen(true)
   }
 
@@ -490,6 +551,44 @@ export default function AdminDashboard() {
     setEditingCampaignId(campaign.id)
     setCampaignForm({ ...campaign })
     setIsCampaignModalOpen(true)
+  }
+
+  const handlePartnerLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsUploadingPartnerLogo(true)
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `partner-logo-${Date.now()}.${fileExt}`
+      const filePath = `campaigns/${fileName}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('scooter-image')
+        .upload(filePath, file, { cacheControl: '3600', upsert: true })
+
+      if (!uploadError) {
+        const { data: { publicUrl } } = supabase.storage
+          .from('scooter-image')
+          .getPublicUrl(filePath)
+        setCampaignForm(prev => ({ ...prev, partner_logo_url: publicUrl }))
+      } else {
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          setCampaignForm(prev => ({ ...prev, partner_logo_url: reader.result as string }))
+        }
+        reader.readAsDataURL(file)
+      }
+    } catch (err) {
+      console.warn("Partner logo fallback error:", err)
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setCampaignForm(prev => ({ ...prev, partner_logo_url: reader.result as string }))
+      }
+      reader.readAsDataURL(file)
+    } finally {
+      setIsUploadingPartnerLogo(false)
+    }
   }
 
   const handleCampaignImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1977,22 +2076,42 @@ export default function AdminDashboard() {
               <div>
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-[11px] font-black uppercase tracking-wider mb-2.5">
                   <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                  Homepage Marketing
+                  Marketing & Cross-Promotions
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">Campaign Banners & Deals</h2>
+                <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">Campaigns & Collaborations</h2>
                 <p className="text-xs sm:text-sm text-gray-500 mt-1 max-w-xl font-medium">
-                  Create and manage rounded campaign cards displayed on the customer homepage. Upload custom graphics, set promo badges, and target promotions.
+                  Create cinematic cards for <strong>Spa & Wellness partnerships</strong>, <strong>YouTube travel video guides</strong>, <strong>Island Tours</strong>, and <strong>Scooter promotions</strong>.
                 </p>
               </div>
 
-              <button
-                type="button"
-                onClick={handleOpenCreateCampaign}
-                className="bg-black text-white hover:bg-neutral-800 px-6 py-3.5 rounded-2xl font-bold text-xs uppercase tracking-wider active-press transition-all flex items-center justify-center gap-2 shadow-md shrink-0 cursor-pointer"
-              >
-                <Plus className="w-4 h-4 stroke-[2.5]" />
-                <span>Create Campaign</span>
-              </button>
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => handleOpenCreateCampaign('spa')}
+                  className="bg-amber-400 hover:bg-amber-300 text-black px-4 py-3 rounded-2xl font-bold text-xs uppercase tracking-wider active-press transition-all flex items-center gap-2 shadow-sm cursor-pointer"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>+ Spa Collab</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleOpenCreateCampaign('video')}
+                  className="bg-neutral-900 hover:bg-black text-white px-4 py-3 rounded-2xl font-bold text-xs uppercase tracking-wider active-press transition-all flex items-center gap-2 shadow-sm cursor-pointer"
+                >
+                  <Play className="w-4 h-4 fill-white" />
+                  <span>+ Video Guide</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleOpenCreateCampaign('scooter')}
+                  className="bg-neutral-100 hover:bg-neutral-200 text-gray-800 px-4 py-3 rounded-2xl font-bold text-xs uppercase tracking-wider active-press transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Plus className="w-4 h-4 stroke-[2.5]" />
+                  <span>Custom</span>
+                </button>
+              </div>
             </div>
 
             {/* Success Alert */}
@@ -2016,12 +2135,12 @@ export default function AdminDashboard() {
                     <Sparkles className="w-8 h-8" />
                   </div>
                   <h4 className="text-base font-bold text-gray-900 mb-1">No campaigns created yet</h4>
-                  <p className="text-xs text-gray-500 max-w-sm mx-auto mb-5">Click below to create your first rounded campaign banner for the homepage.</p>
+                  <p className="text-xs text-gray-500 max-w-sm mx-auto mb-5">Click below to create your first collaboration or video campaign banner for the homepage.</p>
                   <button
-                    onClick={handleOpenCreateCampaign}
+                    onClick={() => handleOpenCreateCampaign('spa')}
                     className="px-5 py-2.5 bg-black text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-neutral-800 transition-all"
                   >
-                    + Create First Campaign
+                    + Create First Collaboration
                   </button>
                 </div>
               ) : (
@@ -2029,7 +2148,7 @@ export default function AdminDashboard() {
                   {campaigns.map((camp) => {
                     const themeGradients: Record<string, string> = {
                       dark: "from-neutral-950 to-black text-white border-white/10",
-                      sunset: "from-amber-700 to-rose-700 text-white border-white/20",
+                      sunset: "from-amber-900 via-orange-950 to-black text-white border-white/20",
                       ocean: "from-cyan-950 to-blue-950 text-white border-white/20",
                       emerald: "from-emerald-950 to-green-950 text-white border-white/20",
                       violet: "from-purple-950 to-neutral-950 text-white border-white/20",
@@ -2043,44 +2162,57 @@ export default function AdminDashboard() {
                         className="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-5 transition-all hover:shadow-md"
                       >
                         {/* Left Card Visual Preview Pill */}
-                        <div className={`w-full md:w-72 h-36 rounded-2xl p-4 bg-gradient-to-br ${gradientClass} relative overflow-hidden flex flex-col justify-between shrink-0 shadow-inner`}>
-                          <div className="flex items-center justify-between">
-                            {camp.badge ? (
+                        <div className={`w-full md:w-80 h-40 rounded-2xl p-4 bg-gradient-to-br ${gradientClass} relative overflow-hidden flex flex-col justify-between shrink-0 shadow-inner border`}>
+                          {camp.image_url && (
+                            <Image
+                              src={camp.image_url}
+                              alt="preview"
+                              fill
+                              className="object-cover opacity-40"
+                            />
+                          )}
+                          <div className="relative z-10 flex items-center justify-between">
+                            <div className="flex items-center gap-1.5">
+                              {camp.partner_logo_url ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={camp.partner_logo_url} alt="logo" className="w-5 h-5 rounded-full object-cover bg-white p-0.5" />
+                              ) : null}
                               <span className="px-2 py-0.5 rounded-full bg-white/20 text-[9px] font-black uppercase tracking-wider backdrop-blur-md">
-                                {camp.badge}
+                                {camp.category || 'collab'}
                               </span>
-                            ) : <span />}
+                            </div>
                             <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${camp.is_active ? 'bg-emerald-400 text-black' : 'bg-neutral-600 text-white'}`}>
                               {camp.is_active ? 'Active' : 'Inactive'}
                             </span>
                           </div>
 
-                          <div className="z-10 pr-20">
-                            <p className="text-xs font-black leading-tight line-clamp-2">{camp.title || 'Untitled Campaign'}</p>
-                            {camp.discount_text && (
-                              <p className="text-[10px] font-extrabold text-amber-300 mt-0.5 truncate">{camp.discount_text}</p>
+                          <div className="relative z-10">
+                            {camp.hero_overlay_text && (
+                              <p className="text-[10px] font-black font-serif italic text-white/80 uppercase tracking-wider">{camp.hero_overlay_text}</p>
                             )}
+                            <p className="text-xs font-black leading-tight line-clamp-1">{camp.title || 'Untitled Campaign'}</p>
+                            {camp.voucher_code ? (
+                              <span className="inline-block mt-1 font-mono text-[9px] font-bold bg-amber-400 text-black px-1.5 py-0.5 rounded">
+                                CODE: {camp.voucher_code}
+                              </span>
+                            ) : camp.discount_text ? (
+                              <p className="text-[10px] font-extrabold text-amber-300 mt-0.5 truncate">{camp.discount_text}</p>
+                            ) : null}
                           </div>
-
-                          {camp.image_url && (
-                            <div className="absolute right-1 bottom-1 w-24 h-20">
-                              <Image
-                                src={camp.image_url}
-                                alt="preview"
-                                fill
-                                className="object-contain drop-shadow-md"
-                              />
-                            </div>
-                          )}
                         </div>
 
                         {/* Middle Details */}
                         <div className="flex-1 min-w-0 space-y-1.5">
                           <div className="flex items-center gap-2 flex-wrap">
                             <h4 className="text-base sm:text-lg font-black text-gray-900 truncate">{camp.title}</h4>
-                            <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-md bg-neutral-100 text-neutral-600 uppercase">
-                              Theme: {camp.theme || 'dark'}
+                            <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 uppercase">
+                              {camp.category || 'scooter'}
                             </span>
+                            {camp.partner_name && (
+                              <span className="text-xs font-semibold text-gray-500 truncate">
+                                with <strong>{camp.partner_name}</strong>
+                              </span>
+                            )}
                           </div>
 
                           {camp.subtitle && (
@@ -2088,8 +2220,16 @@ export default function AdminDashboard() {
                           )}
 
                           <div className="flex items-center gap-4 text-xs text-gray-400 pt-1 flex-wrap">
-                            <span className="font-semibold text-gray-600">Button: <strong className="text-gray-900">{camp.cta_text || 'Rent Now'}</strong></span>
-                            <span className="font-semibold text-gray-600">Target: <strong className="text-gray-900">{camp.cta_link || '#all-scooters'}</strong></span>
+                            {camp.voucher_code && (
+                              <span className="font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                                Voucher: <strong>{camp.voucher_code}</strong>
+                              </span>
+                            )}
+                            {camp.video_url && (
+                              <span className="font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded-md border border-red-200 flex items-center gap-1">
+                                <Play className="w-3 h-3 fill-red-600" /> YouTube Video
+                              </span>
+                            )}
                             <span>Order: #{camp.order || 1}</span>
                           </div>
                         </div>
@@ -2136,15 +2276,15 @@ export default function AdminDashboard() {
             {/* Campaign Modal (Create / Edit) */}
             {isCampaignModalOpen && (
               <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-                <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 space-y-6 border border-gray-100 my-auto animate-in zoom-in-95">
+                <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[92vh] overflow-y-auto p-6 sm:p-8 space-y-6 border border-gray-100 my-auto animate-in zoom-in-95">
                   
                   {/* Modal Header */}
                   <div className="flex items-center justify-between pb-4 border-b border-gray-100">
                     <div>
                       <h3 className="text-xl sm:text-2xl font-black text-gray-900">
-                        {editingCampaignId ? 'Edit Campaign Card' : 'Create New Campaign Card'}
+                        {editingCampaignId ? 'Edit Campaign & Collaboration' : 'Create New Campaign / Collaboration'}
                       </h3>
-                      <p className="text-xs text-gray-500 mt-0.5">Customize copy, badge, visual theme, and upload banner graphics.</p>
+                      <p className="text-xs text-gray-500 mt-0.5">Customize partner branding, video embeds, promo vouchers, and banner graphics.</p>
                     </div>
                     <button
                       type="button"
@@ -2156,75 +2296,293 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* Form */}
-                  <form onSubmit={handleSaveCampaignSubmit} className="space-y-5">
+                  <form onSubmit={handleSaveCampaignSubmit} className="space-y-6">
                     
-                    {/* Live Preview Inside Modal */}
+                    {/* Live Preview Card (Exact Reference Look) */}
                     <div>
                       <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
-                        Live Preview (Homepage Style)
+                        Live Preview (Homepage Reference Design)
                       </label>
-                      <div className={`rounded-3xl p-5 sm:p-6 text-white relative overflow-hidden border shadow-md bg-gradient-to-br ${
-                        campaignForm.theme === 'sunset' ? 'from-amber-700 via-orange-600 to-rose-700 border-white/20' :
-                        campaignForm.theme === 'ocean' ? 'from-cyan-950 via-sky-900 to-blue-950 border-white/20' :
-                        campaignForm.theme === 'emerald' ? 'from-emerald-950 via-teal-900 to-green-950 border-white/20' :
-                        campaignForm.theme === 'violet' ? 'from-purple-950 via-indigo-900 to-neutral-950 border-white/20' :
-                        campaignForm.theme === 'amber' ? 'from-stone-950 via-amber-950 to-neutral-900 border-amber-500/20' :
-                        'from-neutral-950 via-neutral-900 to-black border-white/15'
-                      }`}>
-                        <div className="flex items-center justify-between gap-4">
-                          <div className="space-y-2 flex-1 max-w-sm">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              {campaignForm.badge && (
-                                <span className="px-2.5 py-0.5 rounded-full bg-white/15 text-[10px] font-black uppercase tracking-wider backdrop-blur-md border border-white/20">
-                                  {campaignForm.badge}
-                                </span>
-                              )}
-                              {campaignForm.discount_text && (
-                                <span className="text-[11px] font-black text-amber-300 tracking-wide flex items-center gap-1">
-                                  <Sparkles className="w-3 h-3" />
-                                  {campaignForm.discount_text}
-                                </span>
+                      <div className={`rounded-3xl p-5 sm:p-7 text-white relative overflow-hidden border shadow-xl bg-neutral-950 min-h-[220px] flex flex-col justify-between`}>
+                        
+                        {campaignForm.image_url && (
+                          <Image
+                            src={campaignForm.image_url}
+                            alt="preview"
+                            fill
+                            className="object-cover brightness-75"
+                          />
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/90" />
+
+                        {/* Top Bar Preview */}
+                        <div className="relative z-10 flex items-start justify-between gap-3">
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <div className="w-10 h-10 rounded-full bg-white p-0.5 shadow-md flex items-center justify-center overflow-hidden shrink-0">
+                              {campaignForm.partner_logo_url ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={campaignForm.partner_logo_url} alt="partner" className="w-full h-full object-cover" />
+                              ) : (
+                                <span className="text-[10px] font-black text-black">LOGO</span>
                               )}
                             </div>
-                            <h4 className="text-lg sm:text-xl font-black leading-tight text-white">
-                              {campaignForm.title || 'Your Campaign Headline Here'}
-                            </h4>
-                            <p className="text-xs text-neutral-200 line-clamp-2 leading-relaxed">
-                              {campaignForm.subtitle || 'Your campaign promo description will be displayed here on the homepage banner.'}
-                            </p>
-                            <div className="pt-1">
-                              <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white text-black text-xs font-bold uppercase tracking-wider shadow-sm">
-                                {campaignForm.cta_text || 'Rent Now'}
-                                <ArrowRight className="w-3.5 h-3.5" />
-                              </span>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-sm sm:text-base font-black text-white leading-snug break-words">
+                                {campaignForm.title || 'Campaign Title'}
+                              </h4>
+                              <p className="text-[11px] font-semibold text-neutral-300">
+                                {campaignForm.partner_name || 'Partner Name'}
+                              </p>
                             </div>
                           </div>
 
-                          <div className="relative w-28 h-24 sm:w-36 sm:h-28 shrink-0">
-                            <Image
-                              src={campaignForm.image_url || '/images/scooter.png'}
-                              alt="preview"
-                              fill
-                              className="object-contain drop-shadow-xl"
-                            />
+                          {campaignForm.badge && (
+                            <span className="px-2.5 py-1 rounded-full bg-white/20 text-[10px] font-black uppercase tracking-wider backdrop-blur-md">
+                              {campaignForm.badge}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Center Hero Preview */}
+                        <div className="relative z-10 py-3 flex flex-col items-center justify-center text-center my-auto">
+                          {(campaignForm.category === 'video' || campaignForm.video_url) && (
+                            <div className="w-12 h-9 bg-red-600 rounded-xl flex items-center justify-center shadow-lg mb-1.5">
+                              <Play className="w-5 h-5 fill-white text-white translate-x-0.5" />
+                            </div>
+                          )}
+                          {campaignForm.hero_overlay_text && (
+                            <h5 className="text-lg sm:text-2xl font-black font-serif italic text-white drop-shadow-md uppercase tracking-tight">
+                              {campaignForm.hero_overlay_text}
+                            </h5>
+                          )}
+                        </div>
+
+                        {/* Bottom Bar Preview */}
+                        <div className="relative z-10 flex items-center justify-between gap-3 pt-2 border-t border-white/10">
+                          <div className="min-w-0">
+                            {campaignForm.discount_text && (
+                              <p className="text-[11px] font-black text-amber-300 uppercase truncate">
+                                🎁 {campaignForm.discount_text}
+                              </p>
+                            )}
+                            <p className="text-[10px] text-neutral-200 truncate max-w-sm">
+                              {campaignForm.subtitle || 'Promo details and description'}
+                            </p>
                           </div>
+                          <span className="px-4 py-1.5 rounded-full bg-white text-black text-[11px] font-bold uppercase tracking-wider shrink-0 shadow-sm">
+                            {campaignForm.cta_text || 'Claim Offer'}
+                          </span>
+                        </div>
+
+                      </div>
+                    </div>
+
+                    {/* Category Selector */}
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                        Campaign Type / Collaboration Category
+                      </label>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {[
+                          { id: 'spa', label: '💆 Spa & Wellness', desc: 'Massage vouchers & discounts' },
+                          { id: 'video', label: '🎥 Video Guide', desc: 'YouTube travel guide video' },
+                          { id: 'scooter', label: '🛵 Scooter Promo', desc: 'Fleet discount & rates' },
+                          { id: 'tour', label: '🗺️ Island Tour', desc: 'Day trips & excursions' },
+                        ].map((cat) => (
+                          <button
+                            key={cat.id}
+                            type="button"
+                            onClick={() => setCampaignForm(prev => ({ 
+                              ...prev, 
+                              category: cat.id as CampaignCategory,
+                              cta_text: cat.id === 'spa' ? 'Claim Spa Voucher' : cat.id === 'video' ? 'Watch Video Guide' : 'Rent Now'
+                            }))}
+                            className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                              campaignForm.category === cat.id 
+                                ? 'border-black bg-neutral-900 text-white shadow-sm' 
+                                : 'border-gray-200 hover:border-gray-300 text-gray-800 bg-gray-50'
+                            }`}
+                          >
+                            <span className="text-xs font-black block">{cat.label}</span>
+                            <span className={`text-[10px] block mt-0.5 ${campaignForm.category === cat.id ? 'text-neutral-300' : 'text-gray-400'}`}>
+                              {cat.desc}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Partner Branding Row */}
+                    <div className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200 space-y-4">
+                      <div className="flex items-center gap-2 text-xs font-bold text-neutral-800 uppercase tracking-wider">
+                        <HeartHandshake className="w-4 h-4 text-amber-600" />
+                        <span>Partner / Collaborator Details</span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                            Partner Brand Name
+                          </label>
+                          <input
+                            type="text"
+                            value={campaignForm.partner_name || ''}
+                            onChange={(e) => setCampaignForm(prev => ({ ...prev, partner_name: e.target.value }))}
+                            placeholder="e.g. Sanctuary Spa Bali or Bali Head Tour"
+                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-black bg-white"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                            Partner Location / Area
+                          </label>
+                          <input
+                            type="text"
+                            value={campaignForm.partner_location || ''}
+                            onChange={(e) => setCampaignForm(prev => ({ ...prev, partner_location: e.target.value }))}
+                            placeholder="e.g. Seminyak, Canggu & Ubud"
+                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-black bg-white"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Partner Logo Upload & URL */}
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                          Partner Logo / Avatar
+                        </label>
+                        <div className="flex items-center gap-3">
+                          <label className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-300 hover:border-black cursor-pointer bg-white text-xs font-bold text-gray-700 shrink-0">
+                            {isUploadingPartnerLogo ? <Loader2 className="w-4 h-4 animate-spin" /> : <UploadCloud className="w-4 h-4" />}
+                            <span>Upload Logo</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handlePartnerLogoUpload}
+                              className="hidden"
+                              disabled={isUploadingPartnerLogo}
+                            />
+                          </label>
+                          <input
+                            type="text"
+                            value={campaignForm.partner_logo_url || ''}
+                            onChange={(e) => setCampaignForm(prev => ({ ...prev, partner_logo_url: e.target.value }))}
+                            placeholder="Or paste logo image URL"
+                            className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-black bg-white"
+                          />
                         </div>
                       </div>
                     </div>
 
-                    {/* Campaign Title */}
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                        Campaign Title <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={campaignForm.title}
-                        onChange={(e) => setCampaignForm(prev => ({ ...prev, title: e.target.value }))}
-                        placeholder="e.g. Explore Bali on Two Wheels"
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black"
-                      />
+                    {/* YouTube Video Section (if video or desired) */}
+                    {(campaignForm.category === 'video' || campaignForm.video_url) && (
+                      <div className="p-4 rounded-2xl bg-red-50/50 border border-red-200 space-y-3">
+                        <div className="flex items-center gap-2 text-xs font-bold text-red-800 uppercase tracking-wider">
+                          <Play className="w-4 h-4 fill-red-600 text-red-600" />
+                          <span>YouTube Video Settings</span>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                            YouTube Video URL
+                          </label>
+                          <input
+                            type="text"
+                            value={campaignForm.video_url || ''}
+                            onChange={(e) => {
+                              const val = e.target.value
+                              const ytId = extractYouTubeId(val)
+                              setCampaignForm(prev => ({
+                                ...prev,
+                                video_url: val,
+                                youtube_id: ytId || prev.youtube_id,
+                                image_url: ytId && !prev.image_url ? `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg` : prev.image_url
+                              }))
+                            }}
+                            placeholder="e.g. https://www.youtube.com/watch?v=ScMzIvxBSi4"
+                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-black bg-white"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Voucher & WhatsApp Booking Collaboration Settings */}
+                    <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200 space-y-4">
+                      <div className="flex items-center gap-2 text-xs font-bold text-amber-900 uppercase tracking-wider">
+                        <Gift className="w-4 h-4 text-amber-700" />
+                        <span>Voucher & Customer Discount Settings</span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                            Promo Voucher Code
+                          </label>
+                          <input
+                            type="text"
+                            value={campaignForm.voucher_code || ''}
+                            onChange={(e) => setCampaignForm(prev => ({ ...prev, voucher_code: e.target.value.toUpperCase() }))}
+                            placeholder="e.g. BALISPA25"
+                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-black bg-white tracking-wider"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                            Partner WhatsApp Number
+                          </label>
+                          <input
+                            type="text"
+                            value={campaignForm.partner_whatsapp || ''}
+                            onChange={(e) => setCampaignForm(prev => ({ ...prev, partner_whatsapp: e.target.value }))}
+                            placeholder="e.g. 6281234567890 (for 1-click booking)"
+                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-black bg-white"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                          Redemption Terms / Conditions
+                        </label>
+                        <input
+                          type="text"
+                          value={campaignForm.voucher_terms || ''}
+                          onChange={(e) => setCampaignForm(prev => ({ ...prev, voucher_terms: e.target.value }))}
+                          placeholder="e.g. Show your active scooter booking confirmation on The Bike Rental Bali upon arrival."
+                          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-black bg-white"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Campaign Title & Slogan */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                          Campaign Title <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={campaignForm.title}
+                          onChange={(e) => setCampaignForm(prev => ({ ...prev, title: e.target.value }))}
+                          placeholder="e.g. Exclusive Spa & Wellness Collaboration"
+                          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                          Center Hero Slogan / Typography
+                        </label>
+                        <input
+                          type="text"
+                          value={campaignForm.hero_overlay_text || ''}
+                          onChange={(e) => setCampaignForm(prev => ({ ...prev, hero_overlay_text: e.target.value }))}
+                          placeholder="e.g. EXPLORE the island of God or RELAX & RECHARGE"
+                          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black"
+                        />
+                      </div>
                     </div>
 
                     {/* Subtitle / Description */}
@@ -2236,8 +2594,8 @@ export default function AdminDashboard() {
                         rows={2}
                         value={campaignForm.subtitle}
                         onChange={(e) => setCampaignForm(prev => ({ ...prev, subtitle: e.target.value }))}
-                        placeholder="e.g. Rent Honda, Yamaha & Vespa scooters with free doorstep delivery across Bali & 2 helmets included."
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-black resize-none"
+                        placeholder="e.g. Show your scooter rental booking confirmation to claim 25% off all traditional Balinese massage treatments."
+                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-black resize-none"
                       />
                     </div>
 
@@ -2251,8 +2609,8 @@ export default function AdminDashboard() {
                           type="text"
                           value={campaignForm.badge || ''}
                           onChange={(e) => setCampaignForm(prev => ({ ...prev, badge: e.target.value }))}
-                          placeholder="e.g. 🔥 LIMITED PROMO"
-                          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black"
+                          placeholder="e.g. 💆 25% SPA DISCOUNT"
+                          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black"
                         />
                       </div>
                       <div>
@@ -2263,8 +2621,8 @@ export default function AdminDashboard() {
                           type="text"
                           value={campaignForm.discount_text || ''}
                           onChange={(e) => setCampaignForm(prev => ({ ...prev, discount_text: e.target.value }))}
-                          placeholder="e.g. SAVE UP TO 25% TODAY"
-                          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black"
+                          placeholder="e.g. EXCLUSIVE FOR OUR RIDERS"
+                          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black"
                         />
                       </div>
                     </div>
@@ -2277,10 +2635,10 @@ export default function AdminDashboard() {
                         </label>
                         <input
                           type="text"
-                          value={campaignForm.cta_text || 'Rent Now'}
+                          value={campaignForm.cta_text || 'Claim Offer'}
                           onChange={(e) => setCampaignForm(prev => ({ ...prev, cta_text: e.target.value }))}
-                          placeholder="Rent Now"
-                          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black"
+                          placeholder="Claim Spa Voucher"
+                          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black"
                         />
                       </div>
                       <div>
@@ -2291,8 +2649,8 @@ export default function AdminDashboard() {
                           type="text"
                           value={campaignForm.cta_link || '#all-scooters'}
                           onChange={(e) => setCampaignForm(prev => ({ ...prev, cta_link: e.target.value }))}
-                          placeholder="#all-scooters or /checkout?scooterId=..."
-                          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black"
+                          placeholder="#claim-voucher or https://partner.com"
+                          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black"
                         />
                       </div>
                     </div>
@@ -2305,11 +2663,11 @@ export default function AdminDashboard() {
                       <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
                         {[
                           { id: 'dark', name: 'Dark Luxe', color: 'bg-neutral-900 border-neutral-700' },
-                          { id: 'sunset', name: 'Sunset', color: 'bg-gradient-to-r from-amber-600 to-rose-600 border-orange-400' },
-                          { id: 'ocean', name: 'Ocean', color: 'bg-gradient-to-r from-cyan-900 to-blue-900 border-cyan-400' },
-                          { id: 'emerald', name: 'Emerald', color: 'bg-gradient-to-r from-emerald-900 to-green-900 border-emerald-400' },
-                          { id: 'violet', name: 'Violet', color: 'bg-gradient-to-r from-purple-900 to-indigo-900 border-purple-400' },
-                          { id: 'amber', name: 'Amber', color: 'bg-gradient-to-r from-amber-900 to-stone-900 border-amber-400' },
+                          { id: 'sunset', name: 'Sunset Spa', color: 'bg-gradient-to-r from-amber-600 to-rose-600 border-orange-400' },
+                          { id: 'ocean', name: 'Ocean Island', color: 'bg-gradient-to-r from-cyan-900 to-blue-900 border-cyan-400' },
+                          { id: 'emerald', name: 'Emerald Nature', color: 'bg-gradient-to-r from-emerald-900 to-green-900 border-emerald-400' },
+                          { id: 'violet', name: 'Violet Night', color: 'bg-gradient-to-r from-purple-900 to-indigo-900 border-purple-400' },
+                          { id: 'amber', name: 'Amber Gold', color: 'bg-gradient-to-r from-amber-900 to-stone-900 border-amber-400' },
                         ].map((t) => (
                           <button
                             key={t.id}
@@ -2328,10 +2686,10 @@ export default function AdminDashboard() {
                       </div>
                     </div>
 
-                    {/* Image Upload Section */}
+                    {/* Banner Background Image Upload */}
                     <div>
                       <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                        Campaign Banner / Scooter Image
+                        Banner Background Image
                       </label>
                       <div className="space-y-3">
                         <div className="flex items-center gap-3">
@@ -2339,12 +2697,12 @@ export default function AdminDashboard() {
                             {isUploadingCampaignImg ? (
                               <>
                                 <Loader2 className="w-4 h-4 animate-spin text-black" />
-                                <span>Uploading image...</span>
+                                <span>Uploading banner...</span>
                               </>
                             ) : (
                               <>
                                 <UploadCloud className="w-4 h-4 text-gray-500" />
-                                <span>Upload Image File (PNG, JPG, WebP)</span>
+                                <span>Upload Banner Photo (Landscape / 1200x800)</span>
                               </>
                             )}
                             <input
@@ -2362,7 +2720,7 @@ export default function AdminDashboard() {
                             type="text"
                             value={campaignForm.image_url || ''}
                             onChange={(e) => setCampaignForm(prev => ({ ...prev, image_url: e.target.value }))}
-                            placeholder="Or paste image URL (e.g. /images/scooter.png)"
+                            placeholder="Or paste image URL (e.g. Unsplash URL or Supabase link)"
                             className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-black"
                           />
                         </div>
