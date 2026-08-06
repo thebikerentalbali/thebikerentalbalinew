@@ -436,7 +436,6 @@ export async function fetchCatalogData(options?: { forceRefresh?: boolean }): Pr
       const url = options?.forceRefresh ? '/api/catalog?refresh=true' : '/api/catalog';
       const res = await fetch(url, {
         headers: { 'Content-Type': 'application/json' },
-        next: { revalidate: 30 },
       });
 
       if (res.ok) {

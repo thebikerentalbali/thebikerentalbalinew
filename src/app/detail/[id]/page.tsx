@@ -3,7 +3,7 @@ import ScooterDetailClient from '@/components/ScooterDetailClient';
 import { fetchScooterDetailServer } from '@/lib/api/catalogService';
 import { getProductSchema, getBreadcrumbSchema, SITE_URL, SITE_NAME } from '@/lib/seo/schemaGenerator';
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 interface PageProps {
   params: Promise<{ id: string }>;

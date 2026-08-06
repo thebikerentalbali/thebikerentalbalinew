@@ -7,7 +7,7 @@ interface PageProps {
   params: Promise<{ vendorSlug: string }>;
 }
 
-export const revalidate = 300;
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { vendorSlug } = await params;
