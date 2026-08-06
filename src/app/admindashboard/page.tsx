@@ -488,38 +488,35 @@ export default function AdminDashboard() {
         partner_logo_url: undefined,
         category: 'spa',
         subtitle: 'Show your scooter rental booking confirmation to claim 25% off all traditional Balinese massage & body scrub treatments.',
-        badge: '💆 25% SPA DISCOUNT',
+        badge: '25% SPA DISCOUNT',
         discount_text: 'EXCLUSIVE FOR OUR RIDERS',
         voucher_code: 'BALIRIDER25',
         partner_whatsapp: '6281234567890',
         partner_location: 'Seminyak & Ubud, Bali',
         voucher_terms: 'Valid with any active scooter booking confirmation on The Bike Rental Bali.',
-        hero_overlay_text: 'RELAX & RECHARGE',
         cta_text: 'Claim Spa Voucher',
         cta_link: '#claim-voucher',
         image_url: '/images/scooter.png',
-        theme: 'sunset',
         is_active: true,
         order: (campaigns.length || 0) + 1,
       })
-    } else if (category === 'video') {
+    } else if (category === 'tour') {
       setCampaignForm({
         id: `campaign-${Date.now()}`,
-        title: 'Bali Travel Guide | Best Places & Scenic Routes',
-        partner_name: 'Bali Head Tour',
+        title: 'Bali Island Excursions & Guided Rides',
+        partner_name: 'Bali Island Adventures',
         partner_logo_url: undefined,
-        category: 'video',
-        subtitle: 'Experience Bali through its culture, secret waterfalls, and scenic mountain roads. Watch our ultimate rider guide.',
-        badge: '🎥 ISLAND GUIDE',
-        discount_text: 'TOP HIDDEN SPOTS',
-        video_url: 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
-        youtube_id: 'ScMzIvxBSi4',
-        hero_overlay_text: 'EXPLORE the island of God',
-        cta_text: 'Watch Video Guide',
-        cta_link: 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
+        category: 'tour',
+        subtitle: 'Get 20% off all waterfall treks, sunrise volcano tours, and curated scooter road-trips.',
+        badge: 'SPECIAL TOUR OFFER',
+        discount_text: 'EXCLUSIVE 20% OFF TOURS',
+        voucher_code: 'BALITOUR20',
+        partner_whatsapp: '6281234567890',
         partner_location: 'Bali, Indonesia',
+        voucher_terms: 'Present active scooter booking code when reserving your tour slot.',
+        cta_text: 'View Tour Offer',
+        cta_link: '#claim-voucher',
         image_url: '/images/scooter.png',
-        theme: 'dark',
         is_active: true,
         order: (campaigns.length || 0) + 1,
       })
@@ -531,14 +528,12 @@ export default function AdminDashboard() {
         partner_logo_url: '/images/scooter.png',
         category: 'scooter',
         subtitle: 'Rent Honda, Yamaha & Vespa scooters with free doorstep delivery across Bali & 2 helmets included.',
-        badge: '🔥 LIMITED PROMO',
+        badge: 'LIMITED PROMO',
         discount_text: 'SAVE UP TO 25% TODAY',
-        hero_overlay_text: 'RIDE WITH FREEDOM',
         cta_text: 'Rent Now',
         cta_link: '#all-scooters',
         partner_location: 'All Bali Delivery',
         image_url: '/images/scooter.png',
-        theme: 'ocean',
         is_active: true,
         order: (campaigns.length || 0) + 1,
       })
@@ -2074,13 +2069,13 @@ export default function AdminDashboard() {
             {/* Header & Quick Action */}
             <div className="bg-white rounded-3xl p-6 sm:p-8 border border-black/10 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-[11px] font-black uppercase tracking-wider mb-2.5">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                  Marketing & Cross-Promotions
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-100 text-neutral-900 text-[11px] font-black uppercase tracking-wider mb-2.5 border border-black/10">
+                  <Sparkles className="w-3.5 h-3.5 text-black" />
+                  Marketing & Collaborations
                 </div>
                 <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">Campaigns & Collaborations</h2>
                 <p className="text-xs sm:text-sm text-gray-500 mt-1 max-w-xl font-medium">
-                  Create cinematic cards for <strong>Spa & Wellness partnerships</strong>, <strong>YouTube travel video guides</strong>, <strong>Island Tours</strong>, and <strong>Scooter promotions</strong>.
+                  Create clean cinematic promotion cards for <strong>Spa & Wellness partnerships</strong>, <strong>Island Tours</strong>, and <strong>Scooter deals</strong>.
                 </p>
               </div>
 
@@ -2088,7 +2083,7 @@ export default function AdminDashboard() {
                 <button
                   type="button"
                   onClick={() => handleOpenCreateCampaign('spa')}
-                  className="bg-amber-400 hover:bg-amber-300 text-black px-4 py-3 rounded-2xl font-bold text-xs uppercase tracking-wider active-press transition-all flex items-center gap-2 shadow-sm cursor-pointer"
+                  className="bg-black hover:bg-neutral-800 text-white px-4 py-3 rounded-2xl font-bold text-xs uppercase tracking-wider active-press transition-all flex items-center gap-2 shadow-sm cursor-pointer"
                 >
                   <Sparkles className="w-4 h-4" />
                   <span>+ Spa Collab</span>
@@ -2096,28 +2091,28 @@ export default function AdminDashboard() {
 
                 <button
                   type="button"
-                  onClick={() => handleOpenCreateCampaign('video')}
-                  className="bg-neutral-900 hover:bg-black text-white px-4 py-3 rounded-2xl font-bold text-xs uppercase tracking-wider active-press transition-all flex items-center gap-2 shadow-sm cursor-pointer"
+                  onClick={() => handleOpenCreateCampaign('tour')}
+                  className="bg-neutral-100 hover:bg-neutral-200 text-black px-4 py-3 rounded-2xl font-bold text-xs uppercase tracking-wider active-press transition-all flex items-center gap-2 border border-black/10 cursor-pointer"
                 >
-                  <Play className="w-4 h-4 fill-white" />
-                  <span>+ Video Guide</span>
+                  <MapPin className="w-4 h-4" />
+                  <span>+ Tour Collab</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => handleOpenCreateCampaign('scooter')}
-                  className="bg-neutral-100 hover:bg-neutral-200 text-gray-800 px-4 py-3 rounded-2xl font-bold text-xs uppercase tracking-wider active-press transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="bg-neutral-100 hover:bg-neutral-200 text-black px-4 py-3 rounded-2xl font-bold text-xs uppercase tracking-wider active-press transition-all flex items-center gap-1.5 border border-black/10 cursor-pointer"
                 >
                   <Plus className="w-4 h-4 stroke-[2.5]" />
-                  <span>Custom</span>
+                  <span>+ Scooter Deal</span>
                 </button>
               </div>
             </div>
 
             {/* Success Alert */}
             {campaignSaveSuccess && (
-              <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-5 py-3.5 rounded-2xl flex items-center gap-3 text-xs sm:text-sm font-bold shadow-xs animate-in slide-in-from-top-2">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+              <div className="bg-black text-white px-5 py-3.5 rounded-2xl flex items-center gap-3 text-xs sm:text-sm font-bold shadow-lg animate-in slide-in-from-top-2 border border-white/20">
+                <CheckCircle2 className="w-5 h-5 text-white shrink-0" />
                 <span>Campaign changes published successfully to the homepage!</span>
               </div>
             )}
@@ -2125,8 +2120,8 @@ export default function AdminDashboard() {
             {/* Campaign Cards List */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-base sm:text-lg font-black text-gray-900">Active & Configured Campaigns ({campaigns.length})</h3>
-                <span className="text-xs text-gray-400 font-semibold">Ordered by display priority</span>
+                <h3 className="text-base sm:text-lg font-black text-gray-900">Active Campaigns ({campaigns.length})</h3>
+                <span className="text-xs text-gray-400 font-semibold">Priority ordered</span>
               </div>
 
               {campaigns.length === 0 ? (
@@ -2135,161 +2130,148 @@ export default function AdminDashboard() {
                     <Sparkles className="w-8 h-8" />
                   </div>
                   <h4 className="text-base font-bold text-gray-900 mb-1">No campaigns created yet</h4>
-                  <p className="text-xs text-gray-500 max-w-sm mx-auto mb-5">Click below to create your first collaboration or video campaign banner for the homepage.</p>
+                  <p className="text-xs text-gray-500 max-w-sm mx-auto mb-5">Click below to create your first collaboration campaign card for the homepage.</p>
                   <button
                     onClick={() => handleOpenCreateCampaign('spa')}
-                    className="px-5 py-2.5 bg-black text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-neutral-800 transition-all"
+                    className="px-5 py-2.5 bg-black text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-neutral-800 transition-all cursor-pointer"
                   >
                     + Create First Collaboration
                   </button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 gap-5">
-                  {campaigns.map((camp) => {
-                    const themeGradients: Record<string, string> = {
-                      dark: "from-neutral-950 to-black text-white border-white/10",
-                      sunset: "from-amber-900 via-orange-950 to-black text-white border-white/20",
-                      ocean: "from-cyan-950 to-blue-950 text-white border-white/20",
-                      emerald: "from-emerald-950 to-green-950 text-white border-white/20",
-                      violet: "from-purple-950 to-neutral-950 text-white border-white/20",
-                      amber: "from-amber-950 to-stone-900 text-white border-amber-500/20",
-                    }
-                    const gradientClass = themeGradients[camp.theme || 'dark'] || themeGradients.dark
-
-                    return (
-                      <div
-                        key={camp.id}
-                        className="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-5 transition-all hover:shadow-md"
-                      >
-                        {/* Left Card Visual Preview Pill */}
-                        <div className={`w-full md:w-80 h-40 rounded-2xl p-4 bg-gradient-to-br ${gradientClass} relative overflow-hidden flex flex-col justify-between shrink-0 shadow-inner border`}>
-                          {camp.image_url && (
-                            <Image
-                              src={camp.image_url}
-                              alt="preview"
-                              fill
-                              className="object-cover opacity-40"
-                            />
-                          )}
-                          <div className="relative z-10 flex items-center justify-between">
-                            <div className="flex items-center gap-1.5">
-                              {camp.partner_logo_url ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img src={camp.partner_logo_url} alt="logo" className="w-5 h-5 rounded-full object-cover bg-white p-0.5" />
-                              ) : null}
-                              <span className="px-2 py-0.5 rounded-full bg-white/20 text-[9px] font-black uppercase tracking-wider backdrop-blur-md">
-                                {camp.category || 'collab'}
-                              </span>
-                            </div>
-                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${camp.is_active ? 'bg-emerald-400 text-black' : 'bg-neutral-600 text-white'}`}>
-                              {camp.is_active ? 'Active' : 'Inactive'}
-                            </span>
-                          </div>
-
-                          <div className="relative z-10">
-                            {camp.hero_overlay_text && (
-                              <p className="text-[10px] font-black font-serif italic text-white/80 uppercase tracking-wider">{camp.hero_overlay_text}</p>
-                            )}
-                            <p className="text-xs font-black leading-tight line-clamp-1">{camp.title || 'Untitled Campaign'}</p>
-                            {camp.voucher_code ? (
-                              <span className="inline-block mt-1 font-mono text-[9px] font-bold bg-amber-400 text-black px-1.5 py-0.5 rounded">
-                                CODE: {camp.voucher_code}
-                              </span>
-                            ) : camp.discount_text ? (
-                              <p className="text-[10px] font-extrabold text-amber-300 mt-0.5 truncate">{camp.discount_text}</p>
+                <div className="grid grid-cols-1 gap-4">
+                  {campaigns.map((camp) => (
+                    <div
+                      key={camp.id}
+                      className="bg-white rounded-3xl p-5 sm:p-6 border border-gray-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-5 transition-all hover:shadow-md"
+                    >
+                      {/* Left Visual Preview Pill (Black & White Theme) */}
+                      <div className="w-full md:w-72 h-36 rounded-2xl bg-black text-white relative overflow-hidden flex flex-col justify-between p-4 shrink-0 shadow-md border border-white/10">
+                        {camp.image_url && (
+                          <Image
+                            src={camp.image_url}
+                            alt="preview"
+                            fill
+                            className="object-cover opacity-50 brightness-75"
+                          />
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+                        
+                        <div className="relative z-10 flex items-center justify-between">
+                          <div className="flex items-center gap-1.5">
+                            {camp.partner_logo_url ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={camp.partner_logo_url} alt="logo" className="w-5 h-5 rounded-full object-cover bg-white p-0.5" />
                             ) : null}
-                          </div>
-                        </div>
-
-                        {/* Middle Details */}
-                        <div className="flex-1 min-w-0 space-y-1.5">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className="text-base sm:text-lg font-black text-gray-900 truncate">{camp.title}</h4>
-                            <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 uppercase">
-                              {camp.category || 'scooter'}
+                            <span className="px-2 py-0.5 rounded-full bg-white text-black text-[9px] font-black uppercase tracking-wider">
+                              {camp.category || 'collab'}
                             </span>
-                            {camp.partner_name && (
-                              <span className="text-xs font-semibold text-gray-500 truncate">
-                                with <strong>{camp.partner_name}</strong>
-                              </span>
-                            )}
                           </div>
-
-                          {camp.subtitle && (
-                            <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">{camp.subtitle}</p>
-                          )}
-
-                          <div className="flex items-center gap-4 text-xs text-gray-400 pt-1 flex-wrap">
-                            {camp.voucher_code && (
-                              <span className="font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                                Voucher: <strong>{camp.voucher_code}</strong>
-                              </span>
-                            )}
-                            {camp.video_url && (
-                              <span className="font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded-md border border-red-200 flex items-center gap-1">
-                                <Play className="w-3 h-3 fill-red-600" /> YouTube Video
-                              </span>
-                            )}
-                            <span>Order: #{camp.order || 1}</span>
-                          </div>
+                          <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${camp.is_active ? 'bg-white text-black' : 'bg-neutral-700 text-neutral-300'}`}>
+                            {camp.is_active ? 'Active' : 'Disabled'}
+                          </span>
                         </div>
 
-                        {/* Right Action Buttons */}
-                        <div className="flex items-center gap-2.5 shrink-0 self-end md:self-center">
-                          <button
-                            type="button"
-                            onClick={() => handleToggleCampaignActive(camp)}
-                            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
-                              camp.is_active 
-                                ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200' 
-                                : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 border border-neutral-200'
-                            }`}
-                          >
-                            {camp.is_active ? 'Active' : 'Disabled'}
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => handleOpenEditCampaign(camp)}
-                            className="p-2.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 transition-colors cursor-pointer"
-                            title="Edit Campaign"
-                          >
-                            <Edit3 className="w-4 h-4" />
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteCampaignAction(camp.id)}
-                            className="p-2.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 transition-colors cursor-pointer"
-                            title="Delete Campaign"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                        <div className="relative z-10">
+                          <p className="text-xs font-black leading-tight line-clamp-1">{camp.title || 'Untitled Campaign'}</p>
+                          {camp.voucher_code ? (
+                            <span className="inline-block mt-1 font-mono text-[9px] font-bold bg-white text-black px-1.5 py-0.5 rounded">
+                              CODE: {camp.voucher_code}
+                            </span>
+                          ) : camp.discount_text ? (
+                            <p className="text-[10px] font-bold text-neutral-300 mt-0.5 truncate">{camp.discount_text}</p>
+                          ) : null}
                         </div>
                       </div>
-                    )
-                  })}
+
+                      {/* Middle Details */}
+                      <div className="flex-1 min-w-0 space-y-1.5">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className="text-base sm:text-lg font-black text-gray-900 leading-snug">{camp.title}</h4>
+                          <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-neutral-100 text-black uppercase border border-gray-200">
+                            {camp.category || 'scooter'}
+                          </span>
+                          {camp.partner_name && (
+                            <span className="text-xs font-semibold text-gray-500">
+                              by <strong>{camp.partner_name}</strong>
+                            </span>
+                          )}
+                        </div>
+
+                        {camp.subtitle && (
+                          <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">{camp.subtitle}</p>
+                        )}
+
+                        <div className="flex items-center gap-4 text-xs text-gray-500 pt-1 flex-wrap font-medium">
+                          {camp.voucher_code && (
+                            <span className="bg-neutral-100 text-black px-2.5 py-0.5 rounded-md border border-neutral-200 font-mono font-bold text-[11px]">
+                              Code: {camp.voucher_code}
+                            </span>
+                          )}
+                          {camp.partner_whatsapp && (
+                            <span className="text-emerald-700 flex items-center gap-1 font-semibold">
+                              <MessageCircle className="w-3.5 h-3.5 fill-emerald-600 text-emerald-600" /> WhatsApp Direct
+                            </span>
+                          )}
+                          <span>Priority #{camp.order || 1}</span>
+                        </div>
+                      </div>
+
+                      {/* Right Action Buttons */}
+                      <div className="flex items-center gap-2.5 shrink-0 self-end md:self-center">
+                        <button
+                          type="button"
+                          onClick={() => handleToggleCampaignActive(camp)}
+                          className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer border ${
+                            camp.is_active 
+                              ? 'bg-black text-white hover:bg-neutral-800 border-black' 
+                              : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 border-neutral-200'
+                          }`}
+                        >
+                          {camp.is_active ? 'Active' : 'Disabled'}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEditCampaign(camp)}
+                          className="p-2.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 transition-colors cursor-pointer"
+                          title="Edit Campaign"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteCampaignAction(camp.id)}
+                          className="p-2.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 transition-colors cursor-pointer"
+                          title="Delete Campaign"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
 
             {/* Campaign Modal (Create / Edit) */}
             {isCampaignModalOpen && (
-              <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-                <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[92vh] overflow-y-auto p-6 sm:p-8 space-y-6 border border-gray-100 my-auto animate-in zoom-in-95">
+              <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+                <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[92vh] overflow-y-auto p-6 sm:p-8 space-y-6 border border-gray-200 my-auto animate-in zoom-in-95 text-black">
                   
                   {/* Modal Header */}
                   <div className="flex items-center justify-between pb-4 border-b border-gray-100">
                     <div>
                       <h3 className="text-xl sm:text-2xl font-black text-gray-900">
-                        {editingCampaignId ? 'Edit Campaign & Collaboration' : 'Create New Campaign / Collaboration'}
+                        {editingCampaignId ? 'Edit Campaign Card' : 'Create Campaign Card'}
                       </h3>
-                      <p className="text-xs text-gray-500 mt-0.5">Customize partner branding, video embeds, promo vouchers, and banner graphics.</p>
+                      <p className="text-xs text-gray-500 mt-0.5">Customize partner collaboration, voucher codes, and banner graphics.</p>
                     </div>
                     <button
                       type="button"
                       onClick={() => setIsCampaignModalOpen(false)}
-                      className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-black transition-colors"
+                      className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-black transition-colors cursor-pointer"
                     >
                       <XCircle className="w-6 h-6" />
                     </button>
@@ -2298,27 +2280,27 @@ export default function AdminDashboard() {
                   {/* Form */}
                   <form onSubmit={handleSaveCampaignSubmit} className="space-y-6">
                     
-                    {/* Live Preview Card (Exact Reference Look) */}
+                    {/* Live Preview Card (Clean Black & White Design) */}
                     <div>
                       <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
-                        Live Preview (Homepage Reference Design)
+                        Live Preview (Homepage Look)
                       </label>
-                      <div className={`rounded-3xl p-5 sm:p-7 text-white relative overflow-hidden border shadow-xl bg-neutral-950 min-h-[220px] flex flex-col justify-between`}>
+                      <div className="rounded-3xl p-5 sm:p-6 text-white relative overflow-hidden border border-white/10 shadow-xl bg-black min-h-[190px] flex flex-col justify-between">
                         
                         {campaignForm.image_url && (
                           <Image
                             src={campaignForm.image_url}
                             alt="preview"
                             fill
-                            className="object-cover brightness-75"
+                            className="object-cover brightness-[0.55]"
                           />
                         )}
-                        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/90" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30" />
 
                         {/* Top Bar Preview */}
-                        <div className="relative z-10 flex items-start justify-between gap-3">
+                        <div className="relative z-10 flex items-center justify-between gap-3">
                           <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <div className="w-10 h-10 rounded-full bg-white p-0.5 shadow-md flex items-center justify-center overflow-hidden shrink-0">
+                            <div className="w-9 h-9 rounded-full bg-white p-0.5 shadow-md flex items-center justify-center overflow-hidden shrink-0">
                               {campaignForm.partner_logo_url ? (
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <img src={campaignForm.partner_logo_url} alt="partner" className="w-full h-full object-cover" />
@@ -2327,51 +2309,39 @@ export default function AdminDashboard() {
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <h4 className="text-sm sm:text-base font-black text-white leading-snug break-words">
-                                {campaignForm.title || 'Campaign Title'}
-                              </h4>
-                              <p className="text-[11px] font-semibold text-neutral-300">
-                                {campaignForm.partner_name || 'Partner Name'}
-                              </p>
+                              <span className="text-xs font-bold text-neutral-200 block truncate">
+                                {campaignForm.partner_name || 'The Bike Rental Bali'}
+                              </span>
+                              {campaignForm.partner_location && (
+                                <span className="text-[10px] text-neutral-400 block truncate">
+                                  {campaignForm.partner_location}
+                                </span>
+                              )}
                             </div>
                           </div>
 
                           {campaignForm.badge && (
-                            <span className="px-2.5 py-1 rounded-full bg-white/20 text-[10px] font-black uppercase tracking-wider backdrop-blur-md">
+                            <span className="px-3 py-1 rounded-full bg-white text-black text-[10px] font-black uppercase tracking-wider shadow-sm">
                               {campaignForm.badge}
                             </span>
                           )}
                         </div>
 
-                        {/* Center Hero Preview */}
-                        <div className="relative z-10 py-3 flex flex-col items-center justify-center text-center my-auto">
-                          {(campaignForm.category === 'video' || campaignForm.video_url) && (
-                            <div className="w-12 h-9 bg-red-600 rounded-xl flex items-center justify-center shadow-lg mb-1.5">
-                              <Play className="w-5 h-5 fill-white text-white translate-x-0.5" />
-                            </div>
-                          )}
-                          {campaignForm.hero_overlay_text && (
-                            <h5 className="text-lg sm:text-2xl font-black font-serif italic text-white drop-shadow-md uppercase tracking-tight">
-                              {campaignForm.hero_overlay_text}
-                            </h5>
-                          )}
-                        </div>
-
                         {/* Bottom Bar Preview */}
-                        <div className="relative z-10 flex items-center justify-between gap-3 pt-2 border-t border-white/10">
-                          <div className="min-w-0">
-                            {campaignForm.discount_text && (
-                              <p className="text-[11px] font-black text-amber-300 uppercase truncate">
-                                🎁 {campaignForm.discount_text}
-                              </p>
-                            )}
-                            <p className="text-[10px] text-neutral-200 truncate max-w-sm">
-                              {campaignForm.subtitle || 'Promo details and description'}
+                        <div className="relative z-10 space-y-2 pt-4">
+                          <h4 className="text-base sm:text-lg font-black text-white leading-snug break-words">
+                            {campaignForm.title || 'Campaign Title'}
+                          </h4>
+                          {campaignForm.subtitle && (
+                            <p className="text-xs text-neutral-300 line-clamp-1 max-w-sm">
+                              {campaignForm.subtitle}
                             </p>
+                          )}
+                          <div className="flex items-center justify-between pt-1">
+                            <span className="px-4 py-1.5 rounded-full bg-white text-black text-[10px] font-black uppercase tracking-wider shadow-sm">
+                              {campaignForm.cta_text || 'View Details'}
+                            </span>
                           </div>
-                          <span className="px-4 py-1.5 rounded-full bg-white text-black text-[11px] font-bold uppercase tracking-wider shrink-0 shadow-sm">
-                            {campaignForm.cta_text || 'Claim Offer'}
-                          </span>
                         </div>
 
                       </div>
@@ -2380,14 +2350,13 @@ export default function AdminDashboard() {
                     {/* Category Selector */}
                     <div>
                       <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
-                        Campaign Type / Collaboration Category
+                        Campaign Category
                       </label>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      <div className="grid grid-cols-3 gap-2.5">
                         {[
-                          { id: 'spa', label: '💆 Spa & Wellness', desc: 'Massage vouchers & discounts' },
-                          { id: 'video', label: '🎥 Video Guide', desc: 'YouTube travel guide video' },
-                          { id: 'scooter', label: '🛵 Scooter Promo', desc: 'Fleet discount & rates' },
-                          { id: 'tour', label: '🗺️ Island Tour', desc: 'Day trips & excursions' },
+                          { id: 'spa', label: 'Spa & Wellness', desc: 'Massage & spa vouchers' },
+                          { id: 'tour', label: 'Island Tour', desc: 'Excursions & road trips' },
+                          { id: 'scooter', label: 'Scooter Promo', desc: 'Fleet discount deal' },
                         ].map((cat) => (
                           <button
                             key={cat.id}
@@ -2395,11 +2364,11 @@ export default function AdminDashboard() {
                             onClick={() => setCampaignForm(prev => ({ 
                               ...prev, 
                               category: cat.id as CampaignCategory,
-                              cta_text: cat.id === 'spa' ? 'Claim Spa Voucher' : cat.id === 'video' ? 'Watch Video Guide' : 'Rent Now'
+                              cta_text: cat.id === 'spa' ? 'Claim Spa Voucher' : cat.id === 'tour' ? 'View Tour Offer' : 'Rent Now'
                             }))}
                             className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
                               campaignForm.category === cat.id 
-                                ? 'border-black bg-neutral-900 text-white shadow-sm' 
+                                ? 'border-black bg-black text-white shadow-sm' 
                                 : 'border-gray-200 hover:border-gray-300 text-gray-800 bg-gray-50'
                             }`}
                           >
@@ -2415,8 +2384,8 @@ export default function AdminDashboard() {
                     {/* Partner Branding Row */}
                     <div className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200 space-y-4">
                       <div className="flex items-center gap-2 text-xs font-bold text-neutral-800 uppercase tracking-wider">
-                        <HeartHandshake className="w-4 h-4 text-amber-600" />
-                        <span>Partner / Collaborator Details</span>
+                        <HeartHandshake className="w-4 h-4 text-black" />
+                        <span>Partner / Brand Details</span>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -2428,7 +2397,7 @@ export default function AdminDashboard() {
                             type="text"
                             value={campaignForm.partner_name || ''}
                             onChange={(e) => setCampaignForm(prev => ({ ...prev, partner_name: e.target.value }))}
-                            placeholder="e.g. Sanctuary Spa Bali or Bali Head Tour"
+                            placeholder="e.g. Sanctuary Spa Bali"
                             className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-black bg-white"
                           />
                         </div>
@@ -2475,42 +2444,11 @@ export default function AdminDashboard() {
                       </div>
                     </div>
 
-                    {/* YouTube Video Section (if video or desired) */}
-                    {(campaignForm.category === 'video' || campaignForm.video_url) && (
-                      <div className="p-4 rounded-2xl bg-red-50/50 border border-red-200 space-y-3">
-                        <div className="flex items-center gap-2 text-xs font-bold text-red-800 uppercase tracking-wider">
-                          <Play className="w-4 h-4 fill-red-600 text-red-600" />
-                          <span>YouTube Video Settings</span>
-                        </div>
-                        <div>
-                          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                            YouTube Video URL
-                          </label>
-                          <input
-                            type="text"
-                            value={campaignForm.video_url || ''}
-                            onChange={(e) => {
-                              const val = e.target.value
-                              const ytId = extractYouTubeId(val)
-                              setCampaignForm(prev => ({
-                                ...prev,
-                                video_url: val,
-                                youtube_id: ytId || prev.youtube_id,
-                                image_url: ytId && !prev.image_url ? `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg` : prev.image_url
-                              }))
-                            }}
-                            placeholder="e.g. https://www.youtube.com/watch?v=ScMzIvxBSi4"
-                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-black bg-white"
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Voucher & WhatsApp Booking Collaboration Settings */}
-                    <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200 space-y-4">
-                      <div className="flex items-center gap-2 text-xs font-bold text-amber-900 uppercase tracking-wider">
-                        <Gift className="w-4 h-4 text-amber-700" />
-                        <span>Voucher & Customer Discount Settings</span>
+                    {/* Voucher & WhatsApp Collaboration Settings */}
+                    <div className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200 space-y-4">
+                      <div className="flex items-center gap-2 text-xs font-bold text-neutral-900 uppercase tracking-wider">
+                        <Gift className="w-4 h-4 text-black" />
+                        <span>Voucher & Offer Details</span>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -2529,13 +2467,13 @@ export default function AdminDashboard() {
 
                         <div>
                           <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                            Partner WhatsApp Number
+                            Partner WhatsApp (For 1-Click Booking)
                           </label>
                           <input
                             type="text"
                             value={campaignForm.partner_whatsapp || ''}
                             onChange={(e) => setCampaignForm(prev => ({ ...prev, partner_whatsapp: e.target.value }))}
-                            placeholder="e.g. 6281234567890 (for 1-click booking)"
+                            placeholder="e.g. 6281234567890"
                             className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-black bg-white"
                           />
                         </div>
@@ -2555,43 +2493,28 @@ export default function AdminDashboard() {
                       </div>
                     </div>
 
-                    {/* Campaign Title & Slogan */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                          Campaign Title <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={campaignForm.title}
-                          onChange={(e) => setCampaignForm(prev => ({ ...prev, title: e.target.value }))}
-                          placeholder="e.g. Exclusive Spa & Wellness Collaboration"
-                          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                          Center Hero Slogan / Typography
-                        </label>
-                        <input
-                          type="text"
-                          value={campaignForm.hero_overlay_text || ''}
-                          onChange={(e) => setCampaignForm(prev => ({ ...prev, hero_overlay_text: e.target.value }))}
-                          placeholder="e.g. EXPLORE the island of God or RELAX & RECHARGE"
-                          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black"
-                        />
-                      </div>
+                    {/* Campaign Title */}
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                        Campaign Title <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={campaignForm.title}
+                        onChange={(e) => setCampaignForm(prev => ({ ...prev, title: e.target.value }))}
+                        placeholder="e.g. Exclusive Spa & Wellness Collaboration"
+                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black"
+                      />
                     </div>
 
                     {/* Subtitle / Description */}
                     <div>
                       <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                        Promo Description / Subtitle
+                        Offer Description / Subtitle
                       </label>
                       <textarea
-                        rows={2}
+                        rows={3}
                         value={campaignForm.subtitle}
                         onChange={(e) => setCampaignForm(prev => ({ ...prev, subtitle: e.target.value }))}
                         placeholder="e.g. Show your scooter rental booking confirmation to claim 25% off all traditional Balinese massage treatments."
@@ -2599,23 +2522,23 @@ export default function AdminDashboard() {
                       />
                     </div>
 
-                    {/* Badge & Discount Row */}
+                    {/* Badge & Discount Highlight */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                          Badge / Tag Text
+                          Badge Tag
                         </label>
                         <input
                           type="text"
                           value={campaignForm.badge || ''}
                           onChange={(e) => setCampaignForm(prev => ({ ...prev, badge: e.target.value }))}
-                          placeholder="e.g. 💆 25% SPA DISCOUNT"
+                          placeholder="e.g. 25% SPA DISCOUNT"
                           className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black"
                         />
                       </div>
                       <div>
                         <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                          Discount / Highlight Text
+                          Offer Highlight Banner Text
                         </label>
                         <input
                           type="text"
@@ -2635,9 +2558,9 @@ export default function AdminDashboard() {
                         </label>
                         <input
                           type="text"
-                          value={campaignForm.cta_text || 'Claim Offer'}
+                          value={campaignForm.cta_text || 'View Details'}
                           onChange={(e) => setCampaignForm(prev => ({ ...prev, cta_text: e.target.value }))}
-                          placeholder="Claim Spa Voucher"
+                          placeholder="View Details"
                           className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black"
                         />
                       </div>
@@ -2647,7 +2570,7 @@ export default function AdminDashboard() {
                         </label>
                         <input
                           type="text"
-                          value={campaignForm.cta_link || '#all-scooters'}
+                          value={campaignForm.cta_link || '#claim-voucher'}
                           onChange={(e) => setCampaignForm(prev => ({ ...prev, cta_link: e.target.value }))}
                           placeholder="#claim-voucher or https://partner.com"
                           className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black"
@@ -2655,41 +2578,10 @@ export default function AdminDashboard() {
                       </div>
                     </div>
 
-                    {/* Color Theme Selector */}
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
-                        Visual Theme Gradient
-                      </label>
-                      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
-                        {[
-                          { id: 'dark', name: 'Dark Luxe', color: 'bg-neutral-900 border-neutral-700' },
-                          { id: 'sunset', name: 'Sunset Spa', color: 'bg-gradient-to-r from-amber-600 to-rose-600 border-orange-400' },
-                          { id: 'ocean', name: 'Ocean Island', color: 'bg-gradient-to-r from-cyan-900 to-blue-900 border-cyan-400' },
-                          { id: 'emerald', name: 'Emerald Nature', color: 'bg-gradient-to-r from-emerald-900 to-green-900 border-emerald-400' },
-                          { id: 'violet', name: 'Violet Night', color: 'bg-gradient-to-r from-purple-900 to-indigo-900 border-purple-400' },
-                          { id: 'amber', name: 'Amber Gold', color: 'bg-gradient-to-r from-amber-900 to-stone-900 border-amber-400' },
-                        ].map((t) => (
-                          <button
-                            key={t.id}
-                            type="button"
-                            onClick={() => setCampaignForm(prev => ({ ...prev, theme: t.id as CampaignTheme }))}
-                            className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
-                              campaignForm.theme === t.id 
-                                ? 'ring-2 ring-black scale-105 shadow-md border-black' 
-                                : 'opacity-80 hover:opacity-100 border-gray-200'
-                            }`}
-                          >
-                            <div className={`w-full h-5 rounded-lg mb-1.5 ${t.color}`} />
-                            <span className="text-[10px] font-bold text-gray-800 block truncate">{t.name}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
                     {/* Banner Background Image Upload */}
                     <div>
                       <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                        Banner Background Image
+                        Card Background Photo
                       </label>
                       <div className="space-y-3">
                         <div className="flex items-center gap-3">
@@ -2697,12 +2589,12 @@ export default function AdminDashboard() {
                             {isUploadingCampaignImg ? (
                               <>
                                 <Loader2 className="w-4 h-4 animate-spin text-black" />
-                                <span>Uploading banner...</span>
+                                <span>Uploading image...</span>
                               </>
                             ) : (
                               <>
                                 <UploadCloud className="w-4 h-4 text-gray-500" />
-                                <span>Upload Banner Photo (Landscape / 1200x800)</span>
+                                <span>Upload Background Photo (Landscape)</span>
                               </>
                             )}
                             <input
@@ -2720,7 +2612,7 @@ export default function AdminDashboard() {
                             type="text"
                             value={campaignForm.image_url || ''}
                             onChange={(e) => setCampaignForm(prev => ({ ...prev, image_url: e.target.value }))}
-                            placeholder="Or paste image URL (e.g. Unsplash URL or Supabase link)"
+                            placeholder="Or enter image path / URL (e.g. /images/scooter.png)"
                             className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-black"
                           />
                         </div>
@@ -2731,7 +2623,7 @@ export default function AdminDashboard() {
                     <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100">
                       <div>
                         <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                          Display Order
+                          Display Priority Order
                         </label>
                         <input
                           type="number"
@@ -2755,7 +2647,7 @@ export default function AdminDashboard() {
                             className="w-5 h-5 rounded accent-black cursor-pointer"
                           />
                           <label htmlFor="campaign-active-toggle" className="text-xs font-bold text-gray-800 cursor-pointer">
-                            Active (Visible on Homepage)
+                            Active on Homepage
                           </label>
                         </div>
                       </div>
@@ -2766,15 +2658,14 @@ export default function AdminDashboard() {
                       <button
                         type="button"
                         onClick={() => setIsCampaignModalOpen(false)}
-                        className="px-5 py-3 rounded-xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
+                        className="px-5 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
                       >
                         Cancel
                       </button>
-
                       <button
                         type="submit"
                         disabled={isSavingCampaign}
-                        className="bg-black text-white hover:bg-neutral-800 px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider shadow-md active-press transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                        className="px-6 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl text-xs font-bold uppercase tracking-wider active-press transition-all flex items-center gap-2 cursor-pointer shadow-md disabled:opacity-50"
                       >
                         {isSavingCampaign ? (
                           <>
@@ -2782,10 +2673,7 @@ export default function AdminDashboard() {
                             <span>Saving...</span>
                           </>
                         ) : (
-                          <>
-                            <Check className="w-4 h-4 stroke-[2.5]" />
-                            <span>Save & Publish</span>
-                          </>
+                          <span>{editingCampaignId ? 'Save Changes' : 'Publish Campaign'}</span>
                         )}
                       </button>
                     </div>
