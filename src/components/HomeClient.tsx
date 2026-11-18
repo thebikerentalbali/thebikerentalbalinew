@@ -7,41 +7,21 @@ import {
   Search,
   SlidersHorizontal,
   ChevronDown,
-  Menu,
-  X,
-  Heart,
-  ShoppingCart,
   Bike,
 } from "lucide-react"
 
 import ScooterCard from "@/components/ScooterCard"
 import CampaignCard from "@/components/CampaignCard"
-import ThemeToggle from "@/components/ThemeToggle"
+import MarketplaceNavbar, {
+  readStoredSavedScooters,
+  writeStoredSavedScooters,
+} from "@/components/MarketplaceNavbar"
 import { fetchCatalogData } from "@/lib/api/catalogService"
 import { createClient as createBrowserClient } from "@/lib/supabase/client"
 import { subscribeToPlatformSettings } from "@/utils/pricing"
-import {
-  SavedBooking,
-  getSavedBookings,
-  removeSavedBooking,
-  clearSavedBookings,
-  subscribeToSavedBookings,
-} from "@/utils/myBookings"
 
-// Dynamic code-split imports for heavy modals - zero JS cost until user clicks
+// Dynamic code-split import for filter modal - zero JS cost until user clicks
 const HomeFilterModal = dynamic(() => import("@/components/HomeFilterModal"), {
-  ssr: false,
-  loading: () => null,
-})
-const HomeSavedModal = dynamic(() => import("@/components/HomeSavedModal"), {
-  ssr: false,
-  loading: () => null,
-})
-const HomeBookingsModal = dynamic(() => import("@/components/HomeBookingsModal"), {
-  ssr: false,
-  loading: () => null,
-})
-const HomeMapModal = dynamic(() => import("@/components/HomeMapModal"), {
   ssr: false,
   loading: () => null,
 })
@@ -73,35 +53,18 @@ export default function HomeClient({
   const [savedScooters, setSavedScooters] = useState<number[]>([])
 
   const [isFilterOpen, setIsFilterOpen] = useState(false)
-  const [isSavedModalOpen, setIsSavedModalOpen] = useState(false)
-  const [isBookingsModalOpen, setIsBookingsModalOpen] = useState(false)
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false)
-  const [isNavOpen, setIsNavOpen] = useState(false)
-  const [isScrolled, setIsScrolled] = useState(false)
-  const [savedBookings, setSavedBookings] = useState<SavedBooking[]>([])
 
   useEffect(() => {
-    setSavedBookings(getSavedBookings())
-    return subscribeToSavedBookings((updated) => setSavedBookings(updated))
-  }, [])
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 28)
-    }
-    handleScroll()
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => window.removeEventListener("scroll", handleScroll)
+    setSavedScooters(readStoredSavedScooters())
+    const syncSaved = () => setSavedScooters(readStoredSavedScooters())
+    window.addEventListener("saved_scooters_updated", syncSaved)
+    return () => window.removeEventListener("saved_scooters_updated", syncSaved)
   }, [])
 
   // Filters state
   const [maxPrice, setMaxPrice] = useState(500000)
   const [selectedYear, setSelectedYear] = useState("All")
-
-  // Map state
-  const [selectedMapVendorId, setSelectedMapVendorId] = useState<number | null>(null)
-  const [mapSearchQuery, setMapSearchQuery] = useState("")
-  const [isMapCardVisible, setIsMapCardVisible] = useState(false)
 
   // Non-blocking sync: Trust initial server data on mount, only subscribe to live updates during idle
   useEffect(() => {
@@ -166,9 +129,11 @@ export default function HomeClient({
 
   const toggleSaveScooter = useCallback((e: React.MouseEvent, id: number) => {
     e.preventDefault()
-    setSavedScooters((prev) =>
-      prev.includes(id) ? prev.filter((sId) => sId !== id) : [...prev, id]
-    )
+    setSavedScooters((prev) => {
+      const next = prev.includes(id) ? prev.filter((sId) => sId !== id) : [...prev, id]
+      writeStoredSavedScooters(next)
+      return next
+    })
   }, [])
 
   // Filter Logic memoized
@@ -213,179 +178,20 @@ export default function HomeClient({
   const filteredPopular = useMemo(() => allFiltered.slice(0, 3), [allFiltered])
   const filteredRecommended = useMemo(() => allFiltered.slice(3), [allFiltered])
 
-  // Filtered vendors for map modal
-  const filteredMapVendors = useMemo(() => {
-    if (!mapSearchQuery.trim()) return topVendors
-    const q = mapSearchQuery.toLowerCase()
-    return topVendors.filter(
-      (v) =>
-        v.name?.toLowerCase().includes(q) ||
-        v.location?.toLowerCase().includes(q) ||
-        v.address?.toLowerCase().includes(q)
-    )
-  }, [topVendors, mapSearchQuery])
-
   return (
-    <div className="flex flex-col min-h-screen px-4 sm:px-6 pb-24 md:px-10 md:pb-28 text-[var(--ink)]">
-      {/* Animated Floating Cirrel Liquid Glass Navbar (smoothly appears on scroll, disappears at top) */}
-      <nav
-        aria-label="Main Navigation"
-        aria-hidden={!isScrolled}
-        className={`fixed top-3 sm:top-4 left-4 right-4 md:left-10 md:right-10 z-50 transition-all duration-300 ease-out ${
-          isScrolled
-            ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
-            : "opacity-0 -translate-y-4 scale-[0.98] pointer-events-none"
-        }`}
-      >
-        <div className="w-full max-w-7xl mx-auto relative">
-          <div className="cirrel-glass-hi rounded-full p-2 px-3 sm:px-4 flex justify-between items-center gap-3">
-            {/* Location Selector Title (Maps Integration without Map Icon) */}
-            <button
-              onClick={openLocationPicker}
-              type="button"
-              tabIndex={isScrolled ? 0 : -1}
-              aria-label="Open Vendor Location Map"
-              className="flex flex-col text-left hover:bg-[var(--card-2)] py-1 px-2.5 rounded-full transition-colors active-press cursor-pointer min-w-0"
-            >
-              <span className="text-[10px] font-bold text-[var(--muted-ink)] uppercase tracking-wider leading-tight">
-                Nearby
-              </span>
-              <div className="flex items-center gap-1">
-                <span className="text-[13px] sm:text-sm font-bold text-[var(--ink)] leading-tight truncate">
-                  Vendor Locations
-                </span>
-                <ChevronDown className="w-3.5 h-3.5 text-[var(--muted-ink)] shrink-0" aria-hidden="true" />
-              </div>
-            </button>
+    <div className="flex flex-col min-h-screen pb-24 md:pb-28 text-[var(--ink)]">
+      <MarketplaceNavbar
+        vendors={topVendors}
+        allScooters={allScooters}
+        savedScooters={savedScooters}
+        durationFilter={durationFilter}
+        onToggleSave={toggleSaveScooter}
+        isLocationModalOpen={isLocationModalOpen}
+        onOpenLocationModal={openLocationPicker}
+        onCloseLocationModal={closeLocationPicker}
+      />
 
-            <div className="flex items-center gap-2 shrink-0">
-              <ThemeToggle className="w-9 h-9" />
-              <button
-                onClick={() => setIsSavedModalOpen(true)}
-                type="button"
-                tabIndex={isScrolled ? 0 : -1}
-                aria-label="View saved scooters"
-                className="cirrel-ibtn w-9 h-9 relative active-press cursor-pointer"
-              >
-                <Heart className="w-4 h-4 text-[var(--ink)]" aria-hidden="true" />
-                {savedScooters.length > 0 && (
-                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-[var(--accent-blue)] rounded-full border-2 border-[var(--bg)]" />
-                )}
-              </button>
-              <button
-                onClick={() => setIsBookingsModalOpen(true)}
-                type="button"
-                tabIndex={isScrolled ? 0 : -1}
-                aria-label="View completed bookings"
-                className="cirrel-ibtn w-9 h-9 relative active-press cursor-pointer"
-              >
-                <ShoppingCart className="w-4 h-4 text-[var(--ink)]" aria-hidden="true" />
-                {savedBookings.length > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-[var(--accent-blue)] text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-[var(--bg)]">
-                    {savedBookings.length}
-                  </span>
-                )}
-              </button>
-              <button
-                onClick={() => setIsNavOpen(!isNavOpen)}
-                type="button"
-                tabIndex={isScrolled ? 0 : -1}
-                aria-label={isNavOpen ? "Close Menu" : "Open Menu"}
-                className="cirrel-ibtn w-9 h-9 active-press cursor-pointer"
-              >
-                {isNavOpen ? <X className="w-4 h-4" aria-hidden="true" /> : <Menu className="w-4 h-4" aria-hidden="true" />}
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Dropdown Menu (works cleanly from both top flat bar and scrolled navbar) */}
-      {isNavOpen && (
-        <div className="fixed top-[68px] sm:top-[76px] left-4 right-4 md:left-10 md:right-10 z-50 pointer-events-none">
-          <div className="w-full max-w-7xl mx-auto pointer-events-auto">
-            <div className="cirrel-modal rounded-[26px] p-5 sm:p-6 flex flex-col gap-2 animate-in slide-in-from-top-4 fade-in text-[var(--ink)]">
-              <div className="relative z-10 flex flex-col gap-1">
-                <Link href="/about" onClick={() => setIsNavOpen(false)} prefetch={true} className="text-[15px] font-semibold text-[var(--ink)] px-3 py-2.5 rounded-2xl hover:bg-[var(--card-2)] transition-colors">About Us</Link>
-                <Link href="/how-it-works" onClick={() => setIsNavOpen(false)} prefetch={true} className="text-[15px] font-semibold text-[var(--ink)] px-3 py-2.5 rounded-2xl hover:bg-[var(--card-2)] transition-colors">How it Works</Link>
-                <Link href="/faq" onClick={() => setIsNavOpen(false)} prefetch={true} className="text-[15px] font-semibold text-[var(--ink)] px-3 py-2.5 rounded-2xl hover:bg-[var(--card-2)] transition-colors">FAQ</Link>
-                <Link href="/contact" onClick={() => setIsNavOpen(false)} prefetch={true} className="text-[15px] font-semibold text-[var(--ink)] px-3 py-2.5 rounded-2xl hover:bg-[var(--card-2)] transition-colors">Contact Support</Link>
-
-                <div className="h-px bg-[var(--line)] my-2" />
-
-                <div className="flex flex-col gap-1.5">
-                  <span className="text-[11px] font-bold text-[var(--muted-ink)] uppercase tracking-wider px-3">Partners</span>
-                  <Link href="/partnersignup" onClick={() => setIsNavOpen(false)} prefetch={true} className="text-[15px] font-semibold text-[var(--ink)] px-3 py-2 rounded-2xl hover:bg-[var(--card-2)] transition-colors flex justify-between items-center group">
-                    <span>Partner Portal</span>
-                    <span className="cirrel-btn-primary text-[11px] font-bold px-3.5 py-1.5">Sign In / Sign Up</span>
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <main className="w-full max-w-7xl mx-auto pt-5 sm:pt-7">
-        {/* Flat unboxed Top Controls at Homepage Top (disappears gracefully as floating rounded card fades in on scroll) */}
-        <div
-          className={`flex justify-between items-center gap-3 mb-10 sm:mb-12 md:mb-14 transition-opacity duration-300 ${
-            isScrolled ? "opacity-0 pointer-events-none" : "opacity-100"
-          }`}
-        >
-          <button
-            onClick={openLocationPicker}
-            type="button"
-            aria-label="Open Vendor Location Map"
-            className="flex flex-col text-left py-1 pr-2 rounded-full transition-colors active-press cursor-pointer min-w-0"
-          >
-            <span className="text-[10px] font-bold text-[var(--muted-ink)] uppercase tracking-wider leading-tight">
-              Nearby
-            </span>
-            <div className="flex items-center gap-1">
-              <span className="text-[13px] sm:text-sm font-bold text-[var(--ink)] leading-tight truncate">
-                Vendor Locations
-              </span>
-              <ChevronDown className="w-3.5 h-3.5 text-[var(--muted-ink)] shrink-0" aria-hidden="true" />
-            </div>
-          </button>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <ThemeToggle className="w-9 h-9" />
-            <button
-              onClick={() => setIsSavedModalOpen(true)}
-              type="button"
-              aria-label="View saved scooters"
-              className="cirrel-ibtn w-9 h-9 relative active-press cursor-pointer"
-            >
-              <Heart className="w-4 h-4 text-[var(--ink)]" aria-hidden="true" />
-              {savedScooters.length > 0 && (
-                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-[var(--accent-blue)] rounded-full border-2 border-[var(--bg)]" />
-              )}
-            </button>
-            <button
-              onClick={() => setIsBookingsModalOpen(true)}
-              type="button"
-              aria-label="View completed bookings"
-              className="cirrel-ibtn w-9 h-9 relative active-press cursor-pointer"
-            >
-              <ShoppingCart className="w-4 h-4 text-[var(--ink)]" aria-hidden="true" />
-              {savedBookings.length > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-[var(--accent-blue)] text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-[var(--bg)]">
-                  {savedBookings.length}
-                </span>
-              )}
-            </button>
-            <button
-              onClick={() => setIsNavOpen(!isNavOpen)}
-              type="button"
-              aria-label={isNavOpen ? "Close Menu" : "Open Menu"}
-              className="cirrel-ibtn w-9 h-9 active-press cursor-pointer"
-            >
-              {isNavOpen ? <X className="w-4 h-4" aria-hidden="true" /> : <Menu className="w-4 h-4" aria-hidden="true" />}
-            </button>
-          </div>
-        </div>
+      <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-10">
 
         {/* Hero Header */}
         <header className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
@@ -567,44 +373,6 @@ export default function HomeClient({
             setMaxPrice={setMaxPrice}
             selectedYear={selectedYear}
             setSelectedYear={setSelectedYear}
-          />
-        )}
-
-        {/* Saved Scooters Modal */}
-        {isSavedModalOpen && (
-          <HomeSavedModal
-            isOpen={isSavedModalOpen}
-            onClose={() => setIsSavedModalOpen(false)}
-            savedScooters={savedScooters}
-            allScooters={allScooters}
-            durationFilter={durationFilter}
-            onToggleSave={toggleSaveScooter}
-          />
-        )}
-
-        {/* Saved Completed Bookings (Cart) Modal */}
-        {isBookingsModalOpen && (
-          <HomeBookingsModal
-            isOpen={isBookingsModalOpen}
-            onClose={() => setIsBookingsModalOpen(false)}
-            bookings={savedBookings}
-            onRemoveBooking={(id) => setSavedBookings(removeSavedBooking(id))}
-            onClearBookings={() => setSavedBookings(clearSavedBookings())}
-          />
-        )}
-
-        {/* Dynamic Location & Vendor Map Modal */}
-        {isLocationModalOpen && (
-          <HomeMapModal
-            isOpen={isLocationModalOpen}
-            onClose={closeLocationPicker}
-            vendors={filteredMapVendors}
-            selectedVendorId={selectedMapVendorId}
-            onSelectVendor={(id) => setSelectedMapVendorId(typeof id === "number" ? id : Number(id) || null)}
-            searchQuery={mapSearchQuery}
-            onSearchChange={setMapSearchQuery}
-            isCardVisible={isMapCardVisible}
-            setIsCardVisible={setIsMapCardVisible}
           />
         )}
       </main>

@@ -30,6 +30,7 @@ import {
 import { fetchScooterDetail, fetchVendorDetail } from "@/lib/api/catalogService"
 import { subscribeToPlatformSettings } from "@/utils/pricing"
 import TransparentLoader from "@/components/TransparentLoader"
+import MarketplaceNavbar from "@/components/MarketplaceNavbar"
 
 interface ScooterDetailClientProps {
   id: string
@@ -256,7 +257,8 @@ export default function ScooterDetailClient({
   }
 
   return (
-    <div className="min-h-screen text-[var(--ink)] antialiased w-full max-w-full overflow-x-hidden pt-3.5 pb-28 sm:py-8">
+    <div className="min-h-screen text-[var(--ink)] antialiased w-full max-w-full overflow-x-hidden pb-28 sm:pb-12">
+      <MarketplaceNavbar compactSpacing />
       
       {/* Toast Notification */}
       {copiedToast && (

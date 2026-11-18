@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useMemo } from "react"
+import dynamic from "next/dynamic"
 import { 
   ChevronLeft, 
   ChevronRight,
@@ -9,8 +10,9 @@ import {
   Check, 
   Bike,
   Clock,
-  ShieldCheck,
-  ExternalLink
+  ExternalLink,
+  Search,
+  SlidersHorizontal
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -19,6 +21,12 @@ import { fetchVendorDetail, fetchScooterDetail } from "@/lib/api/catalogService"
 import { subscribeToPlatformSettings } from "@/utils/pricing"
 import { normalizeGoogleMapsUrl, fetchVendorGoogleMapsFallback } from "@/utils/vendorMaps"
 import TransparentLoader from "@/components/TransparentLoader"
+import MarketplaceNavbar from "@/components/MarketplaceNavbar"
+
+const HomeFilterModal = dynamic(() => import("@/components/HomeFilterModal"), {
+  ssr: false,
+  loading: () => null,
+})
 
 interface VendorDetailClientProps {
   id: string
@@ -80,6 +88,10 @@ export default function VendorDetailClient({
   const [loading, setLoading] = useState<boolean>(!initialVendor)
   const [fallbackMapsUrl, setFallbackMapsUrl] = useState<string>("")
   const [selectedBrand, setSelectedBrand] = useState<string>("All")
+  const [searchQuery, setSearchQuery] = useState<string>("")
+  const [maxPrice, setMaxPrice] = useState<number>(500000)
+  const [selectedYear, setSelectedYear] = useState<string>("All")
+  const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false)
   const [copiedLink, setCopiedLink] = useState(false)
 
   // Full frame cover gallery list
@@ -251,15 +263,50 @@ export default function VendorDetailClient({
   }
 
   const availableBrands = ["All", ...Array.from(new Set(scooters.map((s) => s.brand).filter(Boolean)))]
-  const filteredScooters = selectedBrand === "All" 
-    ? scooters 
-    : scooters.filter((s) => s.brand === selectedBrand)
+  const filteredScooters = useMemo(() => {
+    const qLower = searchQuery.trim().toLowerCase()
+    return scooters.filter((s) => {
+      if (selectedBrand !== "All" && s.brand !== selectedBrand) return false
+
+      const priceVal = s.price_daily ?? s.price
+      if (typeof priceVal === "number") {
+        if (priceVal > maxPrice) return false
+      } else {
+        const parsed = parseInt(String(priceVal || "0").replace(/[^0-9]/g, ""))
+        if (!isNaN(parsed) && parsed > 0 && parsed > maxPrice) return false
+      }
+
+      if (selectedYear && selectedYear !== "All") {
+        const sYear = s.year ? String(s.year) : "2025"
+        if (sYear !== selectedYear) return false
+      }
+
+      if (qLower) {
+        const nameMatch = s.name?.toLowerCase().includes(qLower)
+        const brandMatch = s.brand?.toLowerCase().includes(qLower)
+        const yearMatch = s.year ? String(s.year).includes(qLower) : false
+        if (!nameMatch && !brandMatch && !yearMatch) return false
+      }
+
+      return true
+    })
+  }, [scooters, selectedBrand, searchQuery, maxPrice, selectedYear])
+
+  const resetAllFilters = () => {
+    setSelectedBrand("All")
+    setSearchQuery("")
+    setMaxPrice(500000)
+    setSelectedYear("All")
+  }
+
+  const hasActiveModalFilter = maxPrice < 500000 || selectedYear !== "All"
 
   const totalFleetCount = scooters.reduce((sum, s) => sum + (s.total_units || 1), 0)
   const googleMapsUrl = normalizeGoogleMapsUrl(vendor?.google_maps_url) || fallbackMapsUrl
 
   return (
     <div className="min-h-screen text-[var(--ink)] antialiased w-full max-w-full overflow-x-hidden pb-16">
+      <MarketplaceNavbar compactSpacing />
       
       {/* ======================================================== */}
       {/* MOBILE LAYOUT (SM & DOWN)                                */}
@@ -267,7 +314,7 @@ export default function VendorDetailClient({
       <div className="block md:hidden">
         
         {/* Mobile Header Card */}
-        <header className="px-4 pt-4">
+        <header className="px-4">
           <div className="cirrel-glass rounded-[30px] overflow-hidden relative">
             
             {/* 1. Full Frame Cover Image Carousel */}
@@ -397,56 +444,72 @@ export default function VendorDetailClient({
               </div>
 
               {/* Stats Row */}
-              <div className="flex items-center justify-between border-t border-[var(--line)] pt-3.5 mt-3.5 gap-2">
-                <div className="flex flex-col items-center justify-center flex-1">
+              <div className="flex items-center justify-between border-t border-[var(--line)] pt-3.5 mt-3.5 gap-1">
+                <div className="flex flex-col items-center justify-center shrink-0 px-2.5">
                   <span className="font-bold text-base text-[var(--ink)]">{totalFleetCount}</span>
                   <span className="text-[10px] text-[var(--muted-ink)] font-bold mt-0.5 uppercase tracking-wider">scooters</span>
                 </div>
 
-                <div className="w-px h-6 bg-[var(--line)]" />
+                <div className="w-px h-7 bg-[var(--line)] shrink-0" />
 
-                <div className="flex flex-col items-center justify-center flex-1 min-w-0 px-1">
-                  <span className="font-bold text-xs text-[var(--ink)] truncate max-w-full">
-                    {vendor.opening_hours || "08:00 – 20:00"}
+                <div className="flex flex-col items-center justify-center flex-1 min-w-0 px-2 text-center">
+                  <span className="font-bold text-[11px] sm:text-xs text-[var(--ink)] leading-snug whitespace-normal break-words">
+                    {vendor.opening_hours || "08:00 AM – 08:00 PM"}
                   </span>
                   <span className="text-[10px] text-[var(--muted-ink)] font-bold mt-0.5 uppercase tracking-wider">hours</span>
                 </div>
 
-                <div className="w-px h-6 bg-[var(--line)]" />
+                {googleMapsUrl && (
+                  <>
+                    <div className="w-px h-7 bg-[var(--line)] shrink-0" />
 
-                <div className="flex flex-col items-center justify-center flex-1">
-                  <div className="flex items-center gap-1 text-[var(--good)]">
-                    <ShieldCheck className="w-4 h-4" />
-                    <span className="font-bold text-xs">Verified</span>
-                  </div>
-                  <span className="text-[10px] text-[var(--muted-ink)] font-bold mt-0.5 uppercase tracking-wider">partner</span>
-                </div>
-              </div>
-
-              {/* Google Reviews Button (when vendor configured their Google Maps link) */}
-              {googleMapsUrl && (
-                <div className="mt-4 pt-3.5 border-t border-[var(--line)]">
-                  <a
-                    href={googleMapsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full cirrel-btn py-3 px-4 text-xs font-bold flex items-center justify-between gap-3 active-press cursor-pointer"
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <span className="w-7 h-7 rounded-full bg-white flex items-center justify-center shadow-xs shrink-0">
-                        <GoogleMarkIcon className="w-4 h-4" />
-                      </span>
-                      <div className="text-left min-w-0">
-                        <span className="block text-[var(--ink)] font-bold text-xs leading-tight">Google Reviews</span>
-                        <span className="block text-[10px] text-[var(--muted-ink)] font-medium truncate">
-                          View authentic reviews on Google Maps
+                    <a
+                      href={googleMapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center justify-center shrink-0 px-2.5 active-press cursor-pointer group"
+                    >
+                      <div className="flex items-center gap-1">
+                        <GoogleMarkIcon className="w-4 h-4 shrink-0" />
+                        <span className="font-bold text-xs text-[var(--ink)] group-hover:text-[var(--accent-text)] transition-colors">
+                          Reviews
                         </span>
                       </div>
-                    </div>
-                    <ExternalLink className="w-4 h-4 text-[var(--accent-text)] shrink-0" />
-                  </a>
+                      <span className="text-[10px] text-[var(--muted-ink)] font-bold mt-0.5 uppercase tracking-wider">
+                        Google Maps
+                      </span>
+                    </a>
+                  </>
+                )}
+              </div>
+
+              {/* Search Bar & Price Filter Setting (in place of Google Reviews box) */}
+              <div className="mt-4 pt-3.5 border-t border-[var(--line)] flex items-center gap-2.5">
+                <div className="relative flex-1 min-w-0">
+                  <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none z-10">
+                    <Search className="w-4 h-4 text-[var(--accent-text)]" aria-hidden="true" />
+                  </div>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search scooter or brand..."
+                    aria-label="Search scooter name or brand"
+                    className="cirrel-input w-full pl-10 pr-3.5 h-11 rounded-full text-xs sm:text-sm font-medium outline-none text-[var(--ink)] placeholder:text-[var(--muted-ink)]"
+                  />
                 </div>
-              )}
+                <button
+                  type="button"
+                  onClick={() => setIsFilterOpen(true)}
+                  aria-label="Open Price & Year Filter"
+                  className="cirrel-ibtn w-11 h-11 shrink-0 active-press cursor-pointer relative"
+                >
+                  <SlidersHorizontal className="w-4 h-4 text-[var(--ink)]" aria-hidden="true" />
+                  {hasActiveModalFilter && (
+                    <span className="absolute top-2 right-2 w-2 h-2 bg-[var(--accent-blue)] rounded-full border border-[var(--bg)]" />
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </header>
@@ -476,12 +539,12 @@ export default function VendorDetailClient({
                 <div className="relative z-10 w-12 h-12 rounded-full cirrel-well flex items-center justify-center mx-auto mb-3">
                   <Bike className="w-6 h-6 text-[var(--muted-ink)]" />
                 </div>
-                <p className="relative z-10 text-[var(--muted-ink)] font-medium text-xs">No scooters available for this brand</p>
+                <p className="relative z-10 text-[var(--muted-ink)] font-medium text-xs">No scooters match your current filters</p>
                 <button 
-                  onClick={() => setSelectedBrand("All")}
+                  onClick={resetAllFilters}
                   className="relative z-10 mt-3 text-xs font-bold cirrel-btn-primary px-4 py-2 active-press cursor-pointer"
                 >
-                  Reset Filter
+                  Reset Filters
                 </button>
               </div>
             ) : (
@@ -506,11 +569,17 @@ export default function VendorDetailClient({
                       />
                     </div>
                     <div className="relative z-10 flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1 gap-2">
-                        <span className="cirrel-pill text-[10px] uppercase tracking-wider">
-                          {scooter.brand || "Scooter"}
-                        </span>
-                        <div className="cirrel-pill cirrel-pill--good text-[10px] uppercase tracking-wider">
+                      <div className="flex items-center justify-between mb-1 gap-1.5">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className="cirrel-pill text-[10px] uppercase tracking-wider truncate">
+                            {scooter.brand || "Scooter"}
+                          </span>
+                          <span className="cirrel-pill text-[10px] font-bold shrink-0">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#3d9bff]" />
+                            <span>{scooter.year || "2025"}</span>
+                          </span>
+                        </div>
+                        <div className="cirrel-pill cirrel-pill--good text-[10px] uppercase tracking-wider shrink-0">
                           <span className="w-1.5 h-1.5 rounded-full bg-current" />
                           <span>{scooter.available_units || 1} AVAIL</span>
                         </div>
@@ -535,7 +604,7 @@ export default function VendorDetailClient({
       {/* ======================================================== */}
       {/* DESKTOP LAYOUT (MD AND UP)                               */}
       {/* ======================================================== */}
-      <div className="hidden md:block w-full max-w-7xl mx-auto px-6 lg:px-8 py-8 space-y-8">
+      <div className="hidden md:block w-full max-w-7xl mx-auto px-6 lg:px-8 pt-2 pb-10 space-y-8">
         
         {/* Top Breadcrumb & Quick Actions Bar */}
         <div className="flex items-center justify-between">
@@ -663,21 +732,6 @@ export default function VendorDetailClient({
                   </div>
                 </div>
               </div>
-
-              {googleMapsUrl && (
-                <div className="flex items-center gap-3">
-                  <a
-                    href={googleMapsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="cirrel-btn font-bold px-5 py-3 text-xs cursor-pointer active-press flex items-center gap-2.5"
-                  >
-                    <GoogleMarkIcon className="w-4 h-4 shrink-0" />
-                    <span>Google Reviews</span>
-                    <ExternalLink className="w-3.5 h-3.5 text-[var(--accent-text)]" />
-                  </a>
-                </div>
-              )}
             </div>
 
             {/* 3 Column Real Info Bar */}
@@ -691,16 +745,56 @@ export default function VendorDetailClient({
               <div className="w-px h-6 bg-[var(--line)]" />
 
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-[var(--accent-text)]" />
+                <Clock className="w-4 h-4 text-[var(--accent-text)] shrink-0" />
                 <span className="font-bold text-sm text-[var(--ink)]">{vendor.opening_hours || "08:00 AM – 08:00 PM Daily"}</span>
               </div>
 
-              <div className="w-px h-6 bg-[var(--line)]" />
+              {googleMapsUrl && (
+                <>
+                  <div className="w-px h-6 bg-[var(--line)]" />
 
-              <div className="flex items-center gap-1.5 text-[var(--good)]">
-                <ShieldCheck className="w-4 h-4" />
-                <span className="text-xs font-bold uppercase tracking-wider">Verified Partner</span>
+                  <a
+                    href={googleMapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 hover:text-[var(--accent-text)] transition-colors cursor-pointer group"
+                  >
+                    <GoogleMarkIcon className="w-4 h-4 shrink-0" />
+                    <span className="text-xs font-bold uppercase tracking-wider text-[var(--ink)] group-hover:text-[var(--accent-text)]">
+                      Google Reviews
+                    </span>
+                    <ExternalLink className="w-3.5 h-3.5 text-[var(--accent-text)]" />
+                  </a>
+                </>
+              )}
+            </div>
+
+            {/* Search Bar & Price Filter Setting */}
+            <div className="pt-4 border-t border-[var(--line)] flex items-center gap-3 max-w-xl">
+              <div className="relative flex-1 min-w-0">
+                <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none z-10">
+                  <Search className="w-4 h-4 text-[var(--accent-text)]" aria-hidden="true" />
+                </div>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search scooter name or brand..."
+                  aria-label="Search scooter name or brand"
+                  className="cirrel-input w-full pl-11 pr-4 h-12 rounded-full text-sm font-medium outline-none text-[var(--ink)] placeholder:text-[var(--muted-ink)]"
+                />
               </div>
+              <button
+                type="button"
+                onClick={() => setIsFilterOpen(true)}
+                aria-label="Open Price & Year Filter"
+                className="cirrel-ibtn w-12 h-12 shrink-0 hover:scale-105 active-press cursor-pointer relative"
+              >
+                <SlidersHorizontal className="w-5 h-5 text-[var(--ink)]" aria-hidden="true" />
+                {hasActiveModalFilter && (
+                  <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-[var(--accent-blue)] rounded-full border-2 border-[var(--bg)]" />
+                )}
+              </button>
             </div>
           </div>
         </div>
@@ -740,12 +834,12 @@ export default function VendorDetailClient({
 
               {filteredScooters.length === 0 ? (
                 <div className="cirrel-glass rounded-[26px] p-12 text-center">
-                  <p className="relative z-10 text-[var(--muted-ink)] font-medium">No scooters found for this brand filter.</p>
+                  <p className="relative z-10 text-[var(--muted-ink)] font-medium">No scooters match your current filters.</p>
                   <button 
-                    onClick={() => setSelectedBrand("All")}
+                    onClick={resetAllFilters}
                     className="relative z-10 mt-4 text-xs font-bold cirrel-btn-primary px-5 py-2 cursor-pointer"
                   >
-                    Reset Filter
+                    Reset Filters
                   </button>
                 </div>
               ) : (
@@ -755,7 +849,7 @@ export default function VendorDetailClient({
                     return (
                       <Link 
                         key={scooter.id} 
-                        href={`/detail/${scooter.id}`}
+                        href={`/detail/${scooter.id}`} 
                         prefetch={true}
                         onPointerEnter={() => fetchScooterDetail(scooter.id)}
                         onTouchStart={() => fetchScooterDetail(scooter.id)}
@@ -763,9 +857,15 @@ export default function VendorDetailClient({
                       >
                         <div className="relative z-10">
                           <div className="relative w-full h-44 bg-gradient-to-b from-white/95 to-[#eaf0f8]/95 rounded-[20px] flex items-center justify-center p-3 mb-3 overflow-hidden shadow-xs">
-                            <span className="absolute top-3 left-3 text-[10px] font-bold tracking-wider uppercase text-[#0b1220] bg-white/90 border border-black/10 px-2.5 py-0.5 rounded-full z-10">
-                              {scooter.brand || "Scooter"}
-                            </span>
+                            <div className="absolute top-3 left-3 flex items-center gap-1.5 z-10">
+                              <span className="text-[10px] font-bold tracking-wider uppercase text-[#0b1220] bg-white/90 border border-black/10 px-2.5 py-0.5 rounded-full">
+                                {scooter.brand || "Scooter"}
+                              </span>
+                              <span className="bg-[#0b1220]/80 backdrop-blur-md text-white px-2.5 py-0.5 rounded-full flex items-center gap-1 border border-white/20">
+                                <span className="w-1.5 h-1.5 rounded-full bg-[#3d9bff]" />
+                                <span className="text-[10px] font-bold">{scooter.year || "2025"}</span>
+                              </span>
+                            </div>
                             
                             <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-[#0b1220]/80 backdrop-blur-md text-white px-2.5 py-1 rounded-full shadow-xs z-10">
                               <div className="w-1.5 h-1.5 rounded-full bg-[#4fdc78]" />
@@ -875,6 +975,17 @@ export default function VendorDetailClient({
         </div>
 
       </div>
+
+      {isFilterOpen && (
+        <HomeFilterModal
+          isOpen={isFilterOpen}
+          onClose={() => setIsFilterOpen(false)}
+          maxPrice={maxPrice}
+          setMaxPrice={setMaxPrice}
+          selectedYear={selectedYear}
+          setSelectedYear={setSelectedYear}
+        />
+      )}
 
     </div>
   )
