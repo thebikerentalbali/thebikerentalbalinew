@@ -12,7 +12,6 @@ import {
 
 import ScooterCard from "@/components/ScooterCard"
 import CampaignCard from "@/components/CampaignCard"
-import ScooterToursSection from "@/components/ScooterToursSection"
 import MarketplaceNavbar, {
   readStoredSavedScooters,
   writeStoredSavedScooters,
@@ -237,11 +236,8 @@ export default function HomeClient({
           </button>
         </div>
 
-        {/* Promotional Campaign Card */}
+        {/* Promotional & Tour Campaign Slider */}
         <CampaignCard initialCampaigns={initialCampaigns} />
-
-        {/* Scooter Tours & Itineraries Section */}
-        <ScooterToursSection initialCampaigns={initialCampaigns} />
 
         {/* Filter and Brands - Single Row with Duration Dropdown + Brand Chips */}
         <section aria-labelledby="brands-heading" className="mb-10 md:mb-12">

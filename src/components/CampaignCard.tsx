@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useMemo, useCallback } from "react"
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { 
@@ -14,7 +14,8 @@ import {
   ExternalLink, 
   MapPin, 
   Gift, 
-  MessageCircle
+  MessageCircle,
+  Clock
 } from "lucide-react"
 import { Campaign, getCampaigns, fetchCampaigns, subscribeToCampaigns, resolveCampaignLink } from "@/utils/campaigns"
 
@@ -23,16 +24,16 @@ interface CampaignCardProps {
 }
 
 export default function CampaignCard({ initialCampaigns }: CampaignCardProps) {
-  const filterBannerCampaigns = useCallback(
-    (list: Campaign[]) => list.filter((c) => c.is_active !== false && c.category !== "tour"),
+  const filterActiveCampaigns = useCallback(
+    (list: Campaign[]) => list.filter((c) => c.is_active !== false),
     []
   )
 
   const [campaigns, setCampaigns] = useState<Campaign[]>(() => {
     if (initialCampaigns && initialCampaigns.length > 0) {
-      return filterBannerCampaigns(initialCampaigns)
+      return filterActiveCampaigns(initialCampaigns)
     }
-    return filterBannerCampaigns(getCampaigns(false))
+    return filterActiveCampaigns(getCampaigns(false))
   })
 
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -40,22 +41,25 @@ export default function CampaignCard({ initialCampaigns }: CampaignCardProps) {
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null)
   const [hasCopiedCode, setHasCopiedCode] = useState(false)
 
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null)
+  const didSwipeRef = useRef(false)
+
   // Fetch Supabase campaigns in background (supports 0 campaigns when empty/deleted)
   useEffect(() => {
     fetchCampaigns(false)
       .then((data) => {
-        setCampaigns(Array.isArray(data) ? filterBannerCampaigns(data) : [])
+        setCampaigns(Array.isArray(data) ? filterActiveCampaigns(data) : [])
       })
       .catch(() => {})
 
     const unsubscribe = subscribeToCampaigns((updated) => {
-      setCampaigns(Array.isArray(updated) ? filterBannerCampaigns(updated) : [])
+      setCampaigns(Array.isArray(updated) ? filterActiveCampaigns(updated) : [])
     })
 
     return () => {
       unsubscribe()
     }
-  }, [filterBannerCampaigns])
+  }, [filterActiveCampaigns])
 
   // Auto slide if multiple campaigns exist
   useEffect(() => {
@@ -94,35 +98,94 @@ export default function CampaignCard({ initialCampaigns }: CampaignCardProps) {
 
   if (!activeCampaign) return null
 
+  const isTourCampaign = activeCampaign.category === "tour"
+  const tourHref = `/tours/${encodeURIComponent(activeCampaign.id)}`
+  const tourPrice = activeCampaign.tour_details?.price || 0
+  const tourPriceUnit = activeCampaign.tour_details?.price_unit || "per rider"
   const activeLink = resolveCampaignLink(activeCampaign.cta_link)
   const isDirectExternalCard = Boolean(
+    !isTourCampaign &&
     activeLink?.isExternal &&
     !activeCampaign.voucher_code &&
     !activeCampaign.partner_whatsapp &&
     !activeCampaign.voucher_terms
   )
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (campaigns.length <= 1 || e.touches.length !== 1) return
+    touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+    didSwipeRef.current = false
+    setIsPaused(true)
+  }
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const start = touchStartRef.current
+    touchStartRef.current = null
+    setIsPaused(false)
+    if (!start || campaigns.length <= 1 || e.changedTouches.length === 0) return
+
+    const dx = start.x - e.changedTouches[0].clientX
+    const dy = Math.abs(start.y - e.changedTouches[0].clientY)
+    if (Math.abs(dx) > 42 && Math.abs(dx) > dy) {
+      didSwipeRef.current = true
+      if (dx > 0) {
+        nextSlide()
+      } else {
+        prevSlide()
+      }
+      setTimeout(() => {
+        didSwipeRef.current = false
+      }, 250)
+    }
+  }
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    if (didSwipeRef.current) {
+      e.preventDefault()
+      return
+    }
+    if (!isDirectExternalCard && !isTourCampaign) {
+      setSelectedCampaign(activeCampaign)
+    }
+  }
+
   return (
     <section
       aria-label="Promotional Campaigns"
-      className="mb-8 md:mb-10 relative select-none"
+      className="mb-8 md:mb-10 relative select-none touch-pan-y"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
-      {/* Simple, Clean & Responsive Campaign Card */}
+      {/* Simple, Clean & Responsive Campaign Card (with Touch Swipe across Spa, Tour & Promos) */}
       <div
-        onClick={isDirectExternalCard ? undefined : () => setSelectedCampaign(activeCampaign)}
-        className="cirrel-glass group relative overflow-hidden rounded-[22px] md:rounded-[26px] flex flex-col md:flex-row items-stretch cursor-pointer transition-all duration-300 hover:-translate-y-0.5 active-press"
+        key={activeCampaign.id}
+        onClick={handleCardClick}
+        className="cirrel-glass group relative overflow-hidden rounded-[22px] md:rounded-[26px] flex flex-col md:flex-row items-stretch cursor-pointer transition-all duration-300 hover:-translate-y-0.5 active-press animate-in fade-in"
       >
-        {isDirectExternalCard && activeLink && (
+        {isTourCampaign ? (
+          <Link
+            href={tourHref}
+            prefetch={true}
+            onClick={(e) => {
+              if (didSwipeRef.current) e.preventDefault()
+            }}
+            aria-label={activeCampaign.title || "View Scooter Tour Details"}
+            className="absolute inset-0 z-10"
+          />
+        ) : isDirectExternalCard && activeLink ? (
           <a
             href={activeLink.href}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={(e) => {
+              if (didSwipeRef.current) e.preventDefault()
+            }}
             aria-label={activeCampaign.title || "Open booking website"}
             className="absolute inset-0 z-10"
           />
-        )}
+        ) : null}
 
         {/* Media Pane (Compact top banner on mobile, sleek left split on desktop) */}
         {activeCampaign.image_url && (
@@ -137,11 +200,25 @@ export default function CampaignCard({ initialCampaigns }: CampaignCardProps) {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/25" />
 
-            {activeCampaign.badge && (
-              <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-black/65 backdrop-blur-md border border-white/20 text-white text-[10px] font-bold uppercase tracking-wider">
-                {activeCampaign.badge}
-              </span>
-            )}
+            <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
+              {activeCampaign.badge ? (
+                <span className="px-3 py-1 rounded-full bg-black/65 backdrop-blur-md border border-white/20 text-white text-[10px] font-bold uppercase tracking-wider">
+                  {activeCampaign.badge}
+                </span>
+              ) : isTourCampaign ? (
+                <span className="px-3 py-1 rounded-full bg-black/65 backdrop-blur-md border border-white/20 text-white text-[10px] font-bold uppercase tracking-wider">
+                  SCOOTER TOUR
+                </span>
+              ) : (
+                <span />
+              )}
+
+              {isTourCampaign && tourPrice > 0 && (
+                <span className="px-3 py-1 rounded-full bg-[var(--accent-blue)] text-white text-[11px] font-bold shadow-sm">
+                  Rp {tourPrice.toLocaleString("id-ID")} / {tourPriceUnit.replace(/^per\s+/i, "")}
+                </span>
+              )}
+            </div>
 
             {/* Partner Logo, Brand Title & Location overlaid cleanly on image */}
             <div className="absolute bottom-3 left-3 right-3 z-10 flex items-center gap-2.5 min-w-0">
@@ -243,7 +320,28 @@ export default function CampaignCard({ initialCampaigns }: CampaignCardProps) {
 
           {/* Bottom Action & Slider Controls */}
           <div className="flex items-center justify-between gap-3 pt-1">
-            {activeLink?.isExternal && !isDirectExternalCard ? (
+            {isTourCampaign ? (
+              <div className="flex items-center gap-3 flex-wrap">
+                <Link
+                  href={tourHref}
+                  prefetch={true}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    if (didSwipeRef.current) e.preventDefault()
+                  }}
+                  className="relative z-20 pointer-events-auto inline-flex items-center gap-1.5 cirrel-btn-primary px-4 py-2 text-xs font-bold"
+                >
+                  <span>{activeCampaign.cta_text || "View Tour & Itinerary"}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+                {activeCampaign.tour_details?.duration && (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--muted-ink)]">
+                    <Clock className="w-3 h-3 text-[var(--accent-text)]" />
+                    <span>{activeCampaign.tour_details.duration}</span>
+                  </span>
+                )}
+              </div>
+            ) : activeLink?.isExternal && !isDirectExternalCard ? (
               <a
                 href={activeLink.href}
                 target="_blank"
