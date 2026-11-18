@@ -17,6 +17,7 @@ import {
 import { invalidateAllCatalogCaches } from "@/lib/api/catalogService"
 import { normalizeGoogleMapsUrl, saveVendorGoogleMapsFallback, fetchVendorGoogleMapsFallback } from "@/utils/vendorMaps"
 import ThemeToggle from "@/components/ThemeToggle"
+import BookingsCalendar from "@/components/BookingsCalendar"
 
 const MapPicker = dynamic(() => import('@/components/MapPicker'), { ssr: false })
 
@@ -1034,116 +1035,17 @@ export default function VendorDashboard() {
             </div>
           </div>
         ) : activeTab === 'bookings' ? (
-          <div className="p-4 md:p-8 pb-12 animate-in fade-in space-y-6">
-            {/* Cirrel Calendar Header */}
-            <div className="cirrel-glass rounded-[26px] p-4 sm:p-5 space-y-4">
-              <div className="relative z-10 flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-[11px] cirrel-mark shrink-0">
-                    <Calendar className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h2 className="text-lg sm:text-xl font-bold text-[var(--ink)] capitalize tracking-tight flex items-center gap-2">
-                      {formatMonthYear(activeMonthDate)}
-                      {selectedCalendarDate && (
-                        <span className="cirrel-pill cirrel-pill--info text-[11px]">
-                          {formatIndoDate(selectedCalendarDate)}
-                        </span>
-                      )}
-                    </h2>
-                  </div>
-                </div>
-
-                {/* Month & Week Navigation */}
-                <div className="flex items-center gap-1.5 ml-auto">
-                  <button
-                    onClick={handlePrevWeek}
-                    title="Previous Days"
-                    className="cirrel-ibtn w-8 h-8 cursor-pointer"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={handleToday}
-                    className="cirrel-btn px-3 h-8 text-xs font-bold cursor-pointer"
-                  >
-                    Today
-                  </button>
-                  {selectedCalendarDate && (
-                    <button
-                      onClick={() => setSelectedCalendarDate(null)}
-                      className="px-2.5 h-8 rounded-full text-xs font-bold text-[var(--muted-ink)] hover:text-[var(--ink)] hover:bg-[var(--card-2)] transition-colors cursor-pointer"
-                    >
-                      View All
-                    </button>
-                  )}
-                  <button
-                    onClick={handleNextWeek}
-                    title="Next Days"
-                    className="cirrel-ibtn w-8 h-8 cursor-pointer"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Minimalist 7-Day Date Pill Strip */}
-              <div className="relative z-10 grid grid-cols-7 gap-1.5 sm:gap-2">
-                {get7Days(calendarStartDate).map((dateObj, idx) => {
-                  const year = dateObj.getFullYear()
-                  const month = String(dateObj.getMonth() + 1).padStart(2, '0')
-                  const day = String(dateObj.getDate()).padStart(2, '0')
-                  const isoDate = `${year}-${month}-${day}`
-
-                  const isSelected = selectedCalendarDate === isoDate
-                  const isToday = new Date().toDateString() === dateObj.toDateString()
-                  const count = getBookingsCountForDate(dateObj)
-                  const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' })
-
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => {
-                        if (isSelected) {
-                          setSelectedCalendarDate(null)
-                        } else {
-                          setSelectedCalendarDate(isoDate)
-                          if (dateObj.getMonth() !== activeMonthDate.getMonth() || dateObj.getFullYear() !== activeMonthDate.getFullYear()) {
-                            setActiveMonthDate(new Date(dateObj.getFullYear(), dateObj.getMonth(), 1))
-                          }
-                        }
-                      }}
-                      className={`flex flex-col items-center justify-center py-2 px-1 sm:py-3 sm:px-2 rounded-[18px] transition-all cursor-pointer relative ${
-                        isSelected
-                          ? 'cirrel-btn-primary text-white scale-[1.02]'
-                          : isToday
-                          ? 'cirrel-well ring-1 ring-[var(--accent-blue)] text-[var(--ink)] font-bold'
-                          : 'cirrel-well text-[var(--ink-2)] hover:bg-[var(--card-3)]'
-                      }`}
-                    >
-                      <span className={`text-[10px] sm:text-xs font-semibold uppercase ${isSelected ? 'text-white/80' : 'text-[var(--muted-ink)]'}`}>
-                        {dayName}
-                      </span>
-                      <span className="text-sm sm:text-base font-bold my-0.5">
-                        {dateObj.getDate()}
-                      </span>
-
-                      {count > 0 ? (
-                        <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full mt-0.5 ${
-                          isSelected
-                            ? 'bg-white text-[#005ec4]'
-                            : 'bg-[var(--good)] text-[#04070d]'
-                        }`}>
-                          {count}
-                        </span>
-                      ) : (
-                        <span className="w-1 h-1 rounded-full bg-transparent mt-1" />
-                      )}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
+          <div className="p-4 md:p-6 lg:p-8 pb-12 animate-in fade-in space-y-6">
+            {/* Interactive Month / Week Calendar Overview */}
+            <BookingsCalendar
+              bookings={bookingsList}
+              activeMonthDate={activeMonthDate}
+              onActiveMonthChange={setActiveMonthDate}
+              calendarStartDate={calendarStartDate}
+              onCalendarStartChange={setCalendarStartDate}
+              selectedDate={selectedCalendarDate}
+              onSelectDate={setSelectedCalendarDate}
+            />
 
             {/* Smart Active Period Analytics & Filter Banners */}
             {(() => {
@@ -1248,8 +1150,24 @@ export default function VendorDashboard() {
                     </div>
                   </div>
 
+                  {/* Period Financial Summary Bar */}
+                  <div className="cirrel-glass rounded-[22px] p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                    <div className="relative z-10 cirrel-well rounded-[16px] p-3.5">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--muted-ink)]">Gross Booking Value</p>
+                      <p className="text-base sm:text-lg font-bold text-[var(--ink)] mt-0.5">Rp {periodTotalCustomerPrice.toLocaleString()}</p>
+                    </div>
+                    <div className="relative z-10 cirrel-well rounded-[16px] p-3.5">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--muted-ink)]">Platform Commission (Confirmed)</p>
+                      <p className="text-base sm:text-lg font-bold text-[var(--bad)] mt-0.5">-Rp {periodCommission.toLocaleString()}</p>
+                    </div>
+                    <div className="relative z-10 cirrel-well rounded-[16px] p-3.5">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--muted-ink)]">Your Net Earnings</p>
+                      <p className="text-base sm:text-lg font-bold text-[var(--good)] mt-0.5">Rp {periodNetProfit.toLocaleString()}</p>
+                    </div>
+                  </div>
+
                   {/* Section Header with Search */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="text-sm md:text-base font-bold text-[var(--ink)]">
                         Bookings List
@@ -1293,9 +1211,9 @@ export default function VendorDashboard() {
                   </div>
 
                   {/* Bookings List Cards */}
-                  <div className="space-y-4">
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                     {filteredList.length === 0 ? (
-                      <div className="cirrel-glass p-12 text-center text-[var(--muted-ink)] font-bold rounded-[26px]">
+                      <div className="xl:col-span-2 cirrel-glass p-12 text-center text-[var(--muted-ink)] font-bold rounded-[26px]">
                         No bookings found for this filter in the active period.
                       </div>
                     ) : (
