@@ -61,7 +61,15 @@ export default function CheckoutPage() {
 
   const [startDate, setStartDate] = useState(() => formatIsoDate(new Date()))
   const [endDate, setEndDate] = useState(() => addDaysToDate(formatIsoDate(new Date()), 1))
+  const [startTime, setStartTime] = useState("09:00")
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    const now = new Date()
+    const hh = String(now.getHours()).padStart(2, '0')
+    const mm = String(now.getMinutes()).padStart(2, '0')
+    setStartTime(`${hh}:${mm}`)
+  }, [])
 
   const [cart, setCart] = useState<any[]>(() => {
     if (typeof window !== 'undefined') {
@@ -431,11 +439,11 @@ export default function CheckoutPage() {
       message += `*DELIVERY FEE AGREEMENT:* ${agreedToFee ? 'Yes (Agreed)' : 'No'}\n`;
     }
     if (startDate && endDate) {
-      message += `*RENTAL PERIOD:*\n  ${formatDisplayDate(startDate)} to ${formatDisplayDate(endDate)}\n`;
+      message += `*RENTAL PERIOD (24H):*\n  ${formatDisplayDate(startDate)} (${startTime}) to ${formatDisplayDate(endDate)} (${startTime})\n`;
     } else if (startDate) {
-      message += `*RENTAL PERIOD:*\n  ${formatDisplayDate(startDate)}\n`;
+      message += `*RENTAL PERIOD:*\n  ${formatDisplayDate(startDate)} (${startTime})\n`;
     } else if (endDate) {
-      message += `*RENTAL PERIOD:*\n  ${formatDisplayDate(endDate)}\n`;
+      message += `*RENTAL PERIOD:*\n  ${formatDisplayDate(endDate)} (${startTime})\n`;
     }
     message += `\n*FLEET BOOKED:*\n`;
     cart.forEach(item => {
@@ -460,6 +468,11 @@ export default function CheckoutPage() {
         if (item.durationMode === "monthly") base = item.monthly
         const itemTotal = base * item.quantity * item.durationCount
 
+        const finalStartDate = startDate || new Date().toISOString().split('T')[0]
+        const finalEndDate = endDate || finalStartDate
+        const startDateTimeStr = `${finalStartDate}T${startTime || "09:00"}`
+        const endDateTimeStr = `${finalEndDate}T${startTime || "09:00"}`
+
         const vendorId = item.vendor_id || (item.vendors && (item.vendors as any).id) || null
         const { error } = await supabase.from('bookings').insert({
           scooter_id: item.id,
@@ -467,8 +480,8 @@ export default function CheckoutPage() {
           customer_name: `${firstName} ${lastName}`.trim() || 'Guest Customer',
           customer_phone: '',
           customer_email: '',
-          start_date: startDate || new Date().toISOString().split('T')[0],
-          end_date: endDate || new Date().toISOString().split('T')[0],
+          start_date: startDateTimeStr,
+          end_date: endDateTimeStr,
           total_price: itemTotal,
           quantity: item.quantity || 1,
           status: 'pending'
@@ -484,8 +497,8 @@ export default function CheckoutPage() {
       setIsSubmitting(false)
       const waUrl = getWhatsAppLink()
 
-      const finalStart = startDate || new Date().toISOString().split('T')[0]
-      const finalEnd = endDate || new Date().toISOString().split('T')[0]
+      const finalStart = `${startDate || new Date().toISOString().split('T')[0]} (${startTime || "09:00"})`
+      const finalEnd = `${endDate || new Date().toISOString().split('T')[0]} (${startTime || "09:00"})`
       const nowIso = new Date().toISOString()
 
       addSavedBookings(
@@ -758,9 +771,12 @@ export default function CheckoutPage() {
           <div className="space-y-8">
         {/* Rental Period */}
         <section>
-          <h2 className="text-[18px] font-bold text-[var(--ink)] mb-4">Rental Period</h2>
-          <div className="flex gap-3 sm:gap-4">
-            <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2 mb-4 flex-wrap">
+            <h2 className="text-[18px] font-bold text-[var(--ink)]">Rental Period</h2>
+            <span className="cirrel-pill cirrel-pill--info text-[11px]">24-hour cycle</span>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <div className="min-w-0">
               <label className="block text-[13px] text-[var(--ink-2)] font-semibold mb-1.5 pl-1 truncate">Start Date</label>
               <input
                 type="date"
@@ -769,7 +785,7 @@ export default function CheckoutPage() {
                 className="cirrel-input w-full min-w-0 h-13 font-semibold rounded-[16px] px-3 sm:px-4 text-[16px] sm:text-sm"
               />
             </div>
-            <div className="flex-1 min-w-0">
+            <div className="min-w-0">
               <label className="block text-[13px] text-[var(--ink-2)] font-semibold mb-1.5 pl-1 truncate">End Date</label>
               <input
                 type="date"
@@ -778,7 +794,32 @@ export default function CheckoutPage() {
                 className="cirrel-input w-full min-w-0 h-13 font-semibold rounded-[16px] px-3 sm:px-4 text-[16px] sm:text-sm"
               />
             </div>
+            <div className="min-w-0">
+              <label className="block text-[13px] text-[var(--ink-2)] font-semibold mb-1.5 pl-1 truncate">Start Time</label>
+              <input
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value || "09:00")}
+                className="cirrel-input w-full min-w-0 h-13 font-semibold rounded-[16px] px-3 sm:px-4 text-[16px] sm:text-sm"
+              />
+            </div>
+            <div className="min-w-0">
+              <label className="block text-[13px] text-[var(--ink-2)] font-semibold mb-1.5 pl-1 truncate">
+                End Time <span className="text-[11px] font-normal text-[var(--muted-ink)]">(Auto 24h)</span>
+              </label>
+              <input
+                type="time"
+                value={startTime}
+                readOnly
+                disabled
+                aria-label="End time matches start time for 24-hour rental"
+                className="cirrel-input w-full min-w-0 h-13 font-semibold rounded-[16px] px-3 sm:px-4 text-[16px] sm:text-sm opacity-75 cursor-not-allowed"
+              />
+            </div>
           </div>
+          <p className="text-xs text-[var(--muted-ink)] font-medium mt-2.5 pl-1">
+            End time automatically matches your start time ({startTime}) based on 24-hour rental days.
+          </p>
         </section>
 
         {/* Customer Details Form */}

@@ -8,8 +8,10 @@ import { createClient } from "@/lib/supabase/client"
 import { getPlatformSettings, savePlatformSettings, calculateBookingCommission, calculateRentalDays, fetchPlatformSettings, subscribeToPlatformSettings, PlatformSettings, DEFAULT_PLATFORM_SETTINGS } from "@/utils/pricing"
 import { Campaign, CampaignCategory, CampaignTheme, getCampaigns, fetchCampaigns, saveCampaign, deleteCampaign, subscribeToCampaigns, extractYouTubeId, DEFAULT_CAMPAIGNS } from "@/utils/campaigns"
 import { invalidateAllCatalogCaches } from "@/lib/api/catalogService"
+import { reconcileExpiredBookings, formatBookingDateTimeDisplay } from "@/utils/rentalTime"
 import ThemeToggle from "@/components/ThemeToggle"
 import BookingsCalendar from "@/components/BookingsCalendar"
+import RentalCountdownBadge from "@/components/RentalCountdownBadge"
 
 export default function AdminDashboard() {
   // Admin Authentication State
@@ -148,6 +150,12 @@ export default function AdminDashboard() {
       setTotalFleetCount(fleetSum)
     }
 
+    // Auto-complete any expired confirmed rentals down to exact date & time before fetching
+    const reconciled = await reconcileExpiredBookings(supabase)
+    if (reconciled) {
+      invalidateAllCatalogCaches()
+    }
+
     // Fetch All Bookings safely
     const { data: bData, error: bErr } = await supabase
       .from('bookings')
@@ -159,16 +167,8 @@ export default function AdminDashboard() {
     }
 
     if (bData) {
-      const today = new Date().toISOString().split('T')[0]
-      const toComplete: any[] = []
-
       const formatted = bData.map((b: any) => {
-        let rawStatus = (b.status || 'pending').toLowerCase()
-
-        if (rawStatus === 'confirmed' && b.end_date && b.end_date < today) {
-          rawStatus = 'completed'
-          toComplete.push(b)
-        }
+        const rawStatus = (b.status || 'pending').toLowerCase()
 
         return {
           id: b.id,
@@ -189,26 +189,6 @@ export default function AdminDashboard() {
         }
       })
       setAllBookings(formatted)
-
-      // Asynchronously complete past bookings in background without blocking render
-      if (toComplete.length > 0) {
-        (async () => {
-          for (const b of toComplete) {
-            try {
-              await supabase.from('bookings').update({ status: 'completed' }).eq('id', b.id)
-              if (b.scooter_id && b.scooters) {
-                const currentAvail = b.scooters.available_units ?? 0
-                const totalUnits = b.scooters.total_units ?? 1
-                const qty = Number(b.quantity) || 1
-                const newAvail = Math.min(totalUnits, currentAvail + qty)
-                await supabase.from('scooters').update({ available_units: newAvail }).eq('id', b.scooter_id)
-              }
-            } catch (err) {
-              console.warn("Background auto-complete error for booking:", b.id, err)
-            }
-          }
-        })()
-      }
     }
 
     setIsLoadingApprovals(false)
@@ -1514,9 +1494,11 @@ export default function AdminDashboard() {
                             </p>
                           </div>
 
-                          <div className="flex items-center gap-1.5 text-[11px] md:text-xs font-semibold text-[var(--muted-ink)] whitespace-nowrap truncate">
+                          <div className="flex items-center gap-1.5 text-[11px] md:text-xs font-semibold text-[var(--muted-ink)] flex-wrap">
                             <Calendar className="w-3.5 h-3.5 text-[var(--accent-text)] shrink-0" />
-                            <span>{formatRentalPeriod(booking.startDate, booking.endDate)}</span>
+                            <span>
+                              {formatBookingDateTimeDisplay(booking.startDate)} – {formatBookingDateTimeDisplay(booking.endDate)}
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -1540,6 +1522,20 @@ export default function AdminDashboard() {
                         <span className="cirrel-pill text-xs shrink-0">
                           <span>{rentalDays} {rentalDays > 1 ? 'Days' : 'Day'}</span>
                         </span>
+
+                        {booking.rawStatus === 'confirmed' && (
+                          <RentalCountdownBadge
+                            endDate={booking.endDate}
+                            onExpire={() => {
+                              reconcileExpiredBookings(supabase).then((changed) => {
+                                if (changed) {
+                                  invalidateAllCatalogCaches()
+                                  fetchVendors()
+                                }
+                              })
+                            }}
+                          />
+                        )}
                       </div>
                     </div>
 
@@ -1587,24 +1583,10 @@ export default function AdminDashboard() {
                       )}
 
                       {booking.rawStatus === 'confirmed' && (
-                        <>
-                          <div className="w-full cirrel-well text-[var(--good)] font-bold text-xs md:text-sm py-3 px-4 rounded-full flex items-center justify-center gap-2 uppercase tracking-wide">
-                            <CheckCircle2 className="w-4 h-4" />
-                            <span>Confirmed</span>
-                          </div>
-                          <button
-                            onClick={() => handleCompleteBooking(booking)}
-                            disabled={processingBookingId === booking.id}
-                            className="w-full cirrel-btn-primary active:scale-95 text-xs md:text-sm font-bold py-3 px-4 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                          >
-                            {processingBookingId === booking.id ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <RotateCcw className="w-4 h-4" />
-                            )}
-                            <span>Mark Returned</span>
-                          </button>
-                        </>
+                        <div className="col-span-2 w-full cirrel-well text-[var(--good)] font-bold text-xs md:text-sm py-3 px-4 rounded-full flex items-center justify-center gap-2 uppercase tracking-wide">
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>Active Rental</span>
+                        </div>
                       )}
 
                       {booking.rawStatus === 'completed' && (

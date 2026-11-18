@@ -5,8 +5,8 @@ import { Calendar, ChevronLeft, ChevronRight } from "lucide-react"
 
 export interface CalendarBookingItem {
   id: string | number
-  startDate?: string
-  endDate?: string
+  startDate?: string | Date
+  endDate?: string | Date
   rawStatus?: string
   scooter?: string
   customer?: string
@@ -28,17 +28,20 @@ function toIsoDate(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
 }
 
-function parseDateSafe(str?: string): Date | null {
-  if (!str) return null
-  const clean = String(str).substring(0, 10)
+function parseDateSafe(val?: string | Date): Date | null {
+  if (!val) return null
+  if (val instanceof Date) {
+    if (isNaN(val.getTime())) return null
+    return new Date(val.getFullYear(), val.getMonth(), val.getDate(), 0, 0, 0, 0)
+  }
+  const clean = String(val).substring(0, 10)
   const parts = clean.split("-").map(Number)
   if (parts.length === 3 && !isNaN(parts[0]) && !isNaN(parts[1]) && !isNaN(parts[2])) {
     return new Date(parts[0], parts[1] - 1, parts[2], 0, 0, 0, 0)
   }
-  const d = new Date(str)
+  const d = new Date(val)
   if (isNaN(d.getTime())) return null
-  d.setHours(0, 0, 0, 0)
-  return d
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0)
 }
 
 export default function BookingsCalendar({

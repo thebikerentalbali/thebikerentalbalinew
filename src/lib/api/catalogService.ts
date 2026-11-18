@@ -3,6 +3,7 @@ import { createClient as createBrowserClient } from '@/lib/supabase/client';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { serverCache } from '@/lib/cache/serverCache';
 import { DEFAULT_PLATFORM_SETTINGS, getCustomerPrice, PlatformSettings } from '@/utils/pricing';
+import { reconcileExpiredBookings } from '@/utils/rentalTime';
 
 export interface CatalogData {
   vendors: any[];
@@ -132,6 +133,9 @@ export async function getCatalogServerData(options?: { forceRefresh?: boolean })
     async () => {
       const supabase = getDirectSupabase();
 
+      // Auto-complete expired rentals and restore unit availability before reading scooters
+      await reconcileExpiredBookings(supabase);
+
       // Parallel batch query hitting PostgreSQL with composite indexes
       const [
         { data: vendors, error: vErr },
@@ -209,6 +213,7 @@ export async function fetchScooterDetailServer(id: string): Promise<ScooterDetai
 
     // Direct Supabase fallback
     const supabase = getDirectSupabase();
+    await reconcileExpiredBookings(supabase);
     const { data: sData } = await supabase.from('scooters').select('*').eq('id', id).maybeSingle();
     if (!sData) return null;
 

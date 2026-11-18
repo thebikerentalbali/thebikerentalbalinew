@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { serverCache } from '@/lib/cache/serverCache';
 import { DEFAULT_PLATFORM_SETTINGS, getCustomerPrice, PlatformSettings } from '@/utils/pricing';
+import { reconcileExpiredBookings } from '@/utils/rentalTime';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,6 +33,7 @@ export async function GET(
       `scooter:${id}`,
       async () => {
         const supabase = getSupabaseClient();
+        await reconcileExpiredBookings(supabase);
 
         // Fetch scooter with joined vendor data and settings in 1 parallel round-trip
         const [

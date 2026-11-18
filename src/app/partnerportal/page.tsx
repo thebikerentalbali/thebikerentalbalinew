@@ -16,8 +16,10 @@ import {
 } from "@/utils/pricing"
 import { invalidateAllCatalogCaches } from "@/lib/api/catalogService"
 import { normalizeGoogleMapsUrl, saveVendorGoogleMapsFallback, fetchVendorGoogleMapsFallback } from "@/utils/vendorMaps"
+import { parseBookingDateTime, reconcileExpiredBookings, formatBookingDateTimeDisplay } from "@/utils/rentalTime"
 import ThemeToggle from "@/components/ThemeToggle"
 import BookingsCalendar from "@/components/BookingsCalendar"
+import RentalCountdownBadge from "@/components/RentalCountdownBadge"
 
 const MapPicker = dynamic(() => import('@/components/MapPicker'), { ssr: false })
 
@@ -34,6 +36,12 @@ export default function VendorDashboard() {
   const supabase = createClient()
 
   const refreshData = async (vData: any) => {
+    // Auto-complete any expired confirmed rentals down to exact date & time before fetching
+    const reconciled = await reconcileExpiredBookings(supabase, vData.id)
+    if (reconciled) {
+      invalidateAllCatalogCaches()
+    }
+
     // Fetch Fleet
     const { data: scootersData } = await supabase.from('scooters').select('*').eq('vendor_id', vData.id)
     if (scootersData) {
@@ -48,16 +56,10 @@ export default function VendorDashboard() {
       .order('created_at', { ascending: false })
 
     if (bookingsData) {
-      const today = new Date().toISOString().split('T')[0]
-      const toComplete: any[] = []
-
       const formatted = bookingsData.map((b: any) => {
-        let rawStatus = (b.status || 'pending').toLowerCase()
-
-        if (rawStatus === 'confirmed' && b.end_date && b.end_date < today) {
-          rawStatus = 'completed'
-          toComplete.push(b)
-        }
+        const rawStatus = (b.status || 'pending').toLowerCase()
+        const parsedStart = parseBookingDateTime(b.start_date || b.created_at, false) || new Date(b.created_at)
+        const parsedEnd = parseBookingDateTime(b.end_date || b.created_at, true) || parsedStart
 
         return {
           id: b.id,
@@ -70,34 +72,16 @@ export default function VendorDashboard() {
           quantity: Number(b.quantity) || 1,
           status: rawStatus === 'confirmed' ? 'Confirmed' : rawStatus === 'completed' ? 'Completed' : rawStatus === 'rejected' ? 'Rejected' : 'Pending',
           rawStatus: rawStatus,
-          startDate: new Date(b.start_date || b.created_at),
-          endDate: new Date(b.end_date || b.created_at),
+          startDateRaw: b.start_date || '',
+          endDateRaw: b.end_date || '',
+          startDate: parsedStart,
+          endDate: parsedEnd,
           price: Number(b.total_price) || 0,
           created_at: b.created_at,
           scooter_obj: b.scooters
         }
       })
       setBookingsList(formatted)
-
-      // Asynchronously complete past bookings in background without blocking render
-      if (toComplete.length > 0) {
-        (async () => {
-          for (const b of toComplete) {
-            try {
-              await supabase.from('bookings').update({ status: 'completed' }).eq('id', b.id)
-              if (b.scooter_id && b.scooters) {
-                const currentAvail = b.scooters.available_units ?? 0
-                const totalUnits = b.scooters.total_units ?? 1
-                const qty = Number(b.quantity) || 1
-                const newAvail = Math.min(totalUnits, currentAvail + qty)
-                await supabase.from('scooters').update({ available_units: newAvail }).eq('id', b.scooter_id)
-              }
-            } catch (err) {
-              console.warn("Background auto-complete error for partner booking:", b.id, err)
-            }
-          }
-        })()
-      }
     }
   }
 
@@ -260,12 +244,14 @@ export default function VendorDashboard() {
   const handleCompleteBooking = async (booking: any) => {
     setProcessingBookingId(booking.id)
     try {
-      const { error } = await supabase
+      const { data: claimed, error } = await supabase
         .from('bookings')
         .update({ status: 'completed' })
         .eq('id', booking.id)
+        .eq('status', 'confirmed')
+        .select('id')
 
-      if (!error) {
+      if (!error && claimed && claimed.length > 0) {
         if (booking.scooterId) {
           const { data: sData } = await supabase
             .from('scooters')
@@ -281,6 +267,7 @@ export default function VendorDashboard() {
             await supabase.from('scooters').update({ available_units: newAvail }).eq('id', booking.scooterId)
           }
         }
+        invalidateAllCatalogCaches()
         if (vendorData) {
           await refreshData(vendorData)
         }
@@ -1262,9 +1249,11 @@ export default function VendorDashboard() {
                                     </p>
                                   </div>
 
-                                  <div className="flex items-center gap-1.5 text-[11px] md:text-xs font-semibold text-[var(--muted-ink)] whitespace-nowrap truncate">
+                                  <div className="flex items-center gap-1.5 text-[11px] md:text-xs font-semibold text-[var(--muted-ink)] flex-wrap">
                                     <Calendar className="w-3.5 h-3.5 text-[var(--accent-text)] shrink-0" />
-                                    <span>{formatRentalPeriod(booking.startDate, booking.endDate)}</span>
+                                    <span>
+                                      {formatBookingDateTimeDisplay(booking.startDateRaw || booking.startDate)} – {formatBookingDateTimeDisplay(booking.endDateRaw || booking.endDate)}
+                                    </span>
                                   </div>
                                 </div>
                               </div>
@@ -1288,6 +1277,15 @@ export default function VendorDashboard() {
                                 <span className="cirrel-pill text-xs shrink-0">
                                   <span>{rentalDays} {rentalDays > 1 ? 'Days' : 'Day'}</span>
                                 </span>
+
+                                {booking.rawStatus === 'confirmed' && (
+                                  <RentalCountdownBadge
+                                    endDate={booking.endDateRaw || booking.endDate}
+                                    onExpire={() => {
+                                      if (vendorData) refreshData(vendorData)
+                                    }}
+                                  />
+                                )}
                               </div>
                             </div>
 
