@@ -6,25 +6,37 @@ interface TransparentLoaderProps {
 }
 
 export default function TransparentLoader({ label, fullScreen = true }: TransparentLoaderProps) {
+  if (!fullScreen) {
+    return (
+      <div
+        role="status"
+        aria-live="polite"
+        aria-label={label || "Loading content"}
+        className="w-full h-full min-h-[160px] flex items-center justify-center bg-transparent"
+      >
+        <div className="w-7 h-7 rounded-full border-[3px] border-[var(--line-2)] border-t-[var(--accent-blue)] animate-spin" />
+      </div>
+    )
+  }
+
   return (
     <div
       role="status"
       aria-live="polite"
-      aria-label={label || "Loading content"}
-      className={
-        fullScreen
-          ? "fixed inset-0 z-[9999] flex items-center justify-center bg-black/30 backdrop-blur-xl transition-opacity duration-150"
-          : "w-full h-full min-h-[180px] flex items-center justify-center bg-transparent"
-      }
+      aria-label={label || "Loading page"}
+      className="min-h-screen w-full bg-[var(--bg)] px-4 sm:px-6 py-6 md:py-10"
     >
-      <div className="relative flex flex-col items-center justify-center gap-3 cirrel-glass px-6 py-5 rounded-[24px]">
-        {/* Sleek Centered Circular Spinner */}
-        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-[3px] border-[var(--line-2)] border-t-[var(--accent-blue)] animate-spin" />
-        {label && (
-          <span className="text-[11px] font-bold text-[var(--ink)] tracking-wider uppercase">
-            {label}
-          </span>
-        )}
+      <div className="max-w-3xl mx-auto space-y-5">
+        <div className="h-9 w-48 rounded-full bg-[var(--card-2)] animate-pulse" />
+        <div className="cirrel-glass rounded-[28px] p-5 sm:p-7 space-y-4">
+          <div className="h-6 w-2/3 rounded-full bg-[var(--card-2)] animate-pulse" />
+          <div className="h-52 sm:h-64 w-full rounded-[22px] bg-[var(--card-2)] animate-pulse" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="h-16 rounded-[18px] bg-[var(--card-2)] animate-pulse" />
+            <div className="h-16 rounded-[18px] bg-[var(--card-2)] animate-pulse" />
+            <div className="h-16 rounded-[18px] bg-[var(--card-2)] animate-pulse hidden sm:block" />
+          </div>
+        </div>
       </div>
     </div>
   )

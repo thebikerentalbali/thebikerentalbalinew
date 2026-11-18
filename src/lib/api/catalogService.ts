@@ -3,7 +3,15 @@ import { createClient as createBrowserClient } from '@/lib/supabase/client';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { serverCache } from '@/lib/cache/serverCache';
 import { DEFAULT_PLATFORM_SETTINGS, getCustomerPrice, PlatformSettings } from '@/utils/pricing';
-import { reconcileExpiredBookings } from '@/utils/rentalTime';
+import { isBookingFinished, reconcileExpiredBookings } from '@/utils/rentalTime';
+
+let lastBackgroundReconcileAt = 0;
+function triggerBackgroundReconcile(supabase: any) {
+  const now = Date.now();
+  if (now - lastBackgroundReconcileAt < 30_000) return;
+  lastBackgroundReconcileAt = now;
+  void reconcileExpiredBookings(supabase).catch(() => {});
+}
 
 export interface CatalogData {
   vendors: any[];
@@ -133,14 +141,12 @@ export async function getCatalogServerData(options?: { forceRefresh?: boolean })
     async () => {
       const supabase = getDirectSupabase();
 
-      // Auto-complete expired rentals and restore unit availability before reading scooters
-      await reconcileExpiredBookings(supabase);
-
-      // Parallel batch query hitting PostgreSQL with composite indexes
+      // Single parallel batch: vendors, scooters, settings, and active confirmed bookings
       const [
         { data: vendors, error: vErr },
         { data: scooters, error: sErr },
-        { data: settingsData }
+        { data: settingsData },
+        { data: confirmedBookings }
       ] = await Promise.all([
         supabase
           .from('vendors')
@@ -156,10 +162,31 @@ export async function getCatalogServerData(options?: { forceRefresh?: boolean })
           .select('*')
           .limit(1)
           .maybeSingle(),
+        supabase
+          .from('bookings')
+          .select('id, scooter_id, quantity, end_date')
+          .eq('status', 'confirmed'),
       ]);
 
       if (vErr) console.warn('[CatalogService] Vendors query error:', vErr);
       if (sErr) console.warn('[CatalogService] Scooters query error:', sErr);
+
+      // Compute restored units immediately in memory for any finished bookings without blocking response
+      const nowMs = Date.now();
+      const restoredByScooter: Record<string, number> = {};
+      let hasExpired = false;
+      if (confirmedBookings && confirmedBookings.length > 0) {
+        for (const b of confirmedBookings) {
+          if (b.scooter_id && isBookingFinished(b.end_date, nowMs)) {
+            hasExpired = true;
+            const key = String(b.scooter_id);
+            restoredByScooter[key] = (restoredByScooter[key] || 0) + Math.max(1, Number(b.quantity) || 1);
+          }
+        }
+      }
+      if (hasExpired) {
+        triggerBackgroundReconcile(supabase);
+      }
 
       const settings: PlatformSettings = settingsData ? {
         markup_daily: Number(settingsData.markup_daily) || DEFAULT_PLATFORM_SETTINGS.markup_daily,
@@ -173,8 +200,15 @@ export async function getCatalogServerData(options?: { forceRefresh?: boolean })
 
       const formattedScooters = (scooters || []).map((s: any) => {
         const prices = getCustomerPrice(s.price_daily || 0, s.price_weekly, s.price_monthly, settings);
+        const restored = restoredByScooter[String(s.id)] || 0;
+        const totalUnits = Number(s.total_units ?? 1);
+        const liveAvailable = restored > 0
+          ? Math.min(totalUnits, Number(s.available_units ?? 0) + restored)
+          : s.available_units;
+
         return {
           ...s,
+          available_units: liveAvailable,
           price: prices.daily.toLocaleString(),
           price_daily: prices.daily,
           price_weekly: prices.weekly,
@@ -191,7 +225,7 @@ export async function getCatalogServerData(options?: { forceRefresh?: boolean })
         cachedAt: new Date().toISOString(),
       };
     },
-    30_000 // 30s in-memory hot cache
+    60_000 // 60s in-memory hot cache (invalidated immediately on mutations)
   );
 }
 
@@ -213,7 +247,6 @@ export async function fetchScooterDetailServer(id: string): Promise<ScooterDetai
 
     // Direct Supabase fallback
     const supabase = getDirectSupabase();
-    await reconcileExpiredBookings(supabase);
     const { data: sData } = await supabase.from('scooters').select('*').eq('id', id).maybeSingle();
     if (!sData) return null;
 

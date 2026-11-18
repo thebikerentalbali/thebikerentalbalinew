@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ChevronLeft, ChevronRight, Bell, Star, MapPin, Map, Info, Minus, Plus, PlusCircle, X, Trash2, Loader2, Store } from "lucide-react"
+import { ChevronLeft, ChevronRight, Bell, Star, MapPin, Map, Info, Minus, Plus, PlusCircle, X, Trash2, Loader2, Store, CheckCircle2, MessageCircle } from "lucide-react"
 import { createClient } from '@/lib/supabase/client'
 import { fetchCatalogData, fetchScooterDetail } from '@/lib/api/catalogService'
 import { clientCache } from '@/lib/cache/clientCache'
@@ -63,6 +63,7 @@ export default function CheckoutPage() {
   const [endDate, setEndDate] = useState(() => addDaysToDate(formatIsoDate(new Date()), 1))
   const [startTime, setStartTime] = useState("09:00")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [completedWhatsAppUrl, setCompletedWhatsAppUrl] = useState<string | null>(null)
 
   useEffect(() => {
     const now = new Date()
@@ -530,7 +531,11 @@ export default function CheckoutPage() {
         })
       )
 
-      window.location.href = waUrl
+      setCompletedWhatsAppUrl(waUrl)
+      const opened = window.open(waUrl, "_blank", "noopener,noreferrer")
+      if (!opened) {
+        window.location.assign(waUrl)
+      }
     }
   }
 
@@ -561,7 +566,36 @@ export default function CheckoutPage() {
           </button>
         </header>
 
-        {loading ? (
+        {completedWhatsAppUrl ? (
+          <div className="relative z-10 max-w-lg mx-auto w-full my-auto cirrel-glass rounded-[30px] p-6 sm:p-8 text-center space-y-5">
+            <div className="w-16 h-16 rounded-full bg-[var(--good-soft)] text-[var(--good)] flex items-center justify-center mx-auto">
+              <CheckCircle2 className="w-9 h-9" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-[var(--ink)] tracking-tight">Booking Saved!</h2>
+              <p className="text-sm text-[var(--muted-ink)] font-medium mt-1.5">
+                Your booking has been saved to your Bookings Cart and is ready to send on WhatsApp.
+              </p>
+            </div>
+            <div className="space-y-2.5 pt-2">
+              <a
+                href={completedWhatsAppUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full cirrel-btn-primary py-3.5 px-6 text-sm font-bold flex items-center justify-center gap-2 active-press"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span>Open WhatsApp Chat</span>
+              </a>
+              <Link
+                href="/"
+                className="w-full cirrel-btn py-3.5 px-6 text-sm font-bold flex items-center justify-center gap-2 active-press"
+              >
+                <span>Back to Homepage</span>
+              </Link>
+            </div>
+          </div>
+        ) : loading ? (
           <div className="relative z-10 flex flex-col md:grid md:grid-cols-2 md:gap-10 flex-1 animate-pulse">
             <div className="flex flex-col gap-6 mb-6">
               <div className="cirrel-glass rounded-[26px] p-6 flex flex-col gap-5">
@@ -990,6 +1024,7 @@ export default function CheckoutPage() {
       </div>
 
       {/* Bottom Button (Mobile Only) */}
+      {!completedWhatsAppUrl && (
       <div className="md:hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto px-5 py-4 pb-7 cirrel-modal z-10 rounded-t-[30px]">
         <div className="relative z-10 flex items-center justify-between mb-3 px-2">
            <span className="text-[12px] font-bold text-[var(--muted-ink)] uppercase tracking-wider">Total</span>
@@ -1023,6 +1058,7 @@ export default function CheckoutPage() {
           )}
         </button>
       </div>
+      )}
 
       {/* Modal for Adding Same Vendor Scooters */}
       {showAddModal && (

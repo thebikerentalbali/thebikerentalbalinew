@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { serverCache } from '@/lib/cache/serverCache';
 import { DEFAULT_PLATFORM_SETTINGS, getCustomerPrice, PlatformSettings } from '@/utils/pricing';
-import { reconcileExpiredBookings } from '@/utils/rentalTime';
+import { isBookingFinished, reconcileExpiredBookings } from '@/utils/rentalTime';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,12 +33,12 @@ export async function GET(
       `scooter:${id}`,
       async () => {
         const supabase = getSupabaseClient();
-        await reconcileExpiredBookings(supabase);
 
-        // Fetch scooter with joined vendor data and settings in 1 parallel round-trip
+        // Fetch scooter, settings, and active confirmed bookings in 1 parallel round-trip
         const [
           { data: scooterData, error: sErr },
-          { data: settingsData }
+          { data: settingsData },
+          { data: activeBookings }
         ] = await Promise.all([
           supabase
             .from('scooters')
@@ -50,11 +50,34 @@ export async function GET(
             .select('*')
             .limit(1)
             .maybeSingle(),
+          supabase
+            .from('bookings')
+            .select('id, quantity, end_date')
+            .eq('scooter_id', id)
+            .eq('status', 'confirmed'),
         ]);
 
         if (sErr || !scooterData) {
           return null;
         }
+
+        const nowMs = Date.now();
+        let restoredUnits = 0;
+        if (activeBookings && activeBookings.length > 0) {
+          for (const b of activeBookings) {
+            if (isBookingFinished(b.end_date, nowMs)) {
+              restoredUnits += Math.max(1, Number(b.quantity) || 1);
+            }
+          }
+          if (restoredUnits > 0) {
+            void reconcileExpiredBookings(supabase).catch(() => {});
+          }
+        }
+
+        const totalUnits = Number(scooterData.total_units ?? 1);
+        const liveAvailable = restoredUnits > 0
+          ? Math.min(totalUnits, Number(scooterData.available_units ?? 0) + restoredUnits)
+          : scooterData.available_units;
 
         const settings: PlatformSettings = settingsData ? {
           markup_daily: Number(settingsData.markup_daily) || DEFAULT_PLATFORM_SETTINGS.markup_daily,
@@ -76,6 +99,7 @@ export async function GET(
         return {
           scooter: {
             ...scooterData,
+            available_units: liveAvailable,
             price_daily: prices.daily,
             price_weekly: prices.weekly,
             price_monthly: prices.monthly,
