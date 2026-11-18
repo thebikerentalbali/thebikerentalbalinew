@@ -1,12 +1,12 @@
 "use client"
 
 import { useState, useEffect, useMemo, useCallback } from "react"
-import { Users, Bike, DollarSign, Settings, Bell, Search, Store, BarChart3, Home, ChevronRight, ChevronLeft, ChevronDown, ChevronUp, Calendar, TrendingUp, CalendarDays, MoreVertical, Filter, ArrowUpRight, CheckCircle2, AlertCircle, Menu, UserCheck, MoreHorizontal, Loader2, XCircle, RotateCcw, Clock, Check, Calculator, Sparkles, Coins, LogOut, Lock, Mail, Eye, EyeOff, ShieldCheck, Plus, Trash2, Edit3, Image as ImageIcon, UploadCloud, Flame, Tag, Layers, ExternalLink, ArrowRight, Play, Video, Gift, MapPin, MessageCircle, HeartHandshake, Globe } from "lucide-react"
+import { Users, Bike, DollarSign, Settings, Bell, Search, Store, BarChart3, Home, ChevronRight, ChevronLeft, ChevronDown, ChevronUp, Calendar, TrendingUp, CalendarDays, MoreVertical, Filter, ArrowUpRight, CheckCircle2, AlertCircle, Menu, UserCheck, MoreHorizontal, Loader2, XCircle, RotateCcw, Clock, Check, Calculator, Sparkles, Coins, LogOut, Lock, Mail, Eye, EyeOff, ShieldCheck, Plus, Trash2, Edit3, Image as ImageIcon, UploadCloud, Flame, Tag, Layers, ExternalLink, ArrowRight, Play, Video, Gift, MapPin, MessageCircle, HeartHandshake, Globe, Route } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { createClient } from "@/lib/supabase/client"
 import { getPlatformSettings, savePlatformSettings, calculateBookingCommission, calculateRentalDays, fetchPlatformSettings, subscribeToPlatformSettings, PlatformSettings, DEFAULT_PLATFORM_SETTINGS } from "@/utils/pricing"
-import { Campaign, CampaignCategory, CampaignTheme, getCampaigns, fetchCampaigns, saveCampaign, deleteCampaign, subscribeToCampaigns, extractYouTubeId, resolveCampaignLink, DEFAULT_CAMPAIGNS } from "@/utils/campaigns"
+import { Campaign, CampaignCategory, CampaignTheme, TourDetails, TourItineraryStop, DEFAULT_TOUR_DETAILS, getCampaigns, fetchCampaigns, saveCampaign, deleteCampaign, subscribeToCampaigns, extractYouTubeId, resolveCampaignLink, DEFAULT_CAMPAIGNS } from "@/utils/campaigns"
 import { invalidateAllCatalogCaches } from "@/lib/api/catalogService"
 import { reconcileExpiredBookings, formatBookingDateTimeDisplay } from "@/utils/rentalTime"
 import ThemeToggle from "@/components/ThemeToggle"
@@ -90,6 +90,7 @@ export default function AdminDashboard() {
   const [campaignSaveError, setCampaignSaveError] = useState<string | null>(null)
   const [isSavingCampaign, setIsSavingCampaign] = useState(false)
   const [showAdvancedSpaFields, setShowAdvancedSpaFields] = useState(false)
+  const [newIncludeItem, setNewIncludeItem] = useState("")
 
   // Verify Admin Session on Mount
   useEffect(() => {
@@ -489,22 +490,27 @@ export default function AdminDashboard() {
     } else if (category === 'tour') {
       setCampaignForm({
         id: `campaign-${Date.now()}`,
-        title: 'Bali Island Excursions & Guided Rides',
-        partner_name: 'Bali Island Adventures',
+        title: 'Ubud Waterfalls & Rice Terraces Scooter Tour',
+        partner_name: 'The Bike Rental Bali Tours',
         partner_logo_url: undefined,
         category: 'tour',
-        subtitle: 'Get 20% off all waterfall treks, sunrise volcano tours, and curated scooter road-trips.',
-        badge: 'SPECIAL TOUR OFFER',
-        discount_text: 'EXCLUSIVE 20% OFF TOURS',
-        voucher_code: 'BALITOUR20',
-        partner_whatsapp: '6281234567890',
-        partner_location: 'Bali, Indonesia',
-        voucher_terms: 'Present active scooter booking code when reserving your tour slot.',
-        cta_text: 'View Tour Offer',
-        cta_link: '#claim-voucher',
-        image_url: '/images/scooter.png',
+        subtitle: 'Guided Bali scooter excursion through lush rice terraces, waterfalls, and local coffee plantations.',
+        badge: 'SCOOTER TOUR',
+        discount_text: '',
+        voucher_code: '',
+        partner_whatsapp: '',
+        partner_location: 'Canggu, Seminyak & Ubud',
+        voucher_terms: 'Valid international driving license recommended. Helmets & fuel included.',
+        cta_text: 'View Tour & Itinerary',
+        cta_link: '',
+        image_url: '',
         is_active: true,
         order: (campaigns.length || 0) + 1,
+        tour_details: {
+          ...DEFAULT_TOUR_DETAILS,
+          includes: [...(DEFAULT_TOUR_DETAILS.includes || [])],
+          itinerary: DEFAULT_TOUR_DETAILS.itinerary.map((s) => ({ ...s })),
+        },
       })
     } else {
       setCampaignForm({
@@ -532,8 +538,29 @@ export default function AdminDashboard() {
     setEditingCampaignId(campaign.id)
     setShowAdvancedSpaFields(false)
     setCampaignSaveError(null)
-    setCampaignForm({ ...campaign })
+    setCampaignForm({
+      ...campaign,
+      tour_details:
+        campaign.category === 'tour'
+          ? campaign.tour_details || {
+              ...DEFAULT_TOUR_DETAILS,
+              includes: [...(DEFAULT_TOUR_DETAILS.includes || [])],
+              itinerary: DEFAULT_TOUR_DETAILS.itinerary.map((s) => ({ ...s })),
+            }
+          : campaign.tour_details,
+    })
     setIsCampaignModalOpen(true)
+  }
+
+  const updateTourDetails = (updater: (prev: TourDetails) => TourDetails) => {
+    setCampaignForm((prev) => {
+      const current: TourDetails = prev.tour_details || {
+        ...DEFAULT_TOUR_DETAILS,
+        includes: [...(DEFAULT_TOUR_DETAILS.includes || [])],
+        itinerary: [],
+      }
+      return { ...prev, tour_details: updater(current) }
+    })
   }
 
   /**
@@ -644,14 +671,39 @@ export default function AdminDashboard() {
       return
     }
 
+    if (campaignForm.category === 'tour') {
+      const tourPrice = Number(campaignForm.tour_details?.price || 0)
+      if (!tourPrice || tourPrice <= 0) {
+        setCampaignSaveError("Please enter the scooter tour price (in IDR).")
+        return
+      }
+    }
+
     setIsSavingCampaign(true)
     try {
+      const cleanedItinerary = (campaignForm.tour_details?.itinerary || []).filter(
+        (stop) => stop.title.trim() || stop.description.trim() || stop.time.trim()
+      )
       const normalizedForm: Campaign = {
         ...campaignForm,
         cta_link: resolvedLink ? resolvedLink.href : '',
-        cta_text: (campaignForm.cta_text || '').trim() || (campaignForm.category === 'spa' ? 'Book Now' : 'View Details'),
+        cta_text:
+          (campaignForm.cta_text || '').trim() ||
+          (campaignForm.category === 'spa'
+            ? 'Book Now'
+            : campaignForm.category === 'tour'
+            ? 'View Tour & Itinerary'
+            : 'View Details'),
+        tour_details:
+          campaignForm.category === 'tour'
+            ? {
+                ...(campaignForm.tour_details || DEFAULT_TOUR_DETAILS),
+                itinerary: cleanedItinerary,
+              }
+            : campaignForm.tour_details,
       }
       const updatedList = await saveCampaign(normalizedForm)
+      invalidateAllCatalogCaches()
       setCampaigns(updatedList)
       setCampaignSaveSuccess(true)
       setIsCampaignModalOpen(false)
@@ -667,12 +719,14 @@ export default function AdminDashboard() {
   const handleToggleCampaignActive = async (campaign: Campaign) => {
     const updated = { ...campaign, is_active: !campaign.is_active }
     const updatedList = await saveCampaign(updated)
+    invalidateAllCatalogCaches()
     setCampaigns(updatedList)
   }
 
   const handleDeleteCampaignAction = async (id: string) => {
     if (confirm("Are you sure you want to delete this campaign?")) {
       const updatedList = await deleteCampaign(id)
+      invalidateAllCatalogCaches()
       setCampaigns(updatedList)
     }
   }
@@ -1836,8 +1890,8 @@ export default function AdminDashboard() {
                   onClick={() => handleOpenCreateCampaign('tour')}
                   className="bg-neutral-100 hover:bg-neutral-200 text-black px-4 py-3 rounded-2xl font-bold text-xs uppercase tracking-wider active-press transition-all flex items-center gap-2 border border-black/10 cursor-pointer"
                 >
-                  <MapPin className="w-4 h-4" />
-                  <span>+ Tour Collab</span>
+                  <Route className="w-4 h-4" />
+                  <span>+ Scooter Tour</span>
                 </button>
 
                 <button
@@ -1945,6 +1999,26 @@ export default function AdminDashboard() {
                         )}
 
                         <div className="flex items-center gap-4 text-xs text-gray-500 pt-1 flex-wrap font-medium">
+                          {camp.category === 'tour' && camp.tour_details?.price ? (
+                            <span className="bg-black text-white px-2.5 py-0.5 rounded-md font-bold text-[11px]">
+                              Rp {Number(camp.tour_details.price).toLocaleString("id-ID")} {camp.tour_details.price_unit || "per rider"}
+                            </span>
+                          ) : null}
+                          {camp.category === 'tour' && camp.tour_details?.duration ? (
+                            <span className="inline-flex items-center gap-1 text-gray-700 font-semibold">
+                              <Clock className="w-3.5 h-3.5" /> {camp.tour_details.duration}
+                            </span>
+                          ) : null}
+                          {camp.category === 'tour' && camp.tour_details?.itinerary?.length ? (
+                            <span className="inline-flex items-center gap-1 text-gray-700 font-semibold">
+                              <Route className="w-3.5 h-3.5" /> {camp.tour_details.itinerary.length} stops
+                            </span>
+                          ) : null}
+                          {camp.partner_location && (
+                            <span className="inline-flex items-center gap-1 text-gray-600 font-semibold">
+                              <MapPin className="w-3.5 h-3.5" /> {camp.partner_location}
+                            </span>
+                          )}
                           {(() => {
                             const campLink = resolveCampaignLink(camp.cta_link)
                             if (!campLink?.isExternal) return null
@@ -2094,13 +2168,25 @@ export default function AdminDashboard() {
                               {campaignForm.subtitle}
                             </p>
                           )}
-                          <div className="flex items-center justify-between pt-1">
+                          <div className="flex items-center justify-between gap-2 pt-1">
                             <span className="inline-flex items-center gap-1 px-4 py-1.5 rounded-full bg-white text-black text-[10px] font-black uppercase tracking-wider shadow-sm">
-                              <span>{campaignForm.cta_text || (campaignForm.category === 'spa' ? 'Book Now' : 'View Details')}</span>
+                              <span>
+                                {campaignForm.cta_text ||
+                                  (campaignForm.category === 'spa'
+                                    ? 'Book Now'
+                                    : campaignForm.category === 'tour'
+                                    ? 'View Tour & Itinerary'
+                                    : 'View Details')}
+                              </span>
                               {resolveCampaignLink(campaignForm.cta_link)?.isExternal && (
                                 <ExternalLink className="w-3 h-3" />
                               )}
                             </span>
+                            {campaignForm.category === 'tour' && campaignForm.tour_details?.price ? (
+                              <span className="text-[11px] font-bold text-white bg-white/15 px-3 py-1 rounded-full">
+                                Rp {Number(campaignForm.tour_details.price).toLocaleString("id-ID")} · {campaignForm.tour_details.itinerary?.length || 0} stops
+                              </span>
+                            ) : null}
                           </div>
                         </div>
 
@@ -2115,7 +2201,7 @@ export default function AdminDashboard() {
                       <div className="grid grid-cols-3 gap-2.5">
                         {[
                           { id: 'spa', label: 'Spa & Wellness', desc: 'Simple booking link card' },
-                          { id: 'tour', label: 'Island Tour', desc: 'Excursions & road trips' },
+                          { id: 'tour', label: 'Scooter Tour', desc: 'Price, itinerary & booking' },
                           { id: 'scooter', label: 'Scooter Promo', desc: 'Fleet discount deal' },
                         ].map((cat) => (
                           <button
@@ -2124,11 +2210,11 @@ export default function AdminDashboard() {
                             onClick={() => setCampaignForm(prev => {
                               const nextCat = cat.id as CampaignCategory
                               const nextCtaText = nextCat === 'spa'
-                                ? (!prev.cta_text || ['View Tour Offer', 'Rent Now', 'Claim Spa Voucher', 'View Details'].includes(prev.cta_text) ? 'Book Now' : prev.cta_text)
+                                ? (!prev.cta_text || ['View Tour Offer', 'View Tour & Itinerary', 'Rent Now', 'Claim Spa Voucher', 'View Details'].includes(prev.cta_text) ? 'Book Now' : prev.cta_text)
                                 : nextCat === 'tour'
-                                  ? 'View Tour Offer'
+                                  ? (!prev.cta_text || ['Book Now', 'Rent Now', 'Claim Spa Voucher', 'View Details', 'View Tour Offer'].includes(prev.cta_text) ? 'View Tour & Itinerary' : prev.cta_text)
                                   : 'Rent Now'
-                              const nextCtaLink = nextCat === 'spa' && (prev.cta_link === '#claim-voucher' || prev.cta_link === '#all-scooters')
+                              const nextCtaLink = (nextCat === 'spa' || nextCat === 'tour') && (prev.cta_link === '#claim-voucher' || prev.cta_link === '#all-scooters')
                                 ? ''
                                 : prev.cta_link
                               return {
@@ -2136,6 +2222,14 @@ export default function AdminDashboard() {
                                 category: nextCat,
                                 cta_text: nextCtaText,
                                 cta_link: nextCtaLink,
+                                tour_details:
+                                  nextCat === 'tour'
+                                    ? prev.tour_details || {
+                                        ...DEFAULT_TOUR_DETAILS,
+                                        includes: [...(DEFAULT_TOUR_DETAILS.includes || [])],
+                                        itinerary: DEFAULT_TOUR_DETAILS.itinerary.map((s) => ({ ...s })),
+                                      }
+                                    : prev.tour_details,
                               }
                             })}
                             className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
@@ -2190,7 +2284,7 @@ export default function AdminDashboard() {
                           </p>
                         </div>
 
-                        {/* Simple Core Details */}
+                        {/* Simple Core Details (with Location right alongside Spa Name) */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
                             <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
@@ -2200,7 +2294,35 @@ export default function AdminDashboard() {
                               type="text"
                               value={campaignForm.partner_name || ''}
                               onChange={(e) => setCampaignForm(prev => ({ ...prev, partner_name: e.target.value }))}
-                              placeholder="e.g. Sanctuary Spa Bali"
+                              placeholder="e.g. Book Therapick"
+                              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                              Location / Area
+                            </label>
+                            <input
+                              type="text"
+                              value={campaignForm.partner_location || ''}
+                              onChange={(e) => setCampaignForm(prev => ({ ...prev, partner_location: e.target.value }))}
+                              placeholder="e.g. Canggu, Seminyak & Ubud"
+                              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                              Campaign Title <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              required
+                              value={campaignForm.title}
+                              onChange={(e) => setCampaignForm(prev => ({ ...prev, title: e.target.value }))}
+                              placeholder="e.g. Exclusive Home Spa Experience in Bali"
                               className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black"
                             />
                           </div>
@@ -2220,75 +2342,80 @@ export default function AdminDashboard() {
 
                         <div>
                           <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                            Campaign Title <span className="text-red-500">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            value={campaignForm.title}
-                            onChange={(e) => setCampaignForm(prev => ({ ...prev, title: e.target.value }))}
-                            placeholder="e.g. 25% Off Traditional Balinese Massage"
-                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
                             Short Description <span className="text-gray-400 font-medium normal-case">(Optional)</span>
                           </label>
                           <textarea
                             rows={2}
                             value={campaignForm.subtitle}
                             onChange={(e) => setCampaignForm(prev => ({ ...prev, subtitle: e.target.value }))}
-                            placeholder="e.g. Book your massage online and enjoy special rider rates."
+                            placeholder="e.g. Enjoy professional Balinese massage and wellness treatments in the comfort of your villa."
                             className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-black resize-none"
                           />
                         </div>
 
-                        {/* Optional Spa Banner Photo */}
-                        <div>
-                          <div className="flex items-center justify-between mb-1.5">
-                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
-                              Spa Photo <span className="text-gray-400 font-medium normal-case">(Optional)</span>
+                        {/* Spa Logo & Photo */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                              Spa Logo <span className="text-gray-400 font-medium normal-case">(Displayed on photo)</span>
                             </label>
-                            {campaignForm.image_url && (
-                              <button
-                                type="button"
-                                onClick={() => setCampaignForm(prev => ({ ...prev, image_url: '' }))}
-                                className="text-[11px] font-bold text-red-600 hover:underline cursor-pointer"
-                              >
-                                Remove photo
-                              </button>
-                            )}
-                          </div>
-                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-                            <label className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-dashed border-gray-300 hover:border-black cursor-pointer bg-gray-50 hover:bg-white transition-all text-xs font-bold text-gray-700 shrink-0">
-                              {isUploadingCampaignImg ? (
-                                <>
-                                  <Loader2 className="w-4 h-4 animate-spin text-black" />
-                                  <span>Uploading...</span>
-                                </>
-                              ) : (
-                                <>
-                                  <UploadCloud className="w-4 h-4 text-gray-500" />
-                                  <span>Upload Photo</span>
-                                </>
-                              )}
+                            <div className="flex items-center gap-2">
+                              <label className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl border border-gray-300 hover:border-black cursor-pointer bg-gray-50 hover:bg-white text-xs font-bold text-gray-700 shrink-0">
+                                {isUploadingPartnerLogo ? <Loader2 className="w-4 h-4 animate-spin" /> : <UploadCloud className="w-4 h-4" />}
+                                <span>Logo</span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={handlePartnerLogoUpload}
+                                  className="hidden"
+                                  disabled={isUploadingPartnerLogo}
+                                />
+                              </label>
                               <input
-                                type="file"
-                                accept="image/*"
-                                onChange={handleCampaignImageUpload}
-                                className="hidden"
-                                disabled={isUploadingCampaignImg}
+                                type="text"
+                                value={campaignForm.partner_logo_url || ''}
+                                onChange={(e) => setCampaignForm(prev => ({ ...prev, partner_logo_url: e.target.value }))}
+                                placeholder="Paste logo URL"
+                                className="flex-1 min-w-0 px-3 py-2.5 rounded-xl border border-gray-200 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-black"
                               />
-                            </label>
-                            <input
-                              type="text"
-                              value={campaignForm.image_url || ''}
-                              onChange={(e) => setCampaignForm(prev => ({ ...prev, image_url: e.target.value }))}
-                              placeholder="Or paste photo URL"
-                              className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-black"
-                            />
+                            </div>
+                          </div>
+
+                          <div>
+                            <div className="flex items-center justify-between mb-1.5">
+                              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                Spa Photo <span className="text-gray-400 font-medium normal-case">(Optional)</span>
+                              </label>
+                              {campaignForm.image_url && (
+                                <button
+                                  type="button"
+                                  onClick={() => setCampaignForm(prev => ({ ...prev, image_url: '' }))}
+                                  className="text-[11px] font-bold text-red-600 hover:underline cursor-pointer"
+                                >
+                                  Remove
+                                </button>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <label className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl border border-gray-300 hover:border-black cursor-pointer bg-gray-50 hover:bg-white text-xs font-bold text-gray-700 shrink-0">
+                                {isUploadingCampaignImg ? <Loader2 className="w-4 h-4 animate-spin text-black" /> : <UploadCloud className="w-4 h-4" />}
+                                <span>Photo</span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={handleCampaignImageUpload}
+                                  className="hidden"
+                                  disabled={isUploadingCampaignImg}
+                                />
+                              </label>
+                              <input
+                                type="text"
+                                value={campaignForm.image_url || ''}
+                                onChange={(e) => setCampaignForm(prev => ({ ...prev, image_url: e.target.value }))}
+                                placeholder="Paste photo URL"
+                                className="flex-1 min-w-0 px-3 py-2.5 rounded-xl border border-gray-200 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-black"
+                              />
+                            </div>
                           </div>
                         </div>
 
@@ -2317,7 +2444,7 @@ export default function AdminDashboard() {
 
                         {showAdvancedSpaFields && (
                           <div className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200 space-y-4">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                               <div>
                                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
                                   Badge Tag
@@ -2326,25 +2453,13 @@ export default function AdminDashboard() {
                                   type="text"
                                   value={campaignForm.badge || ''}
                                   onChange={(e) => setCampaignForm(prev => ({ ...prev, badge: e.target.value }))}
-                                  placeholder="e.g. 25% OFF"
+                                  placeholder="e.g. SPA PARTNER"
                                   className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-black bg-white"
                                 />
                               </div>
                               <div>
                                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                                  Location / Area
-                                </label>
-                                <input
-                                  type="text"
-                                  value={campaignForm.partner_location || ''}
-                                  onChange={(e) => setCampaignForm(prev => ({ ...prev, partner_location: e.target.value }))}
-                                  placeholder="e.g. Seminyak & Ubud"
-                                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-black bg-white"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                                  Optional Voucher Code
+                                  Voucher Code
                                 </label>
                                 <input
                                   type="text"
@@ -2356,7 +2471,7 @@ export default function AdminDashboard() {
                               </div>
                               <div>
                                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                                  Display Priority Order
+                                  Priority Order
                                 </label>
                                 <input
                                   type="number"
@@ -2368,15 +2483,165 @@ export default function AdminDashboard() {
                                 />
                               </div>
                             </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : campaignForm.category === 'tour' ? (
+                      <div className="space-y-5">
+                        {/* 1. Tour Pricing & Duration */}
+                        <div className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200 space-y-4">
+                          <div className="flex items-center gap-2 text-xs font-bold text-neutral-900 uppercase tracking-wider">
+                            <Coins className="w-4 h-4 text-black" />
+                            <span>Scooter Tour Pricing &amp; Schedule</span>
+                          </div>
 
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
                               <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                                Spa Logo <span className="text-gray-400 font-medium normal-case">(Optional)</span>
+                                Price (IDR) <span className="text-red-500">*</span>
                               </label>
-                              <div className="flex items-center gap-3">
-                                <label className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-300 hover:border-black cursor-pointer bg-white text-xs font-bold text-gray-700 shrink-0">
+                              <input
+                                type="number"
+                                min={0}
+                                step={5000}
+                                value={campaignForm.tour_details?.price ?? ''}
+                                onChange={(e) =>
+                                  updateTourDetails((prev) => ({
+                                    ...prev,
+                                    price: Number(e.target.value) || 0,
+                                  }))
+                                }
+                                placeholder="350000"
+                                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black bg-white"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                                Price Unit
+                              </label>
+                              <select
+                                value={campaignForm.tour_details?.price_unit || 'per rider'}
+                                onChange={(e) =>
+                                  updateTourDetails((prev) => ({ ...prev, price_unit: e.target.value }))
+                                }
+                                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black bg-white"
+                              >
+                                <option value="per rider">Per Rider</option>
+                                <option value="per scooter">Per Scooter</option>
+                                <option value="per group">Per Group</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                                Duration
+                              </label>
+                              <input
+                                type="text"
+                                value={campaignForm.tour_details?.duration || ''}
+                                onChange={(e) =>
+                                  updateTourDetails((prev) => ({ ...prev, duration: e.target.value }))
+                                }
+                                placeholder="e.g. Full Day (8 Hours)"
+                                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black bg-white"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                                Tour Area / Route Location
+                              </label>
+                              <input
+                                type="text"
+                                value={campaignForm.partner_location || ''}
+                                onChange={(e) => setCampaignForm(prev => ({ ...prev, partner_location: e.target.value }))}
+                                placeholder="e.g. Canggu, Seminyak & Ubud"
+                                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-black bg-white"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                                Meeting / Pickup Point
+                              </label>
+                              <input
+                                type="text"
+                                value={campaignForm.tour_details?.meeting_point || ''}
+                                onChange={(e) =>
+                                  updateTourDetails((prev) => ({ ...prev, meeting_point: e.target.value }))
+                                }
+                                placeholder="e.g. Hotel / Villa Pickup • 08:00 AM"
+                                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-black bg-white"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 2. Tour Title, Description & Photos */}
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                              Scooter Tour Title <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              required
+                              value={campaignForm.title}
+                              onChange={(e) => setCampaignForm(prev => ({ ...prev, title: e.target.value }))}
+                              placeholder="e.g. Ubud Waterfalls & Rice Terraces Scooter Tour"
+                              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                              Tour Description
+                            </label>
+                            <textarea
+                              rows={3}
+                              value={campaignForm.subtitle}
+                              onChange={(e) => setCampaignForm(prev => ({ ...prev, subtitle: e.target.value }))}
+                              placeholder="Describe what riders will see and experience on this scooter tour..."
+                              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-black resize-none"
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                                Tour Guide / Brand Name
+                              </label>
+                              <input
+                                type="text"
+                                value={campaignForm.partner_name || ''}
+                                onChange={(e) => setCampaignForm(prev => ({ ...prev, partner_name: e.target.value }))}
+                                placeholder="e.g. The Bike Rental Bali Tours"
+                                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-black"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                                Badge Tag
+                              </label>
+                              <input
+                                type="text"
+                                value={campaignForm.badge || ''}
+                                onChange={(e) => setCampaignForm(prev => ({ ...prev, badge: e.target.value }))}
+                                placeholder="e.g. SCOOTER TOUR"
+                                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-black"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                                Operator Logo
+                              </label>
+                              <div className="flex items-center gap-2">
+                                <label className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl border border-gray-300 hover:border-black cursor-pointer bg-gray-50 hover:bg-white text-xs font-bold text-gray-700 shrink-0">
                                   {isUploadingPartnerLogo ? <Loader2 className="w-4 h-4 animate-spin" /> : <UploadCloud className="w-4 h-4" />}
-                                  <span>Upload Logo</span>
+                                  <span>Logo</span>
                                   <input
                                     type="file"
                                     accept="image/*"
@@ -2389,13 +2654,398 @@ export default function AdminDashboard() {
                                   type="text"
                                   value={campaignForm.partner_logo_url || ''}
                                   onChange={(e) => setCampaignForm(prev => ({ ...prev, partner_logo_url: e.target.value }))}
-                                  placeholder="Or paste logo image URL"
-                                  className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-black bg-white"
+                                  placeholder="Or paste logo URL"
+                                  className="flex-1 min-w-0 px-3 py-2.5 rounded-xl border border-gray-200 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-black"
+                                />
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                                Tour Cover Photo
+                              </label>
+                              <div className="flex items-center gap-2">
+                                <label className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl border border-gray-300 hover:border-black cursor-pointer bg-gray-50 hover:bg-white text-xs font-bold text-gray-700 shrink-0">
+                                  {isUploadingCampaignImg ? <Loader2 className="w-4 h-4 animate-spin" /> : <UploadCloud className="w-4 h-4" />}
+                                  <span>Photo</span>
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleCampaignImageUpload}
+                                    className="hidden"
+                                    disabled={isUploadingCampaignImg}
+                                  />
+                                </label>
+                                <input
+                                  type="text"
+                                  value={campaignForm.image_url || ''}
+                                  onChange={(e) => setCampaignForm(prev => ({ ...prev, image_url: e.target.value }))}
+                                  placeholder="Or paste photo URL"
+                                  className="flex-1 min-w-0 px-3 py-2.5 rounded-xl border border-gray-200 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-black"
                                 />
                               </div>
                             </div>
                           </div>
-                        )}
+                        </div>
+
+                        {/* 3. Timed Itinerary Builder */}
+                        <div className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200 space-y-4">
+                          <div className="flex items-center justify-between gap-2 flex-wrap">
+                            <div className="flex items-center gap-2 text-xs font-bold text-neutral-900 uppercase tracking-wider">
+                              <Route className="w-4 h-4 text-black" />
+                              <span>Itinerary Builder ({campaignForm.tour_details?.itinerary?.length || 0} Stops)</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateTourDetails((prev) => ({
+                                  ...prev,
+                                  itinerary: [
+                                    ...(prev.itinerary || []),
+                                    { time: '', title: '', location: '', description: '' },
+                                  ],
+                                }))
+                              }
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black text-white text-[11px] font-bold hover:bg-neutral-800 transition-colors cursor-pointer"
+                            >
+                              <Plus className="w-3.5 h-3.5" />
+                              <span>Add Stop</span>
+                            </button>
+                          </div>
+
+                          {(!campaignForm.tour_details?.itinerary || campaignForm.tour_details.itinerary.length === 0) ? (
+                            <div className="p-4 rounded-xl bg-white border border-dashed border-gray-300 text-center text-xs text-gray-500">
+                              No itinerary stops yet. Click <strong>+ Add Stop</strong> to build the schedule.
+                            </div>
+                          ) : (
+                            <div className="space-y-3">
+                              {campaignForm.tour_details.itinerary.map((stop, idx) => (
+                                <div key={idx} className="p-3.5 rounded-xl bg-white border border-gray-200 space-y-2.5">
+                                  <div className="flex items-center justify-between gap-2">
+                                    <span className="text-[11px] font-black uppercase tracking-wider text-gray-700">
+                                      Stop #{idx + 1}
+                                    </span>
+                                    <div className="flex items-center gap-1">
+                                      <button
+                                        type="button"
+                                        disabled={idx === 0}
+                                        onClick={() =>
+                                          updateTourDetails((prev) => {
+                                            const copy = [...prev.itinerary]
+                                            ;[copy[idx - 1], copy[idx]] = [copy[idx], copy[idx - 1]]
+                                            return { ...prev, itinerary: copy }
+                                          })
+                                        }
+                                        className="p-1 rounded-lg hover:bg-gray-100 text-gray-500 disabled:opacity-30 cursor-pointer"
+                                        title="Move up"
+                                      >
+                                        <ChevronUp className="w-3.5 h-3.5" />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        disabled={idx === (campaignForm.tour_details?.itinerary?.length || 1) - 1}
+                                        onClick={() =>
+                                          updateTourDetails((prev) => {
+                                            const copy = [...prev.itinerary]
+                                            ;[copy[idx + 1], copy[idx]] = [copy[idx], copy[idx + 1]]
+                                            return { ...prev, itinerary: copy }
+                                          })
+                                        }
+                                        className="p-1 rounded-lg hover:bg-gray-100 text-gray-500 disabled:opacity-30 cursor-pointer"
+                                        title="Move down"
+                                      >
+                                        <ChevronDown className="w-3.5 h-3.5" />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          updateTourDetails((prev) => ({
+                                            ...prev,
+                                            itinerary: prev.itinerary.filter((_, sIdx) => sIdx !== idx),
+                                          }))
+                                        }
+                                        className="p-1 rounded-lg hover:bg-red-50 text-red-500 cursor-pointer"
+                                        title="Remove stop"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
+                                    </div>
+                                  </div>
+
+                                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                                    <input
+                                      type="text"
+                                      value={stop.time}
+                                      onChange={(e) =>
+                                        updateTourDetails((prev) => ({
+                                          ...prev,
+                                          itinerary: prev.itinerary.map((it, sIdx) =>
+                                            sIdx === idx ? { ...it, time: e.target.value } : it
+                                          ),
+                                        }))
+                                      }
+                                      placeholder="Time (e.g. 08:30 AM)"
+                                      className="px-3 py-2 rounded-lg border border-gray-200 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-black"
+                                    />
+                                    <input
+                                      type="text"
+                                      value={stop.title}
+                                      onChange={(e) =>
+                                        updateTourDetails((prev) => ({
+                                          ...prev,
+                                          itinerary: prev.itinerary.map((it, sIdx) =>
+                                            sIdx === idx ? { ...it, title: e.target.value } : it
+                                          ),
+                                        }))
+                                      }
+                                      placeholder="Stop title (e.g. Tegenungan Waterfall)"
+                                      className="px-3 py-2 rounded-lg border border-gray-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-black"
+                                    />
+                                    <input
+                                      type="text"
+                                      value={stop.location || ''}
+                                      onChange={(e) =>
+                                        updateTourDetails((prev) => ({
+                                          ...prev,
+                                          itinerary: prev.itinerary.map((it, sIdx) =>
+                                            sIdx === idx ? { ...it, location: e.target.value } : it
+                                          ),
+                                        }))
+                                      }
+                                      placeholder="Location (optional)"
+                                      className="px-3 py-2 rounded-lg border border-gray-200 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-black"
+                                    />
+                                  </div>
+
+                                  <textarea
+                                    rows={2}
+                                    value={stop.description}
+                                    onChange={(e) =>
+                                      updateTourDetails((prev) => ({
+                                        ...prev,
+                                        itinerary: prev.itinerary.map((it, sIdx) =>
+                                          sIdx === idx ? { ...it, description: e.target.value } : it
+                                        ),
+                                      }))
+                                    }
+                                    placeholder="What happens at this stop..."
+                                    className="w-full px-3 py-2 rounded-lg border border-gray-200 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-black resize-none"
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* 4. What's Included */}
+                        <div className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200 space-y-3">
+                          <label className="block text-xs font-bold text-neutral-900 uppercase tracking-wider">
+                            What&apos;s Included
+                          </label>
+                          <div className="flex flex-wrap gap-2">
+                            {[
+                              'Scooter & 2 Helmets',
+                              'Local Guide',
+                              'Full Fuel Tank',
+                              'Bottled Water',
+                              'Hotel Pickup',
+                              'Entrance Tickets',
+                              'Balinese Lunch',
+                            ].map((preset) => {
+                              const currentIncludes = campaignForm.tour_details?.includes || []
+                              const isSelected = currentIncludes.includes(preset)
+                              return (
+                                <button
+                                  key={preset}
+                                  type="button"
+                                  onClick={() =>
+                                    updateTourDetails((prev) => {
+                                      const list = prev.includes || []
+                                      return {
+                                        ...prev,
+                                        includes: isSelected
+                                          ? list.filter((i) => i !== preset)
+                                          : [...list, preset],
+                                      }
+                                    })
+                                  }
+                                  className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors cursor-pointer ${
+                                    isSelected
+                                      ? 'bg-black text-white border-black'
+                                      : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'
+                                  }`}
+                                >
+                                  {isSelected ? '✓ ' : '+ '}
+                                  {preset}
+                                </button>
+                              )
+                            })}
+                          </div>
+
+                          <div className="flex items-center gap-2 pt-1">
+                            <input
+                              type="text"
+                              value={newIncludeItem}
+                              onChange={(e) => setNewIncludeItem(e.target.value)}
+                              placeholder="Add custom inclusion (e.g. GoPro photos)..."
+                              className="flex-1 px-3.5 py-2 rounded-xl border border-gray-200 text-xs font-medium bg-white focus:outline-none focus:ring-2 focus:ring-black"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const trimmed = newIncludeItem.trim()
+                                if (!trimmed) return
+                                updateTourDetails((prev) => ({
+                                  ...prev,
+                                  includes: prev.includes?.includes(trimmed)
+                                    ? prev.includes
+                                    : [...(prev.includes || []), trimmed],
+                                }))
+                                setNewIncludeItem('')
+                              }}
+                              className="px-4 py-2 rounded-xl bg-black text-white text-xs font-bold hover:bg-neutral-800 cursor-pointer"
+                            >
+                              Add
+                            </button>
+                          </div>
+
+                          {(campaignForm.tour_details?.includes || []).some(
+                            (i) =>
+                              ![
+                                'Scooter & 2 Helmets',
+                                'Local Guide',
+                                'Full Fuel Tank',
+                                'Bottled Water',
+                                'Hotel Pickup',
+                                'Entrance Tickets',
+                                'Balinese Lunch',
+                              ].includes(i)
+                          ) && (
+                            <div className="flex flex-wrap gap-1.5 pt-1">
+                              {(campaignForm.tour_details?.includes || [])
+                                .filter(
+                                  (i) =>
+                                    ![
+                                      'Scooter & 2 Helmets',
+                                      'Local Guide',
+                                      'Full Fuel Tank',
+                                      'Bottled Water',
+                                      'Hotel Pickup',
+                                      'Entrance Tickets',
+                                      'Balinese Lunch',
+                                    ].includes(i)
+                                )
+                                .map((customItem) => (
+                                  <span
+                                    key={customItem}
+                                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black text-white text-[11px] font-bold"
+                                  >
+                                    <span>{customItem}</span>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        updateTourDetails((prev) => ({
+                                          ...prev,
+                                          includes: (prev.includes || []).filter((x) => x !== customItem),
+                                        }))
+                                      }
+                                      className="hover:opacity-75 cursor-pointer"
+                                    >
+                                      ×
+                                    </button>
+                                  </span>
+                                ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* 5. Booking & Status */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                              Booking WhatsApp Number
+                            </label>
+                            <input
+                              type="text"
+                              value={campaignForm.partner_whatsapp || ''}
+                              onChange={(e) => setCampaignForm(prev => ({ ...prev, partner_whatsapp: e.target.value }))}
+                              placeholder="e.g. 6281234567890"
+                              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-black"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                              Optional Booking Link (New Tab)
+                            </label>
+                            <input
+                              type="text"
+                              value={campaignForm.cta_link || ''}
+                              onChange={(e) => setCampaignForm(prev => ({ ...prev, cta_link: e.target.value }))}
+                              placeholder="Optional external website link"
+                              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-black"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                              Important Notes / Terms
+                            </label>
+                            <input
+                              type="text"
+                              value={campaignForm.voucher_terms || ''}
+                              onChange={(e) => setCampaignForm(prev => ({ ...prev, voucher_terms: e.target.value }))}
+                              placeholder="e.g. Bring swimwear, sunscreen & valid driver license"
+                              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-black"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                              Button Label
+                            </label>
+                            <input
+                              type="text"
+                              value={campaignForm.cta_text || 'View Tour & Itinerary'}
+                              onChange={(e) => setCampaignForm(prev => ({ ...prev, cta_text: e.target.value }))}
+                              placeholder="View Tour & Itinerary"
+                              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-black"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100">
+                          <div>
+                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                              Display Priority Order
+                            </label>
+                            <input
+                              type="number"
+                              min={1}
+                              max={99}
+                              value={campaignForm.order || 1}
+                              onChange={(e) => setCampaignForm(prev => ({ ...prev, order: Number(e.target.value) || 1 }))}
+                              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-black"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                              Tour Status
+                            </label>
+                            <div className="flex items-center gap-3 pt-2">
+                              <input
+                                type="checkbox"
+                                id="campaign-active-toggle"
+                                checked={campaignForm.is_active}
+                                onChange={(e) => setCampaignForm(prev => ({ ...prev, is_active: e.target.checked }))}
+                                className="w-5 h-5 rounded accent-black cursor-pointer"
+                              />
+                              <label htmlFor="campaign-active-toggle" className="text-xs font-bold text-gray-800 cursor-pointer">
+                                Active on Homepage
+                              </label>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     ) : (
                       <>

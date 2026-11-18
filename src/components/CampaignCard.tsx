@@ -23,11 +23,16 @@ interface CampaignCardProps {
 }
 
 export default function CampaignCard({ initialCampaigns }: CampaignCardProps) {
+  const filterBannerCampaigns = useCallback(
+    (list: Campaign[]) => list.filter((c) => c.is_active !== false && c.category !== "tour"),
+    []
+  )
+
   const [campaigns, setCampaigns] = useState<Campaign[]>(() => {
     if (initialCampaigns && initialCampaigns.length > 0) {
-      return initialCampaigns.filter(c => c.is_active !== false)
+      return filterBannerCampaigns(initialCampaigns)
     }
-    return getCampaigns(false)
+    return filterBannerCampaigns(getCampaigns(false))
   })
 
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -37,18 +42,20 @@ export default function CampaignCard({ initialCampaigns }: CampaignCardProps) {
 
   // Fetch Supabase campaigns in background (supports 0 campaigns when empty/deleted)
   useEffect(() => {
-    fetchCampaigns(false).then((data) => {
-      setCampaigns(Array.isArray(data) ? data : [])
-    }).catch(() => {})
+    fetchCampaigns(false)
+      .then((data) => {
+        setCampaigns(Array.isArray(data) ? filterBannerCampaigns(data) : [])
+      })
+      .catch(() => {})
 
     const unsubscribe = subscribeToCampaigns((updated) => {
-      setCampaigns(Array.isArray(updated) ? updated : [])
+      setCampaigns(Array.isArray(updated) ? filterBannerCampaigns(updated) : [])
     })
 
     return () => {
       unsubscribe()
     }
-  }, [])
+  }, [filterBannerCampaigns])
 
   // Auto slide if multiple campaigns exist
   useEffect(() => {
@@ -119,7 +126,7 @@ export default function CampaignCard({ initialCampaigns }: CampaignCardProps) {
 
         {/* Media Pane (Compact top banner on mobile, sleek left split on desktop) */}
         {activeCampaign.image_url && (
-          <div className="relative w-full h-44 sm:h-48 md:h-auto md:w-[38%] lg:w-[36%] md:min-h-[200px] shrink-0 overflow-hidden bg-[#f4f6f9] dark:bg-[#141a24]">
+          <div className="relative w-full h-48 sm:h-52 md:h-auto md:w-[40%] lg:w-[38%] md:min-h-[220px] shrink-0 overflow-hidden bg-[#f4f6f9] dark:bg-[#141a24]">
             <Image
               src={activeCampaign.image_url}
               alt={activeCampaign.title || "Campaign"}
@@ -128,69 +135,106 @@ export default function CampaignCard({ initialCampaigns }: CampaignCardProps) {
               className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
               priority={true}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent md:bg-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/25" />
 
             {activeCampaign.badge && (
-              <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/20 text-white text-[10px] font-bold uppercase tracking-wider">
+              <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-black/65 backdrop-blur-md border border-white/20 text-white text-[10px] font-bold uppercase tracking-wider">
                 {activeCampaign.badge}
               </span>
             )}
+
+            {/* Partner Logo, Brand Title & Location overlaid cleanly on image */}
+            <div className="absolute bottom-3 left-3 right-3 z-10 flex items-center gap-2.5 min-w-0">
+              <div className="w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center overflow-hidden shrink-0 border border-white/40">
+                {activeCampaign.partner_logo_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={activeCampaign.partner_logo_url}
+                    alt={activeCampaign.partner_name || "Partner"}
+                    className="w-full h-full object-contain p-0.5"
+                  />
+                ) : (
+                  <span className="text-[11px] font-bold text-[#0b1220]">
+                    {activeCampaign.partner_name ? activeCampaign.partner_name.slice(0, 2).toUpperCase() : "TB"}
+                  </span>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="block text-xs sm:text-sm font-bold text-white leading-tight truncate drop-shadow-sm">
+                  {activeCampaign.partner_name || "The Bike Rental Bali"}
+                </span>
+                {activeCampaign.partner_location && (
+                  <span className="inline-flex items-center gap-1 text-[11px] text-white/90 font-medium leading-tight mt-0.5 max-w-full">
+                    <MapPin className="w-3 h-3 shrink-0" />
+                    <span className="truncate">{activeCampaign.partner_location}</span>
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
         )}
 
         {/* Content Pane */}
         <div className="relative z-10 flex-1 p-4 sm:p-5 md:p-6 flex flex-col justify-between gap-3.5 min-w-0 pointer-events-none">
-          <div className="space-y-2">
-            {/* Partner Row */}
-            <div className="flex items-center justify-between gap-2 flex-wrap">
-              <div className="flex items-center gap-2 min-w-0">
-                <div className="w-7 h-7 rounded-full cirrel-well flex items-center justify-center overflow-hidden shrink-0">
-                  {activeCampaign.partner_logo_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={activeCampaign.partner_logo_url}
-                      alt={activeCampaign.partner_name || "Partner"}
-                      className="w-full h-full object-contain p-0.5"
-                    />
-                  ) : (
-                    <span className="text-[10px] font-bold text-[var(--accent-text)]">
-                      {activeCampaign.partner_name ? activeCampaign.partner_name.slice(0, 2).toUpperCase() : "TB"}
+          <div className="space-y-2.5">
+            {/* Fallback Partner Row (when card has no image) + Discount/Badge Pills */}
+            {(!activeCampaign.image_url || activeCampaign.discount_text) && (
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                {!activeCampaign.image_url ? (
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-full cirrel-well flex items-center justify-center overflow-hidden shrink-0">
+                      {activeCampaign.partner_logo_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={activeCampaign.partner_logo_url}
+                          alt={activeCampaign.partner_name || "Partner"}
+                          className="w-full h-full object-contain p-0.5"
+                        />
+                      ) : (
+                        <span className="text-[10px] font-bold text-[var(--accent-text)]">
+                          {activeCampaign.partner_name ? activeCampaign.partner_name.slice(0, 2).toUpperCase() : "TB"}
+                        </span>
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <span className="block text-xs font-bold text-[var(--ink-2)] truncate">
+                        {activeCampaign.partner_name || "The Bike Rental Bali"}
+                      </span>
+                      {activeCampaign.partner_location && (
+                        <span className="inline-flex items-center gap-1 text-[11px] text-[var(--muted-ink)] font-medium">
+                          <MapPin className="w-3 h-3 shrink-0 text-[var(--accent-text)]" />
+                          <span>{activeCampaign.partner_location}</span>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div />
+                )}
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {!activeCampaign.image_url && activeCampaign.badge && (
+                    <span className="cirrel-pill text-[10px] uppercase tracking-wider">
+                      {activeCampaign.badge}
+                    </span>
+                  )}
+                  {activeCampaign.discount_text && (
+                    <span className="cirrel-pill cirrel-pill--info text-[10px] sm:text-[11px]">
+                      <Gift className="w-3 h-3 shrink-0" />
+                      <span>{activeCampaign.discount_text}</span>
                     </span>
                   )}
                 </div>
-                <span className="text-xs font-bold text-[var(--ink-2)] truncate">
-                  {activeCampaign.partner_name || "The Bike Rental Bali"}
-                </span>
-                {activeCampaign.partner_location && (
-                  <span className="hidden sm:inline-flex items-center gap-1 text-[11px] text-[var(--muted-ink)] font-medium truncate">
-                    • {activeCampaign.partner_location}
-                  </span>
-                )}
               </div>
+            )}
 
-              {/* Show badge on right if card has no image, or show discount pill */}
-              <div className="flex items-center gap-1.5 shrink-0">
-                {!activeCampaign.image_url && activeCampaign.badge && (
-                  <span className="cirrel-pill text-[10px] uppercase tracking-wider">
-                    {activeCampaign.badge}
-                  </span>
-                )}
-                {activeCampaign.discount_text && (
-                  <span className="cirrel-pill cirrel-pill--info text-[10px] sm:text-[11px]">
-                    <Gift className="w-3 h-3 shrink-0" />
-                    <span className="truncate max-w-[160px] sm:max-w-none">{activeCampaign.discount_text}</span>
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Title & Subtitle */}
+            {/* Title & Full Short Description (without ... truncation) */}
             <div>
-              <h2 className="text-base sm:text-lg md:text-xl font-bold text-[var(--ink)] leading-snug tracking-tight line-clamp-2">
+              <h2 className="text-base sm:text-lg md:text-xl font-bold text-[var(--ink)] leading-snug tracking-tight">
                 {activeCampaign.title}
               </h2>
               {activeCampaign.subtitle && (
-                <p className="text-xs sm:text-sm text-[var(--muted-ink)] line-clamp-2 mt-1 font-medium leading-relaxed">
+                <p className="text-xs sm:text-sm text-[var(--muted-ink)] mt-1.5 font-medium leading-relaxed whitespace-normal">
                   {activeCampaign.subtitle}
                 </p>
               )}

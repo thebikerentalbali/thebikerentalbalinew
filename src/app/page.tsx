@@ -76,6 +76,7 @@ export default async function Page() {
       <HomeClient
         initialVendors={catalogData?.vendors || []}
         initialScooters={catalogData?.scooters || []}
+        initialCampaigns={catalogData?.campaigns || []}
         initialSettings={catalogData?.settings}
       />
     </>

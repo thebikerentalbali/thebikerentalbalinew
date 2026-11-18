@@ -12,6 +12,7 @@ import {
 
 import ScooterCard from "@/components/ScooterCard"
 import CampaignCard from "@/components/CampaignCard"
+import ScooterToursSection from "@/components/ScooterToursSection"
 import MarketplaceNavbar, {
   readStoredSavedScooters,
   writeStoredSavedScooters,
@@ -19,6 +20,7 @@ import MarketplaceNavbar, {
 import { fetchCatalogData } from "@/lib/api/catalogService"
 import { createClient as createBrowserClient } from "@/lib/supabase/client"
 import { subscribeToPlatformSettings } from "@/utils/pricing"
+import type { Campaign } from "@/utils/campaigns"
 
 // Dynamic code-split import for filter modal - zero JS cost until user clicks
 const HomeFilterModal = dynamic(() => import("@/components/HomeFilterModal"), {
@@ -36,12 +38,14 @@ const BRANDS = [
 interface HomeClientProps {
   initialVendors?: any[]
   initialScooters?: any[]
+  initialCampaigns?: Campaign[]
   initialSettings?: any
 }
 
 export default function HomeClient({
   initialVendors = [],
   initialScooters = [],
+  initialCampaigns = [],
   initialSettings,
 }: HomeClientProps) {
   const [topVendors, setTopVendors] = useState<any[]>(initialVendors)
@@ -234,7 +238,10 @@ export default function HomeClient({
         </div>
 
         {/* Promotional Campaign Card */}
-        <CampaignCard />
+        <CampaignCard initialCampaigns={initialCampaigns} />
+
+        {/* Scooter Tours & Itineraries Section */}
+        <ScooterToursSection initialCampaigns={initialCampaigns} />
 
         {/* Filter and Brands - Single Row with Duration Dropdown + Brand Chips */}
         <section aria-labelledby="brands-heading" className="mb-10 md:mb-12">

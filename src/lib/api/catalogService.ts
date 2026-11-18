@@ -4,6 +4,7 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { serverCache } from '@/lib/cache/serverCache';
 import { DEFAULT_PLATFORM_SETTINGS, getCustomerPrice, PlatformSettings } from '@/utils/pricing';
 import { isBookingFinished, reconcileExpiredBookings } from '@/utils/rentalTime';
+import { Campaign, mapCampaignRow } from '@/utils/campaigns';
 
 let lastBackgroundReconcileAt = 0;
 function triggerBackgroundReconcile(supabase: any) {
@@ -16,6 +17,7 @@ function triggerBackgroundReconcile(supabase: any) {
 export interface CatalogData {
   vendors: any[];
   scooters: any[];
+  campaigns?: Campaign[];
   settings: PlatformSettings;
   cachedAt?: string;
 }
@@ -141,12 +143,13 @@ export async function getCatalogServerData(options?: { forceRefresh?: boolean })
     async () => {
       const supabase = getDirectSupabase();
 
-      // Single parallel batch: vendors, scooters, settings, and active confirmed bookings
+      // Single parallel batch: vendors, scooters, settings, active confirmed bookings, and campaigns
       const [
         { data: vendors, error: vErr },
         { data: scooters, error: sErr },
         { data: settingsData },
-        { data: confirmedBookings }
+        { data: confirmedBookings },
+        { data: campaignsData }
       ] = await Promise.all([
         supabase
           .from('vendors')
@@ -166,6 +169,12 @@ export async function getCatalogServerData(options?: { forceRefresh?: boolean })
           .from('bookings')
           .select('id, scooter_id, quantity, end_date')
           .eq('status', 'confirmed'),
+        supabase
+          .from('campaigns')
+          .select('*')
+          .eq('is_active', true)
+          .order('order', { ascending: true })
+          .order('created_at', { ascending: false }),
       ]);
 
       if (vErr) console.warn('[CatalogService] Vendors query error:', vErr);
@@ -218,15 +227,38 @@ export async function getCatalogServerData(options?: { forceRefresh?: boolean })
         };
       });
 
+      const formattedCampaigns: Campaign[] = Array.isArray(campaignsData)
+        ? campaignsData.map(mapCampaignRow)
+        : [];
+
       return {
         vendors: formattedVendors,
         scooters: formattedScooters,
+        campaigns: formattedCampaigns,
         settings,
         cachedAt: new Date().toISOString(),
       };
     },
     60_000 // 60s in-memory hot cache (invalidated immediately on mutations)
   );
+}
+
+/**
+ * Fetches a single campaign / scooter tour cleanly by ID on the server.
+ */
+export async function fetchCampaignByIdServer(id: string): Promise<Campaign | null> {
+  try {
+    const catalog = await getCatalogServerData();
+    const cachedMatch = (catalog.campaigns || []).find((c) => String(c.id) === String(id));
+    if (cachedMatch) return cachedMatch;
+
+    const supabase = getDirectSupabase();
+    const { data } = await supabase.from('campaigns').select('*').eq('id', id).maybeSingle();
+    return data ? mapCampaignRow(data) : null;
+  } catch (e) {
+    console.error('[CatalogService] fetchCampaignByIdServer error:', e);
+    return null;
+  }
 }
 
 /**

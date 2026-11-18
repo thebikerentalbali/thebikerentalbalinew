@@ -3,6 +3,90 @@ import { createClient } from '@/lib/supabase/client';
 export type CampaignCategory = 'spa' | 'video' | 'tour' | 'scooter' | 'dining' | 'custom';
 export type CampaignTheme = 'dark' | 'sunset' | 'ocean' | 'emerald' | 'violet' | 'amber';
 
+export interface TourItineraryStop {
+  time: string;
+  title: string;
+  location?: string;
+  description: string;
+}
+
+export interface TourDetails {
+  price: number;
+  price_unit?: string;
+  duration?: string;
+  meeting_point?: string;
+  includes?: string[];
+  itinerary: TourItineraryStop[];
+}
+
+export const DEFAULT_TOUR_DETAILS: TourDetails = {
+  price: 350000,
+  price_unit: 'per rider',
+  duration: 'Full Day (8 Hours)',
+  meeting_point: 'Hotel / Villa Pickup (Canggu, Seminyak, Ubud)',
+  includes: ['Scooter & 2 Helmets', 'Local Guide', 'Full Fuel Tank', 'Bottled Water'],
+  itinerary: [
+    {
+      time: '08:30 AM',
+      title: 'Hotel Pickup & Briefing',
+      location: 'Canggu / Seminyak',
+      description: 'Meet your guide, get fitted with helmets, and review the scenic route.',
+    },
+    {
+      time: '10:00 AM',
+      title: 'Tegenungan Waterfall Stop',
+      location: 'Gianyar, Ubud',
+      description: 'Ride through lush village roads to swim and take photos at the waterfall.',
+    },
+    {
+      time: '12:30 PM',
+      title: 'Tegalalang Rice Terraces & Lunch',
+      location: 'Ubud',
+      description: 'Enjoy scenic valley views and an authentic Balinese lunch stop.',
+    },
+  ],
+};
+
+const TOUR_JSON_PREFIX = 'TOUR_JSON:';
+
+/**
+ * Parses serialized scooter tour details from hero_overlay_text.
+ */
+export function parseTourDetails(raw?: string | null): TourDetails | undefined {
+  if (!raw || typeof raw !== 'string' || !raw.startsWith(TOUR_JSON_PREFIX)) {
+    return undefined;
+  }
+  try {
+    const parsed = JSON.parse(raw.slice(TOUR_JSON_PREFIX.length));
+    if (!parsed || typeof parsed !== 'object') return undefined;
+    return {
+      price: Number(parsed.price) || 0,
+      price_unit: typeof parsed.price_unit === 'string' ? parsed.price_unit : 'per rider',
+      duration: typeof parsed.duration === 'string' ? parsed.duration : '',
+      meeting_point: typeof parsed.meeting_point === 'string' ? parsed.meeting_point : '',
+      includes: Array.isArray(parsed.includes) ? parsed.includes.filter(Boolean).map(String) : [],
+      itinerary: Array.isArray(parsed.itinerary)
+        ? parsed.itinerary.map((stop: any) => ({
+            time: String(stop?.time || ''),
+            title: String(stop?.title || ''),
+            location: stop?.location ? String(stop.location) : '',
+            description: String(stop?.description || ''),
+          }))
+        : [],
+    };
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Serializes scooter tour details into hero_overlay_text for zero-migration DB persistence.
+ */
+export function serializeTourDetails(details?: TourDetails): string {
+  if (!details) return '';
+  return `${TOUR_JSON_PREFIX}${JSON.stringify(details)}`;
+}
+
 export interface Campaign {
   id: string;
   title: string;
@@ -26,6 +110,43 @@ export interface Campaign {
   is_active: boolean;
   order?: number;
   created_at?: string;
+  tour_details?: TourDetails;
+}
+
+/**
+ * Maps a raw Supabase campaigns row into a typed Campaign object.
+ */
+export function mapCampaignRow(item: any): Campaign {
+  const category = (item.category as CampaignCategory) || 'scooter';
+  const heroOverlay = item.hero_overlay_text || '';
+  const tourDetails = item.tour_details || parseTourDetails(heroOverlay);
+  return {
+    id: String(item.id),
+    title: item.title || 'Special Campaign',
+    subtitle: item.subtitle || '',
+    category,
+    partner_name: item.partner_name || '',
+    partner_logo_url: item.partner_logo_url || '',
+    video_url: item.video_url || '',
+    youtube_id: item.youtube_id || extractYouTubeId(item.video_url) || '',
+    hero_overlay_text: heroOverlay,
+    badge: item.badge || '',
+    discount_text: item.discount_text || '',
+    voucher_code: item.voucher_code || '',
+    partner_whatsapp: item.partner_whatsapp || '',
+    partner_location: item.partner_location || '',
+    voucher_terms: item.voucher_terms || '',
+    cta_text:
+      item.cta_text ||
+      (category === 'spa' ? 'Book Now' : category === 'tour' ? 'View Tour & Itinerary' : 'Learn More'),
+    cta_link: item.cta_link || '',
+    image_url: item.image_url || '',
+    theme: (item.theme as CampaignTheme) || 'dark',
+    is_active: item.is_active !== false,
+    order: Number(item.order) || 0,
+    created_at: item.created_at || new Date().toISOString(),
+    tour_details: tourDetails,
+  };
 }
 
 /**
@@ -141,9 +262,10 @@ export function getCampaigns(includeInactive = false): Campaign[] {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved !== null) {
-      const parsed: Campaign[] = JSON.parse(saved);
+      const parsed = JSON.parse(saved);
       if (Array.isArray(parsed)) {
-        return includeInactive ? parsed : parsed.filter(c => c.is_active !== false);
+        const mapped = parsed.map(mapCampaignRow);
+        return includeInactive ? mapped : mapped.filter(c => c.is_active !== false);
       }
     }
   } catch (e) {
@@ -168,32 +290,11 @@ export async function fetchCampaigns(includeInactive = false): Promise<Campaign[
       .order('created_at', { ascending: false });
 
     if (!error && Array.isArray(data)) {
-      const remoteCampaigns: Campaign[] = data.map((item: any) => ({
-        id: String(item.id),
-        title: item.title || 'Special Campaign',
-        subtitle: item.subtitle || '',
-        category: (item.category as CampaignCategory) || 'scooter',
-        partner_name: item.partner_name || '',
-        partner_logo_url: item.partner_logo_url || '',
-        video_url: item.video_url || '',
-        youtube_id: item.youtube_id || extractYouTubeId(item.video_url) || '',
-        hero_overlay_text: item.hero_overlay_text || '',
-        badge: item.badge || '',
-        discount_text: item.discount_text || '',
-        voucher_code: item.voucher_code || '',
-        partner_whatsapp: item.partner_whatsapp || '',
-        partner_location: item.partner_location || '',
-        voucher_terms: item.voucher_terms || '',
-        cta_text: item.cta_text || (item.category === 'spa' ? 'Book Now' : 'Learn More'),
-        cta_link: item.cta_link || '',
-        image_url: item.image_url || '',
-        theme: (item.theme as CampaignTheme) || 'dark',
-        is_active: item.is_active !== false,
-        order: Number(item.order) || 0,
-        created_at: item.created_at || new Date().toISOString(),
-      }));
+      const remoteCampaigns: Campaign[] = data.map(mapCampaignRow);
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(remoteCampaigns));
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(remoteCampaigns));
+      } catch {}
       window.dispatchEvent(new Event('campaigns_updated'));
 
       return includeInactive ? remoteCampaigns : remoteCampaigns.filter(c => c.is_active);
@@ -213,8 +314,13 @@ export async function saveCampaign(campaign: Campaign): Promise<Campaign[]> {
 
   const resolvedYoutubeId = campaign.youtube_id || extractYouTubeId(campaign.video_url) || '';
   const resolvedLink = resolveCampaignLink(campaign.cta_link);
+  const serializedHeroOverlay =
+    campaign.category === 'tour' && campaign.tour_details
+      ? serializeTourDetails(campaign.tour_details)
+      : campaign.hero_overlay_text || '';
   const campaignToSave: Campaign = {
     ...campaign,
+    hero_overlay_text: serializedHeroOverlay,
     cta_link: resolvedLink ? resolvedLink.href : '',
     image_url: campaign.image_url || '',
     youtube_id: resolvedYoutubeId,
@@ -254,7 +360,13 @@ export async function saveCampaign(campaign: Campaign): Promise<Campaign[]> {
       partner_whatsapp: campaignToSave.partner_whatsapp || '',
       partner_location: campaignToSave.partner_location || '',
       voucher_terms: campaignToSave.voucher_terms || '',
-      cta_text: campaignToSave.cta_text || (campaignToSave.category === 'spa' ? 'Book Now' : 'Learn More'),
+      cta_text:
+        campaignToSave.cta_text ||
+        (campaignToSave.category === 'spa'
+          ? 'Book Now'
+          : campaignToSave.category === 'tour'
+          ? 'View Tour & Itinerary'
+          : 'Learn More'),
       cta_link: campaignToSave.cta_link || '',
       image_url: campaignToSave.image_url || '',
       theme: campaignToSave.theme || 'dark',
