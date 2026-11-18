@@ -299,7 +299,7 @@ export default function HomeClient({
         <section aria-labelledby="popular-scooters-heading" className="mb-10 md:mb-12">
           <div className="flex justify-between items-end mb-4 md:mb-6">
             <h2 id="popular-scooters-heading" className="text-xl md:text-2xl font-bold text-[var(--ink)]">Popular</h2>
-            <Link href="#all-scooters" className="text-[var(--accent-text)] text-sm font-semibold hover:underline transition-colors">See all</Link>
+            <Link href="/scooters" prefetch={true} className="text-[var(--accent-text)] text-sm font-semibold hover:underline transition-colors">See all</Link>
           </div>
 
           {filteredPopular.length === 0 ? (

@@ -12,6 +12,7 @@ interface ScooterCardProps {
   onToggleSave: (e: React.MouseEvent, id: number) => void
   isHero?: boolean
   variant?: "popular" | "grid"
+  locationLabel?: string
 }
 
 function ScooterCardComponent({
@@ -21,6 +22,7 @@ function ScooterCardComponent({
   onToggleSave,
   isHero = false,
   variant = "popular",
+  locationLabel,
 }: ScooterCardProps) {
   const price =
     durationFilter === "Weekly"
@@ -126,9 +128,9 @@ function ScooterCardComponent({
             sessionStorage.setItem("checkout_prefill", JSON.stringify({ scooter }))
           } catch (e) {}
         }}
-        className="cirrel-glass rounded-[24px] md:rounded-[26px] p-3 md:p-4 flex flex-col group transition-all duration-300 hover:-translate-y-0.5 active-press h-full"
+        className="cirrel-glass rounded-[20px] sm:rounded-[24px] p-2.5 sm:p-3.5 md:p-4 flex flex-col group transition-all duration-300 hover:-translate-y-0.5 active-press h-full"
       >
-        <div className="relative w-full aspect-square mb-3 md:mb-3.5 rounded-[18px] md:rounded-[20px] bg-gradient-to-b from-white/95 to-[#eaf0f8]/95 flex items-center justify-center p-3 md:p-4 overflow-hidden shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+        <div className="relative w-full aspect-square mb-2.5 sm:mb-3 rounded-[15px] sm:rounded-[18px] bg-gradient-to-b from-white/95 to-[#eaf0f8]/95 flex items-center justify-center p-2.5 sm:p-3.5 overflow-hidden shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
           <button
             type="button"
             aria-label={isSaved ? `Unsave ${scooter.name}` : `Save ${scooter.name}`}
@@ -137,18 +139,18 @@ function ScooterCardComponent({
               e.stopPropagation()
               onToggleSave(e, scooter.id)
             }}
-            className="absolute top-2.5 left-2.5 md:top-3 md:left-3 bg-[#0b1220]/70 backdrop-blur-md border border-white/20 w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center z-20 shadow-sm hover:scale-110 active-press transition-transform"
+            className="absolute top-2 left-2 sm:top-2.5 sm:left-2.5 bg-[#0b1220]/70 backdrop-blur-md border border-white/20 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center z-20 shadow-sm hover:scale-110 active-press transition-transform"
           >
             <Heart
-              className={`w-3.5 h-3.5 md:w-4 md:h-4 ${
+              className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${
                 isSaved ? "fill-[#ff6f66] text-[#ff6f66]" : "text-white"
               }`}
               aria-hidden="true"
             />
           </button>
-          <div className="absolute top-2.5 right-2.5 md:top-3 md:right-3 bg-[#0b1220]/75 backdrop-blur-md px-2.5 py-1 rounded-full flex items-center gap-1.5 z-10 border border-white/20">
+          <div className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 bg-[#0b1220]/75 backdrop-blur-md px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full flex items-center gap-1 z-10 border border-white/20">
             <span className="w-1.5 h-1.5 rounded-full bg-[#3d9bff]" />
-            <span className="text-[11px] font-bold text-white">
+            <span className="text-[10px] sm:text-[11px] font-bold text-white">
               {scooter.year || "2025"}
             </span>
           </div>
@@ -156,27 +158,32 @@ function ScooterCardComponent({
             src={scooter.img || scooter.image_url || "/images/scooter.png"}
             alt={scooter.name || "Scooter rental"}
             fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-contain p-3 drop-shadow-md transition-transform duration-300 group-hover:scale-105"
+            sizes="(max-width: 640px) 46vw, (max-width: 1024px) 33vw, 25vw"
+            className="object-contain p-2 sm:p-3 drop-shadow-md transition-transform duration-300 group-hover:scale-105"
             loading="lazy"
           />
         </div>
-        <div className="relative z-10 px-1 flex flex-col flex-1 justify-between">
+        <div className="relative z-10 px-0.5 sm:px-1 flex flex-col flex-1 justify-between">
           <div>
-            <h3 className="text-[14px] md:text-[16px] font-bold text-[var(--ink)] mb-0.5 truncate">
+            <h3 className="text-[13px] sm:text-[15px] font-bold text-[var(--ink)] mb-0.5 truncate leading-snug">
               {scooter.name}
             </h3>
+            {locationLabel && (
+              <p className="text-[10px] sm:text-[11px] font-medium text-[var(--muted-ink)] truncate mb-1">
+                {locationLabel}
+              </p>
+            )}
             <div className="flex items-baseline gap-1 flex-wrap">
-              <span className="font-bold text-[var(--ink)] text-[13px] md:text-[15px] leading-tight">
+              <span className="font-bold text-[var(--ink)] text-[13px] sm:text-[15px] leading-tight">
                 Rp {price.toLocaleString()}
               </span>
-              <span className="text-[11px] font-semibold text-[var(--muted-ink)]">
+              <span className="text-[10px] sm:text-[11px] font-semibold text-[var(--muted-ink)]">
                 / {durationFilter.toLowerCase()}
               </span>
             </div>
           </div>
-          <div className="mt-3">
-            <span className="w-full cirrel-btn-primary py-2 rounded-full text-xs md:text-sm font-semibold whitespace-nowrap flex items-center justify-center">
+          <div className="mt-2.5 sm:mt-3">
+            <span className="w-full cirrel-btn-primary py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-semibold whitespace-nowrap flex items-center justify-center">
               Book Now
             </span>
           </div>
