@@ -16,7 +16,7 @@ import {
   Gift, 
   MessageCircle
 } from "lucide-react"
-import { Campaign, getCampaigns, fetchCampaigns, subscribeToCampaigns } from "@/utils/campaigns"
+import { Campaign, getCampaigns, fetchCampaigns, subscribeToCampaigns, resolveCampaignLink } from "@/utils/campaigns"
 
 interface CampaignCardProps {
   initialCampaigns?: Campaign[]
@@ -87,6 +87,14 @@ export default function CampaignCard({ initialCampaigns }: CampaignCardProps) {
 
   if (!activeCampaign) return null
 
+  const activeLink = resolveCampaignLink(activeCampaign.cta_link)
+  const isDirectExternalCard = Boolean(
+    activeLink?.isExternal &&
+    !activeCampaign.voucher_code &&
+    !activeCampaign.partner_whatsapp &&
+    !activeCampaign.voucher_terms
+  )
+
   return (
     <section
       aria-label="Promotional Campaigns"
@@ -96,9 +104,19 @@ export default function CampaignCard({ initialCampaigns }: CampaignCardProps) {
     >
       {/* Simple, Clean & Responsive Campaign Card */}
       <div
-        onClick={() => setSelectedCampaign(activeCampaign)}
+        onClick={isDirectExternalCard ? undefined : () => setSelectedCampaign(activeCampaign)}
         className="cirrel-glass group relative overflow-hidden rounded-[22px] md:rounded-[26px] flex flex-col md:flex-row items-stretch cursor-pointer transition-all duration-300 hover:-translate-y-0.5 active-press"
       >
+        {isDirectExternalCard && activeLink && (
+          <a
+            href={activeLink.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={activeCampaign.title || "Open booking website"}
+            className="absolute inset-0 z-10"
+          />
+        )}
+
         {/* Media Pane (Compact top banner on mobile, sleek left split on desktop) */}
         {activeCampaign.image_url && (
           <div className="relative w-full h-44 sm:h-48 md:h-auto md:w-[38%] lg:w-[36%] md:min-h-[200px] shrink-0 overflow-hidden bg-[#f4f6f9] dark:bg-[#141a24]">
@@ -121,7 +139,7 @@ export default function CampaignCard({ initialCampaigns }: CampaignCardProps) {
         )}
 
         {/* Content Pane */}
-        <div className="relative z-10 flex-1 p-4 sm:p-5 md:p-6 flex flex-col justify-between gap-3.5 min-w-0">
+        <div className="relative z-10 flex-1 p-4 sm:p-5 md:p-6 flex flex-col justify-between gap-3.5 min-w-0 pointer-events-none">
           <div className="space-y-2">
             {/* Partner Row */}
             <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -181,13 +199,30 @@ export default function CampaignCard({ initialCampaigns }: CampaignCardProps) {
 
           {/* Bottom Action & Slider Controls */}
           <div className="flex items-center justify-between gap-3 pt-1">
-            <span className="inline-flex items-center gap-1.5 cirrel-btn-primary px-4 py-2 text-xs font-bold">
-              <span>{activeCampaign.cta_text || "View Offer"}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </span>
+            {activeLink?.isExternal && !isDirectExternalCard ? (
+              <a
+                href={activeLink.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="relative z-20 pointer-events-auto inline-flex items-center gap-1.5 cirrel-btn-primary px-4 py-2 text-xs font-bold"
+              >
+                <span>{activeCampaign.cta_text || "Book Now"}</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 cirrel-btn-primary px-4 py-2 text-xs font-bold">
+                <span>{activeCampaign.cta_text || (activeLink?.isExternal ? "Book Now" : "View Offer")}</span>
+                {activeLink?.isExternal ? (
+                  <ExternalLink className="w-3.5 h-3.5" />
+                ) : (
+                  <ArrowRight className="w-3.5 h-3.5" />
+                )}
+              </span>
+            )}
 
             {campaigns.length > 1 && (
-              <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+              <div className="relative z-20 pointer-events-auto flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center gap-1 mr-1">
                   {campaigns.map((_, idx) => (
                     <button
@@ -378,20 +413,22 @@ export default function CampaignCard({ initialCampaigns }: CampaignCardProps) {
                 </a>
               ) : null}
 
-              {selectedCampaign.cta_link && selectedCampaign.cta_link !== "#claim-voucher" ? (
-                selectedCampaign.cta_link.startsWith("http") ? (
+              {(() => {
+                const modalLink = resolveCampaignLink(selectedCampaign.cta_link)
+                if (!modalLink) return null
+                return modalLink.isExternal ? (
                   <a
-                    href={selectedCampaign.cta_link}
+                    href={modalLink.href}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full cirrel-btn-primary py-3.5 px-6 text-xs font-bold uppercase tracking-wider active-press flex items-center justify-center gap-2 text-center"
                   >
-                    <span>{selectedCampaign.cta_text || "Proceed"}</span>
+                    <span>{selectedCampaign.cta_text || "Book Now"}</span>
                     <ExternalLink className="w-4 h-4" />
                   </a>
                 ) : (
                   <Link
-                    href={selectedCampaign.cta_link}
+                    href={modalLink.href}
                     onClick={() => setSelectedCampaign(null)}
                     className="w-full cirrel-btn-primary py-3.5 px-6 text-xs font-bold uppercase tracking-wider active-press flex items-center justify-center gap-2 text-center"
                   >
@@ -399,7 +436,7 @@ export default function CampaignCard({ initialCampaigns }: CampaignCardProps) {
                     <ArrowRight className="w-4 h-4" />
                   </Link>
                 )
-              ) : null}
+              })()}
 
               <button
                 type="button"

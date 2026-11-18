@@ -42,6 +42,30 @@ export function extractYouTubeId(url?: string): string | null {
   return match && match[2].length === 11 ? match[2] : null;
 }
 
+/**
+ * Resolves a campaign CTA link cleanly and marks whether it opens an external website.
+ */
+export function resolveCampaignLink(link?: string): { href: string; isExternal: boolean } | null {
+  if (!link) return null;
+  const trimmed = link.trim();
+  if (!trimmed || trimmed === '#claim-voucher') return null;
+
+  const lower = trimmed.toLowerCase();
+  if (lower.startsWith('javascript:') || lower.startsWith('data:') || lower.startsWith('vbscript:')) {
+    return null;
+  }
+
+  if (trimmed.startsWith('#') || trimmed.startsWith('/')) {
+    return { href: trimmed, isExternal: false };
+  }
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    return { href: trimmed, isExternal: true };
+  }
+
+  return { href: `https://${trimmed}`, isExternal: true };
+}
+
 export const DEFAULT_CAMPAIGNS: Campaign[] = [
   {
     id: 'default-spa-collaboration',
@@ -154,15 +178,15 @@ export async function fetchCampaigns(includeInactive = false): Promise<Campaign[
         video_url: item.video_url || '',
         youtube_id: item.youtube_id || extractYouTubeId(item.video_url) || '',
         hero_overlay_text: item.hero_overlay_text || '',
-        badge: item.badge || 'PROMO',
+        badge: item.badge || '',
         discount_text: item.discount_text || '',
         voucher_code: item.voucher_code || '',
         partner_whatsapp: item.partner_whatsapp || '',
         partner_location: item.partner_location || '',
         voucher_terms: item.voucher_terms || '',
-        cta_text: item.cta_text || 'Learn More',
-        cta_link: item.cta_link || '#all-scooters',
-        image_url: item.image_url || '/images/scooter.png',
+        cta_text: item.cta_text || (item.category === 'spa' ? 'Book Now' : 'Learn More'),
+        cta_link: item.cta_link || '',
+        image_url: item.image_url || '',
         theme: (item.theme as CampaignTheme) || 'dark',
         is_active: item.is_active !== false,
         order: Number(item.order) || 0,
@@ -188,8 +212,11 @@ export async function saveCampaign(campaign: Campaign): Promise<Campaign[]> {
   if (typeof window === 'undefined') return DEFAULT_CAMPAIGNS;
 
   const resolvedYoutubeId = campaign.youtube_id || extractYouTubeId(campaign.video_url) || '';
+  const resolvedLink = resolveCampaignLink(campaign.cta_link);
   const campaignToSave: Campaign = {
     ...campaign,
+    cta_link: resolvedLink ? resolvedLink.href : '',
+    image_url: campaign.image_url || '',
     youtube_id: resolvedYoutubeId,
   };
 
@@ -224,9 +251,9 @@ export async function saveCampaign(campaign: Campaign): Promise<Campaign[]> {
         partner_whatsapp: campaignToSave.partner_whatsapp || '',
         partner_location: campaignToSave.partner_location || '',
         voucher_terms: campaignToSave.voucher_terms || '',
-        cta_text: campaignToSave.cta_text || 'Learn More',
-        cta_link: campaignToSave.cta_link || '#all-scooters',
-        image_url: campaignToSave.image_url || '/images/scooter.png',
+        cta_text: campaignToSave.cta_text || (campaignToSave.category === 'spa' ? 'Book Now' : 'Learn More'),
+        cta_link: campaignToSave.cta_link || '',
+        image_url: campaignToSave.image_url || '',
         theme: campaignToSave.theme || 'dark',
         is_active: campaignToSave.is_active,
         order: campaignToSave.order || 0,
