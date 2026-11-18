@@ -1,7 +1,7 @@
 "use client"
 
 import React, { memo } from "react"
-import { X } from "lucide-react"
+import { X, SlidersHorizontal } from "lucide-react"
 
 interface HomeFilterModalProps {
   isOpen: boolean
@@ -28,30 +28,35 @@ function HomeFilterModalComponent({
       role="dialog"
       aria-modal="true"
       aria-label="Filter Options"
-      className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-6 bg-black/40 backdrop-blur-sm animate-in fade-in"
+      className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-6 bg-black/50 backdrop-blur-md animate-in fade-in"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full md:max-w-md bg-white rounded-t-[32px] md:rounded-[32px] p-6 pb-12 md:pb-6 shadow-xl animate-in slide-in-from-bottom-8 md:slide-in-from-bottom-4 relative"
+        className="w-full md:max-w-md cirrel-modal rounded-t-[30px] md:rounded-[30px] p-6 pb-10 md:pb-6 animate-in slide-in-from-bottom-8 md:slide-in-from-bottom-4 relative text-[var(--ink)]"
       >
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-bold text-gray-900">Filters</h3>
+        <div className="flex items-center justify-between mb-6 relative z-10">
+          <div className="flex items-center gap-2.5">
+            <div className="cirrel-mark w-9 h-9 rounded-[11px]">
+              <SlidersHorizontal className="w-4 h-4" />
+            </div>
+            <h3 className="text-xl font-bold text-[var(--ink)]">Filters</h3>
+          </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close filters"
-            className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors active-press"
+            className="cirrel-ibtn w-9 h-9 active-press cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-6 relative z-10">
           {/* Max Price Filter */}
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-bold text-gray-700">Max Daily Price</span>
-              <span className="text-sm font-extrabold text-gray-900">
+          <div className="cirrel-well rounded-[20px] p-4">
+            <div className="flex justify-between items-center mb-2.5">
+              <span className="text-sm font-semibold text-[var(--ink-2)]">Max Daily Price</span>
+              <span className="text-sm font-bold text-[var(--accent-text)]">
                 Rp {maxPrice.toLocaleString()}
               </span>
             </div>
@@ -63,9 +68,9 @@ function HomeFilterModalComponent({
               value={maxPrice}
               onChange={(e) => setMaxPrice(Number(e.target.value))}
               aria-label="Max daily price slider"
-              className="w-full accent-black cursor-pointer"
+              className="w-full accent-[#0a84ff] cursor-pointer"
             />
-            <div className="flex justify-between text-[11px] font-bold text-gray-400 mt-1">
+            <div className="flex justify-between text-[11px] font-semibold text-[var(--muted-ink)] mt-1.5">
               <span>Rp 50k</span>
               <span>Rp 500k+</span>
             </div>
@@ -74,12 +79,12 @@ function HomeFilterModalComponent({
           {/* Production Year Filter */}
           <div>
             <div className="flex justify-between items-center mb-3">
-              <span className="text-sm font-bold text-gray-700">Production Year</span>
+              <span className="text-sm font-semibold text-[var(--ink-2)]">Production Year</span>
               {selectedYear !== "All" && (
                 <button
                   type="button"
                   onClick={() => setSelectedYear("All")}
-                  className="text-xs font-bold text-gray-500 hover:text-black transition-colors"
+                  className="text-xs font-bold text-[var(--accent-text)] hover:underline transition-colors cursor-pointer"
                 >
                   Reset
                 </button>
@@ -93,11 +98,8 @@ function HomeFilterModalComponent({
                     key={year}
                     type="button"
                     onClick={() => setSelectedYear(year)}
-                    className={`px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all active-press cursor-pointer ${
-                      isSelected
-                        ? "bg-black text-white shadow-xs scale-105"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
+                    data-active={isSelected}
+                    className="cirrel-chip px-4 py-2 text-xs md:text-sm active-press cursor-pointer"
                   >
                     {year === "All" ? "All Years" : year}
                   </button>
@@ -110,7 +112,7 @@ function HomeFilterModalComponent({
         <button
           type="button"
           onClick={onClose}
-          className="w-full bg-black text-white font-bold text-lg py-4 rounded-2xl mt-8 shadow-md hover:bg-neutral-800 transition-colors active-press cursor-pointer"
+          className="relative z-10 w-full cirrel-btn-primary font-bold text-base py-3.5 mt-7 active-press cursor-pointer"
         >
           Apply Filters
         </button>

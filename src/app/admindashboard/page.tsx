@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client"
 import { getPlatformSettings, savePlatformSettings, calculateBookingCommission, calculateRentalDays, fetchPlatformSettings, subscribeToPlatformSettings, PlatformSettings, DEFAULT_PLATFORM_SETTINGS } from "@/utils/pricing"
 import { Campaign, CampaignCategory, CampaignTheme, getCampaigns, fetchCampaigns, saveCampaign, deleteCampaign, subscribeToCampaigns, extractYouTubeId, DEFAULT_CAMPAIGNS } from "@/utils/campaigns"
 import { invalidateAllCatalogCaches } from "@/lib/api/catalogService"
+import ThemeToggle from "@/components/ThemeToggle"
 
 export default function AdminDashboard() {
   // Admin Authentication State
@@ -795,8 +796,11 @@ export default function AdminDashboard() {
   // Show loader while checking session
   if (isAuthenticated === null) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-white animate-spin" />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="cirrel-glass p-6 rounded-[24px] flex items-center gap-3">
+          <Loader2 className="w-6 h-6 text-[var(--accent-blue)] animate-spin" />
+          <span className="text-sm font-semibold text-[var(--ink)]">Checking Admin Session...</span>
+        </div>
       </div>
     )
   }
@@ -804,70 +808,65 @@ export default function AdminDashboard() {
   // Show Admin Login Gate if not authenticated
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-[#0E0E10] text-white flex flex-col items-center justify-center p-4 sm:p-6 selection:bg-white selection:text-black">
-        {/* Background glow */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-white/[0.03] rounded-full blur-3xl" />
-        </div>
-
-        <div className="w-full max-w-md bg-black rounded-[32px] p-7 sm:p-9 border border-neutral-800 shadow-2xl relative z-10">
+      <div className="min-h-screen text-[var(--ink)] flex flex-col items-center justify-center p-4 sm:p-6">
+        <div className="w-full max-w-md cirrel-glass rounded-[30px] p-7 sm:p-9 relative z-10">
           {/* Header */}
-          <div className="text-center mb-8">
-            <div className="w-14 h-14 bg-neutral-900 border border-neutral-700 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-inner">
+          <div className="relative z-10 text-center mb-8">
+            <div className="w-14 h-14 cirrel-mark rounded-[18px] mx-auto mb-4">
               <Lock className="w-6 h-6 text-white" />
             </div>
-            <h1 className="text-2xl font-black tracking-tight text-white uppercase">
+            <h1 className="text-2xl font-bold tracking-tight text-[var(--ink)] uppercase">
               The Bike Rental Bali
             </h1>
-            <p className="text-xs font-semibold text-neutral-400 mt-1 uppercase tracking-widest">
+            <p className="text-xs font-semibold text-[var(--muted-ink)] mt-1 uppercase tracking-widest">
               Admin Console Gateway
             </p>
           </div>
 
           {/* Login Form */}
-          <form onSubmit={handleAdminLogin} className="space-y-4">
+          <form onSubmit={handleAdminLogin} className="relative z-10 space-y-4">
             {loginError && (
-              <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-medium p-3.5 rounded-2xl flex items-start gap-2.5">
-                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-400" />
+              <div className="bg-[var(--bad-soft)] border border-[var(--bad)]/30 text-[var(--bad)] text-xs font-medium p-3.5 rounded-[16px] flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                 <p className="leading-snug">{loginError}</p>
               </div>
             )}
 
             <div>
-              <label className="block text-[11px] font-bold text-neutral-400 uppercase tracking-wider mb-2">
+              <label className="block text-[11px] font-bold text-[var(--muted-ink)] uppercase tracking-wider mb-2">
                 Admin Email
               </label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-neutral-500 absolute left-4 top-1/2 -translate-y-1/2" />
+                <Mail className="w-4 h-4 text-[var(--muted-ink)] absolute left-4 top-1/2 -translate-y-1/2" />
                 <input 
                   type="email" 
                   value={loginEmail}
                   onChange={(e) => setLoginEmail(e.target.value)}
                   placeholder="thebikerentalbali@gmail.com"
                   required
-                  className="w-full bg-neutral-900 border border-neutral-800 focus:border-white rounded-2xl pl-11 pr-4 py-3.5 text-sm text-white placeholder-neutral-600 outline-none transition-colors"
+                  className="cirrel-input w-full rounded-[14px] pl-11 pr-4 py-3.5 text-sm"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-neutral-400 uppercase tracking-wider mb-2">
+              <label className="block text-[11px] font-bold text-[var(--muted-ink)] uppercase tracking-wider mb-2">
                 Password
               </label>
               <div className="relative">
-                <Lock className="w-4 h-4 text-neutral-500 absolute left-4 top-1/2 -translate-y-1/2" />
+                <Lock className="w-4 h-4 text-[var(--muted-ink)] absolute left-4 top-1/2 -translate-y-1/2" />
                 <input 
                   type={showPassword ? "text" : "password"} 
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
                   placeholder="Enter admin password"
                   required
-                  className="w-full bg-neutral-900 border border-neutral-800 focus:border-white rounded-2xl pl-11 pr-11 py-3.5 text-sm text-white placeholder-neutral-600 outline-none transition-colors"
+                  className="cirrel-input w-full rounded-[14px] pl-11 pr-11 py-3.5 text-sm"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--muted-ink)] hover:text-[var(--ink)] transition-colors"
                   aria-label="Toggle password visibility"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -878,7 +877,7 @@ export default function AdminDashboard() {
             <button 
               type="submit" 
               disabled={isLoggingIn}
-              className="w-full mt-2 bg-white text-black hover:bg-neutral-200 py-3.5 rounded-2xl font-bold text-sm transition-all shadow-md active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full mt-2 cirrel-btn-primary py-3.5 font-bold text-sm active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
             >
               {isLoggingIn ? (
                 <>
@@ -895,12 +894,12 @@ export default function AdminDashboard() {
           </form>
 
           {/* Return link */}
-          <div className="mt-6 pt-6 border-t border-neutral-900 text-center">
+          <div className="relative z-10 mt-6 pt-6 border-t border-[var(--line)] text-center">
             <Link 
               href="/"
-              className="text-xs text-neutral-500 hover:text-white transition-colors inline-flex items-center gap-1 font-medium"
+              className="text-xs text-[var(--muted-ink)] hover:text-[var(--ink)] transition-colors inline-flex items-center gap-1 font-medium"
             >
-              ← Return to Main Website
+              &larr; Return to Main Website
             </Link>
           </div>
         </div>
@@ -913,70 +912,74 @@ export default function AdminDashboard() {
   const mockBookings: any[] = []
 
   return (
-    <div className="min-h-screen bg-[#F5F7FA] md:flex md:pl-64 pb-28 md:pb-0">
+    <div className="min-h-screen text-[var(--ink)] md:flex md:pl-[288px] pb-28 md:pb-8">
       {/* 
         ========================================================================
-        DESKTOP SIDEBAR
+        CIRREL FLOATING LIQUID GLASS SIDEBAR
         ========================================================================
       */}
-      <aside className="w-64 bg-black border-r border-gray-800 hidden md:flex flex-col fixed top-0 left-0 h-screen z-40 shadow-xl">
-        <div className="p-6">
-          <Link href="/" className="inline-block">
-            <h2 className="text-xl font-black text-white tracking-tight leading-none">THE BIKE RENTAL</h2>
-            <p className="text-[11px] font-bold text-gray-400 mt-1 uppercase tracking-wider">Admin Console</p>
+      <aside className="w-64 cirrel-glass-hi rounded-[26px] hidden md:flex flex-col fixed top-4 bottom-4 left-4 z-40">
+        <div className="relative z-10 p-5 flex items-center justify-between gap-2">
+          <Link href="/" className="flex items-center gap-2.5 min-w-0">
+            <div className="cirrel-mark w-9 h-9 rounded-[12px] shrink-0">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-sm font-bold text-[var(--ink)] tracking-tight leading-none truncate">THE BIKE RENTAL</h2>
+              <p className="text-[10px] font-bold text-[var(--muted-ink)] mt-1 uppercase tracking-wider">Admin Console</p>
+            </div>
           </Link>
+          <ThemeToggle className="w-8 h-8" />
         </div>
 
-        <nav className="flex-1 px-4 py-2 space-y-2">
-          <button onClick={() => setActiveTab('home')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors ${activeTab === 'home' ? 'bg-white/10 text-white shadow-sm shadow-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
-            <BarChart3 className="w-5 h-5" />
-            <span className="font-bold text-[15px]">Overview</span>
+        <nav className="relative z-10 flex-1 px-3 py-2 space-y-1.5 overflow-y-auto">
+          <button onClick={() => setActiveTab('home')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-full transition-all text-sm cursor-pointer ${activeTab === 'home' ? 'cirrel-btn-primary text-white font-semibold' : 'text-[var(--ink-2)] hover:bg-[var(--card-2)] font-semibold'}`}>
+            <BarChart3 className="w-4 h-4" />
+            <span>Overview</span>
           </button>
-          <button onClick={() => setActiveTab('approvals')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors relative ${activeTab === 'approvals' ? 'bg-white/10 text-white shadow-sm shadow-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
-            <UserCheck className="w-5 h-5" />
-            <span className="font-semibold text-[15px]">Approvals</span>
-            <span className="absolute right-4 bg-yellow-500 text-black text-[10px] font-bold px-2 py-0.5 rounded-full">{pendingVendors.length}</span>
+          <button onClick={() => setActiveTab('approvals')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-full transition-all text-sm relative cursor-pointer ${activeTab === 'approvals' ? 'cirrel-btn-primary text-white font-semibold' : 'text-[var(--ink-2)] hover:bg-[var(--card-2)] font-semibold'}`}>
+            <UserCheck className="w-4 h-4" />
+            <span>Approvals</span>
+            <span className={`ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full ${activeTab === 'approvals' ? 'bg-white/25 text-white' : 'bg-[var(--warn-soft)] text-[var(--warn)]'}`}>{pendingVendors.length}</span>
           </button>
-          <button onClick={() => setActiveTab('vendors')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors ${activeTab === 'vendors' ? 'bg-white/10 text-white shadow-sm shadow-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
-            <Store className="w-5 h-5" />
-            <span className="font-semibold text-[15px]">Vendors</span>
+          <button onClick={() => setActiveTab('vendors')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-full transition-all text-sm cursor-pointer ${activeTab === 'vendors' ? 'cirrel-btn-primary text-white font-semibold' : 'text-[var(--ink-2)] hover:bg-[var(--card-2)] font-semibold'}`}>
+            <Store className="w-4 h-4" />
+            <span>Vendors</span>
           </button>
-          <button onClick={() => setActiveTab('campaigns')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors relative ${activeTab === 'campaigns' ? 'bg-white/10 text-white shadow-sm shadow-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
-            <Sparkles className="w-5 h-5 text-amber-400" />
-            <span className="font-semibold text-[15px]">Campaigns</span>
-            <span className="absolute right-4 bg-amber-400 text-black text-[10px] font-bold px-2 py-0.5 rounded-full">{campaigns.filter(c => c.is_active).length} Active</span>
+          <button onClick={() => setActiveTab('campaigns')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-full transition-all text-sm relative cursor-pointer ${activeTab === 'campaigns' ? 'cirrel-btn-primary text-white font-semibold' : 'text-[var(--ink-2)] hover:bg-[var(--card-2)] font-semibold'}`}>
+            <Sparkles className="w-4 h-4 text-[#ffb340]" />
+            <span>Campaigns</span>
+            <span className={`ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full ${activeTab === 'campaigns' ? 'bg-white/25 text-white' : 'bg-[var(--warn-soft)] text-[var(--warn)]'}`}>{campaigns.filter(c => c.is_active).length} Active</span>
           </button>
 
-          <button onClick={() => setActiveTab('revenue')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors ${activeTab === 'revenue' ? 'bg-white/10 text-white shadow-sm shadow-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
-            <DollarSign className="w-5 h-5" />
-            <span className="font-semibold text-[15px]">Revenue</span>
+          <button onClick={() => setActiveTab('revenue')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-full transition-all text-sm cursor-pointer ${activeTab === 'revenue' ? 'cirrel-btn-primary text-white font-semibold' : 'text-[var(--ink-2)] hover:bg-[var(--card-2)] font-semibold'}`}>
+            <DollarSign className="w-4 h-4" />
+            <span>Revenue</span>
           </button>
-          <button onClick={() => setActiveTab('bookings')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors ${activeTab === 'bookings' ? 'bg-white/10 text-white shadow-sm shadow-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
-            <CalendarDays className="w-5 h-5" />
-            <span className="font-semibold text-[15px]">Bookings</span>
+          <button onClick={() => setActiveTab('bookings')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-full transition-all text-sm cursor-pointer ${activeTab === 'bookings' ? 'cirrel-btn-primary text-white font-semibold' : 'text-[var(--ink-2)] hover:bg-[var(--card-2)] font-semibold'}`}>
+            <CalendarDays className="w-4 h-4" />
+            <span>Bookings</span>
           </button>
-          <button onClick={() => setActiveTab('settings')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors ${activeTab === 'settings' ? 'bg-white/10 text-white shadow-sm shadow-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
-            <Settings className="w-5 h-5" />
-            <span className="font-semibold text-[15px]">Platform Settings</span>
+          <button onClick={() => setActiveTab('settings')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-full transition-all text-sm cursor-pointer ${activeTab === 'settings' ? 'cirrel-btn-primary text-white font-semibold' : 'text-[var(--ink-2)] hover:bg-[var(--card-2)] font-semibold'}`}>
+            <Settings className="w-4 h-4" />
+            <span>Platform Settings</span>
           </button>
         </nav>
 
-        <div className="p-4 border-t border-gray-800 space-y-2">
-          <div className="flex items-center gap-3 bg-white/5 p-3 rounded-2xl border border-gray-800">
-            <div className="w-9 h-9 rounded-full bg-white p-[2px] shrink-0">
-              <div className="w-full h-full bg-black rounded-full flex items-center justify-center">
-                <span className="font-bold text-white text-xs">AD</span>
-              </div>
+        <div className="relative z-10 p-4 border-t border-[var(--line)] space-y-2">
+          <div className="flex items-center gap-3 cirrel-well p-2.5 rounded-[16px]">
+            <div className="w-9 h-9 rounded-full cirrel-mark shrink-0">
+              <span className="font-bold text-white text-xs">AD</span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-white truncate">Super Admin</p>
-              <p className="text-[10px] font-medium text-neutral-400 truncate">thebikerentalbali@gmail.com</p>
+              <p className="text-xs font-bold text-[var(--ink)] truncate">Super Admin</p>
+              <p className="text-[10px] font-medium text-[var(--muted-ink)] truncate">thebikerentalbali@gmail.com</p>
             </div>
           </div>
 
           <button
             onClick={handleAdminLogout}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-full text-xs font-bold text-[var(--bad)] bg-[var(--bad-soft)] hover:opacity-90 transition-all cursor-pointer"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>Sign Out</span>
@@ -989,18 +992,16 @@ export default function AdminDashboard() {
         MAIN CONTENT
         ========================================================================
       */}
-      <main className="flex-1 w-full max-w-full md:max-w-4xl lg:max-w-5xl mx-auto flex flex-col min-h-screen">
+      <main className="flex-1 w-full max-w-full md:max-w-5xl mx-auto flex flex-col min-h-screen">
 
-        {/* Mobile App-like Header */}
-        <header className="hidden md:flex bg-white/80 backdrop-blur-xl sticky top-0 z-30 px-5 py-4 border-b border-gray-100 items-center justify-between md:py-6 md:px-8 md:bg-transparent md:border-none md:backdrop-blur-none">
+        {/* Top Header */}
+        <header className="flex sticky top-0 z-30 px-4 sm:px-5 py-4 items-center justify-between md:py-6 md:px-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-black p-[2px] shrink-0 md:hidden">
-              <div className="w-full h-full bg-white rounded-full flex items-center justify-center border-2 border-black">
-                <span className="font-bold text-black text-xs">AD</span>
-              </div>
+            <div className="w-9 h-9 rounded-[11px] cirrel-mark shrink-0 md:hidden">
+              <span className="font-bold text-white text-xs">AD</span>
             </div>
             <div>
-              <h1 className="text-xl md:text-3xl font-bold text-gray-900 leading-tight">
+              <h1 className="text-xl md:text-3xl font-bold text-[var(--ink)] leading-tight">
                 {activeTab === 'home' ? 'Platform Overview' :
                   activeTab === 'approvals' ? 'Pending Approvals' :
                     activeTab === 'vendors' ? 'Vendors Management' :
@@ -1009,7 +1010,7 @@ export default function AdminDashboard() {
                           activeTab === 'bookings' ? 'Platform Bookings' :
                             activeTab === 'revenue' ? 'Revenue Analytics' : 'Platform Settings'}
               </h1>
-              <p className="text-xs font-medium text-gray-500 md:text-sm md:mt-1 hidden md:block">
+              <p className="text-xs font-medium text-[var(--muted-ink)] md:text-sm md:mt-0.5 hidden md:block">
                 {activeTab === 'home' ? 'System-wide metrics and performance' :
                   activeTab === 'approvals' ? 'Review and manage vendor sign-up applications' :
                     activeTab === 'vendors' ? 'Manage and monitor all platform vendors' :
@@ -1020,145 +1021,137 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 md:gap-5">
+          <div className="flex items-center gap-2.5 md:gap-3">
             <div className="relative hidden md:block">
-              <Search className="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
-              <input type="text" placeholder="Search vendors, users..." className="pl-11 pr-4 py-2.5 bg-white rounded-full text-sm font-medium outline-none w-72 shadow-sm border border-gray-100 focus:border-gray-300 focus:ring-4 focus:ring-gray-50 transition-all" />
+              <Search className="w-4 h-4 text-[var(--muted-ink)] absolute left-4 top-1/2 -translate-y-1/2" />
+              <input type="text" placeholder="Search vendors, users..." className="cirrel-glass pl-11 pr-4 py-2.5 rounded-full text-sm font-medium outline-none w-64" />
             </div>
-            <Link href="#" className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full border border-gray-100 flex items-center justify-center shadow-sm relative hover:bg-gray-50 transition-colors">
-              <span className="absolute top-2.5 right-2.5 md:top-3 md:right-3 w-2 h-2 md:w-2.5 md:h-2.5 bg-blue-500 rounded-full border-2 border-white"></span>
-              <Bell className="w-5 h-5 text-gray-700" />
+            <ThemeToggle className="w-10 h-10 md:hidden" />
+            <Link href="#" className="cirrel-ibtn w-10 h-10 md:w-11 md:h-11 relative">
+              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-[var(--accent-blue)] rounded-full border-2 border-[var(--bg)]" />
+              <Bell className="w-4 h-4" />
             </Link>
           </div>
         </header>
 
         {/* Dashboard Content */}
         {activeTab === 'home' ? (
-          <div className="p-5 md:px-8 md:pb-12 space-y-6 md:space-y-8">
+          <div className="p-4 sm:p-5 md:px-6 md:pb-12 space-y-6">
 
-            {/* Stats Row */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-              <div className="bg-white p-4 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group hover:border-gray-200 transition-colors col-span-2 lg:col-span-1">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-green-50 to-transparent rounded-bl-full opacity-80"></div>
-                <div className="flex items-center gap-3 mb-2 md:mb-4">
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-green-50 text-green-600 flex items-center justify-center shrink-0">
-                    <DollarSign className="w-5 h-5 md:w-6 md:h-6" />
+            {/* Cirrel Tinted KPI Stats Row */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
+              <div className="cirrel-kpi cirrel-kpi--3 p-4 md:p-5 col-span-2 lg:col-span-1">
+                <div className="relative z-10 flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-full bg-[var(--good-soft)] text-[var(--good)] flex items-center justify-center shrink-0">
+                    <DollarSign className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-[12px] md:text-[13px] font-bold text-gray-500 uppercase tracking-wide leading-tight">Platform Profit</h3>
-                    <p className="text-[10px] text-gray-400 font-medium">Your net commission</p>
+                    <h3 className="text-[12px] font-bold text-[var(--tile-muted)] uppercase tracking-wider leading-tight">Platform Profit</h3>
+                    <p className="text-[10px] text-[var(--tile-muted)] font-medium">Your net commission</p>
                   </div>
                 </div>
-                <p className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">
+                <p className="relative z-10 text-2xl font-bold text-[var(--tile-ink)] tracking-tight">
                   Rp {totalPlatformProfit.toLocaleString()}
                 </p>
-                <div className="flex items-center gap-1 mt-2 md:mt-3 bg-green-50 text-green-700 w-fit px-2.5 py-0.5 rounded-full">
-                  <span className="text-[10px] md:text-[11px] font-bold">
+                <div className="relative z-10 mt-2.5 cirrel-pill cirrel-pill--good w-fit text-[10px]">
+                  <span>
                     {totalConfirmedCompletedCount} Confirmed / Completed
                   </span>
                 </div>
               </div>
 
-              <div className="bg-white p-4 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group hover:border-gray-200 transition-colors">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-purple-50 to-transparent rounded-bl-full opacity-80"></div>
-                <div className="flex items-center gap-3 mb-2 md:mb-4">
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
-                    <Store className="w-5 h-5 md:w-6 md:h-6" />
+              <div className="cirrel-kpi cirrel-kpi--1 p-4 md:p-5">
+                <div className="relative z-10 flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-full bg-[var(--info-soft)] text-[var(--info)] flex items-center justify-center shrink-0">
+                    <Store className="w-5 h-5" />
                   </div>
-                  <h3 className="text-[12px] md:text-[13px] font-bold text-gray-500 uppercase tracking-wide leading-tight hidden md:block">Active Vendors</h3>
+                  <h3 className="text-[12px] font-bold text-[var(--tile-muted)] uppercase tracking-wider leading-tight hidden md:block">Active Vendors</h3>
                 </div>
-                <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide md:hidden mb-1">Vendors</p>
-                <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">{approvedVendors.length}</p>
-                <p className="text-[10px] md:text-[11px] font-bold text-gray-400 mt-2 md:mt-3">Total approved</p>
+                <p className="relative z-10 text-[11px] font-bold text-[var(--tile-muted)] uppercase tracking-wider md:hidden mb-1">Vendors</p>
+                <p className="relative z-10 text-3xl font-bold text-[var(--tile-ink)] tracking-tight">{approvedVendors.length}</p>
+                <p className="relative z-10 text-[11px] font-semibold text-[var(--tile-muted)] mt-2.5">Total approved</p>
               </div>
 
-              <div className="bg-white p-4 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group hover:border-gray-200 transition-colors">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-orange-50 to-transparent rounded-bl-full opacity-80"></div>
-                <div className="flex items-center gap-3 mb-2 md:mb-4">
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center shrink-0">
-                    <Bike className="w-5 h-5 md:w-6 md:h-6 fill-orange-500" />
+              <div className="cirrel-kpi cirrel-kpi--2 p-4 md:p-5">
+                <div className="relative z-10 flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-full bg-[var(--warn-soft)] text-[var(--warn)] flex items-center justify-center shrink-0">
+                    <Bike className="w-5 h-5" />
                   </div>
-                  <h3 className="text-[12px] md:text-[13px] font-bold text-gray-500 uppercase tracking-wide leading-tight hidden md:block">Total Fleet</h3>
+                  <h3 className="text-[12px] font-bold text-[var(--tile-muted)] uppercase tracking-wider leading-tight hidden md:block">Total Fleet</h3>
                 </div>
-                <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide md:hidden mb-1">Fleet</p>
-                <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">{totalFleetCount}</p>
-                <p className="text-[10px] md:text-[11px] font-bold text-gray-400 mt-2 md:mt-3">Across Bali</p>
+                <p className="relative z-10 text-[11px] font-bold text-[var(--tile-muted)] uppercase tracking-wider md:hidden mb-1">Fleet</p>
+                <p className="relative z-10 text-3xl font-bold text-[var(--tile-ink)] tracking-tight">{totalFleetCount}</p>
+                <p className="relative z-10 text-[11px] font-semibold text-[var(--tile-muted)] mt-2.5">Across Bali</p>
               </div>
 
-              <div className="bg-white p-4 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group hover:border-gray-200 transition-colors col-span-2 lg:col-span-1">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-blue-50 to-transparent rounded-bl-full opacity-80"></div>
-                <div className="flex items-center gap-3 mb-2 md:mb-4">
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                    <Users className="w-5 h-5 md:w-6 md:h-6" />
+              <div className="cirrel-kpi cirrel-kpi--4 p-4 md:p-5 col-span-2 lg:col-span-1">
+                <div className="relative z-10 flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-full bg-[var(--info-soft)] text-[var(--info)] flex items-center justify-center shrink-0">
+                    <Users className="w-5 h-5" />
                   </div>
-                  <h3 className="text-[12px] md:text-[13px] font-bold text-gray-500 uppercase tracking-wide leading-tight">Total Users</h3>
+                  <h3 className="text-[12px] font-bold text-[var(--tile-muted)] uppercase tracking-wider leading-tight">Total Users</h3>
                 </div>
-                <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">0</p>
-                <div className="flex items-center gap-1 mt-2 md:mt-3 bg-gray-50 text-gray-500 w-fit px-2 py-0.5 rounded-full">
-                  <span className="text-[10px] md:text-[11px] font-bold">No data yet</span>
+                <p className="relative z-10 text-3xl font-bold text-[var(--tile-ink)] tracking-tight">0</p>
+                <div className="relative z-10 mt-2.5 cirrel-pill w-fit text-[10px]">
+                  <span>No data yet</span>
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-              {/* Top Vendors (App-like List for Mobile) */}
-              <div className="bg-white rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm overflow-hidden lg:col-span-2 flex flex-col">
-                <div className="p-5 md:p-6 border-b border-gray-50 flex justify-between items-center">
-                  <h3 className="text-lg md:text-xl font-bold text-gray-900">Top Performing Vendors</h3>
-                  <Link href="#" className="text-[13px] md:text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 md:gap-6">
+              {/* Top Vendors */}
+              <div className="cirrel-glass rounded-[26px] overflow-hidden lg:col-span-2 flex flex-col">
+                <div className="relative z-10 p-5 md:p-6 border-b border-[var(--line)] flex justify-between items-center">
+                  <h3 className="text-lg font-bold text-[var(--ink)]">Top Performing Vendors</h3>
+                  <button type="button" onClick={() => setActiveTab('vendors')} className="text-xs font-bold text-[var(--accent-text)] hover:underline transition-colors flex items-center gap-1 cursor-pointer">
                     View All <ChevronRight className="w-4 h-4" />
-                  </Link>
+                  </button>
                 </div>
 
-                <div className="p-2 md:p-4 flex-1">
-                  <div className="space-y-2">
-                    <div className="text-center py-10 text-gray-400 font-medium text-sm">
-                      No top performing vendors yet.
-                    </div>
+                <div className="relative z-10 p-4 flex-1">
+                  <div className="text-center py-10 text-[var(--muted-ink)] font-medium text-sm">
+                    No top performing vendors yet.
                   </div>
                 </div>
               </div>
 
-              {/* Quick Actions Desktop / System Alerts */}
-              <div className="bg-blue-600 rounded-[24px] md:rounded-[32px] p-6 md:p-8 text-white relative overflow-hidden flex flex-col justify-between min-h-[250px]">
-                <div className="absolute -right-8 -top-8 w-40 h-40 bg-white/20 rounded-full blur-2xl"></div>
-                <div className="absolute -left-8 -bottom-8 w-32 h-32 bg-black/20 rounded-full blur-2xl"></div>
-
+              {/* System Alerts */}
+              <div className="cirrel-kpi cirrel-kpi--1 rounded-[26px] p-6 flex flex-col justify-between min-h-[240px]">
                 <div className="relative z-10">
-                  <h3 className="text-xl font-bold mb-2">System Alerts</h3>
-                  <p className="text-blue-100 text-sm font-medium">Pending approvals and system notifications.</p>
+                  <h3 className="text-lg font-bold text-[var(--tile-ink)] mb-1.5">System Alerts</h3>
+                  <p className="text-[var(--tile-muted)] text-xs font-medium">Pending approvals and system notifications.</p>
                 </div>
 
                 <div className="relative z-10 mt-6 space-y-3">
-                  <Link href="#" onClick={() => setActiveTab('approvals')} className="w-full bg-white text-blue-900 p-4 rounded-2xl flex items-center justify-between font-bold text-[14px] hover:bg-gray-50 transition-colors shadow-lg">
+                  <button type="button" onClick={() => setActiveTab('approvals')} className="w-full cirrel-btn-primary p-4 rounded-[18px] flex items-center justify-between font-bold text-xs cursor-pointer">
                     <div className="flex items-center gap-3">
-                      <span className={`w-2 h-2 rounded-full ${pendingVendors.length > 0 ? 'bg-red-500' : 'bg-gray-300'}`}></span>
-                      Approve {pendingVendors.length} Vendors
+                      <span className={`w-2 h-2 rounded-full ${pendingVendors.length > 0 ? 'bg-[#ffb340]' : 'bg-white/50'}`} />
+                      <span>Approve {pendingVendors.length} Vendors</span>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-blue-400" />
-                  </Link>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
             </div>
 
           </div>
         ) : activeTab === 'approvals' ? (
-          <div className="p-5 md:px-8 md:pb-12 animate-in fade-in">
+          <div className="p-4 sm:p-5 md:px-6 md:pb-12 animate-in fade-in">
             <div className="space-y-4">
               <div className="grid grid-cols-1 gap-4">
                 {isLoadingApprovals ? (
-                  <div className="flex justify-center p-10"><Loader2 className="w-8 h-8 animate-spin text-gray-400" /></div>
+                  <div className="flex justify-center p-10"><Loader2 className="w-8 h-8 animate-spin text-[var(--accent-blue)]" /></div>
                 ) : pendingVendors.length === 0 ? (
-                  <div className="bg-white rounded-[24px] border border-gray-100 p-10 text-center">
-                    <p className="text-gray-500 font-medium">No pending approvals.</p>
+                  <div className="cirrel-glass rounded-[26px] p-10 text-center">
+                    <p className="relative z-10 text-[var(--muted-ink)] font-medium">No pending approvals.</p>
                   </div>
                 ) : pendingVendors.map(vendor => {
                   const isExpanded = expandedPendingVendorId === vendor.id;
                   return (
-                    <div key={vendor.id} className="bg-white rounded-[24px] border border-gray-100 shadow-sm flex flex-col overflow-hidden transition-all duration-300 hover:border-gray-200">
-                      <div className="p-5 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+                    <div key={vendor.id} className="cirrel-glass rounded-[26px] flex flex-col overflow-hidden transition-all duration-300">
+                      <div className="relative z-10 p-5 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
                         <div className="flex gap-4 items-center cursor-pointer flex-1 min-w-0" onClick={() => setExpandedPendingVendorId(isExpanded ? null : vendor.id)}>
-                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg bg-blue-100 text-blue-700 shrink-0 overflow-hidden`}>
+                          <div className="w-12 h-12 rounded-[14px] flex items-center justify-center font-bold text-lg cirrel-mark shrink-0 overflow-hidden">
                             {vendor.logo ? (
                               /* eslint-disable-next-line @next/next/no-img-element */
                               <img src={vendor.logo} alt={vendor.name} className="w-full h-full object-cover" />
@@ -1168,55 +1161,55 @@ export default function AdminDashboard() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
-                              <h4 className="font-bold text-gray-900 text-base truncate">{vendor.name}</h4>
-                              <div className={`p-1.5 rounded-full transition-transform xl:hidden ${isExpanded ? 'rotate-90 bg-gray-100' : 'bg-gray-50 hover:bg-gray-100'}`}>
-                                <ChevronRight className="w-4 h-4 text-gray-600" />
+                              <h4 className="font-bold text-[var(--ink)] text-base truncate">{vendor.name}</h4>
+                              <div className={`cirrel-ibtn w-8 h-8 transition-transform xl:hidden ${isExpanded ? 'rotate-90' : ''}`}>
+                                <ChevronRight className="w-4 h-4" />
                               </div>
                             </div>
-                            <div className="flex flex-col lg:flex-row lg:items-center gap-1 lg:gap-3 text-xs font-medium text-gray-500 mt-1 flex-wrap">
-                              <span className="flex items-center gap-1 shrink-0"><Store className="w-3 h-3" /> {vendor.address || "Unknown"}</span>
-                              <span className="hidden lg:inline text-gray-300 shrink-0">•</span>
+                            <div className="flex flex-col lg:flex-row lg:items-center gap-1 lg:gap-3 text-xs font-medium text-[var(--muted-ink)] mt-1 flex-wrap">
+                              <span className="flex items-center gap-1 shrink-0"><Store className="w-3 h-3 text-[var(--accent-text)]" /> {vendor.address || "Unknown"}</span>
+                              <span className="hidden lg:inline opacity-40 shrink-0">•</span>
                               <span className="truncate">{vendor.email}</span>
-                              <span className="hidden lg:inline text-gray-300 shrink-0">•</span>
+                              <span className="hidden lg:inline opacity-40 shrink-0">•</span>
                               <span className="shrink-0">Applied {new Date(vendor.created_at).toLocaleDateString()}</span>
                             </div>
                           </div>
-                          <div className={`hidden xl:flex p-1.5 rounded-full transition-transform shrink-0 ${isExpanded ? 'rotate-90 bg-gray-100' : 'bg-gray-50 hover:bg-gray-100'}`}>
-                            <ChevronRight className="w-5 h-5 text-gray-600" />
+                          <div className={`hidden xl:flex cirrel-ibtn w-9 h-9 transition-transform shrink-0 ${isExpanded ? 'rotate-90' : ''}`}>
+                            <ChevronRight className="w-4 h-4" />
                           </div>
                         </div>
-                        <div className="flex flex-row items-center gap-2 w-full xl:w-auto mt-2 xl:mt-0 pt-3 xl:pt-0 border-t border-gray-100 xl:border-none shrink-0">
-                          <button onClick={() => handleApprove(vendor.id)} className="flex-1 xl:flex-none bg-black text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-800 transition-colors shadow-sm">Approve</button>
-                          <button className="flex-1 xl:flex-none bg-gray-100 text-gray-700 px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-200 transition-colors">Reject</button>
+                        <div className="flex flex-row items-center gap-2 w-full xl:w-auto mt-2 xl:mt-0 pt-3 xl:pt-0 border-t border-[var(--line)] xl:border-none shrink-0">
+                          <button onClick={() => handleApprove(vendor.id)} className="flex-1 xl:flex-none cirrel-btn-primary px-5 py-2.5 text-sm font-bold cursor-pointer">Approve</button>
+                          <button className="flex-1 xl:flex-none cirrel-btn px-5 py-2.5 text-sm font-bold cursor-pointer">Reject</button>
                         </div>
                       </div>
 
                       {isExpanded && (
-                        <div className="bg-gray-50/50 p-5 border-t border-gray-100 animate-in slide-in-from-top-2">
-                          <h5 className="text-xs font-bold text-gray-900 uppercase tracking-wide mb-4">Vendor Details</h5>
+                        <div className="relative z-10 cirrel-well p-5 border-t border-[var(--line)] animate-in slide-in-from-top-2">
+                          <h5 className="text-xs font-bold text-[var(--ink)] uppercase tracking-wide mb-4">Vendor Details</h5>
                           
                           {vendor.image_url && (
-                            <div className="mb-6 rounded-xl overflow-hidden h-32 md:h-40 relative border border-gray-200">
+                            <div className="mb-6 rounded-[18px] overflow-hidden h-32 md:h-40 relative border border-[var(--line)]">
                               {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img src={vendor.image_url} alt="Cover" className="w-full h-full object-cover" />
                               <div className="absolute inset-0 bg-black/20 flex items-end p-3">
-                                <span className="text-white text-xs font-bold bg-black/50 px-2 py-1 rounded-md">Cover Image</span>
+                                <span className="text-white text-xs font-bold bg-black/55 backdrop-blur-md px-2.5 py-1 rounded-full">Cover Image</span>
                               </div>
                             </div>
                           )}
 
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div>
-                              <p className="text-xs font-medium text-gray-500 mb-1">Contact Phone</p>
-                              <p className="font-semibold text-gray-900 text-sm">{vendor.phone || "N/A"}</p>
+                              <p className="text-xs font-medium text-[var(--muted-ink)] mb-1">Contact Phone</p>
+                              <p className="font-semibold text-[var(--ink)] text-sm">{vendor.phone || "N/A"}</p>
                             </div>
                             <div>
-                              <p className="text-xs font-medium text-gray-500 mb-1">Document Status</p>
-                              <p className="font-semibold text-sm text-yellow-600">Pending Review</p>
+                              <p className="text-xs font-medium text-[var(--muted-ink)] mb-1">Document Status</p>
+                              <p className="font-semibold text-sm text-[var(--warn)]">Pending Review</p>
                             </div>
                             <div>
-                              <p className="text-xs font-medium text-gray-500 mb-1">Address Details</p>
-                              <p className="font-semibold text-gray-900 text-sm">{vendor.address || "Unknown"}</p>
+                              <p className="text-xs font-medium text-[var(--muted-ink)] mb-1">Address Details</p>
+                              <p className="font-semibold text-[var(--ink)] text-sm">{vendor.address || "Unknown"}</p>
                             </div>
                           </div>
                         </div>
@@ -1228,27 +1221,27 @@ export default function AdminDashboard() {
             </div>
           </div>
         ) : activeTab === 'vendors' ? (
-          <div className="p-5 md:px-8 md:pb-12 animate-in fade-in">
+          <div className="p-4 sm:p-5 md:px-6 md:pb-12 animate-in fade-in">
             {/* Active Vendors Grid */}
             <div className="space-y-4">
-              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-green-500"></span>
+              <h3 className="text-lg font-bold text-[var(--ink)] flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-[var(--good)]" />
                 Active Vendors
-                <span className="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full ml-2">{approvedVendors.length}</span>
+                <span className="cirrel-pill text-xs ml-2">{approvedVendors.length}</span>
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {approvedVendors.map(vendor => {
                   const isExpanded = expandedVendorDetailsId === vendor.id;
 
                   return (
-                    <div key={vendor.id} className="bg-white rounded-[24px] border border-gray-100 shadow-sm flex flex-col overflow-hidden transition-all duration-300 hover:border-gray-200">
+                    <div key={vendor.id} className="cirrel-glass rounded-[26px] flex flex-col overflow-hidden transition-all duration-300">
                       <div
                         onClick={() => setExpandedVendorDetailsId(isExpanded ? null : vendor.id)}
-                        className="p-5 flex flex-col gap-4 cursor-pointer"
+                        className="relative z-10 p-5 flex flex-col gap-4 cursor-pointer"
                       >
                         <div className="flex justify-between items-start">
-                          <div className="flex gap-3 items-center">
-                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg bg-blue-100 text-blue-700 shrink-0 overflow-hidden`}>
+                          <div className="flex gap-3 items-center min-w-0">
+                            <div className="w-12 h-12 rounded-[14px] flex items-center justify-center font-bold text-lg cirrel-mark shrink-0 overflow-hidden">
                               {vendor.logo ? (
                                 /* eslint-disable-next-line @next/next/no-img-element */
                                 <img src={vendor.logo} alt={vendor.name} className="w-full h-full object-cover" />
@@ -1256,65 +1249,65 @@ export default function AdminDashboard() {
                                 (vendor.name || "V").substring(0, 2).toUpperCase()
                               )}
                             </div>
-                            <div>
-                              <h3 className="font-bold text-gray-900 text-lg leading-tight">{vendor.name}</h3>
-                              <p className="text-sm font-medium text-gray-500 flex items-center gap-1 mt-0.5"><Store className="w-3.5 h-3.5" /> {vendor.address || "Unknown Location"}</p>
+                            <div className="min-w-0">
+                              <h3 className="font-bold text-[var(--ink)] text-lg leading-tight truncate">{vendor.name}</h3>
+                              <p className="text-xs font-medium text-[var(--muted-ink)] flex items-center gap-1 mt-0.5 truncate"><Store className="w-3.5 h-3.5 shrink-0" /> {vendor.address || "Unknown Location"}</p>
                             </div>
                           </div>
-                          <div className={`p-1.5 rounded-full transition-transform ${isExpanded ? 'rotate-90 bg-gray-100' : 'bg-gray-50 hover:bg-gray-100'}`}>
-                            <ChevronRight className="w-5 h-5 text-gray-600" />
+                          <div className={`cirrel-ibtn w-8 h-8 transition-transform shrink-0 ${isExpanded ? 'rotate-90' : ''}`}>
+                            <ChevronRight className="w-4 h-4" />
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-2 pt-3 border-t border-gray-50">
+                        <div className="grid grid-cols-2 gap-2 pt-3 border-t border-[var(--line)]">
                           <div>
-                            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">Scooters</p>
-                            <p className="font-black text-gray-900 text-lg">{vendor.scooters?.length || 0}</p>
+                            <p className="text-[11px] font-bold text-[var(--muted-ink)] uppercase tracking-wide">Scooters</p>
+                            <p className="font-bold text-[var(--ink)] text-lg">{vendor.scooters?.length || 0}</p>
                           </div>
                           <div>
-                            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">Revenue</p>
-                            <p className="font-black text-gray-900 text-lg">Rp 0</p>
+                            <p className="text-[11px] font-bold text-[var(--muted-ink)] uppercase tracking-wide">Revenue</p>
+                            <p className="font-bold text-[var(--ink)] text-lg">Rp 0</p>
                           </div>
                         </div>
                       </div>
 
                       {/* Published Scooters Accordion */}
                       {isExpanded && (
-                        <div className="bg-gray-50/50 p-5 border-t border-gray-100 animate-in slide-in-from-top-2">
-                          <h5 className="text-xs font-bold text-gray-900 uppercase tracking-wide mb-3 flex items-center gap-2">
-                            <Bike className="w-4 h-4 text-gray-400" /> Published Fleet
+                        <div className="relative z-10 cirrel-well p-5 border-t border-[var(--line)] animate-in slide-in-from-top-2">
+                          <h5 className="text-xs font-bold text-[var(--ink)] uppercase tracking-wide mb-3 flex items-center gap-2">
+                            <Bike className="w-4 h-4 text-[var(--accent-text)]" /> Published Fleet
                           </h5>
                           <div className="space-y-2 mb-6">
                             {vendor.scooters?.map((scooter: any) => (
-                              <div key={scooter.id} className="bg-white border border-gray-100 p-3 rounded-xl flex items-center justify-between shadow-sm hover:border-gray-200 transition-colors">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-10 h-10 bg-gray-50 rounded-lg overflow-hidden shrink-0 border border-gray-50 flex items-center justify-center">
-                                    <Bike className="w-5 h-5 text-gray-300" />
+                              <div key={scooter.id} className="cirrel-glass p-3 rounded-[16px] flex items-center justify-between">
+                                <div className="relative z-10 flex items-center gap-3">
+                                  <div className="w-10 h-10 cirrel-well rounded-lg overflow-hidden shrink-0 flex items-center justify-center">
+                                    <Bike className="w-5 h-5 text-[var(--accent-text)]" />
                                   </div>
                                   <div>
-                                    <p className="font-bold text-gray-900 text-sm leading-tight">{scooter.name}</p>
-                                    <p className="text-[11px] font-medium text-gray-500 mt-0.5">{scooter.available_units ?? 1} / {scooter.total_units ?? 1} units available</p>
+                                    <p className="font-bold text-[var(--ink)] text-sm leading-tight">{scooter.name}</p>
+                                    <p className="text-[11px] font-medium text-[var(--muted-ink)] mt-0.5">{scooter.available_units ?? 1} / {scooter.total_units ?? 1} units available</p>
                                   </div>
                                 </div>
-                                <div className="text-right">
-                                  <p className="font-bold text-gray-900 text-sm">Rp {(scooter.price_daily || 0).toLocaleString()}</p>
+                                <div className="relative z-10 text-right">
+                                  <p className="font-bold text-[var(--ink)] text-sm">Rp {(scooter.price_daily || 0).toLocaleString()}</p>
                                 </div>
                               </div>
                             ))}
                             {(!vendor.scooters || vendor.scooters.length === 0) && (
-                              <p className="text-sm text-gray-500">No scooters published yet.</p>
+                              <p className="text-sm text-[var(--muted-ink)]">No scooters published yet.</p>
                             )}
                           </div>
                           
-                          <div className="pt-4 border-t border-gray-200 flex flex-col sm:flex-row gap-3">
+                          <div className="pt-4 border-t border-[var(--line)] flex flex-col sm:flex-row gap-3">
                             <button 
                               onClick={() => handleSuspendVendor(vendor.id)}
-                              className="flex-1 bg-yellow-50 hover:bg-yellow-100 text-yellow-700 border border-yellow-200 font-bold py-2.5 px-4 rounded-xl text-sm transition-colors text-center"
+                              className="flex-1 bg-[var(--warn-soft)] text-[var(--warn)] font-bold py-2.5 px-4 rounded-full text-xs transition-opacity hover:opacity-90 text-center cursor-pointer"
                             >
                               Suspend Vendor
                             </button>
                             <button 
                               onClick={() => handleRemoveVendor(vendor.id)}
-                              className="flex-1 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-bold py-2.5 px-4 rounded-xl text-sm transition-colors text-center"
+                              className="flex-1 bg-[var(--bad-soft)] text-[var(--bad)] font-bold py-2.5 px-4 rounded-full text-xs transition-opacity hover:opacity-90 text-center cursor-pointer"
                             >
                               Remove Vendor
                             </button>
@@ -2686,14 +2679,16 @@ export default function AdminDashboard() {
           </div>
         ) : activeTab === 'revenue' ? (
           <div className="p-5 md:px-8 md:pb-12 flex flex-col items-center justify-center flex-1 min-h-[50vh] text-center animate-in fade-in">
-            <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mb-4">
-              <DollarSign className="w-10 h-10 text-green-500" />
+            <div className="cirrel-glass rounded-[30px] p-10 max-w-md">
+              <div className="relative z-10 w-16 h-16 bg-[var(--good-soft)] rounded-full flex items-center justify-center mx-auto mb-4">
+                <DollarSign className="w-8 h-8 text-[var(--good)]" />
+              </div>
+              <h2 className="relative z-10 text-2xl font-bold text-[var(--ink)] mb-2">Revenue Analytics</h2>
+              <p className="relative z-10 text-[var(--muted-ink)] text-sm mb-6">Detailed revenue reports, platform commissions, and payout schedules are being processed.</p>
+              <button className="relative z-10 cirrel-btn-primary px-6 py-3 font-bold text-sm hover:scale-[1.02] cursor-pointer">
+                Download CSV Report
+              </button>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Revenue Analytics</h2>
-            <p className="text-gray-500 max-w-sm mb-6">Detailed revenue reports, platform commissions, and payout schedules are being processed.</p>
-            <button className="bg-black text-white px-6 py-3 rounded-xl font-bold hover:scale-[1.02] transition-transform shadow-md">
-              Download CSV Report
-            </button>
           </div>
         ) : activeTab === 'settings' ? (
           <div className="p-4 sm:p-6 md:p-8 animate-in fade-in max-w-3xl mx-auto">
@@ -3072,11 +3067,13 @@ export default function AdminDashboard() {
           </div>
         ) : (
           <div className="p-5 md:px-8 md:pb-12 flex flex-col items-center justify-center flex-1 min-h-[50vh] text-center animate-in fade-in slide-in-from-bottom-4">
-            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-              <AlertCircle className="w-10 h-10 text-gray-400" />
+            <div className="cirrel-glass rounded-[30px] p-10 max-w-sm">
+              <div className="relative z-10 w-16 h-16 cirrel-well rounded-full flex items-center justify-center mx-auto mb-4">
+                <AlertCircle className="w-8 h-8 text-[var(--muted-ink)]" />
+              </div>
+              <h2 className="relative z-10 text-2xl font-bold text-[var(--ink)] mb-2 capitalize">{activeTab} Management</h2>
+              <p className="relative z-10 text-[var(--muted-ink)] text-sm">This section is currently under development. Check back soon for updates!</p>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2 capitalize">{activeTab} Management</h2>
-            <p className="text-gray-500 max-w-sm">This section is currently under development. Check back soon for updates!</p>
           </div>
         )}
       </main>
@@ -3086,73 +3083,65 @@ export default function AdminDashboard() {
         MOBILE BOTTOM NAVBAR
         ========================================================================
       */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-50 rounded-t-[32px] shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
-        <div className="flex justify-around items-center pt-3 pb-8 px-4 relative">
-          <button onClick={() => { setActiveTab('home'); setIsMobileMenuOpen(false); }} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group ${activeTab === 'home' ? 'text-blue-600' : 'text-gray-400 hover:text-black'}`}>
-            <div className={`${activeTab === 'home' ? 'bg-blue-50' : 'group-hover:bg-gray-50'} p-1.5 rounded-full transition-colors`}>
-              <Home className="w-6 h-6" />
-            </div>
+      <nav className="md:hidden fixed bottom-3 left-3 right-3 cirrel-modal z-50 rounded-full p-1.5">
+        <div className="relative z-10 flex justify-around items-center gap-1">
+          <button onClick={() => { setActiveTab('home'); setIsMobileMenuOpen(false); }} className={`flex flex-col items-center gap-1 py-2 px-1 rounded-full transition-all flex-1 cursor-pointer ${activeTab === 'home' ? 'cirrel-btn-primary text-white' : 'text-[var(--muted-ink)] hover:text-[var(--ink)]'}`}>
+            <Home className="w-4 h-4" />
             <span className="text-[10px] font-bold">Home</span>
           </button>
 
-          <button onClick={() => { setActiveTab('approvals'); setIsMobileMenuOpen(false); }} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group relative ${activeTab === 'approvals' ? 'text-blue-600' : 'text-gray-400 hover:text-black'}`}>
-            <div className={`${activeTab === 'approvals' ? 'bg-blue-50' : 'group-hover:bg-gray-50'} p-1.5 rounded-full transition-colors`}>
-              <UserCheck className="w-6 h-6" />
+          <button onClick={() => { setActiveTab('approvals'); setIsMobileMenuOpen(false); }} className={`flex flex-col items-center gap-1 py-2 px-1 rounded-full transition-all flex-1 relative cursor-pointer ${activeTab === 'approvals' ? 'cirrel-btn-primary text-white' : 'text-[var(--muted-ink)] hover:text-[var(--ink)]'}`}>
+            <div className="relative">
+              <UserCheck className="w-4 h-4" />
+              {pendingVendors.length > 0 && (
+                <span className="absolute -top-1 -right-2 w-3.5 h-3.5 bg-[#ffb340] text-[#04070d] text-[8px] font-bold rounded-full flex items-center justify-center">
+                  {pendingVendors.length}
+                </span>
+              )}
             </div>
             <span className="text-[10px] font-bold">Approvals</span>
-            {pendingVendors.length > 0 && (
-              <span className="absolute top-2 right-2 w-4 h-4 bg-yellow-500 text-black text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-white">
-                {pendingVendors.length}
-              </span>
-            )}
           </button>
 
-          <button onClick={() => { setActiveTab('vendors'); setIsMobileMenuOpen(false); }} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group ${activeTab === 'vendors' ? 'text-blue-600' : 'text-gray-400 hover:text-black'}`}>
-            <div className={`${activeTab === 'vendors' ? 'bg-blue-50' : 'group-hover:bg-gray-50'} p-1.5 rounded-full transition-colors`}>
-              <Store className="w-6 h-6" />
-            </div>
+          <button onClick={() => { setActiveTab('vendors'); setIsMobileMenuOpen(false); }} className={`flex flex-col items-center gap-1 py-2 px-1 rounded-full transition-all flex-1 cursor-pointer ${activeTab === 'vendors' ? 'cirrel-btn-primary text-white' : 'text-[var(--muted-ink)] hover:text-[var(--ink)]'}`}>
+            <Store className="w-4 h-4" />
             <span className="text-[10px] font-bold">Vendors</span>
           </button>
 
-          <button onClick={() => { setActiveTab('bookings'); setIsMobileMenuOpen(false); }} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group ${activeTab === 'bookings' ? 'text-blue-600' : 'text-gray-400 hover:text-black'}`}>
-            <div className={`${activeTab === 'bookings' ? 'bg-blue-50' : 'group-hover:bg-gray-50'} p-1.5 rounded-full transition-colors`}>
-              <CalendarDays className="w-6 h-6" />
-            </div>
+          <button onClick={() => { setActiveTab('bookings'); setIsMobileMenuOpen(false); }} className={`flex flex-col items-center gap-1 py-2 px-1 rounded-full transition-all flex-1 cursor-pointer ${activeTab === 'bookings' ? 'cirrel-btn-primary text-white' : 'text-[var(--muted-ink)] hover:text-[var(--ink)]'}`}>
+            <CalendarDays className="w-4 h-4" />
             <span className="text-[10px] font-bold">Bookings</span>
           </button>
 
-          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className={`flex flex-col items-center gap-1.5 p-2 transition-colors w-16 group ${isMobileMenuOpen ? 'text-blue-600' : 'text-gray-400 hover:text-black'}`}>
-            <div className={`${isMobileMenuOpen ? 'bg-blue-50' : 'group-hover:bg-gray-50'} p-1.5 rounded-full transition-colors`}>
-              <Menu className="w-6 h-6" />
-            </div>
+          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className={`flex flex-col items-center gap-1 py-2 px-1 rounded-full transition-all flex-1 cursor-pointer ${isMobileMenuOpen ? 'cirrel-btn-primary text-white' : 'text-[var(--muted-ink)] hover:text-[var(--ink)]'}`}>
+            <Menu className="w-4 h-4" />
             <span className="text-[10px] font-bold">More</span>
           </button>
 
           {/* Mobile Dropdown Menu */}
           {isMobileMenuOpen && (
-            <div className="absolute bottom-full right-4 mb-2 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden w-48 animate-in slide-in-from-bottom-2 fade-in">
-              <div className="flex flex-col">
+            <div className="absolute bottom-full right-2 mb-3 cirrel-modal rounded-[22px] overflow-hidden w-48 animate-in slide-in-from-bottom-2 fade-in text-[var(--ink)]">
+              <div className="relative z-10 flex flex-col">
                 <button
                   onClick={() => { setActiveTab('campaigns'); setIsMobileMenuOpen(false); }}
-                  className={`flex items-center gap-3 px-4 py-3 text-sm font-bold transition-colors ${activeTab === 'campaigns' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`}
+                  className={`flex items-center gap-3 px-4 py-3 text-sm font-bold transition-colors cursor-pointer ${activeTab === 'campaigns' ? 'bg-[var(--accent-soft)] text-[var(--accent-text)]' : 'text-[var(--ink)] hover:bg-[var(--card-2)]'}`}
                 >
-                  <Sparkles className="w-4 h-4 text-amber-500" /> Campaigns
+                  <Sparkles className="w-4 h-4 text-[#ffb340]" /> Campaigns
                 </button>
                 <button
                   onClick={() => { setActiveTab('revenue'); setIsMobileMenuOpen(false); }}
-                  className={`flex items-center gap-3 px-4 py-3 text-sm font-bold transition-colors border-t border-gray-50 ${activeTab === 'revenue' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`}
+                  className={`flex items-center gap-3 px-4 py-3 text-sm font-bold transition-colors border-t border-[var(--line)] cursor-pointer ${activeTab === 'revenue' ? 'bg-[var(--accent-soft)] text-[var(--accent-text)]' : 'text-[var(--ink)] hover:bg-[var(--card-2)]'}`}
                 >
                   <DollarSign className="w-4 h-4" /> Revenue
                 </button>
                 <button
                   onClick={() => { setActiveTab('settings'); setIsMobileMenuOpen(false); }}
-                  className={`flex items-center gap-3 px-4 py-3 text-sm font-bold transition-colors border-t border-gray-50 ${activeTab === 'settings' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`}
+                  className={`flex items-center gap-3 px-4 py-3 text-sm font-bold transition-colors border-t border-[var(--line)] cursor-pointer ${activeTab === 'settings' ? 'bg-[var(--accent-soft)] text-[var(--accent-text)]' : 'text-[var(--ink)] hover:bg-[var(--card-2)]'}`}
                 >
                   <Settings className="w-4 h-4" /> Settings
                 </button>
                 <button
                   onClick={() => { setIsMobileMenuOpen(false); handleAdminLogout(); }}
-                  className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-red-500 hover:bg-red-50 border-t border-gray-50 transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-[var(--bad)] hover:bg-[var(--bad-soft)] border-t border-[var(--line)] transition-colors cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" /> Sign Out
                 </button>

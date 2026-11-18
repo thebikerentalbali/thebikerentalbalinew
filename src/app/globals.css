@@ -2,7 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:is(.dark *, [data-theme="dark"] *));
 
 @theme inline {
   --color-background: var(--background);
@@ -17,7 +17,7 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
-  
+
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -34,7 +34,7 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  
+
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-error: var(--error);
@@ -46,140 +46,493 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
-
-  /* Glassmorphism utilities */
-  --color-glass: rgba(255, 255, 255, 0.7);
-  --color-glass-dark: rgba(0, 0, 0, 0.7);
 }
 
 :root {
-  --background: #F0F2F5;
-  --foreground: #000000;
-  
-  --card: #FFFFFF;
-  --card-foreground: #000000;
-  
-  --popover: #FFFFFF;
-  --popover-foreground: #000000;
-  
-  --primary: #000000;
-  --primary-foreground: #FFFFFF;
-  
-  --secondary: #FFFFFF;
-  --secondary-foreground: #000000;
-  
-  --muted: #F5F5F5;
-  --muted-foreground: #666666;
-  
-  --accent: #F5F5F5;
-  --accent-foreground: #000000;
-  
-  --destructive: #EB5757;
-  --destructive-foreground: #FFFFFF;
-  
-  --border: #E5E5E5;
-  --input: #E5E5E5;
-  --ring: #000000;
-  
-  --success: #27AE60;
-  --warning: #F2994A;
-  --error: #EB5757;
+  /* Cirrel Clean White Liquid Glass Tokens */
+  --bg: #ffffff;
+  --wall: #ffffff;
 
+  --glass: rgba(255, 255, 255, 0.94);
+  --glass-hi: rgba(255, 255, 255, 0.96);
+  --glass-solid: rgba(255, 255, 255, 0.98);
+  --blur: blur(24px) saturate(160%);
+
+  --edge: rgba(255, 255, 255, 0.95);
+  --edge-2: rgba(15, 25, 45, 0.06);
+  --rim: rgba(15, 25, 45, 0.08);
+
+  --card-glass: #ffffff;
+  --card-2: #f4f6f9;
+  --card-3: #eaedf2;
+
+  --ink: #0b1220;
+  --ink-2: #283142;
+  --muted-ink: #4c5566;
+  --line: rgba(15, 25, 45, 0.08);
+  --line-2: rgba(15, 25, 45, 0.14);
+
+  --shadow: 0 1px 2px rgba(15, 30, 60, 0.04), 0 10px 28px -12px rgba(15, 30, 60, 0.12);
+  --shadow-lg: 0 4px 14px rgba(15, 30, 60, 0.06), 0 24px 56px -18px rgba(15, 30, 60, 0.18);
+  --glow: inset 0 0 0 1px rgba(15, 25, 45, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+
+  --accent-blue: #007aff;
+  --accent-hi: #0068d9;
+  --accent-grad: linear-gradient(180deg, #1c87ff, #0062d6);
+  --accent-glow: rgba(0, 122, 255, 0.30);
+  --accent-soft: rgba(0, 122, 255, 0.10);
+  --accent-text: #005ec4;
+
+  --good: #18753a;
+  --warn: #975400;
+  --bad: #c4261c;
+  --info: #005ec4;
+  --good-soft: rgba(52, 199, 89, 0.14);
+  --warn-soft: rgba(255, 149, 0, 0.15);
+  --bad-soft: rgba(255, 59, 48, 0.11);
+  --info-soft: rgba(0, 122, 255, 0.10);
+
+  --tile-1: #eef5ff;
+  --tile-2: #fff4ec;
+  --tile-3: #ebfbf3;
+  --tile-4: #fff8e6;
+  --tile-ink: #0b1220;
+  --tile-muted: rgba(11, 18, 32, 0.64);
+
+  --r-sm: 12px;
+  --r-md: 16px;
+  --r-lg: 26px;
+  --r-xl: 30px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --grain: none;
+
+  /* Tailwind / shadcn compatibility tokens */
+  --background: #ffffff;
+  --foreground: #0b1220;
+  --card: #ffffff;
+  --card-foreground: #0b1220;
+  --popover: #ffffff;
+  --popover-foreground: #0b1220;
+  --primary: #007aff;
+  --primary-foreground: #ffffff;
+  --secondary: #f4f6f9;
+  --secondary-foreground: #0b1220;
+  --muted: #f4f6f9;
+  --muted-foreground: #4c5566;
+  --accent: rgba(0, 122, 255, 0.10);
+  --accent-foreground: #005ec4;
+  --destructive: #c4261c;
+  --destructive-foreground: #ffffff;
+  --border: rgba(15, 25, 45, 0.08);
+  --input: rgba(15, 25, 45, 0.12);
+  --ring: #007aff;
+  --success: #18753a;
+  --warning: #975400;
+  --error: #c4261c;
   --radius: 1rem;
-  
-  --sidebar: #FFFFFF;
-  --sidebar-foreground: #000000;
-  --sidebar-primary: #000000;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #F5F5F5;
-  --sidebar-accent-foreground: #000000;
-  --sidebar-border: #E5E5E5;
-  --sidebar-ring: #000000;
+
+  --sidebar: #f8fafd;
+  --sidebar-foreground: #0b1220;
+  --sidebar-primary: #007aff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #eef2f7;
+  --sidebar-accent-foreground: #0b1220;
+  --sidebar-border: rgba(15, 25, 45, 0.08);
+  --sidebar-ring: #007aff;
+
+  color-scheme: light;
 }
 
+[data-theme="dark"],
 .dark {
-  --background: #000000;
-  --foreground: #FFFFFF;
-  
-  --card: #111111;
-  --card-foreground: #FFFFFF;
-  
-  --popover: #111111;
-  --popover-foreground: #FFFFFF;
-  
-  --primary: #FFFFFF;
-  --primary-foreground: #000000;
-  
-  --secondary: #111111;
-  --secondary-foreground: #FFFFFF;
-  
-  --muted: #222222;
-  --muted-foreground: #999999;
-  
-  --accent: #222222;
-  --accent-foreground: #FFFFFF;
-  
-  --destructive: #EB5757;
-  --destructive-foreground: #FFFFFF;
-  
-  --border: #333333;
-  --input: #333333;
-  --ring: #FFFFFF;
-  
-  --success: #27AE60;
-  --warning: #F2994A;
-  --error: #EB5757;
-  
-  --sidebar: #111111;
-  --sidebar-foreground: #FFFFFF;
-  --sidebar-primary: #FFFFFF;
-  --sidebar-primary-foreground: #000000;
-  --sidebar-accent: #222222;
-  --sidebar-accent-foreground: #FFFFFF;
-  --sidebar-border: #333333;
-  --sidebar-ring: #FFFFFF;
+  /* Cirrel Clean Dark Tokens (No Bubble Orbs) */
+  --bg: #070a10;
+  --wall: #070a10;
+
+  --glass: rgba(18, 22, 32, 0.88);
+  --glass-hi: rgba(22, 27, 39, 0.92);
+  --glass-solid: rgba(20, 24, 34, 0.96);
+  --blur: blur(24px) saturate(150%);
+
+  --edge: rgba(255, 255, 255, 0.24);
+  --edge-2: rgba(255, 255, 255, 0.04);
+  --rim: rgba(255, 255, 255, 0.12);
+
+  --card-glass: rgba(255, 255, 255, 0.08);
+  --card-2: rgba(255, 255, 255, 0.05);
+  --card-3: rgba(255, 255, 255, 0.10);
+
+  --ink: #f2f5fa;
+  --ink-2: #ced5e1;
+  --muted-ink: #b6bfcd;
+  --line: rgba(255, 255, 255, 0.09);
+  --line-2: rgba(255, 255, 255, 0.16);
+
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.30), 0 20px 44px -22px rgba(0, 0, 0, 0.75);
+  --shadow-lg: 0 2px 6px rgba(0, 0, 0, 0.40), 0 40px 90px -28px rgba(0, 0, 0, 0.90);
+  --glow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 18px 30px -24px rgba(255, 255, 255, 0.18);
+
+  --accent-blue: #0a84ff;
+  --accent-hi: #3d9bff;
+  --accent-grad: linear-gradient(180deg, #1c87ff, #0062d6);
+  --accent-glow: rgba(10, 132, 255, 0.42);
+  --accent-soft: rgba(10, 132, 255, 0.18);
+  --accent-text: #6cb4ff;
+
+  --good: #4fdc78;
+  --warn: #ffb340;
+  --bad: #ff6f66;
+  --info: #6cb4ff;
+  --good-soft: rgba(48, 209, 88, 0.16);
+  --warn-soft: rgba(255, 179, 64, 0.16);
+  --bad-soft: rgba(255, 105, 97, 0.16);
+  --info-soft: rgba(10, 132, 255, 0.18);
+
+  --tile-1: rgba(10, 70, 150, 0.42);
+  --tile-2: rgba(130, 62, 26, 0.40);
+  --tile-3: rgba(14, 100, 76, 0.42);
+  --tile-4: rgba(120, 86, 14, 0.42);
+  --tile-ink: #f2f5fa;
+  --tile-muted: rgba(242, 245, 250, 0.72);
+
+  --background: #04070d;
+  --foreground: #f2f5fa;
+  --card: rgba(14, 18, 27, 0.65);
+  --card-foreground: #f2f5fa;
+  --popover: rgba(20, 24, 34, 0.94);
+  --popover-foreground: #f2f5fa;
+  --primary: #0a84ff;
+  --primary-foreground: #ffffff;
+  --secondary: rgba(255, 255, 255, 0.08);
+  --secondary-foreground: #f2f5fa;
+  --muted: rgba(255, 255, 255, 0.06);
+  --muted-foreground: #b6bfcd;
+  --accent: rgba(10, 132, 255, 0.18);
+  --accent-foreground: #6cb4ff;
+  --destructive: #ff6f66;
+  --destructive-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.10);
+  --input: rgba(255, 255, 255, 0.15);
+  --ring: #0a84ff;
+
+  --sidebar: rgba(18, 22, 33, 0.72);
+  --sidebar-foreground: #f2f5fa;
+  --sidebar-primary: #0a84ff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(255, 255, 255, 0.08);
+  --sidebar-accent-foreground: #f2f5fa;
+  --sidebar-border: rgba(255, 255, 255, 0.10);
+  --sidebar-ring: #0a84ff;
+
+  color-scheme: dark;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
-  html, body {
+  html,
+  body {
     max-width: 100%;
     overflow-x: hidden;
     touch-action: pan-y;
     -webkit-tap-highlight-color: transparent;
   }
-  button, a, input, select, textarea, [role="button"] {
+  button,
+  a,
+  input,
+  select,
+  textarea,
+  [role="button"] {
     touch-action: manipulation;
   }
-  button, [role="button"], a {
+  button,
+  [role="button"],
+  a {
     -webkit-touch-callout: none;
     user-select: none;
   }
-  button:not(:disabled), a:not(:disabled), [role="button"]:not(:disabled) {
+  button:not(:disabled),
+  a:not(:disabled),
+  [role="button"]:not(:disabled) {
     cursor: pointer;
   }
-  input, select, textarea {
+  input,
+  select,
+  textarea {
     font-size: 16px;
   }
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans), "Urbanist", system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
   }
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-heading font-bold tracking-tight;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-sans), "Urbanist", system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
   }
+  ::selection {
+    background: var(--accent-soft);
+  }
+}
+
+/* ============================================================================
+   CIRREL LIQUID GLASS SURFACES & SPECULAR RIMS
+   ============================================================================ */
+.cirrel-glass,
+.cirrel-glass-hi,
+.cirrel-modal {
+  position: relative;
+  background-image: var(--grain);
+  background-blend-mode: soft-light;
+  background-size: 128px;
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  box-shadow: var(--glow), var(--shadow);
+}
+
+.cirrel-glass {
+  background-color: var(--glass);
+}
+
+.cirrel-glass-hi {
+  background-color: var(--glass-hi);
+}
+
+.cirrel-modal {
+  background-color: var(--glass-solid);
+  -webkit-backdrop-filter: blur(30px) saturate(170%);
+  backdrop-filter: blur(30px) saturate(170%);
+  box-shadow: var(--glow), var(--shadow-lg);
+}
+
+/* Top specular sheen */
+.cirrel-glass::before,
+.cirrel-kpi::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.08) 22%, transparent 45%);
+  z-index: 0;
+}
+
+[data-theme="dark"] .cirrel-glass::before,
+.dark .cirrel-glass::before,
+[data-theme="dark"] .cirrel-kpi::before,
+.dark .cirrel-kpi::before {
+  background: linear-gradient(rgba(255, 255, 255, 0.07), transparent 40%);
+}
+
+/* 1px directional specular edge mask */
+.cirrel-glass::after,
+.cirrel-glass-hi::after,
+.cirrel-modal::after,
+.cirrel-kpi::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(
+    140deg,
+    var(--edge) 0%,
+    var(--edge-2) 32%,
+    transparent 52%,
+    var(--edge-2) 74%,
+    color-mix(in oklab, var(--edge) 70%, transparent) 100%
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+
+.cirrel-well {
+  background-color: var(--card-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+/* Cirrel Blue Brand Mark */
+.cirrel-mark {
+  color: #ffffff;
+  background: linear-gradient(145deg, #64d2ff, #0a84ff 55%, #0050c8);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 10px 18px -10px var(--accent-blue);
+  display: grid;
+  place-items: center;
+}
+
+/* Cirrel Pill Buttons & Icon Buttons */
+.cirrel-btn {
+  background: var(--card-glass);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line-2), inset 0 1px 0 color-mix(in oklab, var(--edge) 50%, transparent);
+  border-radius: 9999px;
+  font-weight: 600;
+  transition: all 0.2s var(--ease);
+}
+.cirrel-btn:hover {
+  background: var(--glass-hi);
+}
+
+.cirrel-btn-primary {
+  background: var(--accent-grad);
+  color: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 10px 22px -10px var(--accent-glow);
+  border-radius: 9999px;
+  font-weight: 600;
+  transition: all 0.2s var(--ease);
+}
+.cirrel-btn-primary:hover {
+  background: var(--accent-hi);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 14px 26px -10px var(--accent-glow);
+}
+
+.cirrel-ibtn {
+  background: var(--glass);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  color: var(--ink);
+  box-shadow: var(--glow), 0 8px 18px -12px rgba(15, 30, 60, 0.35);
+  border-radius: 9999px;
+  display: grid;
+  place-items: center;
+  transition: all 0.2s var(--ease);
+}
+.cirrel-ibtn:hover {
+  background: var(--glass-hi);
+}
+
+/* Cirrel Filter Chips & Segmented Controls */
+.cirrel-chip {
+  background: var(--card-2);
+  color: var(--muted-ink);
+  box-shadow: inset 0 0 0 1px var(--line);
+  border-radius: 9999px;
+  font-weight: 600;
+  transition: all 0.2s var(--ease);
+}
+.cirrel-chip:hover {
+  color: var(--ink);
+  background: var(--glass-hi);
+}
+.cirrel-chip[data-active="true"] {
+  background: var(--accent-grad);
+  color: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 8px 18px -8px var(--accent-glow);
+}
+
+.cirrel-seg {
+  background: rgba(120, 130, 150, 0.14);
+  box-shadow: inset 0 0 0 1px var(--line);
+  border-radius: 9999px;
+  padding: 3px;
+}
+[data-theme="dark"] .cirrel-seg,
+.dark .cirrel-seg {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Cirrel Status Pills */
+.cirrel-pill {
+  height: 24px;
+  font-size: 12px;
+  white-space: nowrap;
+  background: var(--card-3);
+  color: var(--ink-2);
+  border-radius: 9999px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  font-weight: 600;
+  display: inline-flex;
+}
+.cirrel-pill--good {
+  background: var(--good-soft);
+  color: var(--good);
+}
+.cirrel-pill--warn {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+.cirrel-pill--bad {
+  background: var(--bad-soft);
+  color: var(--bad);
+}
+.cirrel-pill--info {
+  background: var(--info-soft);
+  color: var(--info);
+}
+
+/* Cirrel Tinted KPI Tiles */
+.cirrel-kpi {
+  position: relative;
+  border-radius: var(--r-lg);
+  color: var(--tile-ink);
+  background-image: var(--grain);
+  background-blend-mode: soft-light;
+  background-size: 128px;
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  box-shadow: var(--glow), var(--shadow);
+  overflow: hidden;
+}
+.cirrel-kpi--1 { background-color: var(--tile-1); }
+.cirrel-kpi--2 { background-color: var(--tile-2); }
+.cirrel-kpi--3 { background-color: var(--tile-3); }
+.cirrel-kpi--4 { background-color: var(--tile-4); }
+
+/* Cirrel Inputs */
+.cirrel-input {
+  background: var(--card-glass);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+  transition: box-shadow 0.2s var(--ease), background 0.2s var(--ease);
+}
+[data-theme="dark"] .cirrel-input,
+.dark .cirrel-input {
+  background: rgba(0, 0, 0, 0.24);
+}
+.cirrel-input::placeholder {
+  color: var(--muted-ink);
+  opacity: 0.7;
+}
+.cirrel-input:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 1.5px var(--accent-blue), 0 0 0 4px var(--accent-soft);
 }
 
 @layer utilities {
   .glass {
-    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.05)] dark:bg-black/70 dark:border-white/10 dark:shadow-[0_8px_32px_0_rgba(255,255,255,0.05)];
+    background-color: var(--glass);
+    -webkit-backdrop-filter: var(--blur);
+    backdrop-filter: var(--blur);
+    box-shadow: var(--glow), var(--shadow);
+    border: 1px solid var(--rim);
   }
   .glass-card {
-    @apply bg-white/90 backdrop-blur-sm border border-gray-100 shadow-[0_4px_24px_0_rgba(0,0,0,0.04)] dark:bg-[#111]/90 dark:border-gray-800 dark:shadow-[0_4px_24px_0_rgba(0,0,0,0.4)];
+    background-color: var(--glass-hi);
+    -webkit-backdrop-filter: var(--blur);
+    backdrop-filter: var(--blur);
+    box-shadow: var(--glow), var(--shadow);
+    border: 1px solid var(--rim);
   }
   .premium-shadow {
-    @apply shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] transition-shadow duration-500;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.4s var(--ease), transform 0.2s var(--ease);
+  }
+  .premium-shadow:hover {
+    box-shadow: var(--shadow-lg);
   }
   .active-press {
     @apply active:scale-[0.98] transition-transform duration-75;
@@ -204,4 +557,9 @@
       display: none !important;
     }
   }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
 }

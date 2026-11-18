@@ -1,14 +1,15 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
-import { Inter } from "next/font/google";
+import { Urbanist } from "next/font/google";
 import "./globals.css";
 import PWARegister from "@/components/PWARegister";
 import AppSplashScreen from "@/components/AppSplashScreen";
 import NavigationProgressBar from "@/components/NavigationProgressBar";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import { getWebSiteSchema, getOrganizationSchema } from "@/lib/seo/schemaGenerator";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-const inter = Inter({
+const urbanist = Urbanist({
   variable: "--font-sans",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
@@ -23,7 +24,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#000000",
+  themeColor: "#ffffff",
 };
 
 export const metadata: Metadata = {
@@ -118,9 +119,16 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} h-full antialiased`}
+      data-theme="light"
+      suppressHydrationWarning
+      className={`${urbanist.variable} h-full antialiased`}
     >
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(d){try{var t=localStorage.getItem('tbrb:theme');var m=(t==='dark'||t==='light')?t:'light';d.dataset.theme=m;d.classList.toggle('dark',m==='dark');}catch(e){d.dataset.theme='light';d.classList.remove('dark');}})(document.documentElement);`,
+          }}
+        />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png" />
         <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png" />
@@ -134,7 +142,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="application-name" content="Vendor Portal" />
         <meta name="apple-mobile-web-app-title" content="Vendor Portal" />
-        <meta name="theme-color" content="#000000" />
+        <meta name="theme-color" content="#ffffff" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -148,16 +156,18 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-full flex flex-col bg-background text-foreground">
-        <Suspense fallback={null}>
-          <NavigationProgressBar />
-        </Suspense>
-        <AppSplashScreen />
-        <PWARegister />
-        <main className="flex-1 w-full min-h-screen relative">
-          {children}
-        </main>
-        <SpeedInsights />
+      <body className="min-h-full flex flex-col bg-background text-foreground relative">
+        <ThemeProvider>
+          <Suspense fallback={null}>
+            <NavigationProgressBar />
+          </Suspense>
+          <AppSplashScreen />
+          <PWARegister />
+          <main className="flex-1 w-full min-h-screen relative z-10">
+            {children}
+          </main>
+          <SpeedInsights />
+        </ThemeProvider>
       </body>
     </html>
   );

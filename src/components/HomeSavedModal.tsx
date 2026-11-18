@@ -32,32 +32,37 @@ function HomeSavedModalComponent({
       role="dialog"
       aria-modal="true"
       aria-label="Saved Scooters"
-      className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-6 bg-black/40 backdrop-blur-sm animate-in fade-in"
+      className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-6 bg-black/50 backdrop-blur-md animate-in fade-in"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full md:max-w-md bg-white rounded-t-[32px] md:rounded-[32px] p-6 pb-12 md:pb-6 shadow-xl animate-in slide-in-from-bottom-8 md:slide-in-from-bottom-4 relative max-h-[85vh] overflow-y-auto"
+        className="w-full md:max-w-md cirrel-modal rounded-t-[30px] md:rounded-[30px] p-6 pb-10 md:pb-6 animate-in slide-in-from-bottom-8 md:slide-in-from-bottom-4 relative max-h-[85vh] overflow-y-auto text-[var(--ink)]"
       >
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-bold text-gray-900">Saved Scooters</h3>
+        <div className="flex items-center justify-between mb-6 relative z-10">
+          <div className="flex items-center gap-2.5">
+            <div className="cirrel-mark w-9 h-9 rounded-[11px]">
+              <Heart className="w-4 h-4" />
+            </div>
+            <h3 className="text-xl font-bold text-[var(--ink)]">Saved Scooters</h3>
+          </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close saved scooters"
-            className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors active-press"
+            className="cirrel-ibtn w-9 h-9 active-press cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3 relative z-10">
           {savedList.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Heart className="w-8 h-8 text-gray-400" aria-hidden="true" />
+            <div className="text-center py-12 cirrel-well rounded-[24px]">
+              <div className="w-14 h-14 cirrel-glass rounded-full flex items-center justify-center mx-auto mb-4">
+                <Heart className="w-6 h-6 text-[var(--muted-ink)]" aria-hidden="true" />
               </div>
-              <p className="font-bold text-gray-900">No saved scooters yet</p>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="font-bold text-[var(--ink)]">No saved scooters yet</p>
+              <p className="text-sm text-[var(--muted-ink)] mt-1 px-4">
                 Tap the heart icon on a scooter to save it for later.
               </p>
             </div>
@@ -76,9 +81,9 @@ function HomeSavedModalComponent({
                   href={`/detail/${scooter.id}`}
                   onClick={onClose}
                   prefetch={true}
-                  className="bg-gray-50 p-3 rounded-2xl flex items-center gap-4 hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-200 active-press"
+                  className="cirrel-well p-3 rounded-[20px] flex items-center gap-4 hover:bg-[var(--card-3)] transition-colors active-press"
                 >
-                  <div className="relative w-16 h-16 bg-white rounded-xl overflow-hidden shrink-0 shadow-sm p-1">
+                  <div className="relative w-16 h-16 bg-white/95 rounded-2xl overflow-hidden shrink-0 shadow-sm p-1">
                     <Image
                       src={scooter.img || scooter.image_url || "/images/scooter.png"}
                       alt={scooter.name || "Scooter"}
@@ -89,20 +94,18 @@ function HomeSavedModalComponent({
                     />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-start">
-                      <h4 className="font-bold text-gray-900 text-[14px] truncate">{scooter.name}</h4>
-                      <div className="flex items-center gap-1 bg-neutral-100 text-black border border-black/10 px-2 py-0.5 rounded-full flex-shrink-0 ml-2">
-                        <span className="text-[11px] font-bold">
-                          {scooter.year || "2024"}
-                        </span>
-                      </div>
+                    <div className="flex justify-between items-start gap-2">
+                      <h4 className="font-bold text-[var(--ink)] text-[14px] truncate">{scooter.name}</h4>
+                      <span className="cirrel-pill shrink-0 text-[11px]">
+                        {scooter.year || "2024"}
+                      </span>
                     </div>
                     <div className="flex items-baseline gap-1.5 mt-1">
-                      <span className="text-[14px] font-extrabold text-gray-900">
+                      <span className="text-[14px] font-bold text-[var(--ink)]">
                         Rp {price.toLocaleString()}
                       </span>
-                      <span className="text-gray-400 font-semibold text-[11px]">
-                        {durationFilter}
+                      <span className="text-[var(--muted-ink)] font-semibold text-[11px]">
+                        / {durationFilter.toLowerCase()}
                       </span>
                     </div>
                   </div>
@@ -114,9 +117,9 @@ function HomeSavedModalComponent({
                       e.stopPropagation()
                       onToggleSave(e, scooter.id)
                     }}
-                    className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0 active-press"
+                    className="cirrel-ibtn w-8 h-8 shrink-0 active-press cursor-pointer"
                   >
-                    <Heart className="w-4 h-4 fill-red-500 text-red-500" />
+                    <Heart className="w-4 h-4 fill-[#ff6f66] text-[#ff6f66]" />
                   </button>
                 </Link>
               )

@@ -48,7 +48,7 @@ function InstagramVerifiedBadge({ className = "w-4 h-4" }: { className?: string 
       <title>Verified Partner</title>
       <path
         d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.137V5.15h-6.162L25.358 0l-5.36 3.094Z"
-        fill="#000000"
+        fill="#0a84ff"
       />
       <path
         d="M16.5 28.5 9 21l2.85-2.85 4.65 4.65 11.65-11.65L31 14l-14.5 14.5Z"
@@ -269,12 +269,14 @@ export default function VendorDetailClient({
 
   if (!vendor) {
     return (
-      <div className="min-h-screen bg-[#F0F2F5] flex flex-col items-center justify-center p-4">
-        <h1 className="text-xl font-bold text-gray-800 mb-2">Vendor Not Found</h1>
-        <p className="text-gray-500 mb-4">The requested rental provider is unavailable.</p>
-        <Link href="/" prefetch={true} className="bg-black text-white px-6 py-2 rounded-full font-bold">
-          Go Back Home
-        </Link>
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 text-[var(--ink)]">
+        <div className="cirrel-glass rounded-[30px] p-8 text-center max-w-sm">
+          <h1 className="text-xl font-bold text-[var(--ink)] mb-2">Vendor Not Found</h1>
+          <p className="text-[var(--muted-ink)] text-sm mb-5">The requested rental provider is unavailable.</p>
+          <Link href="/" prefetch={true} className="inline-block cirrel-btn-primary px-6 py-2.5 text-xs font-bold">
+            Go Back Home
+          </Link>
+        </div>
       </div>
     )
   }
@@ -287,7 +289,7 @@ export default function VendorDetailClient({
   const totalFleetCount = scooters.reduce((sum, s) => sum + (s.total_units || 1), 0)
 
   return (
-    <div className="min-h-screen bg-[#F0F2F5] text-black antialiased w-full max-w-full overflow-x-hidden pb-16">
+    <div className="min-h-screen text-[var(--ink)] antialiased w-full max-w-full overflow-x-hidden pb-16">
       
       {/* ======================================================== */}
       {/* MOBILE LAYOUT (SM & DOWN)                                */}
@@ -296,17 +298,17 @@ export default function VendorDetailClient({
         
         {/* Mobile Header Card */}
         <header className="px-4 pt-4">
-          <div className="bg-white rounded-[32px] shadow-xs border border-gray-100 overflow-hidden relative">
+          <div className="cirrel-glass rounded-[30px] overflow-hidden relative">
             
-            {/* 1. Full Frame Cover Image Carousel with Rounded Card Bottom */}
-            <div className="relative w-full h-64 sm:h-72 bg-neutral-950 rounded-b-[32px] overflow-hidden select-none shadow-sm">
+            {/* 1. Full Frame Cover Image Carousel */}
+            <div className="relative z-10 w-full h-64 sm:h-72 bg-[#070d18] rounded-b-[28px] overflow-hidden select-none shadow-sm">
               
               {/* Top Action Overlay (Back & Share) */}
               <div className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between pointer-events-auto">
                 <button 
                   onClick={handleBack} 
                   aria-label="Go Back"
-                  className="w-10 h-10 bg-black/60 hover:bg-black/80 backdrop-blur-md rounded-full flex items-center justify-center text-white shadow-md border border-white/20 active-press cursor-pointer"
+                  className="w-10 h-10 bg-black/55 hover:bg-black/75 backdrop-blur-md rounded-full flex items-center justify-center text-white shadow-md border border-white/25 active-press cursor-pointer"
                 >
                   <ChevronLeft className="w-5 h-5 text-white" />
                 </button>
@@ -314,9 +316,9 @@ export default function VendorDetailClient({
                 <button 
                   onClick={handleShare} 
                   aria-label="Share Vendor Profile"
-                  className="w-10 h-10 bg-black/60 hover:bg-black/80 backdrop-blur-md rounded-full flex items-center justify-center text-white shadow-md border border-white/20 active-press cursor-pointer"
+                  className="w-10 h-10 bg-black/55 hover:bg-black/75 backdrop-blur-md rounded-full flex items-center justify-center text-white shadow-md border border-white/25 active-press cursor-pointer"
                 >
-                  {copiedLink ? <Check className="w-4 h-4 text-white" /> : <Share className="w-4 h-4 text-white" />}
+                  {copiedLink ? <Check className="w-4 h-4 text-[#4fdc78]" /> : <Share className="w-4 h-4 text-white" />}
                 </button>
               </div>
 
@@ -331,8 +333,7 @@ export default function VendorDetailClient({
                 className="w-full h-full flex overflow-x-auto snap-x snap-mandatory hide-scrollbar scroll-smooth"
               >
                 {coverImages.map((img, idx) => (
-                  <div key={idx} className="relative min-w-full h-full shrink-0 snap-center bg-neutral-950 flex items-center justify-center overflow-hidden">
-                    {/* Ambient background blur (so frame blends seamlessly with photo colors without black bars) */}
+                  <div key={idx} className="relative min-w-full h-full shrink-0 snap-center bg-[#070d18] flex items-center justify-center overflow-hidden">
                     <div className="absolute inset-0 overflow-hidden pointer-events-none">
                       <Image
                         src={img.url}
@@ -340,11 +341,10 @@ export default function VendorDetailClient({
                         fill
                         aria-hidden="true"
                         sizes="100vw"
-                        className="object-cover object-center blur-xl opacity-35 scale-110"
+                        className="object-cover object-center blur-xl opacity-40 scale-110"
                       />
                     </div>
 
-                    {/* Uncropped, perfectly scaled foreground image (never zoomed) */}
                     <div className="relative w-full h-full flex items-center justify-center p-1.5 sm:p-2 z-10">
                       <Image
                         src={img.url}
@@ -356,21 +356,19 @@ export default function VendorDetailClient({
                       />
                     </div>
 
-                    {/* Subtle dark gradient overlay at bottom for pill & dot readability */}
                     <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-15 pointer-events-none" />
 
-                    {/* Bottom pill if associated with a scooter */}
                     {img.scooter && (
                       <div className="absolute bottom-3 left-4 right-4 z-20 flex items-center justify-between pointer-events-auto">
                         <Link 
                           href={`/detail/${img.scooter.id}`}
                           prefetch={true}
-                          className="bg-black/60 backdrop-blur-md text-white text-[11px] font-bold px-3 py-1.5 rounded-full border border-white/20 hover:bg-black/80 flex items-center gap-1 transition-all"
+                          className="bg-black/55 backdrop-blur-md text-white text-[11px] font-bold px-3 py-1.5 rounded-full border border-white/25 hover:bg-black/75 flex items-center gap-1 transition-all"
                         >
                           <span>{formatTitleCase(img.scooter.name)}</span>
                           <ChevronRight className="w-3.5 h-3.5" />
                         </Link>
-                        <span className="text-[10px] font-bold text-white bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20">
+                        <span className="text-[10px] font-bold text-white bg-black/55 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/25">
                           {idx + 1} / {coverImages.length}
                         </span>
                       </div>
@@ -386,7 +384,7 @@ export default function VendorDetailClient({
                     <span 
                       key={i} 
                       className={`h-1 rounded-full transition-all duration-300 ${
-                        i === mobileCoverIndex ? "w-4 bg-white shadow-xs" : "w-1 bg-white/50"
+                        i === mobileCoverIndex ? "w-4 bg-[#3d9bff] shadow-xs" : "w-1 bg-white/50"
                       }`}
                     />
                   ))}
@@ -395,38 +393,33 @@ export default function VendorDetailClient({
 
             </div>
 
-            {/* 2. Provider Profile Details: Clean White Card with Crisp Dark Typography */}
-            <div className="p-5 bg-white text-gray-900">
-              
-              {/* Header: Smaller Logo placed BEFORE Vendor Name with Location Directly Below */}
+            {/* 2. Provider Profile Details */}
+            <div className="relative z-10 p-5 text-[var(--ink)]">
               <div className="mb-2">
                 <div className="flex items-center gap-3">
-                  {/* Smaller Logo */}
-                  <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-100 shadow-xs bg-white flex items-center justify-center shrink-0">
+                  <div className="w-11 h-11 rounded-full overflow-hidden border border-[var(--line-2)] shadow-xs bg-white flex items-center justify-center shrink-0">
                     {(vendor.logo || vendor.logo_url) ? (
                       <Image 
                         src={vendor.logo || vendor.logo_url} 
                         alt={vendor.name || "Vendor"} 
-                        width={40} 
-                        height={40} 
+                        width={44} 
+                        height={44} 
                         className="w-full h-full object-cover" 
                       />
                     ) : (
-                      <span className="font-bold text-xs text-gray-700">{vendor.name?.slice(0, 2).toUpperCase() || "VN"}</span>
+                      <span className="font-bold text-xs text-[#0b1220]">{vendor.name?.slice(0, 2).toUpperCase() || "VN"}</span>
                     )}
                   </div>
 
-                  {/* Vendor Name Title & Location Below */}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 min-w-0">
-                      <h1 className="text-base sm:text-lg font-bold text-gray-900 leading-tight truncate">
+                      <h1 className="text-base sm:text-lg font-bold text-[var(--ink)] leading-tight truncate">
                         {vendor.name}
                       </h1>
                       <InstagramVerifiedBadge className="w-4 h-4 shrink-0" />
                     </div>
-                    {/* Location title just below vendor name */}
-                    <div className="flex items-center gap-1 text-xs text-gray-500 font-medium mt-0.5">
-                      <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                    <div className="flex items-center gap-1 text-xs text-[var(--muted-ink)] font-medium mt-0.5">
+                      <MapPin className="w-3.5 h-3.5 text-[var(--accent-text)] shrink-0" />
                       <span className="truncate max-w-[240px] sm:max-w-xs">{vendor.address || "Bali, Indonesia"}</span>
                     </div>
                   </div>
@@ -434,78 +427,73 @@ export default function VendorDetailClient({
               </div>
 
               {/* Stats Row */}
-              <div className="flex items-center justify-between border-t border-b border-gray-100 py-3 my-3.5">
-                {/* Rating */}
+              <div className="flex items-center justify-between border-t border-b border-[var(--line)] py-3 my-3.5">
                 <div className="flex flex-col items-center justify-center flex-1 cursor-pointer" onClick={() => setIsReviewModalOpen(true)}>
                   <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 fill-black text-black" />
-                    <span className="font-bold text-base text-gray-900">{vendor.rating ? Number(vendor.rating).toFixed(1) : "5.0"}</span>
+                    <Star className="w-4 h-4 fill-[#ffb340] text-[#ffb340]" />
+                    <span className="font-bold text-base text-[var(--ink)]">{vendor.rating ? Number(vendor.rating).toFixed(1) : "5.0"}</span>
                   </div>
-                  <span className="text-[10px] text-gray-400 font-bold mt-0.5 uppercase tracking-wider">rating</span>
+                  <span className="text-[10px] text-[var(--muted-ink)] font-bold mt-0.5 uppercase tracking-wider">rating</span>
                 </div>
 
-                <div className="w-px h-6 bg-gray-200" />
+                <div className="w-px h-6 bg-[var(--line)]" />
 
-                {/* Reviews */}
                 <div className="flex flex-col items-center justify-center flex-1 cursor-pointer" onClick={() => setIsReviewModalOpen(true)}>
-                  <span className="font-bold text-base text-gray-900">{reviews.length}+</span>
-                  <span className="text-[10px] text-gray-400 font-bold mt-0.5 uppercase tracking-wider">reviews</span>
+                  <span className="font-bold text-base text-[var(--ink)]">{reviews.length}+</span>
+                  <span className="text-[10px] text-[var(--muted-ink)] font-bold mt-0.5 uppercase tracking-wider">reviews</span>
                 </div>
 
-                <div className="w-px h-6 bg-gray-200" />
+                <div className="w-px h-6 bg-[var(--line)]" />
 
-                {/* Scooters Count */}
                 <div className="flex flex-col items-center justify-center flex-1">
-                  <span className="font-bold text-base text-gray-900">{totalFleetCount}</span>
-                  <span className="text-[10px] text-gray-400 font-bold mt-0.5 uppercase tracking-wider">scooters</span>
+                  <span className="font-bold text-base text-[var(--ink)]">{totalFleetCount}</span>
+                  <span className="text-[10px] text-[var(--muted-ink)] font-bold mt-0.5 uppercase tracking-wider">scooters</span>
                 </div>
               </div>
 
-              {/* Swipeable Reviews directly under vendor info */}
+              {/* Swipeable Reviews */}
               <div>
                 <div className="flex overflow-x-auto gap-3 pb-2 snap-x hide-scrollbar">
                   {reviews.slice(0, 5).map((review) => (
-                    <div key={review.id} className="snap-start shrink-0 w-[260px] bg-[#F8F9FA] rounded-2xl p-3.5 border border-gray-100 flex flex-col justify-between">
+                    <div key={review.id} className="snap-start shrink-0 w-[260px] cirrel-well rounded-[20px] p-3.5 flex flex-col justify-between">
                       <div>
                         <div className="flex gap-0.5 mb-2">
                           {[...Array(5)].map((_, i) => (
-                            <Star key={i} className={`w-3.5 h-3.5 ${i < (review.rating || 5) ? "fill-black text-black" : "fill-gray-200 text-gray-200"}`} />
+                            <Star key={i} className={`w-3.5 h-3.5 ${i < (review.rating || 5) ? "fill-[#ffb340] text-[#ffb340]" : "fill-[var(--line-2)] text-[var(--line-2)]"}`} />
                           ))}
                         </div>
-                        <p className="text-xs text-gray-600 line-clamp-3 mb-2 font-medium">"{review.comment}"</p>
+                        <p className="text-xs text-[var(--ink-2)] line-clamp-3 mb-2 font-medium">&ldquo;{review.comment}&rdquo;</p>
                       </div>
-                      <p className="font-bold text-xs text-gray-900">- {review.user_name || "Guest"}</p>
+                      <p className="font-bold text-xs text-[var(--ink)]">- {review.user_name || "Guest"}</p>
                     </div>
                   ))}
                   {reviews.length === 0 && (
-                    <div className="w-full text-center py-4 text-xs text-gray-500">No reviews yet. Be the first!</div>
+                    <div className="w-full text-center py-4 text-xs text-[var(--muted-ink)]">No reviews yet. Be the first!</div>
                   )}
                 </div>
                 <div className="flex items-center gap-2.5 mt-3">
                   <button 
                     onClick={() => setIsWriteReviewModalOpen(true)}
-                    className="flex-1 bg-black text-white font-bold py-2.5 rounded-full text-xs hover:bg-neutral-800 shadow-sm transition-colors active-press cursor-pointer"
+                    className="flex-1 cirrel-btn-primary font-bold py-2.5 text-xs active-press cursor-pointer"
                   >
                     Write a Review
                   </button>
                   {reviews.length > 0 && (
                     <button 
                       onClick={() => setIsReviewModalOpen(true)}
-                      className="flex-1 bg-gray-100 border border-gray-200 text-gray-800 font-bold py-2.5 rounded-full text-xs hover:bg-gray-200 transition-colors active-press cursor-pointer"
+                      className="flex-1 cirrel-btn font-bold py-2.5 text-xs active-press cursor-pointer"
                     >
                       See More
                     </button>
                   )}
                 </div>
               </div>
-
             </div>
           </div>
         </header>
 
         {/* Mobile Scooters Fleet Section */}
         <div className="px-4 mt-5">
-          {/* Brand Filter Pills on Mobile */}
           {availableBrands.length > 1 && (
             <div className="mb-4">
               <div className="flex items-center gap-2 overflow-x-auto pb-1 hide-scrollbar">
@@ -513,11 +501,8 @@ export default function VendorDetailClient({
                   <button
                     key={brand}
                     onClick={() => setSelectedBrand(brand)}
-                    className={`px-4 py-2 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer active-press ${
-                      selectedBrand === brand
-                        ? "bg-black text-white shadow-xs"
-                        : "bg-white text-gray-700 border border-gray-200 hover:text-black"
-                    }`}
+                    data-active={selectedBrand === brand}
+                    className="cirrel-chip px-4 py-2 text-xs shrink-0 cursor-pointer active-press"
                   >
                     {brand}
                   </button>
@@ -528,14 +513,14 @@ export default function VendorDetailClient({
 
           <div className="space-y-3">
             {filteredScooters.length === 0 ? (
-              <div className="text-center py-8 bg-white rounded-3xl p-6 border border-gray-100">
-                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
-                  <Bike className="w-6 h-6 text-gray-400" />
+              <div className="text-center py-8 cirrel-glass rounded-[26px] p-6">
+                <div className="relative z-10 w-12 h-12 rounded-full cirrel-well flex items-center justify-center mx-auto mb-3">
+                  <Bike className="w-6 h-6 text-[var(--muted-ink)]" />
                 </div>
-                <p className="text-gray-500 font-medium text-xs">No scooters available for this brand</p>
+                <p className="relative z-10 text-[var(--muted-ink)] font-medium text-xs">No scooters available for this brand</p>
                 <button 
                   onClick={() => setSelectedBrand("All")}
-                  className="mt-3 text-xs font-bold bg-black text-white px-4 py-2 rounded-full active-press cursor-pointer shadow-xs"
+                  className="relative z-10 mt-3 text-xs font-bold cirrel-btn-primary px-4 py-2 active-press cursor-pointer"
                 >
                   Reset Filter
                 </button>
@@ -550,9 +535,9 @@ export default function VendorDetailClient({
                     prefetch={true}
                     onPointerEnter={() => fetchScooterDetail(scooter.id)}
                     onTouchStart={() => fetchScooterDetail(scooter.id)}
-                    className="bg-white rounded-3xl p-4 flex gap-3.5 shadow-xs items-center border border-gray-200/80 active-press transition-colors cursor-pointer"
+                    className="cirrel-glass rounded-[24px] p-3.5 flex gap-3.5 items-center active-press transition-all cursor-pointer"
                   >
-                    <div className="relative w-24 h-24 rounded-2xl bg-[#F8F9FA] flex items-center justify-center p-2 shrink-0 overflow-hidden border border-gray-100">
+                    <div className="relative z-10 w-24 h-24 rounded-[18px] bg-gradient-to-b from-white/95 to-[#eaf0f8]/95 flex items-center justify-center p-2 shrink-0 overflow-hidden shadow-xs">
                       <Image 
                         src={scooter.image_url || "/images/scooter.png"} 
                         alt={formattedName} 
@@ -561,25 +546,22 @@ export default function VendorDetailClient({
                         className="object-contain p-1 drop-shadow-md" 
                       />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] font-bold tracking-wider uppercase text-gray-500 bg-[#F8F9FA] px-2 py-0.5 rounded-full border border-gray-200/60">
+                    <div className="relative z-10 flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1 gap-2">
+                        <span className="cirrel-pill text-[10px] uppercase tracking-wider">
                           {scooter.brand || "Scooter"}
                         </span>
-                        {/* Black and White Available Label */}
-                        <div className="flex items-center gap-1.5 bg-black text-white px-2.5 py-0.5 rounded-full shadow-2xs">
-                          <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
-                          <span className="text-[10px] font-bold uppercase tracking-wider">
-                            {scooter.available_units || 1} AVAILABLE
-                          </span>
+                        <div className="cirrel-pill cirrel-pill--good text-[10px] uppercase tracking-wider">
+                          <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                          <span>{scooter.available_units || 1} AVAIL</span>
                         </div>
                       </div>
-                      <h3 className="font-bold text-gray-900 text-sm mb-1 truncate">{formattedName}</h3>
-                      <div className="flex items-baseline gap-1 mt-1.5">
-                        <span className="text-base font-black text-gray-900 leading-none">
+                      <h3 className="font-bold text-[var(--ink)] text-sm mb-1 truncate">{formattedName}</h3>
+                      <div className="flex items-baseline gap-1 mt-1">
+                        <span className="text-base font-bold text-[var(--ink)] leading-none">
                           Rp {scooter.price_daily?.toLocaleString("id-ID") || scooter.price_daily}
                         </span>
-                        <span className="text-xs text-gray-400 font-semibold">Daily</span>
+                        <span className="text-xs text-[var(--muted-ink)] font-semibold">/ day</span>
                       </div>
                     </div>
                   </Link>
@@ -602,43 +584,40 @@ export default function VendorDetailClient({
             <button 
               onClick={handleBack} 
               aria-label="Go Back"
-              className="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-gray-200 shadow-xs hover:bg-gray-50 transition-colors cursor-pointer"
+              className="cirrel-ibtn w-10 h-10 cursor-pointer"
             >
-              <ChevronLeft className="w-5 h-5 text-gray-800" />
+              <ChevronLeft className="w-5 h-5" />
             </button>
-            <nav className="flex items-center gap-2 text-sm text-gray-500 font-medium">
-              <Link href="/" className="hover:text-black transition-colors">Home</Link>
-              <span>/</span>
-              <span className="text-gray-900 font-bold">{vendor.name}</span>
+            <nav className="cirrel-glass px-4 py-2 rounded-full flex items-center gap-2 text-sm text-[var(--muted-ink)] font-medium">
+              <Link href="/" className="relative z-10 hover:text-[var(--ink)] transition-colors">Home</Link>
+              <span className="relative z-10">/</span>
+              <span className="relative z-10 text-[var(--ink)] font-bold">{vendor.name}</span>
             </nav>
           </div>
 
           <div className="flex items-center gap-3">
             <button 
               onClick={handleShare}
-              className="bg-white border border-gray-200 text-gray-800 hover:bg-gray-50 px-4 py-2.5 rounded-full text-xs font-bold flex items-center gap-2 shadow-xs transition-all active:scale-95 cursor-pointer"
+              className="cirrel-btn px-4 py-2.5 text-xs font-bold flex items-center gap-2 active:scale-95 cursor-pointer"
             >
-              {copiedLink ? <Check className="w-4 h-4 text-black" /> : <Share className="w-4 h-4 text-black" />}
+              {copiedLink ? <Check className="w-4 h-4 text-[var(--good)]" /> : <Share className="w-4 h-4 text-[var(--accent-text)]" />}
               <span>{copiedLink ? "Link Copied!" : "Share Profile"}</span>
             </button>
           </div>
         </div>
 
         {/* Desktop Header Card */}
-        <div className="bg-white rounded-[32px] overflow-hidden shadow-xs border border-gray-200/80">
+        <div className="cirrel-glass rounded-[30px] overflow-hidden">
           
-          {/* Full Frame Cover Image Carousel with Rounded Card Bottom */}
-          <div className="relative w-full h-80 lg:h-96 bg-neutral-900 rounded-b-[36px] overflow-hidden select-none shadow-sm">
-            
-            {/* Full Frame Slider Container */}
+          {/* Full Frame Cover Image Carousel */}
+          <div className="relative z-10 w-full h-80 lg:h-96 bg-[#070d18] rounded-b-[32px] overflow-hidden select-none shadow-sm">
             <div 
               ref={desktopCoverRef}
               onScroll={handleDesktopScroll}
               className="w-full h-full flex overflow-x-auto snap-x snap-mandatory hide-scrollbar scroll-smooth"
             >
               {coverImages.map((img, idx) => (
-                <div key={idx} className="relative min-w-full h-full shrink-0 snap-center bg-neutral-950 flex items-center justify-center overflow-hidden">
-                  {/* Ambient background blur */}
+                <div key={idx} className="relative min-w-full h-full shrink-0 snap-center bg-[#070d18] flex items-center justify-center overflow-hidden">
                   <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <Image
                       src={img.url}
@@ -646,11 +625,10 @@ export default function VendorDetailClient({
                       fill
                       aria-hidden="true"
                       sizes="100vw"
-                      className="object-cover object-center blur-xl opacity-35 scale-110"
+                      className="object-cover object-center blur-xl opacity-40 scale-110"
                     />
                   </div>
 
-                  {/* Uncropped foreground image */}
                   <div className="relative w-full h-full flex items-center justify-center p-3 lg:p-4 z-10">
                     <Image
                       src={img.url}
@@ -662,21 +640,19 @@ export default function VendorDetailClient({
                     />
                   </div>
 
-                  {/* Bottom gradient */}
                   <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-15 pointer-events-none" />
 
-                  {/* Bottom pill if scooter */}
                   {img.scooter && (
                     <div className="absolute bottom-4 left-6 right-6 z-20 flex items-center justify-between pointer-events-auto">
                       <Link 
                         href={`/detail/${img.scooter.id}`}
                         prefetch={true}
-                        className="bg-black/60 backdrop-blur-md text-white text-xs font-bold px-4 py-2 rounded-full border border-white/20 hover:bg-black/80 flex items-center gap-2 transition-all"
+                        className="bg-black/55 backdrop-blur-md text-white text-xs font-bold px-4 py-2 rounded-full border border-white/25 hover:bg-black/75 flex items-center gap-2 transition-all"
                       >
                         <span>{formatTitleCase(img.scooter.name)}</span>
                         <ChevronRight className="w-3.5 h-3.5" />
                       </Link>
-                      <span className="text-xs font-bold text-white bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/20">
+                      <span className="text-xs font-bold text-white bg-black/55 backdrop-blur-md px-3 py-1 rounded-full border border-white/25">
                         {idx + 1} / {coverImages.length}
                       </span>
                     </div>
@@ -685,29 +661,25 @@ export default function VendorDetailClient({
               ))}
             </div>
 
-            {/* Indicator Dots */}
             {coverImages.length > 1 && (
               <div className="absolute bottom-3.5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 pointer-events-none">
                 {coverImages.map((_, i) => (
                   <span 
                     key={i} 
                     className={`h-1.5 rounded-full transition-all duration-300 ${
-                      i === desktopCoverIndex ? "w-5 bg-white shadow-xs" : "w-1.5 bg-white/50"
+                      i === desktopCoverIndex ? "w-5 bg-[#3d9bff] shadow-xs" : "w-1.5 bg-white/50"
                     }`}
                   />
                 ))}
               </div>
             )}
-
           </div>
 
-          {/* Profile Details: Clean White Card with Crisp Dark Typography */}
-          <div className="p-8 bg-white text-gray-900">
+          {/* Profile Details */}
+          <div className="relative z-10 p-8 text-[var(--ink)]">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-6">
-              
-              {/* Smaller Logo before Vendor Name & Location Below */}
               <div className="flex items-center gap-4">
-                <div className="relative w-12 h-12 lg:w-14 lg:h-14 rounded-full overflow-hidden bg-white border-2 border-gray-100 shadow-xs shrink-0 flex items-center justify-center">
+                <div className="relative w-12 h-12 lg:w-14 lg:h-14 rounded-full overflow-hidden bg-white border-2 border-[var(--line-2)] shadow-xs shrink-0 flex items-center justify-center">
                   {(vendor.logo || vendor.logo_url) ? (
                     <Image 
                       src={vendor.logo || vendor.logo_url} 
@@ -717,63 +689,56 @@ export default function VendorDetailClient({
                       className="w-full h-full object-cover" 
                     />
                   ) : (
-                    <span className="text-lg font-bold text-gray-700">{(vendor.name || "V").substring(0, 2).toUpperCase()}</span>
+                    <span className="text-lg font-bold text-[#0b1220]">{(vendor.name || "V").substring(0, 2).toUpperCase()}</span>
                   )}
                 </div>
 
                 <div>
                   <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                    <h1 className="text-lg lg:text-xl font-bold text-gray-900 leading-tight">{vendor.name}</h1>
+                    <h1 className="text-lg lg:text-xl font-bold text-[var(--ink)] leading-tight">{vendor.name}</h1>
                     <InstagramVerifiedBadge className="w-5 h-5 shrink-0" />
                   </div>
-                  {/* Location directly below vendor name */}
-                  <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium mt-0.5">
-                    <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                  <div className="flex items-center gap-1.5 text-xs text-[var(--muted-ink)] font-medium mt-0.5">
+                    <MapPin className="w-3.5 h-3.5 text-[var(--accent-text)] shrink-0" />
                     <span>{vendor.address || "Bali, Indonesia"}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Action Button */}
               <div className="flex items-center gap-3">
                 <button 
                   onClick={() => setIsWriteReviewModalOpen(true)}
-                  className="bg-black text-white font-bold px-6 py-3 rounded-full hover:bg-neutral-800 shadow-sm transition-colors text-xs cursor-pointer active-press"
+                  className="cirrel-btn-primary font-bold px-6 py-3 text-xs cursor-pointer active-press"
                 >
                   Write a Review
                 </button>
               </div>
-
             </div>
 
             {/* 3 Column Stats Bar */}
-            <div className="flex items-center gap-8 py-4 border-t border-gray-100 max-w-md">
-              {/* Rating */}
+            <div className="flex items-center gap-8 py-4 border-t border-[var(--line)] max-w-md">
               <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setIsReviewModalOpen(true)}>
                 <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 fill-black text-black" />
-                  <span className="font-bold text-base text-gray-900">{vendor.rating ? Number(vendor.rating).toFixed(1) : "5.0"}</span>
+                  <Star className="w-4 h-4 fill-[#ffb340] text-[#ffb340]" />
+                  <span className="font-bold text-base text-[var(--ink)]">{vendor.rating ? Number(vendor.rating).toFixed(1) : "5.0"}</span>
                 </div>
-                <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">rating</span>
+                <span className="text-xs text-[var(--muted-ink)] font-bold uppercase tracking-wider">rating</span>
               </div>
               
-              <div className="w-px h-6 bg-gray-200" />
+              <div className="w-px h-6 bg-[var(--line)]" />
 
-              {/* Reviews */}
               <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setIsReviewModalOpen(true)}>
-                <span className="font-bold text-base text-gray-900">{reviews.length}+</span>
-                <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">reviews</span>
+                <span className="font-bold text-base text-[var(--ink)]">{reviews.length}+</span>
+                <span className="text-xs text-[var(--muted-ink)] font-bold uppercase tracking-wider">reviews</span>
               </div>
 
-              <div className="w-px h-6 bg-gray-200" />
+              <div className="w-px h-6 bg-[var(--line)]" />
 
-              {/* Scooters Count */}
               <div className="flex items-center gap-2.5">
-                <span className="font-bold text-base text-gray-900">{totalFleetCount}</span>
-                <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">scooters</span>
+                <span className="font-bold text-base text-[var(--ink)]">{totalFleetCount}</span>
+                <span className="text-xs text-[var(--muted-ink)] font-bold uppercase tracking-wider">scooters</span>
               </div>
             </div>
-
           </div>
         </div>
 
@@ -785,22 +750,22 @@ export default function VendorDetailClient({
             
             {/* Scooters Fleet Section */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-3">
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900 tracking-tight">Available Scooters</h2>
-                  <p className="text-xs text-gray-500 font-medium mt-0.5">{scooters.length} bikes in garage</p>
+                  <h2 className="text-xl font-bold text-[var(--ink)] tracking-tight">Available Scooters</h2>
+                  <p className="text-xs text-[var(--muted-ink)] font-medium mt-0.5">{scooters.length} bikes in garage</p>
                 </div>
 
                 {availableBrands.length > 1 && (
-                  <div className="flex items-center gap-1.5 bg-white p-1 rounded-full border border-gray-200 shadow-2xs">
+                  <div className="cirrel-seg flex items-center gap-1">
                     {availableBrands.map((brand) => (
                       <button
                         key={brand}
                         onClick={() => setSelectedBrand(brand)}
                         className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
                           selectedBrand === brand
-                            ? "bg-black text-white shadow-xs"
-                            : "text-gray-600 hover:text-black"
+                            ? "cirrel-btn-primary text-white"
+                            : "text-[var(--muted-ink)] hover:text-[var(--ink)]"
                         }`}
                       >
                         {brand}
@@ -811,11 +776,11 @@ export default function VendorDetailClient({
               </div>
 
               {filteredScooters.length === 0 ? (
-                <div className="bg-white rounded-3xl p-12 text-center border border-gray-100">
-                  <p className="text-gray-500 font-medium">No scooters found for this brand filter.</p>
+                <div className="cirrel-glass rounded-[26px] p-12 text-center">
+                  <p className="relative z-10 text-[var(--muted-ink)] font-medium">No scooters found for this brand filter.</p>
                   <button 
                     onClick={() => setSelectedBrand("All")}
-                    className="mt-4 text-xs font-bold bg-black text-white px-4 py-2 rounded-full shadow-xs cursor-pointer"
+                    className="relative z-10 mt-4 text-xs font-bold cirrel-btn-primary px-5 py-2 cursor-pointer"
                   >
                     Reset Filter
                   </button>
@@ -831,18 +796,16 @@ export default function VendorDetailClient({
                         prefetch={true}
                         onPointerEnter={() => fetchScooterDetail(scooter.id)}
                         onTouchStart={() => fetchScooterDetail(scooter.id)}
-                        className="bg-white rounded-3xl p-4 border border-gray-200/80 shadow-xs hover:shadow-md active-press transition-all flex flex-col justify-between cursor-pointer"
+                        className="cirrel-glass rounded-[26px] p-4 hover:-translate-y-0.5 active-press transition-all flex flex-col justify-between cursor-pointer"
                       >
-                        <div>
-                          {/* Image Backdrop Box */}
-                          <div className="relative w-full h-44 bg-[#F8F9FA] rounded-2xl flex items-center justify-center p-3 mb-3 overflow-hidden border border-gray-100">
-                            <span className="absolute top-3 left-3 text-[10px] font-bold tracking-wider uppercase text-gray-600 bg-white border border-gray-200/80 px-2.5 py-0.5 rounded-full z-10">
+                        <div className="relative z-10">
+                          <div className="relative w-full h-44 bg-gradient-to-b from-white/95 to-[#eaf0f8]/95 rounded-[20px] flex items-center justify-center p-3 mb-3 overflow-hidden shadow-xs">
+                            <span className="absolute top-3 left-3 text-[10px] font-bold tracking-wider uppercase text-[#0b1220] bg-white/90 border border-black/10 px-2.5 py-0.5 rounded-full z-10">
                               {scooter.brand || "Scooter"}
                             </span>
                             
-                            {/* Black and White Available Label */}
-                            <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-black text-white px-2.5 py-1 rounded-full shadow-xs z-10">
-                              <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
+                            <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-[#0b1220]/80 backdrop-blur-md text-white px-2.5 py-1 rounded-full shadow-xs z-10">
+                              <div className="w-1.5 h-1.5 rounded-full bg-[#4fdc78]" />
                               <span className="text-[10px] font-bold uppercase tracking-wider">
                                 {scooter.available_units || 1} AVAILABLE
                               </span>
@@ -857,21 +820,19 @@ export default function VendorDetailClient({
                             />
                           </div>
 
-                          {/* Title */}
-                          <h3 className="font-bold text-gray-900 text-base mb-1 truncate">{formattedName}</h3>
+                          <h3 className="font-bold text-[var(--ink)] text-base mb-1 truncate">{formattedName}</h3>
                         </div>
 
-                        {/* Price & CTA */}
-                        <div className="flex items-center justify-between border-t border-gray-100 pt-3 mt-3">
+                        <div className="relative z-10 flex items-center justify-between border-t border-[var(--line)] pt-3 mt-3">
                           <div>
-                            <span className="text-xs text-gray-400 font-bold block leading-none mb-1">Starting from</span>
-                            <span className="text-base font-black text-gray-900">
+                            <span className="text-xs text-[var(--muted-ink)] font-bold block leading-none mb-1">Starting from</span>
+                            <span className="text-base font-bold text-[var(--ink)]">
                               Rp {scooter.price_daily?.toLocaleString("id-ID") || scooter.price_daily}
-                              <span className="text-xs text-gray-400 font-normal"> / day</span>
+                              <span className="text-xs text-[var(--muted-ink)] font-normal"> / day</span>
                             </span>
                           </div>
 
-                          <span className="bg-black text-white px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-2xs">
+                          <span className="cirrel-btn-primary px-4 py-2 text-xs font-bold whitespace-nowrap">
                             View
                           </span>
                         </div>
@@ -883,53 +844,52 @@ export default function VendorDetailClient({
             </div>
 
             {/* Verified Reviews Section (Desktop) */}
-            <div className="bg-white rounded-[32px] p-6 lg:p-8 shadow-xs border border-gray-200/80">
-              <div className="flex items-center justify-between mb-6">
+            <div className="cirrel-glass rounded-[30px] p-6 lg:p-8">
+              <div className="relative z-10 flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900 tracking-tight">Customer Reviews</h2>
+                  <h2 className="text-xl font-bold text-[var(--ink)] tracking-tight">Customer Reviews</h2>
                   <div className="flex items-center gap-2 mt-1">
-                    <div className="flex items-center gap-1 bg-yellow-50 px-2 py-0.5 rounded-full border border-yellow-100">
-                      <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
-                      <span className="font-bold text-xs text-yellow-700">{vendor.rating ? Number(vendor.rating).toFixed(1) : "5.0"}</span>
+                    <div className="flex items-center gap-1 bg-[var(--warn-soft)] text-[var(--warn)] px-2.5 py-0.5 rounded-full">
+                      <Star className="w-3.5 h-3.5 fill-current" />
+                      <span className="font-bold text-xs">{vendor.rating ? Number(vendor.rating).toFixed(1) : "5.0"}</span>
                     </div>
-                    <span className="text-xs text-gray-400 font-medium">•</span>
-                    <span className="text-xs text-gray-500 font-medium">{reviews.length} authenticated reviews</span>
+                    <span className="text-xs text-[var(--muted-ink)] font-medium">•</span>
+                    <span className="text-xs text-[var(--muted-ink)] font-medium">{reviews.length} authenticated reviews</span>
                   </div>
                 </div>
 
                 <button 
                   onClick={() => setIsWriteReviewModalOpen(true)}
-                  className="bg-black text-white font-bold px-5 py-2.5 rounded-full text-xs hover:bg-neutral-800 shadow-sm transition-colors cursor-pointer"
+                  className="cirrel-btn-primary font-bold px-5 py-2.5 text-xs cursor-pointer"
                 >
                   Write Review
                 </button>
               </div>
 
-              {/* Reviews Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-4">
                 {reviews.slice(0, 6).map((review) => (
-                  <div key={review.id} className="bg-[#F8F9FA] rounded-2xl p-4 border border-gray-200/80 flex flex-col justify-between">
+                  <div key={review.id} className="cirrel-well rounded-[20px] p-4 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center gap-1 mb-2">
                         {[...Array(review.rating || 5)].map((_, i) => (
-                          <Star key={i} className={`w-3.5 h-3.5 ${i < (review.rating || 5) ? "fill-black text-black" : "fill-gray-200 text-gray-200"}`} />
+                          <Star key={i} className={`w-3.5 h-3.5 ${i < (review.rating || 5) ? "fill-[#ffb340] text-[#ffb340]" : "fill-[var(--line-2)] text-[var(--line-2)]"}`} />
                         ))}
                       </div>
-                      <p className="text-xs text-gray-600 font-medium mb-3">"{review.comment || "Smooth rental process and well-maintained bike."}"</p>
+                      <p className="text-xs text-[var(--ink-2)] font-medium mb-3">&ldquo;{review.comment || "Smooth rental process and well-maintained bike."}&rdquo;</p>
                     </div>
-                    <p className="font-bold text-xs text-gray-900">- {review.user_name || "Guest"}</p>
+                    <p className="font-bold text-xs text-[var(--ink)]">- {review.user_name || "Guest"}</p>
                   </div>
                 ))}
                 {reviews.length === 0 && (
-                  <div className="col-span-2 text-center py-8 text-xs text-gray-500 font-medium">No reviews yet. Be the first!</div>
+                  <div className="col-span-2 text-center py-8 text-xs text-[var(--muted-ink)] font-medium">No reviews yet. Be the first!</div>
                 )}
               </div>
 
               {reviews.length > 6 && (
-                <div className="mt-6 text-center">
+                <div className="relative z-10 mt-6 text-center">
                   <button 
                     onClick={() => setIsReviewModalOpen(true)}
-                    className="px-6 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-900 font-bold rounded-full text-xs transition-all cursor-pointer"
+                    className="cirrel-btn px-6 py-2 text-xs font-bold cursor-pointer"
                   >
                     See All Reviews
                   </button>
@@ -941,29 +901,26 @@ export default function VendorDetailClient({
 
           {/* Sticky Sidebar (4 Columns) */}
           <div className="lg:col-span-4 space-y-5 lg:sticky lg:top-8 self-start">
-            
-            {/* Host Partner Garage Location Card */}
-            <div className="bg-white rounded-[32px] p-6 shadow-xs border border-gray-200/80 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-bold text-gray-900 text-base tracking-tight">Garage Hub</h3>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-black bg-neutral-100 border border-neutral-200 px-2.5 py-0.5 rounded-full">
+            <div className="cirrel-glass rounded-[30px] p-6 space-y-4">
+              <div className="relative z-10 flex items-center justify-between">
+                <h3 className="font-bold text-[var(--ink)] text-base tracking-tight">Garage Hub</h3>
+                <span className="cirrel-pill cirrel-pill--info text-[10px] uppercase tracking-wider">
                   Pickup Location
                 </span>
               </div>
               
-              <div className="space-y-3 pt-1">
-                <div className="bg-[#F8F9FA] rounded-2xl p-4 border border-gray-200/80">
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">
+              <div className="relative z-10 space-y-3 pt-1">
+                <div className="cirrel-well rounded-[20px] p-4">
+                  <span className="text-[10px] font-bold text-[var(--muted-ink)] uppercase tracking-widest block mb-1">
                     Dispatch Address
                   </span>
-                  <p className="font-bold text-gray-900 text-xs leading-relaxed flex items-start gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-black shrink-0 mt-0.5" />
+                  <p className="font-bold text-[var(--ink)] text-xs leading-relaxed flex items-start gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-[var(--accent-text)] shrink-0 mt-0.5" />
                     <span>{vendor.address || "Bali, Indonesia"}</span>
                   </p>
                 </div>
               </div>
             </div>
-
           </div>
 
         </div>
@@ -974,60 +931,60 @@ export default function VendorDetailClient({
       {isReviewModalOpen && (
         <div 
           onClick={() => setIsReviewModalOpen(false)}
-          className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4"
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-3xl w-full max-w-lg max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200"
+            className="cirrel-modal rounded-[30px] w-full max-w-lg max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200 text-[var(--ink)]"
           >
-            <div className="p-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white rounded-t-3xl z-10">
+            <div className="relative z-10 p-5 border-b border-[var(--line)] flex items-center justify-between">
               <div>
-                <h3 className="font-bold text-lg">Reviews</h3>
-                <div className="flex items-center gap-1">
-                  <Star className="w-3 h-3 fill-black text-black" />
-                  <span className="text-xs font-bold">5.0</span>
-                  <span className="text-xs text-gray-500">({reviews.length} reviews)</span>
+                <h3 className="font-bold text-lg text-[var(--ink)]">Reviews</h3>
+                <div className="flex items-center gap-1.5">
+                  <Star className="w-3.5 h-3.5 fill-[#ffb340] text-[#ffb340]" />
+                  <span className="text-xs font-bold">{vendor.rating ? Number(vendor.rating).toFixed(1) : "5.0"}</span>
+                  <span className="text-xs text-[var(--muted-ink)]">({reviews.length} reviews)</span>
                 </div>
               </div>
               <button 
                 onClick={() => setIsReviewModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+                className="cirrel-ibtn w-8 h-8 cursor-pointer"
               >
-                <X className="w-4 h-4 text-gray-600" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="p-4 overflow-y-auto space-y-3 flex-1">
+            <div className="relative z-10 p-5 overflow-y-auto space-y-3 flex-1">
               {reviews.map((review) => (
-                <div key={review.id} className="bg-[#F8F9FA] rounded-2xl p-3.5 border border-gray-200/80">
+                <div key={review.id} className="cirrel-well rounded-[20px] p-3.5">
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="font-bold text-xs text-gray-900">{review.user_name || "Customer"}</span>
+                    <span className="font-bold text-xs text-[var(--ink)]">{review.user_name || "Customer"}</span>
                     <div className="flex items-center gap-0.5">
                       {[...Array(5)].map((_, i) => (
-                        <Star key={i} className={`w-3.5 h-3.5 ${i < (review.rating || 5) ? "fill-black text-black" : "fill-gray-200 text-gray-200"}`} />
+                        <Star key={i} className={`w-3.5 h-3.5 ${i < (review.rating || 5) ? "fill-[#ffb340] text-[#ffb340]" : "fill-[var(--line-2)] text-[var(--line-2)]"}`} />
                       ))}
                     </div>
                   </div>
-                  <p className="text-xs text-gray-600 font-medium">"{review.comment}"</p>
+                  <p className="text-xs text-[var(--ink-2)] font-medium">&ldquo;{review.comment}&rdquo;</p>
                   {review.created_at && (
-                    <span className="text-[10px] text-gray-400 mt-1 block">
+                    <span className="text-[10px] text-[var(--muted-ink)] mt-1 block">
                       {new Date(review.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                     </span>
                   )}
                 </div>
               ))}
               {reviews.length === 0 && (
-                <p className="text-center py-8 text-xs text-gray-500">No reviews found.</p>
+                <p className="text-center py-8 text-xs text-[var(--muted-ink)]">No reviews found.</p>
               )}
             </div>
 
-            <div className="p-4 border-t border-gray-100">
+            <div className="relative z-10 p-5 border-t border-[var(--line)]">
               <button 
                 onClick={() => {
                   setIsReviewModalOpen(false)
                   setIsWriteReviewModalOpen(true)
                 }}
-                className="w-full bg-black text-white font-bold py-3 rounded-full text-xs hover:bg-neutral-800 shadow-md transition-colors cursor-pointer"
+                className="w-full cirrel-btn-primary font-bold py-3 text-xs cursor-pointer"
               >
                 Write a Review
               </button>
@@ -1040,25 +997,25 @@ export default function VendorDetailClient({
       {isWriteReviewModalOpen && (
         <div 
           onClick={() => setIsWriteReviewModalOpen(false)}
-          className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4"
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-3xl w-full max-w-md flex flex-col animate-in zoom-in-95 duration-200"
+            className="cirrel-modal rounded-[30px] w-full max-w-md flex flex-col animate-in zoom-in-95 duration-200 text-[var(--ink)]"
           >
-            <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="font-bold text-base text-gray-900">Write a Review</h3>
+            <div className="relative z-10 p-5 border-b border-[var(--line)] flex items-center justify-between">
+              <h3 className="font-bold text-base text-[var(--ink)]">Write a Review</h3>
               <button 
                 onClick={() => setIsWriteReviewModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+                className="cirrel-ibtn w-8 h-8 cursor-pointer"
               >
-                <X className="w-4 h-4 text-gray-600" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="p-5 space-y-4">
+            <div className="relative z-10 p-5 space-y-4">
               <div>
-                <label className="text-xs font-bold text-gray-700 block mb-1.5">Rating</label>
+                <label className="text-xs font-bold text-[var(--ink-2)] block mb-1.5">Rating</label>
                 <div className="flex items-center gap-2">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
@@ -1067,38 +1024,38 @@ export default function VendorDetailClient({
                       onClick={() => setNewReview({ ...newReview, rating: star })}
                       className="p-1 cursor-pointer transition-transform hover:scale-110"
                     >
-                      <Star className={`w-6 h-6 ${star <= newReview.rating ? "fill-black text-black" : "fill-gray-200 text-gray-200"}`} />
+                      <Star className={`w-6 h-6 ${star <= newReview.rating ? "fill-[#ffb340] text-[#ffb340]" : "fill-[var(--line-2)] text-[var(--line-2)]"}`} />
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-bold text-gray-700 block mb-1.5">Your Name</label>
+                <label className="text-xs font-bold text-[var(--ink-2)] block mb-1.5">Your Name</label>
                 <input 
                   type="text"
                   placeholder="e.g. Alex M."
                   value={newReview.name}
                   onChange={(e) => setNewReview({ ...newReview, name: e.target.value })}
-                  className="w-full bg-[#F8F9FA] border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-black"
+                  className="cirrel-input w-full rounded-[14px] px-3.5 py-2.5 text-xs"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-gray-700 block mb-1.5">Your Feedback</label>
+                <label className="text-xs font-bold text-[var(--ink-2)] block mb-1.5">Your Feedback</label>
                 <textarea 
                   rows={4}
                   placeholder="Share your experience renting with this partner..."
                   value={newReview.comment}
                   onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
-                  className="w-full bg-[#F8F9FA] border border-gray-200 rounded-xl p-3.5 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-black resize-none"
+                  className="cirrel-input w-full rounded-[16px] p-3.5 text-xs resize-none"
                 />
               </div>
 
               <button 
                 onClick={handleSubmitReview}
                 disabled={isSubmittingReview}
-                className="w-full bg-black text-white font-bold py-3 rounded-full text-xs hover:bg-neutral-800 shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full cirrel-btn-primary font-bold py-3 text-xs flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isSubmittingReview ? "Submitting..." : "Submit Review"}
               </button>

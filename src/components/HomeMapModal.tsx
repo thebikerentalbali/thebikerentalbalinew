@@ -8,9 +8,9 @@ import { useRouter } from "next/navigation"
 const MapPicker = dynamic(() => import("@/components/MapPicker"), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 gap-3">
-      <div className="w-9 h-9 rounded-full border-[3px] border-black/10 border-t-black animate-spin" />
-      <span className="text-xs font-bold text-gray-600">Loading Vendor Map...</span>
+    <div className="w-full h-full flex flex-col items-center justify-center bg-[var(--bg)] gap-3">
+      <div className="w-9 h-9 rounded-full border-[3px] border-[var(--line-2)] border-t-[var(--accent-blue)] animate-spin" />
+      <span className="text-xs font-bold text-[var(--muted-ink)]">Loading Vendor Map...</span>
     </div>
   ),
 })
@@ -51,11 +51,11 @@ function HomeMapModalComponent({
       role="dialog"
       aria-modal="true"
       aria-label="Vendor Profile Map"
-      className="fixed inset-0 z-[100] flex flex-col bg-black/70 backdrop-blur-sm md:items-center md:justify-center p-0 md:p-6 lg:p-10 animate-in fade-in duration-200"
+      className="fixed inset-0 z-[100] flex flex-col bg-black/60 backdrop-blur-md md:items-center md:justify-center p-0 md:p-6 lg:p-10 animate-in fade-in duration-200"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="flex flex-col w-full h-[100dvh] md:h-[84vh] md:max-h-[820px] md:max-w-5xl bg-white md:rounded-[36px] md:shadow-2xl relative overflow-hidden md:border md:border-gray-200"
+        className="flex flex-col w-full h-[100dvh] md:h-[84vh] md:max-h-[820px] md:max-w-5xl cirrel-modal md:rounded-[30px] relative overflow-hidden"
       >
         {/* Top Floating Control Bar */}
         <div className="absolute top-3 left-3 right-3 md:top-5 md:left-5 md:right-5 z-20 flex flex-col gap-2 pointer-events-none">
@@ -64,15 +64,15 @@ function HomeMapModalComponent({
             <button
               type="button"
               onClick={onClose}
-              className="w-10 h-10 md:w-11 md:h-11 rounded-full bg-black text-white hover:bg-neutral-800 shadow-md flex items-center justify-center transition-transform active:scale-95 shrink-0 cursor-pointer"
+              className="cirrel-ibtn w-10 h-10 md:w-11 md:h-11 active:scale-95 shrink-0 cursor-pointer"
               aria-label="Close Map"
             >
               <X className="w-5 h-5" />
             </button>
 
             {/* Search / Filter Area Input */}
-            <div className="relative flex-1 bg-white/95 backdrop-blur-md rounded-full shadow-md border border-gray-200 flex items-center px-3.5 py-2 md:py-2.5">
-              <Search className="w-4 h-4 text-black shrink-0 mr-2" aria-hidden="true" />
+            <div className="relative flex-1 cirrel-glass-hi rounded-full flex items-center px-3.5 py-2 md:py-2.5">
+              <Search className="w-4 h-4 text-[var(--accent-text)] shrink-0 mr-2" aria-hidden="true" />
               <input
                 type="text"
                 value={searchQuery}
@@ -82,14 +82,14 @@ function HomeMapModalComponent({
                 }}
                 placeholder="Search vendor or location (e.g. Canggu, Ubud, Seminyak)..."
                 aria-label="Search vendor area"
-                className="w-full text-xs md:text-sm font-semibold text-black placeholder-gray-400 outline-none bg-transparent"
+                className="w-full text-xs md:text-sm font-semibold text-[var(--ink)] placeholder:text-[var(--muted-ink)] outline-none bg-transparent"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => onSearchChange("")}
                   aria-label="Clear area search"
-                  className="text-gray-400 hover:text-black font-bold text-xs px-1.5 cursor-pointer"
+                  className="text-[var(--muted-ink)] hover:text-[var(--ink)] font-bold text-xs px-1.5 cursor-pointer"
                 >
                   ✕
                 </button>
@@ -97,8 +97,8 @@ function HomeMapModalComponent({
             </div>
 
             {/* Verified Count Badge */}
-            <div className="hidden sm:flex items-center gap-1.5 bg-black text-white px-3.5 py-2.5 rounded-full shadow-md text-xs font-bold shrink-0">
-              <ShieldCheck className="w-3.5 h-3.5 text-white" aria-hidden="true" />
+            <div className="hidden sm:flex items-center gap-1.5 cirrel-btn-primary px-3.5 py-2.5 text-xs font-bold shrink-0">
+              <ShieldCheck className="w-3.5 h-3.5" aria-hidden="true" />
               <span>{vendors.length} Verified Partners</span>
             </div>
           </div>
@@ -116,10 +116,11 @@ function HomeMapModalComponent({
                     onSearchChange(area === "All Bali" ? "" : area)
                     setIsCardVisible(true)
                   }}
-                  className={`text-[11px] md:text-xs font-bold px-3.5 py-1.5 rounded-full whitespace-nowrap shadow-xs transition-all cursor-pointer ${
+                  data-active={isSelected}
+                  className={`text-[11px] md:text-xs font-bold px-3.5 py-1.5 rounded-full whitespace-nowrap transition-all cursor-pointer ${
                     isSelected
-                      ? "bg-black text-white shadow-sm"
-                      : "bg-white/95 backdrop-blur-md text-black hover:bg-black hover:text-white border border-gray-200"
+                      ? "cirrel-btn-primary"
+                      : "cirrel-glass-hi text-[var(--ink)] hover:opacity-90"
                   }`}
                 >
                   {area}
@@ -142,15 +143,14 @@ function HomeMapModalComponent({
           />
         </div>
 
-        {/* Selected Vendor Floating Bottom Drawer (Only Vendor Profile) */}
+        {/* Selected Vendor Floating Bottom Drawer */}
         {selectedVendor && isCardVisible && (
           <article className="absolute bottom-3 left-3 right-3 md:bottom-5 md:left-5 md:right-auto md:max-w-md z-20 pointer-events-auto animate-in slide-in-from-bottom-4 duration-200">
-            <div className="bg-white/95 backdrop-blur-md rounded-3xl p-4 md:p-5 shadow-2xl border border-gray-200 flex flex-col gap-3">
-              {/* Header Row: Vendor Avatar + Title + Rating */}
-              <div className="flex items-start justify-between gap-3">
+            <div className="cirrel-modal rounded-[26px] p-4 md:p-5 flex flex-col gap-3 text-[var(--ink)]">
+              {/* Header Row */}
+              <div className="flex items-start justify-between gap-3 relative z-10">
                 <div className="flex items-center gap-3 min-w-0">
-                  {/* Vendor Avatar */}
-                  <div className="w-13 h-13 rounded-2xl bg-black text-white font-extrabold text-sm flex items-center justify-center shrink-0 border border-black/10 overflow-hidden shadow-xs relative">
+                  <div className="w-12 h-12 rounded-2xl cirrel-mark font-bold text-sm shrink-0 overflow-hidden relative">
                     {selectedVendor.logo || selectedVendor.logo_url || selectedVendor.image_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -166,26 +166,25 @@ function HomeMapModalComponent({
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h4 className="font-extrabold text-sm md:text-base text-gray-900 leading-tight">
+                      <h4 className="font-bold text-sm md:text-base text-[var(--ink)] leading-tight">
                         {selectedVendor.name}
                       </h4>
-                      <span className="flex items-center gap-1 bg-black text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full shrink-0">
-                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" aria-hidden="true" />
+                      <span className="flex items-center gap-1 bg-[var(--warn-soft)] text-[var(--warn)] text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0">
+                        <Star className="w-3 h-3 fill-current" aria-hidden="true" />
                         <span>{selectedVendor.rating ? Number(selectedVendor.rating).toFixed(1) : "5.0"}</span>
                       </span>
                     </div>
-                    <p className="text-xs text-gray-600 font-semibold truncate mt-1 flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-black shrink-0" aria-hidden="true" />
+                    <p className="text-xs text-[var(--muted-ink)] font-semibold truncate mt-1 flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-[var(--accent-text)] shrink-0" aria-hidden="true" />
                       <span>{selectedVendor.address || "Bali, Indonesia"}</span>
                     </p>
                   </div>
                 </div>
 
-                {/* Minimize Card Button */}
                 <button
                   type="button"
                   onClick={() => setIsCardVisible(false)}
-                  className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-black flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                  className="cirrel-ibtn w-7 h-7 cursor-pointer shrink-0"
                   aria-label="Minimize vendor drawer"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -194,8 +193,8 @@ function HomeMapModalComponent({
 
               {/* Delivery Coverage Tag */}
               {selectedVendor.delivery_area && (
-                <div className="text-[11px] text-gray-700 bg-neutral-50 px-3 py-2 rounded-xl border border-neutral-200 flex items-center gap-2">
-                  <Truck className="w-3.5 h-3.5 text-black shrink-0" aria-hidden="true" />
+                <div className="relative z-10 text-[11px] text-[var(--ink-2)] cirrel-well px-3 py-2 rounded-xl flex items-center gap-2">
+                  <Truck className="w-3.5 h-3.5 text-[var(--accent-text)] shrink-0" aria-hidden="true" />
                   <span className="truncate"><strong>Delivery Area:</strong> {selectedVendor.delivery_area}</span>
                 </div>
               )}
@@ -207,7 +206,7 @@ function HomeMapModalComponent({
                   onClose()
                   router.push(`/vendor/${selectedVendor.id}?fromMap=true`)
                 }}
-                className="w-full bg-black hover:bg-neutral-800 text-white font-bold text-xs md:text-sm py-3 px-4 rounded-2xl transition-all shadow-md active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
+                className="relative z-10 w-full cirrel-btn-primary font-bold text-xs md:text-sm py-3 px-4 active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>View Vendor Profile & Fleet</span>
                 <ChevronRight className="w-4 h-4" aria-hidden="true" />
@@ -222,7 +221,7 @@ function HomeMapModalComponent({
             <button
               type="button"
               onClick={() => setIsCardVisible(true)}
-              className="bg-black text-white text-xs font-bold px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2 hover:bg-neutral-800 transition-all cursor-pointer active-press"
+              className="cirrel-btn-primary text-xs font-bold px-4 py-2.5 flex items-center gap-2 cursor-pointer active-press"
             >
               <MapPin className="w-3.5 h-3.5" aria-hidden="true" />
               <span>Show {selectedVendor.name} Profile</span>

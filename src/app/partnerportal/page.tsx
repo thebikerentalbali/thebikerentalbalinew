@@ -15,6 +15,7 @@ import {
   calculateRentalDays 
 } from "@/utils/pricing"
 import { invalidateAllCatalogCaches } from "@/lib/api/catalogService"
+import ThemeToggle from "@/components/ThemeToggle"
 
 const MapPicker = dynamic(() => import('@/components/MapPicker'), { ssr: false })
 
@@ -611,69 +612,76 @@ export default function VendorDashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#F5F7FA] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="cirrel-glass p-6 rounded-[24px] flex items-center gap-3">
+          <Loader2 className="w-6 h-6 animate-spin text-[var(--accent-blue)]" />
+          <span className="text-sm font-semibold text-[var(--ink)]">Loading Partner Portal...</span>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F7FA] md:flex md:pl-64 pb-28 md:pb-0">
+    <div className="min-h-screen text-[var(--ink)] md:flex md:pl-[288px] pb-28 md:pb-8">
       {/* 
         ========================================================================
-        DESKTOP SIDEBAR
+        CIRREL FLOATING LIQUID GLASS SIDEBAR
         ========================================================================
       */}
-      <aside className="w-64 bg-white border-r border-gray-100 hidden md:flex flex-col fixed top-0 left-0 h-screen z-40 shadow-sm">
-        <div className="p-6">
-          <Link href="/" className="inline-block">
-            <h2 className="text-xl font-black text-gray-900 tracking-tight leading-none">THE BIKE RENTAL</h2>
-            <p className="text-[11px] font-bold text-gray-400 mt-1 uppercase tracking-wider">Partner Portal</p>
+      <aside className="w-64 cirrel-glass-hi rounded-[26px] hidden md:flex flex-col fixed top-4 bottom-4 left-4 z-40">
+        <div className="relative z-10 p-5 flex items-center justify-between gap-2">
+          <Link href="/" className="flex items-center gap-2.5 min-w-0">
+            <div className="cirrel-mark w-9 h-9 rounded-[12px] shrink-0">
+              <Store className="w-5 h-5" />
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-sm font-bold text-[var(--ink)] tracking-tight leading-none truncate">THE BIKE RENTAL</h2>
+              <p className="text-[10px] font-bold text-[var(--muted-ink)] mt-1 uppercase tracking-wider">Partner Portal</p>
+            </div>
           </Link>
+          <ThemeToggle className="w-8 h-8" />
         </div>
 
-        <nav className="flex-1 px-4 py-2 space-y-2">
-          <button onClick={() => setActiveTab('home')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors ${activeTab === 'home' ? 'bg-black text-white shadow-md shadow-black/10' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}>
-            <Home className="w-5 h-5" />
-            <span className="font-bold text-[15px]">Dashboard</span>
+        <nav className="relative z-10 flex-1 px-3 py-2 space-y-1.5 overflow-y-auto">
+          <button onClick={() => setActiveTab('home')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-full transition-all text-sm cursor-pointer ${activeTab === 'home' ? 'cirrel-btn-primary text-white font-semibold' : 'text-[var(--ink-2)] hover:bg-[var(--card-2)] font-semibold'}`}>
+            <Home className="w-4 h-4" />
+            <span>Dashboard</span>
           </button>
-          <button onClick={() => setActiveTab('fleet')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors ${activeTab === 'fleet' ? 'bg-black text-white shadow-md shadow-black/10' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}>
-            <Bike className="w-5 h-5" />
-            <span className="font-semibold text-[15px]">My Fleet</span>
+          <button onClick={() => setActiveTab('fleet')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-full transition-all text-sm cursor-pointer ${activeTab === 'fleet' ? 'cirrel-btn-primary text-white font-semibold' : 'text-[var(--ink-2)] hover:bg-[var(--card-2)] font-semibold'}`}>
+            <Bike className="w-4 h-4" />
+            <span>My Fleet</span>
           </button>
-          <button onClick={() => setActiveTab('bookings')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors relative ${activeTab === 'bookings' ? 'bg-black text-white shadow-md shadow-black/10' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}>
-            <CalendarDays className="w-5 h-5" />
-            <span className="font-semibold text-[15px]">Bookings</span>
-            {bookingsList.length > 0 && <span className="absolute right-4 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{bookingsList.length}</span>}
+          <button onClick={() => setActiveTab('bookings')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-full transition-all text-sm relative cursor-pointer ${activeTab === 'bookings' ? 'cirrel-btn-primary text-white font-semibold' : 'text-[var(--ink-2)] hover:bg-[var(--card-2)] font-semibold'}`}>
+            <CalendarDays className="w-4 h-4" />
+            <span>Bookings</span>
+            {bookingsList.length > 0 && <span className={`ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full ${activeTab === 'bookings' ? 'bg-white/25 text-white' : 'bg-[var(--accent-soft)] text-[var(--accent-text)]'}`}>{bookingsList.length}</span>}
           </button>
-          <button onClick={() => setActiveTab('earnings')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors ${activeTab === 'earnings' ? 'bg-black text-white shadow-md shadow-black/10' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}>
-            <Wallet className="w-5 h-5" />
-            <span className="font-semibold text-[15px]">Earnings</span>
+          <button onClick={() => setActiveTab('earnings')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-full transition-all text-sm cursor-pointer ${activeTab === 'earnings' ? 'cirrel-btn-primary text-white font-semibold' : 'text-[var(--ink-2)] hover:bg-[var(--card-2)] font-semibold'}`}>
+            <Wallet className="w-4 h-4" />
+            <span>Earnings</span>
           </button>
-          <button onClick={() => setActiveTab('maintenance')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors ${activeTab === 'maintenance' ? 'bg-black text-white shadow-md shadow-black/10' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}>
-            <Wrench className="w-5 h-5" />
-            <span className="font-semibold text-[15px]">Maintenance</span>
+          <button onClick={() => setActiveTab('maintenance')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-full transition-all text-sm cursor-pointer ${activeTab === 'maintenance' ? 'cirrel-btn-primary text-white font-semibold' : 'text-[var(--ink-2)] hover:bg-[var(--card-2)] font-semibold'}`}>
+            <Wrench className="w-4 h-4" />
+            <span>Maintenance</span>
           </button>
-          <button onClick={() => setActiveTab('settings')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors ${activeTab === 'settings' ? 'bg-black text-white shadow-md shadow-black/10' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}>
-            <Settings className="w-5 h-5" />
-            <span className="font-semibold text-[15px]">Settings</span>
+          <button onClick={() => setActiveTab('settings')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-full transition-all text-sm cursor-pointer ${activeTab === 'settings' ? 'cirrel-btn-primary text-white font-semibold' : 'text-[var(--ink-2)] hover:bg-[var(--card-2)] font-semibold'}`}>
+            <Settings className="w-4 h-4" />
+            <span>Settings</span>
           </button>
         </nav>
 
-        <div className="p-6 border-t border-gray-100">
-          <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-2xl border border-gray-100 mb-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-yellow-400 to-orange-500 p-[2px] shrink-0">
-              <div className="w-full h-full bg-white rounded-full flex items-center justify-center">
-                <span className="font-bold text-gray-800 text-xs">{(vendorData?.name || "V").charAt(0).toUpperCase()}</span>
-              </div>
+        <div className="relative z-10 p-4 border-t border-[var(--line)]">
+          <div className="flex items-center gap-3 cirrel-well p-2.5 rounded-[16px] mb-2.5">
+            <div className="w-9 h-9 rounded-full cirrel-mark shrink-0">
+              <span className="font-bold text-white text-xs">{(vendorData?.name || "V").charAt(0).toUpperCase()}</span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-gray-900 truncate">{vendorData?.name || "Vendor"}</p>
-              <p className="text-[11px] font-medium text-green-600 truncate">Verified Partner</p>
+              <p className="text-xs font-bold text-[var(--ink)] truncate">{vendorData?.name || "Vendor"}</p>
+              <p className="text-[10px] font-semibold text-[var(--good)] truncate">Verified Partner</p>
             </div>
           </div>
-          <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 bg-red-50 text-red-600 font-bold py-2.5 rounded-xl hover:bg-red-100 transition-colors text-sm">
-            <LogOut className="w-4 h-4" />
+          <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 bg-[var(--bad-soft)] text-[var(--bad)] font-bold py-2 rounded-full hover:opacity-90 transition-opacity text-xs cursor-pointer">
+            <LogOut className="w-3.5 h-3.5" />
             Logout
           </button>
         </div>
@@ -684,23 +692,37 @@ export default function VendorDashboard() {
         MAIN CONTENT
         ========================================================================
       */}
-      <main className="flex-1 w-full max-w-full md:max-w-4xl lg:max-w-5xl mx-auto flex flex-col min-h-screen pt-4 md:pt-8">
+      <main className="flex-1 w-full max-w-full md:max-w-5xl mx-auto flex flex-col min-h-screen pt-4 md:pt-6">
 
         {/* Dashboard Content */}
         {activeTab === 'home' ? (
-          <div className="p-5 md:px-8 md:pb-12 space-y-6 md:space-y-8">
+          <div className="p-4 sm:p-5 md:px-6 md:pb-12 space-y-6">
+
+            {/* Mobile Top Header */}
+            <div className="flex items-center justify-between md:hidden">
+              <div className="flex items-center gap-2.5">
+                <div className="cirrel-mark w-9 h-9 rounded-[11px]">
+                  <Store className="w-4 h-4" />
+                </div>
+                <div>
+                  <h1 className="text-base font-bold text-[var(--ink)] leading-none">{vendorData?.name || "Partner Portal"}</h1>
+                  <p className="text-[10px] font-semibold text-[var(--muted-ink)] mt-0.5">Shop Desk</p>
+                </div>
+              </div>
+              <ThemeToggle className="w-9 h-9" />
+            </div>
 
             {/* Quick Actions (App-like) */}
             <div className="flex flex-col gap-3 md:hidden">
-              <Link href="#" className="bg-black text-white p-4 rounded-[20px] flex flex-col items-center justify-center gap-2 shadow-lg shadow-black/20 active:scale-95 transition-transform">
-                <div className="bg-white/20 p-2 rounded-full">
-                  <Plus className="w-5 h-5" />
+              <button type="button" onClick={() => setIsAddingScooter(true)} className="cirrel-btn-primary p-4 rounded-[22px] flex items-center justify-center gap-2.5 active:scale-95 transition-transform cursor-pointer">
+                <div className="bg-white/20 p-1.5 rounded-full">
+                  <Plus className="w-4 h-4" />
                 </div>
-                <span className="font-bold text-[13px]">Add Scooter</span>
-              </Link>
+                <span className="font-bold text-sm">Add Scooter</span>
+              </button>
             </div>
 
-            {/* Stats Row */}
+            {/* Cirrel Tinted KPI Stats Row */}
             {(() => {
               const confirmedOrCompleted = bookingsList.filter(b => b.rawStatus === 'confirmed' || b.rawStatus === 'completed')
               const totalNetEarnings = confirmedOrCompleted.reduce((sum, b) => {
@@ -712,94 +734,91 @@ export default function VendorDashboard() {
               const availableFleetUnits = fleet.reduce((sum, s) => sum + (Number(s.available_units) ?? 1), 0)
 
               return (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                  <div className="bg-white p-5 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group hover:border-gray-200 transition-colors">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-green-50 to-transparent rounded-bl-full opacity-50"></div>
-                    <div className="flex items-center gap-3 mb-3 md:mb-4">
-                      <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-green-50 text-green-600 flex items-center justify-center">
-                        <Wallet className="w-5 h-5 md:w-6 md:h-6" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+                  <div className="cirrel-kpi cirrel-kpi--3 p-5 md:p-6">
+                    <div className="relative z-10 flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-full bg-[var(--good-soft)] text-[var(--good)] flex items-center justify-center">
+                        <Wallet className="w-5 h-5" />
                       </div>
-                      <h3 className="text-[13px] md:text-[14px] font-bold text-gray-500 uppercase tracking-wide">Net Profit</h3>
+                      <h3 className="text-xs font-bold text-[var(--tile-muted)] uppercase tracking-wider">Net Profit</h3>
                     </div>
-                    <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">
+                    <p className="relative z-10 text-2xl md:text-3xl font-bold text-[var(--tile-ink)] tracking-tight">
                       Rp {totalNetEarnings.toLocaleString()}
                     </p>
-                    <div className="flex items-center gap-1.5 mt-2 md:mt-3 bg-gray-50 text-gray-500 w-fit px-2.5 py-1 rounded-full">
-                      <span className="text-[11px] md:text-xs font-bold">
+                    <div className="relative z-10 mt-3 cirrel-pill w-fit text-[11px]">
+                      <span>
                         {confirmedOrCompleted.length} {confirmedOrCompleted.length === 1 ? 'booking' : 'bookings'} total
                       </span>
                     </div>
                   </div>
 
-                  <div className="bg-white p-5 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group hover:border-gray-200 transition-colors">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-50 to-transparent rounded-bl-full opacity-50"></div>
-                    <div className="flex items-center gap-3 mb-3 md:mb-4">
-                      <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
-                        <Bike className="w-5 h-5 md:w-6 md:h-6" />
+                  <div className="cirrel-kpi cirrel-kpi--1 p-5 md:p-6">
+                    <div className="relative z-10 flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-full bg-[var(--info-soft)] text-[var(--info)] flex items-center justify-center">
+                        <Bike className="w-5 h-5" />
                       </div>
-                      <h3 className="text-[13px] md:text-[14px] font-bold text-gray-500 uppercase tracking-wide">Active Rentals</h3>
+                      <h3 className="text-xs font-bold text-[var(--tile-muted)] uppercase tracking-wider">Active Rentals</h3>
                     </div>
-                    <div className="flex items-baseline gap-2">
-                      <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">{activeRentalsCount}</p>
-                      <span className="text-sm md:text-base font-bold text-gray-400">/ {totalFleetUnits} units</span>
+                    <div className="relative z-10 flex items-baseline gap-2">
+                      <p className="text-2xl md:text-3xl font-bold text-[var(--tile-ink)] tracking-tight">{activeRentalsCount}</p>
+                      <span className="text-sm font-bold text-[var(--tile-muted)]">/ {totalFleetUnits} units</span>
                     </div>
-                    <p className="text-[12px] md:text-[13px] font-semibold text-gray-500 mt-2 md:mt-3 flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                    <p className="relative z-10 text-xs font-semibold text-[var(--tile-muted)] mt-3 flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-[var(--good)]" />
                       {availableFleetUnits} available for booking
                     </p>
                   </div>
 
-                  <div className="bg-white p-5 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group hover:border-gray-200 transition-colors sm:col-span-2 lg:col-span-1">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-orange-50 to-transparent rounded-bl-full opacity-50"></div>
-                    <div className="flex items-center gap-3 mb-3 md:mb-4">
-                      <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center">
-                        <Star className="w-5 h-5 md:w-6 md:h-6 fill-orange-500" />
+                  <div className="cirrel-kpi cirrel-kpi--2 p-5 md:p-6 sm:col-span-2 lg:col-span-1">
+                    <div className="relative z-10 flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-full bg-[var(--warn-soft)] text-[var(--warn)] flex items-center justify-center">
+                        <Star className="w-5 h-5 fill-current" />
                       </div>
-                      <h3 className="text-[13px] md:text-[14px] font-bold text-gray-500 uppercase tracking-wide">Avg Rating</h3>
+                      <h3 className="text-xs font-bold text-[var(--tile-muted)] uppercase tracking-wider">Avg Rating</h3>
                     </div>
-                    <div className="flex items-baseline gap-2">
-                      <p className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">5.0</p>
+                    <div className="relative z-10 flex items-baseline gap-2">
+                      <p className="text-2xl md:text-3xl font-bold text-[var(--tile-ink)] tracking-tight">5.0</p>
                     </div>
-                    <p className="text-[12px] md:text-[13px] font-semibold text-gray-500 mt-2 md:mt-3">
-                      Based on <span className="text-black">Verified partner reviews</span>
+                    <p className="relative z-10 text-xs font-semibold text-[var(--tile-muted)] mt-3">
+                      Based on <span className="text-[var(--tile-ink)]">Verified partner reviews</span>
                     </p>
                   </div>
                 </div>
               )
             })()}
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-              {/* Active Bookings (App-like List for Mobile, Table-like for Desktop) */}
-              <div className="bg-white rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm overflow-hidden lg:col-span-2 flex flex-col">
-                <div className="p-5 md:p-6 border-b border-gray-50 flex justify-between items-center">
-                  <h3 className="text-lg md:text-xl font-bold text-gray-900">Recent Bookings</h3>
-                  <button onClick={() => setActiveTab('bookings')} className="text-[13px] md:text-sm font-bold text-gray-500 hover:text-black transition-colors flex items-center gap-1">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 md:gap-6">
+              {/* Recent Bookings */}
+              <div className="cirrel-glass rounded-[26px] overflow-hidden lg:col-span-2 flex flex-col">
+                <div className="relative z-10 p-5 md:p-6 border-b border-[var(--line)] flex justify-between items-center">
+                  <h3 className="text-lg font-bold text-[var(--ink)]">Recent Bookings</h3>
+                  <button onClick={() => setActiveTab('bookings')} className="text-xs font-bold text-[var(--accent-text)] hover:underline transition-colors flex items-center gap-1 cursor-pointer">
                     View All <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
 
-                <div className="p-3 md:p-4 flex-1">
+                <div className="relative z-10 p-3 md:p-4 flex-1">
                   {bookingsList.length === 0 ? (
-                    <div className="text-center py-10 text-gray-400 font-medium text-sm">
+                    <div className="text-center py-10 text-[var(--muted-ink)] font-medium text-sm">
                       No recent bookings yet.
                     </div>
                   ) : (
                     <div className="space-y-2.5">
                       {bookingsList.slice(0, 5).map((booking) => (
-                        <div key={booking.id} className="p-3 md:p-4 rounded-2xl hover:bg-gray-50 transition-colors flex items-center justify-between gap-4 border border-gray-50">
+                        <div key={booking.id} className="p-3 md:p-3.5 rounded-[18px] cirrel-well flex items-center justify-between gap-4">
                           <div className="flex items-center gap-3.5 min-w-0">
-                            <div className="w-11 h-11 bg-gray-100 rounded-xl overflow-hidden shrink-0">
+                            <div className="w-11 h-11 bg-white/95 rounded-xl overflow-hidden shrink-0 p-1">
                               {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img src={booking.scooter_img} alt="Scooter" className="w-full h-full object-cover" />
+                              <img src={booking.scooter_img} alt="Scooter" className="w-full h-full object-contain" />
                             </div>
                             <div className="min-w-0">
-                              <h4 className="font-bold text-gray-900 text-sm truncate">{booking.scooter}</h4>
-                              <p className="text-xs text-gray-500 truncate">{booking.customer} {booking.phone ? `• ${booking.phone}` : ''}</p>
+                              <h4 className="font-bold text-[var(--ink)] text-sm truncate">{booking.scooter}</h4>
+                              <p className="text-xs text-[var(--muted-ink)] truncate">{booking.customer} {booking.phone ? `• ${booking.phone}` : ''}</p>
                             </div>
                           </div>
                           <div className="text-right shrink-0">
-                            <p className="font-black text-gray-900 text-sm">Rp {booking.price.toLocaleString()}</p>
-                            <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${booking.status === 'Confirmed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
+                            <p className="font-bold text-[var(--ink)] text-sm">Rp {booking.price.toLocaleString()}</p>
+                            <span className={`cirrel-pill text-[10px] uppercase tracking-wider mt-0.5 ${booking.status === 'Confirmed' ? 'cirrel-pill--good' : 'cirrel-pill--info'}`}>
                               {booking.status}
                             </span>
                           </div>
@@ -810,18 +829,15 @@ export default function VendorDashboard() {
                 </div>
               </div>
 
-              {/* Quick Actions Desktop / Need Attention */}
-              <div className="bg-black rounded-[24px] md:rounded-[32px] p-6 md:p-8 text-white relative overflow-hidden flex flex-col justify-between min-h-[250px]">
-                <div className="absolute -right-8 -top-8 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
-                <div className="absolute -left-8 -bottom-8 w-32 h-32 bg-blue-500/20 rounded-full blur-2xl"></div>
-
+              {/* Quick Actions / Need Attention */}
+              <div className="cirrel-kpi cirrel-kpi--4 rounded-[26px] p-6 flex flex-col justify-between min-h-[240px]">
                 <div className="relative z-10">
-                  <h3 className="text-xl font-bold mb-2">Need Attention</h3>
-                  <p className="text-gray-400 text-sm font-medium">You have tasks that require your immediate action.</p>
+                  <h3 className="text-lg font-bold text-[var(--tile-ink)] mb-1.5">Need Attention</h3>
+                  <p className="text-[var(--tile-muted)] text-xs font-medium">You have tasks that require your immediate action.</p>
                 </div>
 
                 <div className="relative z-10 mt-6 space-y-3">
-                  <div className="text-center py-4 text-gray-400 text-sm">
+                  <div className="text-center py-4 text-[var(--tile-muted)] text-xs font-semibold cirrel-well rounded-[18px]">
                     No pending actions required.
                   </div>
                 </div>
@@ -830,34 +846,34 @@ export default function VendorDashboard() {
 
           </div>
         ) : activeTab === 'fleet' ? (
-          <div className="p-5 md:px-8 pb-12 animate-in fade-in">
+          <div className="p-4 sm:p-5 md:px-6 pb-12 animate-in fade-in">
             <div className="mb-6 space-y-4">
               <div className="flex justify-between items-center gap-4">
                 <div className="relative w-max shrink-0">
                   <select
                     value={fleetFilter}
                     onChange={(e) => setFleetFilter(e.target.value)}
-                    className="text-xl md:text-2xl font-black text-gray-900 bg-transparent outline-none cursor-pointer appearance-none pr-8 pl-1"
+                    className="text-xl md:text-2xl font-bold text-[var(--ink)] bg-transparent outline-none cursor-pointer appearance-none pr-8 pl-1"
                     style={{ WebkitAppearance: 'none' }}
                   >
-                    <option value="All">All Scooters</option>
-                    <option value="Available">Available</option>
-                    <option value="Rented">Rented</option>
+                    <option value="All" className="text-black">All Scooters</option>
+                    <option value="Available" className="text-black">Available</option>
+                    <option value="Rented" className="text-black">Rented</option>
                   </select>
-                  <ChevronDown className="w-5 h-5 absolute right-1 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" />
+                  <ChevronDown className="w-5 h-5 absolute right-1 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--muted-ink)]" />
                 </div>
-                <button onClick={() => setIsAddingScooter(true)} className="bg-black text-white px-4 py-2.5 rounded-[14px] text-[13px] font-bold flex items-center gap-2 hover:scale-[1.02] transition-transform shadow-md shadow-black/10 shrink-0">
+                <button onClick={() => setIsAddingScooter(true)} className="cirrel-btn-primary px-4 py-2.5 text-[13px] font-bold flex items-center gap-2 hover:scale-[1.02] shrink-0 cursor-pointer">
                   <Plus className="w-4 h-4" /> Add Scooter
                 </button>
               </div>
               <div className="relative w-full">
-                <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-[var(--muted-ink)]" />
                 <input
                   type="text"
                   placeholder="Search fleet..."
                   value={fleetSearch}
                   onChange={(e) => setFleetSearch(e.target.value)}
-                  className="w-full bg-white border border-gray-100 rounded-[16px] pl-12 pr-4 py-4 text-[15px] font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all shadow-sm"
+                  className="cirrel-input w-full rounded-[16px] pl-12 pr-4 py-3.5 text-[15px] font-medium"
                 />
               </div>
             </div>
@@ -873,15 +889,15 @@ export default function VendorDashboard() {
                 const availableUnits = scooter.available_units ?? 1;
                 
                 return (
-                  <div key={scooter.id} className="bg-white p-5 md:p-6 rounded-[28px] border border-gray-100 flex flex-col gap-4 shadow-sm hover:shadow-md hover:border-gray-200 transition-all relative group">
-                    <div className="flex items-center gap-5">
-                      <div className="w-24 h-24 bg-gray-50 rounded-[20px] p-2 shrink-0">
+                  <div key={scooter.id} className="cirrel-glass p-5 md:p-6 rounded-[26px] flex flex-col gap-4 transition-all relative group">
+                    <div className="relative z-10 flex items-center gap-5">
+                      <div className="w-24 h-24 bg-gradient-to-b from-white/95 to-[#eaf0f8]/95 rounded-[18px] p-2 shrink-0">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={scooter.image_url || "/images/scooter.png"} alt="Scooter" className="w-full h-full object-contain" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start mb-1">
-                          <h3 className="font-bold text-gray-900 text-lg md:text-xl truncate pr-2" title={scooter.name}>{scooter.name}</h3>
+                          <h3 className="font-bold text-[var(--ink)] text-lg md:text-xl truncate pr-2" title={scooter.name}>{scooter.name}</h3>
                           <button onClick={() => setEditingScooter({
                             ...scooter,
                             price: scooter.price_daily || 0,
@@ -891,21 +907,21 @@ export default function VendorDashboard() {
                             cc: scooter.engine || '',
                             fuelCapacity: scooter.fuel_capacity || '',
                             transmission: scooter.transmission || ''
-                          })} className="text-gray-400 hover:text-black p-1 shrink-0">
+                          })} className="text-[var(--muted-ink)] hover:text-[var(--ink)] p-1 shrink-0 cursor-pointer">
                             <MoreVertical className="w-5 h-5" />
                           </button>
                         </div>
-                        <p className="text-[13px] font-bold text-gray-900 mb-3">Rp {(scooter.price_daily || scooter.price || 0).toLocaleString()} <span className="text-gray-500 font-normal">/day</span> • {scooter.year || new Date().getFullYear()}</p>
+                        <p className="text-[13px] font-bold text-[var(--ink)] mb-3">Rp {(scooter.price_daily || scooter.price || 0).toLocaleString()} <span className="text-[var(--muted-ink)] font-normal">/day</span> • {scooter.year || new Date().getFullYear()}</p>
                         <div className="flex flex-wrap items-center gap-2 mt-1">
-                          <span className={`px-2.5 py-1.5 rounded-[10px] text-[10px] md:text-[11px] font-black uppercase tracking-wide flex items-center gap-1.5 w-fit ${availableUnits > 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                            {availableUnits > 0 ? <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span> : null}
+                          <span className={`cirrel-pill text-[10px] md:text-[11px] uppercase tracking-wide ${availableUnits > 0 ? 'cirrel-pill--good' : ''}`}>
+                            {availableUnits > 0 ? <span className="w-1.5 h-1.5 rounded-full bg-current" /> : null}
                             {availableUnits} / {totalUnits} Available
                           </span>
                         </div>
                       </div>
                     </div>
                     {/* Action Buttons Row */}
-                    <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-50">
+                    <div className="relative z-10 grid grid-cols-2 gap-3 pt-3 border-t border-[var(--line)]">
                       <button
                         type="button"
                         disabled={availableUnits >= totalUnits}
@@ -915,10 +931,10 @@ export default function VendorDashboard() {
                           await supabase.from('scooters').update({ available_units: newAvail }).eq('id', scooter.id);
                           invalidateAllCatalogCaches();
                         }}
-                        className={`py-3 px-3 rounded-[14px] font-bold text-sm transition-all flex items-center justify-center gap-1.5 active:scale-95 ${
+                        className={`py-2.5 px-3 rounded-full font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 active:scale-95 ${
                           availableUnits < totalUnits 
-                            ? 'bg-gray-100 text-gray-900 hover:bg-gray-200 shadow-xs' 
-                            : 'bg-gray-50 text-gray-400 opacity-40 cursor-not-allowed'
+                            ? 'cirrel-btn cursor-pointer' 
+                            : 'cirrel-well text-[var(--muted-ink)] opacity-40 cursor-not-allowed'
                         }`}
                         title={availableUnits >= totalUnits ? 'All units are currently in stock' : 'Record returned scooter (+1 available)'}
                       >
@@ -934,10 +950,10 @@ export default function VendorDashboard() {
                           await supabase.from('scooters').update({ available_units: newAvail }).eq('id', scooter.id);
                           invalidateAllCatalogCaches();
                         }}
-                        className={`py-3 px-3 rounded-[14px] font-bold text-sm transition-all flex items-center justify-center gap-1.5 active:scale-95 ${
+                        className={`py-2.5 px-3 rounded-full font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 active:scale-95 ${
                           availableUnits > 0 
-                            ? 'bg-black text-white hover:bg-neutral-800 shadow-md shadow-black/10' 
-                            : 'bg-gray-100 text-gray-400 opacity-40 cursor-not-allowed'
+                            ? 'cirrel-btn-primary cursor-pointer' 
+                            : 'cirrel-well text-[var(--muted-ink)] opacity-40 cursor-not-allowed'
                         }`}
                         title={availableUnits === 0 ? 'All units are currently rented out' : 'Record rented scooter (-1 available)'}
                       >
@@ -955,25 +971,24 @@ export default function VendorDashboard() {
                 const matchesSearch = s.name.toLowerCase().includes(fleetSearch.toLowerCase());
                 return matchesFilter && matchesSearch;
               }).length === 0 && (
-                  <div className="col-span-full py-12 text-center text-gray-400 font-bold">No scooters found for this filter.</div>
+                  <div className="col-span-full py-12 text-center text-[var(--muted-ink)] font-bold">No scooters found for this filter.</div>
                 )}
             </div>
           </div>
         ) : activeTab === 'bookings' ? (
           <div className="p-4 md:p-8 pb-12 animate-in fade-in space-y-6">
-            {/* Simple & Clean Smart Calendar Header */}
-            <div className="bg-white rounded-3xl border border-gray-200/80 shadow-sm p-4 sm:p-5 space-y-4">
-              {/* Header Month & Actions */}
-              <div className="flex flex-wrap items-center justify-between gap-3">
+            {/* Cirrel Calendar Header */}
+            <div className="cirrel-glass rounded-[26px] p-4 sm:p-5 space-y-4">
+              <div className="relative z-10 flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-black text-white flex items-center justify-center shrink-0">
+                  <div className="w-9 h-9 rounded-[11px] cirrel-mark shrink-0">
                     <Calendar className="w-4 h-4" />
                   </div>
                   <div>
-                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 capitalize tracking-tight flex items-center gap-2">
+                    <h2 className="text-lg sm:text-xl font-bold text-[var(--ink)] capitalize tracking-tight flex items-center gap-2">
                       {formatMonthYear(activeMonthDate)}
                       {selectedCalendarDate && (
-                        <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-black/5 text-black">
+                        <span className="cirrel-pill cirrel-pill--info text-[11px]">
                           {formatIndoDate(selectedCalendarDate)}
                         </span>
                       )}
@@ -986,20 +1001,20 @@ export default function VendorDashboard() {
                   <button
                     onClick={handlePrevWeek}
                     title="Previous Days"
-                    className="w-8 h-8 rounded-lg border border-gray-200 hover:border-black hover:bg-black hover:text-white flex items-center justify-center text-gray-700 transition-colors cursor-pointer"
+                    className="cirrel-ibtn w-8 h-8 cursor-pointer"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
                   <button
                     onClick={handleToday}
-                    className="px-3 h-8 rounded-lg text-xs font-bold border border-gray-200 bg-white hover:bg-black hover:text-white text-gray-800 transition-colors cursor-pointer"
+                    className="cirrel-btn px-3 h-8 text-xs font-bold cursor-pointer"
                   >
                     Today
                   </button>
                   {selectedCalendarDate && (
                     <button
                       onClick={() => setSelectedCalendarDate(null)}
-                      className="px-2.5 h-8 rounded-lg text-xs font-bold text-gray-500 hover:text-black hover:bg-gray-100 transition-colors cursor-pointer"
+                      className="px-2.5 h-8 rounded-full text-xs font-bold text-[var(--muted-ink)] hover:text-[var(--ink)] hover:bg-[var(--card-2)] transition-colors cursor-pointer"
                     >
                       View All
                     </button>
@@ -1007,7 +1022,7 @@ export default function VendorDashboard() {
                   <button
                     onClick={handleNextWeek}
                     title="Next Days"
-                    className="w-8 h-8 rounded-lg border border-gray-200 hover:border-black hover:bg-black hover:text-white flex items-center justify-center text-gray-700 transition-colors cursor-pointer"
+                    className="cirrel-ibtn w-8 h-8 cursor-pointer"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
@@ -1015,7 +1030,7 @@ export default function VendorDashboard() {
               </div>
 
               {/* Minimalist 7-Day Date Pill Strip */}
-              <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+              <div className="relative z-10 grid grid-cols-7 gap-1.5 sm:gap-2">
                 {get7Days(calendarStartDate).map((dateObj, idx) => {
                   const year = dateObj.getFullYear()
                   const month = String(dateObj.getMonth() + 1).padStart(2, '0')
@@ -1040,15 +1055,15 @@ export default function VendorDashboard() {
                           }
                         }
                       }}
-                      className={`flex flex-col items-center justify-center py-2 px-1 sm:py-3 sm:px-2 rounded-2xl border transition-all cursor-pointer relative ${
+                      className={`flex flex-col items-center justify-center py-2 px-1 sm:py-3 sm:px-2 rounded-[18px] transition-all cursor-pointer relative ${
                         isSelected
-                          ? 'bg-black text-white border-black shadow-sm scale-[1.02]'
+                          ? 'cirrel-btn-primary text-white scale-[1.02]'
                           : isToday
-                          ? 'bg-gray-50 text-black border-black/60 font-bold'
-                          : 'bg-white text-gray-700 border-gray-100 hover:border-gray-300'
+                          ? 'cirrel-well ring-1 ring-[var(--accent-blue)] text-[var(--ink)] font-bold'
+                          : 'cirrel-well text-[var(--ink-2)] hover:bg-[var(--card-3)]'
                       }`}
                     >
-                      <span className={`text-[10px] sm:text-xs font-semibold uppercase ${isSelected ? 'text-gray-300' : 'text-gray-400'}`}>
+                      <span className={`text-[10px] sm:text-xs font-semibold uppercase ${isSelected ? 'text-white/80' : 'text-[var(--muted-ink)]'}`}>
                         {dayName}
                       </span>
                       <span className="text-sm sm:text-base font-bold my-0.5">
@@ -1058,8 +1073,8 @@ export default function VendorDashboard() {
                       {count > 0 ? (
                         <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full mt-0.5 ${
                           isSelected
-                            ? 'bg-white text-black'
-                            : 'bg-emerald-500 text-white'
+                            ? 'bg-white text-[#005ec4]'
+                            : 'bg-[var(--good)] text-[#04070d]'
                         }`}>
                           {count}
                         </span>
@@ -1112,64 +1127,64 @@ export default function VendorDashboard() {
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                     <div
                       onClick={() => setBookingFilter('all')}
-                      className={`p-4 rounded-2xl border-2 transition-all cursor-pointer ${
+                      className={`p-4 rounded-[22px] transition-all cursor-pointer ${
                         bookingFilter === 'all'
-                          ? 'ring-2 ring-black bg-black text-white border-black shadow-md'
-                          : 'bg-white border-black/80 text-gray-900 hover:border-black shadow-xs'
+                          ? 'cirrel-btn-primary text-white'
+                          : 'cirrel-glass text-[var(--ink)] hover:opacity-95'
                       }`}
                     >
-                      <p className={`text-[11px] font-bold uppercase tracking-wide flex items-center gap-1 truncate whitespace-nowrap ${bookingFilter === 'all' ? 'text-gray-300' : 'text-gray-500'}`}>
+                      <p className={`relative z-10 text-[11px] font-bold uppercase tracking-wide flex items-center gap-1 truncate whitespace-nowrap ${bookingFilter === 'all' ? 'text-white/80' : 'text-[var(--muted-ink)]'}`}>
                         <CalendarDays className="w-3.5 h-3.5 shrink-0" /> Total Bookings
                       </p>
-                      <p className="text-xl md:text-2xl font-black mt-1">
+                      <p className="relative z-10 text-xl md:text-2xl font-bold mt-1">
                         {periodBookings.length}
                       </p>
                     </div>
 
                     <div
                       onClick={() => setBookingFilter('pending')}
-                      className={`p-4 rounded-2xl border-2 transition-all cursor-pointer ${
+                      className={`p-4 rounded-[22px] transition-all cursor-pointer ${
                         bookingFilter === 'pending'
-                          ? 'ring-2 ring-black bg-black text-white border-black shadow-md'
-                          : 'bg-white border-black/80 text-gray-900 hover:border-black shadow-xs'
+                          ? 'cirrel-btn-primary text-white'
+                          : 'cirrel-kpi cirrel-kpi--2'
                       }`}
                     >
-                      <p className={`text-[11px] font-bold uppercase tracking-wide flex items-center gap-1 truncate whitespace-nowrap ${bookingFilter === 'pending' ? 'text-gray-300' : 'text-gray-500'}`}>
+                      <p className={`relative z-10 text-[11px] font-bold uppercase tracking-wide flex items-center gap-1 truncate whitespace-nowrap ${bookingFilter === 'pending' ? 'text-white/80' : 'text-[var(--tile-muted)]'}`}>
                         <Clock className="w-3.5 h-3.5 shrink-0" /> Pending Review
                       </p>
-                      <p className="text-xl md:text-2xl font-black mt-1">
+                      <p className="relative z-10 text-xl md:text-2xl font-bold mt-1">
                         {periodPending.length}
                       </p>
                     </div>
 
                     <div
                       onClick={() => setBookingFilter('confirmed')}
-                      className={`p-4 rounded-2xl border-2 transition-all cursor-pointer ${
+                      className={`p-4 rounded-[22px] transition-all cursor-pointer ${
                         bookingFilter === 'confirmed'
-                          ? 'ring-2 ring-black bg-black text-white border-black shadow-md'
-                          : 'bg-white border-black/80 text-gray-900 hover:border-black shadow-xs'
+                          ? 'cirrel-btn-primary text-white'
+                          : 'cirrel-kpi cirrel-kpi--3'
                       }`}
                     >
-                      <p className={`text-[11px] font-bold uppercase tracking-wide flex items-center gap-1 truncate whitespace-nowrap ${bookingFilter === 'confirmed' ? 'text-gray-300' : 'text-gray-500'}`}>
+                      <p className={`relative z-10 text-[11px] font-bold uppercase tracking-wide flex items-center gap-1 truncate whitespace-nowrap ${bookingFilter === 'confirmed' ? 'text-white/80' : 'text-[var(--tile-muted)]'}`}>
                         <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> Confirmed
                       </p>
-                      <p className="text-xl md:text-2xl font-black mt-1">
+                      <p className="relative z-10 text-xl md:text-2xl font-bold mt-1">
                         {periodConfirmed.length}
                       </p>
                     </div>
 
                     <div
                       onClick={() => setBookingFilter('completed')}
-                      className={`p-4 rounded-2xl border-2 transition-all cursor-pointer ${
+                      className={`p-4 rounded-[22px] transition-all cursor-pointer ${
                         bookingFilter === 'completed'
-                          ? 'ring-2 ring-black bg-black text-white border-black shadow-md'
-                          : 'bg-white border-black/80 text-gray-900 hover:border-black shadow-xs'
+                          ? 'cirrel-btn-primary text-white'
+                          : 'cirrel-kpi cirrel-kpi--1'
                       }`}
                     >
-                      <p className={`text-[11px] font-bold uppercase tracking-wide flex items-center gap-1 truncate whitespace-nowrap ${bookingFilter === 'completed' ? 'text-gray-300' : 'text-gray-500'}`}>
+                      <p className={`relative z-10 text-[11px] font-bold uppercase tracking-wide flex items-center gap-1 truncate whitespace-nowrap ${bookingFilter === 'completed' ? 'text-white/80' : 'text-[var(--tile-muted)]'}`}>
                         <RotateCcw className="w-3.5 h-3.5 shrink-0" /> Completed
                       </p>
-                      <p className="text-xl md:text-2xl font-black mt-1">
+                      <p className="relative z-10 text-xl md:text-2xl font-bold mt-1">
                         {periodCompleted.length}
                       </p>
                     </div>
@@ -1178,20 +1193,20 @@ export default function VendorDashboard() {
                   {/* Section Header with Search */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-sm md:text-base font-black text-gray-900">
+                      <h3 className="text-sm md:text-base font-bold text-[var(--ink)]">
                         Bookings List
                       </h3>
-                      <span className="text-xs font-bold text-gray-500">
+                      <span className="text-xs font-bold text-[var(--muted-ink)]">
                         ({filteredList.length} {filteredList.length === 1 ? 'Booking' : 'Bookings'})
                       </span>
 
                       {selectedCalendarDate && (
-                        <div className="flex items-center gap-1.5 text-xs font-semibold text-black bg-gray-100 px-2.5 py-1 rounded-xl border border-gray-300 ml-1">
-                          <Calendar className="w-3 h-3 text-black" />
+                        <div className="cirrel-pill cirrel-pill--info text-xs ml-1">
+                          <Calendar className="w-3 h-3" />
                           <span>{formatIndoDate(selectedCalendarDate)}</span>
                           <button
                             onClick={() => setSelectedCalendarDate(null)}
-                            className="ml-1 text-black hover:opacity-70 font-bold cursor-pointer"
+                            className="ml-1 hover:opacity-70 font-bold cursor-pointer"
                           >
                             ×
                           </button>
@@ -1200,18 +1215,18 @@ export default function VendorDashboard() {
                     </div>
 
                     <div className="relative flex items-center min-w-[200px] sm:min-w-[260px]">
-                      <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3 pointer-events-none" />
+                      <Search className="w-3.5 h-3.5 text-[var(--muted-ink)] absolute left-3.5 pointer-events-none" />
                       <input
                         type="text"
                         value={bookingSearchQuery}
                         onChange={(e) => setBookingSearchQuery(e.target.value)}
                         placeholder="Search scooter, customer..."
-                        className="w-full bg-white border border-gray-300 focus:border-black text-xs font-bold text-black rounded-xl pl-9 pr-3 py-2 outline-none shadow-xs transition-all"
+                        className="cirrel-input w-full text-xs font-semibold rounded-full pl-9 pr-3 py-2.5"
                       />
                       {bookingSearchQuery && (
                         <button
                           onClick={() => setBookingSearchQuery('')}
-                          className="absolute right-2.5 text-gray-400 hover:text-black text-xs font-bold"
+                          className="absolute right-3 text-[var(--muted-ink)] hover:text-[var(--ink)] text-xs font-bold cursor-pointer"
                         >
                           ×
                         </button>
@@ -1219,10 +1234,10 @@ export default function VendorDashboard() {
                     </div>
                   </div>
 
-                  {/* Bookings List Cards (100% same card design as admin dashboard) */}
+                  {/* Bookings List Cards */}
                   <div className="space-y-4">
                     {filteredList.length === 0 ? (
-                      <div className="bg-white p-12 text-center text-gray-500 font-bold rounded-3xl border-2 border-gray-200">
+                      <div className="cirrel-glass p-12 text-center text-[var(--muted-ink)] font-bold rounded-[26px]">
                         No bookings found for this filter in the active period.
                       </div>
                     ) : (
@@ -1234,28 +1249,26 @@ export default function VendorDashboard() {
                         return (
                           <div
                             key={booking.id}
-                            className="bg-white p-4 md:p-5 rounded-3xl border-2 border-black/80 shadow-sm space-y-3.5 hover:border-black transition-all"
+                            className="cirrel-glass p-4 md:p-5 rounded-[26px] space-y-3.5 transition-all"
                           >
-                            {/* Top Row: Scooter, Company Profile, Customer & Status */}
-                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                            {/* Top Row */}
+                            <div className="relative z-10 flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                               <div className="flex items-start gap-3.5 min-w-0">
-                                <div className="w-14 h-14 md:w-16 md:h-16 bg-gray-50 rounded-2xl overflow-hidden shrink-0 border border-gray-200 p-1 flex items-center justify-center">
+                                <div className="w-14 h-14 md:w-16 md:h-16 bg-white/95 rounded-2xl overflow-hidden shrink-0 p-1 flex items-center justify-center">
                                   {/* eslint-disable-next-line @next/next/no-img-element */}
                                   <img src={booking.scooter_img || "/images/scooter.png"} alt="Scooter" className="w-full h-full object-contain" />
                                 </div>
                                 <div className="min-w-0 space-y-1.5">
-                                  {/* Line 1: Scooter Title & Quantity Badge */}
                                   <div className="flex items-center gap-2 flex-wrap">
-                                    <h5 className="font-black text-black text-sm md:text-base leading-tight">{booking.scooter}</h5>
-                                    <span className="text-[10px] md:text-[11px] font-black bg-black text-white px-2 py-0.5 rounded-full shrink-0">
+                                    <h5 className="font-bold text-[var(--ink)] text-sm md:text-base leading-tight">{booking.scooter}</h5>
+                                    <span className="cirrel-pill cirrel-pill--info text-[10px] md:text-[11px] shrink-0">
                                       {booking.quantity} {booking.quantity > 1 ? 'Units' : 'Unit'}
                                     </span>
                                   </div>
 
-                                  {/* Line 2: Company Profile Image and Customer Badge */}
                                   <div className="flex items-center gap-2 flex-wrap">
-                                    <div className="flex items-center gap-1.5 bg-gray-100 border border-gray-300 px-2 py-0.5 rounded-lg w-fit">
-                                      <div className="w-4 h-4 rounded-md bg-black text-white text-[8px] font-black flex items-center justify-center shrink-0 overflow-hidden">
+                                    <div className="flex items-center gap-1.5 cirrel-well px-2 py-0.5 rounded-lg w-fit">
+                                      <div className="w-4 h-4 rounded-md cirrel-mark text-white text-[8px] font-bold flex items-center justify-center shrink-0 overflow-hidden">
                                         {vendorData?.logo_url || vendorData?.logo || vendorData?.image_url ? (
                                           // eslint-disable-next-line @next/next/no-img-element
                                           <img src={vendorData?.logo_url || vendorData?.logo || vendorData?.image_url} alt="Vendor" className="w-full h-full object-cover" />
@@ -1263,65 +1276,61 @@ export default function VendorDashboard() {
                                           <span>{vendorData?.name ? vendorData.name.substring(0, 2).toUpperCase() : 'VN'}</span>
                                         )}
                                       </div>
-                                      <span className="text-[10px] md:text-[11px] font-black text-black truncate max-w-[140px] sm:max-w-[200px]">
+                                      <span className="text-[10px] md:text-[11px] font-bold text-[var(--ink)] truncate max-w-[140px] sm:max-w-[200px]">
                                         {vendorData?.name || 'Partner Vendor'}
                                       </span>
                                     </div>
 
-                                    {/* Customer info */}
-                                    <p className="text-xs font-medium text-black truncate">
-                                      Customer: <strong className="text-black font-black">{booking.customer}</strong> {booking.phone ? `(${booking.phone})` : ''}
+                                    <p className="text-xs font-medium text-[var(--ink-2)] truncate">
+                                      Customer: <strong className="text-[var(--ink)] font-bold">{booking.customer}</strong> {booking.phone ? `(${booking.phone})` : ''}
                                     </p>
                                   </div>
 
-                                  {/* Line 3: Compact Single-Line Date Section */}
-                                  <div className="flex items-center gap-1.5 text-[11px] md:text-xs font-bold text-gray-700 whitespace-nowrap truncate">
-                                    <Calendar className="w-3.5 h-3.5 text-black shrink-0" />
+                                  <div className="flex items-center gap-1.5 text-[11px] md:text-xs font-semibold text-[var(--muted-ink)] whitespace-nowrap truncate">
+                                    <Calendar className="w-3.5 h-3.5 text-[var(--accent-text)] shrink-0" />
                                     <span>{formatRentalPeriod(booking.startDate, booking.endDate)}</span>
                                   </div>
                                 </div>
                               </div>
 
-                              {/* Status Badge + Rounded Duration Badge */}
                               <div className="flex items-center gap-2 flex-wrap self-start">
-                                <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border-2 inline-flex items-center gap-1.5 ${
+                                <span className={`cirrel-pill text-xs uppercase tracking-wider ${
                                   booking.rawStatus === 'pending'
-                                    ? 'bg-white text-black border-black border-dashed'
+                                    ? 'cirrel-pill--warn'
                                     : booking.rawStatus === 'confirmed'
-                                    ? 'bg-black text-white border-black'
+                                    ? 'cirrel-pill--good'
                                     : booking.rawStatus === 'completed'
-                                    ? 'bg-gray-100 text-black border-gray-300'
-                                    : 'bg-gray-100 text-gray-400 border-gray-200 line-through'
+                                    ? 'cirrel-pill--info'
+                                    : 'cirrel-pill--bad line-through'
                                 }`}>
-                                  {booking.rawStatus === 'confirmed' && <CheckCircle2 className="w-3 h-3 text-white" />}
-                                  {booking.rawStatus === 'pending' && <Clock className="w-3 h-3 text-black" />}
-                                  {booking.rawStatus === 'completed' && <RotateCcw className="w-3 h-3 text-black" />}
+                                  {booking.rawStatus === 'confirmed' && <CheckCircle2 className="w-3 h-3" />}
+                                  {booking.rawStatus === 'pending' && <Clock className="w-3 h-3" />}
+                                  {booking.rawStatus === 'completed' && <RotateCcw className="w-3 h-3" />}
                                   <span>{booking.status}</span>
                                 </span>
 
-                                {/* Rounded Rental Duration Badge */}
-                                <span className="px-3 py-1 rounded-full text-xs font-black bg-gray-100 text-black border border-gray-300 inline-flex items-center gap-1 shrink-0">
+                                <span className="cirrel-pill text-xs shrink-0">
                                   <span>{rentalDays} {rentalDays > 1 ? 'Days' : 'Day'}</span>
                                 </span>
                               </div>
                             </div>
 
                             {/* Price and Net Price / Commission Row */}
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-gray-50 rounded-2xl p-3 md:p-3.5 border border-gray-200">
+                            <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 cirrel-well rounded-[18px] p-3 md:p-3.5">
                               <div>
-                                <p className="text-[10px] md:text-[11px] font-black text-gray-500 uppercase tracking-wider">Total Customer Price</p>
-                                <p className="font-black text-black text-sm md:text-base">Rp {booking.price.toLocaleString()}</p>
+                                <p className="text-[10px] md:text-[11px] font-bold text-[var(--muted-ink)] uppercase tracking-wider">Total Customer Price</p>
+                                <p className="font-bold text-[var(--ink)] text-sm md:text-base">Rp {booking.price.toLocaleString()}</p>
                               </div>
 
                               <div className="flex items-center gap-3 justify-between sm:justify-end">
                                 <div className="text-left sm:text-right">
-                                  <p className="text-[10px] md:text-[11px] font-black text-gray-500 uppercase tracking-wider">Pay Commission</p>
-                                  <p className="text-xs md:text-sm font-black text-red-600">-Rp {bookingCommission.toLocaleString()}</p>
+                                  <p className="text-[10px] md:text-[11px] font-bold text-[var(--muted-ink)] uppercase tracking-wider">Pay Commission</p>
+                                  <p className="text-xs md:text-sm font-bold text-[var(--bad)]">-Rp {bookingCommission.toLocaleString()}</p>
                                 </div>
                                 <div className="text-right">
-                                  <p className="text-[10px] md:text-[11px] font-black text-gray-500 uppercase tracking-wider">Your Profit (Net Price)</p>
+                                  <p className="text-[10px] md:text-[11px] font-bold text-[var(--muted-ink)] uppercase tracking-wider">Your Profit (Net)</p>
                                   <div className="mt-0.5">
-                                    <span className="bg-black text-white font-black text-xs md:text-sm px-3 py-1 rounded-xl inline-flex items-center gap-1 shadow-xs">
+                                    <span className="cirrel-pill cirrel-pill--good font-bold text-xs md:text-sm px-3 py-1">
                                       Rp {vendorNetProfit.toLocaleString()}
                                     </span>
                                   </div>
@@ -1329,28 +1338,28 @@ export default function VendorDashboard() {
                               </div>
                             </div>
 
-                            {/* Enlarged Half and Half (50% / 50%) Action Buttons */}
-                            <div className="grid grid-cols-2 gap-2.5 w-full pt-1">
+                            {/* Action Buttons */}
+                            <div className="relative z-10 grid grid-cols-2 gap-2.5 w-full pt-1">
                               {booking.rawStatus === 'pending' && (
                                 <>
                                   <button
                                     onClick={() => handleConfirmBooking(booking)}
                                     disabled={processingBookingId === booking.id}
-                                    className="w-full bg-black hover:bg-neutral-800 active:scale-95 text-white text-xs md:text-sm font-black py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer disabled:opacity-50"
+                                    className="w-full cirrel-btn-primary active:scale-95 text-xs md:text-sm font-bold py-3 px-4 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                                   >
                                     {processingBookingId === booking.id ? (
-                                      <Loader2 className="w-4 h-4 animate-spin text-white" />
+                                      <Loader2 className="w-4 h-4 animate-spin" />
                                     ) : (
-                                      <Check className="w-4 h-4 text-white" />
+                                      <Check className="w-4 h-4" />
                                     )}
                                     <span>Confirm Booking</span>
                                   </button>
                                   <button
                                     onClick={() => handleRejectBooking(booking)}
                                     disabled={processingBookingId === booking.id}
-                                    className="w-full bg-white hover:bg-gray-100 active:scale-95 text-black border-2 border-black text-xs md:text-sm font-black py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+                                    className="w-full cirrel-btn text-[var(--bad)] active:scale-95 text-xs md:text-sm font-bold py-3 px-4 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                                   >
-                                    <XCircle className="w-4 h-4 text-black" />
+                                    <XCircle className="w-4 h-4" />
                                     <span>Reject</span>
                                   </button>
                                 </>
@@ -1358,19 +1367,19 @@ export default function VendorDashboard() {
 
                               {booking.rawStatus === 'confirmed' && (
                                 <>
-                                  <div className="w-full bg-gray-100 border-2 border-black text-black font-black text-xs md:text-sm py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 uppercase tracking-wide">
-                                    <CheckCircle2 className="w-4 h-4 text-black" />
+                                  <div className="w-full cirrel-well text-[var(--good)] font-bold text-xs md:text-sm py-3 px-4 rounded-full flex items-center justify-center gap-2 uppercase tracking-wide">
+                                    <CheckCircle2 className="w-4 h-4" />
                                     <span>CONFIRMED</span>
                                   </div>
                                   <button
                                     onClick={() => handleCompleteBooking(booking)}
                                     disabled={processingBookingId === booking.id}
-                                    className="w-full bg-black hover:bg-neutral-800 active:scale-95 text-white text-xs md:text-sm font-black py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer disabled:opacity-50"
+                                    className="w-full cirrel-btn-primary active:scale-95 text-xs md:text-sm font-bold py-3 px-4 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                                   >
                                     {processingBookingId === booking.id ? (
-                                      <Loader2 className="w-4 h-4 animate-spin text-white" />
+                                      <Loader2 className="w-4 h-4 animate-spin" />
                                     ) : (
-                                      <RotateCcw className="w-4 h-4 text-white" />
+                                      <RotateCcw className="w-4 h-4" />
                                     )}
                                     <span>Mark Returned</span>
                                   </button>
@@ -1378,15 +1387,15 @@ export default function VendorDashboard() {
                               )}
 
                               {booking.rawStatus === 'completed' && (
-                                <div className="col-span-2 w-full bg-gray-100 border border-gray-300 text-gray-500 font-black text-xs md:text-sm py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 uppercase tracking-wide">
-                                  <Check className="w-4 h-4 text-gray-500" />
+                                <div className="col-span-2 w-full cirrel-well text-[var(--muted-ink)] font-bold text-xs md:text-sm py-3 px-4 rounded-full flex items-center justify-center gap-2 uppercase tracking-wide">
+                                  <Check className="w-4 h-4" />
                                   <span>Completed</span>
                                 </div>
                               )}
 
                               {booking.rawStatus === 'rejected' && (
-                                <div className="col-span-2 w-full bg-gray-100 border border-gray-300 text-gray-500 font-bold text-xs md:text-sm py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 uppercase tracking-wide">
-                                  <XCircle className="w-4 h-4 text-gray-500" />
+                                <div className="col-span-2 w-full cirrel-well text-[var(--bad)] font-bold text-xs md:text-sm py-3 px-4 rounded-full flex items-center justify-center gap-2 uppercase tracking-wide">
+                                  <XCircle className="w-4 h-4" />
                                   <span>Rejected Booking</span>
                                 </div>
                               )}
@@ -1401,83 +1410,83 @@ export default function VendorDashboard() {
             })()}
           </div>
         ) : activeTab === 'maintenance' ? (
-          <div className="p-5 md:px-8 pb-12 animate-in fade-in">
+          <div className="p-4 sm:p-5 md:px-6 pb-12 animate-in fade-in">
             <div className="mb-6 space-y-4">
               <div className="flex justify-between items-center gap-4">
-                <h2 className="text-xl md:text-2xl font-black text-gray-900">Maintenance Log</h2>
-                <button onClick={() => setIsAddingServiceScooter(true)} className="bg-black text-white px-4 py-2.5 rounded-[14px] text-[13px] font-bold flex items-center gap-2 hover:scale-[1.02] transition-transform shadow-md shadow-black/10 shrink-0">
+                <h2 className="text-xl md:text-2xl font-bold text-[var(--ink)]">Maintenance Log</h2>
+                <button onClick={() => setIsAddingServiceScooter(true)} className="cirrel-btn-primary px-4 py-2.5 text-[13px] font-bold flex items-center gap-2 hover:scale-[1.02] shrink-0 cursor-pointer">
                   <Plus className="w-4 h-4" /> Add Scooter
                 </button>
               </div>
               <div className="relative w-full">
-                <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-[var(--muted-ink)]" />
                 <input
                   type="text"
                   placeholder="Search by plate or name..."
                   value={serviceSearch}
                   onChange={(e) => setServiceSearch(e.target.value)}
-                  className="w-full bg-white border border-gray-100 rounded-[16px] pl-12 pr-4 py-4 text-[15px] font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all shadow-sm"
+                  className="cirrel-input w-full rounded-[16px] pl-12 pr-4 py-3.5 text-[15px] font-medium"
                 />
               </div>
             </div>
             <div className="space-y-4">
               {serviceLogs.filter(s => s.name.toLowerCase().includes(serviceSearch.toLowerCase()) || s.plate.toLowerCase().includes(serviceSearch.toLowerCase())).map((scooter) => (
-                <div key={scooter.id} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm">
-                  <div className="flex items-center gap-4 mb-4">
+                <div key={scooter.id} className="cirrel-glass p-5 rounded-[26px]">
+                  <div className="relative z-10 flex items-center gap-4 mb-4">
                     <div>
-                      <h3 className="font-bold text-gray-900">{scooter.name}</h3>
-                      <p className="text-xs text-gray-500 font-bold mt-0.5">{scooter.plate}</p>
+                      <h3 className="font-bold text-[var(--ink)]">{scooter.name}</h3>
+                      <p className="text-xs text-[var(--muted-ink)] font-bold mt-0.5">{scooter.plate}</p>
                     </div>
-                    <button onClick={() => setEditingServiceLog(scooter)} className="ml-auto bg-gray-100 hover:bg-gray-200 text-black px-3 py-1.5 rounded-full text-xs font-bold transition-colors">
+                    <button onClick={() => setEditingServiceLog(scooter)} className="ml-auto cirrel-btn px-3.5 py-1.5 text-xs font-bold cursor-pointer">
                       Record Service
                     </button>
                   </div>
-                  <div className="grid grid-cols-2 gap-y-4 gap-x-2 border-t border-gray-50 pt-4">
+                  <div className="relative z-10 grid grid-cols-2 gap-y-4 gap-x-2 border-t border-[var(--line)] pt-4">
                     <div>
-                      <p className="text-[10px] text-gray-500 font-semibold uppercase mb-1">Odometer</p>
-                      <p className="text-sm font-bold text-gray-900">{scooter.odo} km</p>
+                      <p className="text-[10px] text-[var(--muted-ink)] font-semibold uppercase mb-1">Odometer</p>
+                      <p className="text-sm font-bold text-[var(--ink)]">{scooter.odo} km</p>
                     </div>
-                    <div></div>
+                    <div />
                     <div>
-                      <p className="text-[10px] text-gray-500 font-semibold uppercase mb-1">Last Oil</p>
-                      <p className="text-sm font-bold text-gray-900">{scooter.oil}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-blue-500 font-semibold uppercase mb-1">Next Oil</p>
-                      <p className="text-sm font-bold text-blue-700">{scooter.nextOil || 'N/A'}</p>
+                      <p className="text-[10px] text-[var(--muted-ink)] font-semibold uppercase mb-1">Last Oil</p>
+                      <p className="text-sm font-bold text-[var(--ink)]">{scooter.oil}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-gray-500 font-semibold uppercase mb-1">Last Service</p>
-                      <p className="text-sm font-bold text-gray-900">{scooter.service}</p>
+                      <p className="text-[10px] text-[var(--accent-text)] font-semibold uppercase mb-1">Next Oil</p>
+                      <p className="text-sm font-bold text-[var(--accent-text)]">{scooter.nextOil || 'N/A'}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-red-500 font-semibold uppercase mb-1">Next Service</p>
-                      <p className="text-sm font-bold text-red-700">{scooter.nextService || 'N/A'}</p>
+                      <p className="text-[10px] text-[var(--muted-ink)] font-semibold uppercase mb-1">Last Service</p>
+                      <p className="text-sm font-bold text-[var(--ink)]">{scooter.service}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-[var(--bad)] font-semibold uppercase mb-1">Next Service</p>
+                      <p className="text-sm font-bold text-[var(--bad)]">{scooter.nextService || 'N/A'}</p>
                     </div>
                   </div>
                 </div>
               ))}
               {serviceLogs.filter(s => s.name.toLowerCase().includes(serviceSearch.toLowerCase()) || s.plate.toLowerCase().includes(serviceSearch.toLowerCase())).length === 0 && (
-                <div className="py-12 text-center text-gray-400 font-bold">No records found.</div>
+                <div className="py-12 text-center text-[var(--muted-ink)] font-bold">No records found.</div>
               )}
             </div>
           </div>
         ) : activeTab === 'profile' || activeTab === 'settings' ? (
-          <div className="p-5 md:px-8 pb-12 animate-in fade-in max-w-2xl">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Profile Settings</h2>
-            <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm space-y-5">
+          <div className="p-4 sm:p-5 md:px-6 pb-12 animate-in fade-in max-w-2xl">
+            <h2 className="text-2xl font-bold text-[var(--ink)] mb-6">Profile Settings</h2>
+            <div className="cirrel-glass rounded-[28px] p-6 space-y-5">
               {/* Cover Image Upload Section */}
-              <div className="flex flex-col items-center sm:flex-row sm:items-start gap-6 pb-4 border-b border-gray-50">
+              <div className="relative z-10 flex flex-col items-center sm:flex-row sm:items-start gap-6 pb-4 border-b border-[var(--line)]">
                 <div className="relative group w-full sm:w-1/3">
-                  <div className={`w-full h-32 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden bg-gray-50 transition-all ${!vendorCover ? 'group-hover:bg-gray-100 group-hover:border-gray-300' : ''}`}>
+                  <div className="w-full h-32 rounded-xl border-2 border-dashed border-[var(--line-2)] flex items-center justify-center overflow-hidden cirrel-well">
                     {vendorCover ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img src={vendorCover} alt="Cover" className="w-full h-full object-cover" />
                     ) : (
-                      <Camera className="w-8 h-8 text-gray-400 group-hover:scale-110 transition-transform" />
+                      <Camera className="w-8 h-8 text-[var(--muted-ink)] group-hover:scale-110 transition-transform" />
                     )}
                   </div>
-                  <label className="absolute bottom-2 right-2 bg-black text-white p-2 rounded-full cursor-pointer shadow-lg hover:scale-110 transition-transform">
+                  <label className="absolute bottom-2 right-2 cirrel-btn-primary p-2 rounded-full cursor-pointer hover:scale-110 transition-transform">
                     <Camera className="w-4 h-4" />
                     <input
                       type="file"
@@ -1497,23 +1506,23 @@ export default function VendorDashboard() {
                   </label>
                 </div>
                 <div className="text-center sm:text-left flex-1 pt-2">
-                  <h3 className="font-bold text-gray-900 text-lg">Cover Image</h3>
-                  <p className="text-sm text-gray-500 mt-1">Upload a landscape cover image for your profile header. Recommended size: 1200x600px.</p>
+                  <h3 className="font-bold text-[var(--ink)] text-lg">Cover Image</h3>
+                  <p className="text-sm text-[var(--muted-ink)] mt-1">Upload a landscape cover image for your profile header. Recommended size: 1200x600px.</p>
                 </div>
               </div>
 
               {/* Logo Upload Section */}
-              <div className="flex flex-col items-center sm:flex-row sm:items-start gap-6 pb-4 border-b border-gray-50">
+              <div className="relative z-10 flex flex-col items-center sm:flex-row sm:items-start gap-6 pb-4 border-b border-[var(--line)]">
                 <div className="relative group">
-                  <div className={`w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-white shadow-md flex items-center justify-center overflow-hidden bg-gray-50 transition-all ${!vendorLogo ? 'group-hover:bg-gray-100' : ''}`}>
+                  <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-[var(--edge)] shadow-md flex items-center justify-center overflow-hidden cirrel-well">
                     {vendorLogo ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img src={vendorLogo} alt="Vendor Logo" className="w-full h-full object-cover" />
                     ) : (
-                      <User className="w-10 h-10 text-gray-400 group-hover:scale-110 transition-transform" />
+                      <User className="w-10 h-10 text-[var(--muted-ink)] group-hover:scale-110 transition-transform" />
                     )}
                   </div>
-                  <label className="absolute bottom-0 right-0 bg-black text-white p-2.5 rounded-full cursor-pointer shadow-lg hover:scale-110 transition-transform border-2 border-white">
+                  <label className="absolute bottom-0 right-0 cirrel-btn-primary p-2.5 rounded-full cursor-pointer hover:scale-110 transition-transform border-2 border-[var(--bg)]">
                     <Camera className="w-4 h-4" />
                     <input
                       type="file"
@@ -1533,58 +1542,58 @@ export default function VendorDashboard() {
                   </label>
                 </div>
                 <div className="text-center sm:text-left flex-1 pt-2">
-                  <h3 className="font-bold text-gray-900 text-lg">Vendor Logo</h3>
-                  <p className="text-sm text-gray-500 mt-1">Upload a professional logo to build trust with customers. Recommended size: 500x500px.</p>
+                  <h3 className="font-bold text-[var(--ink)] text-lg">Vendor Logo</h3>
+                  <p className="text-sm text-[var(--muted-ink)] mt-1">Upload a professional logo to build trust with customers. Recommended size: 500x500px.</p>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Vendor Name</label>
-                <input type="text" value={settingsForm.name} onChange={e => setSettingsForm({...settingsForm, name: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all" />
+              <div className="relative z-10">
+                <label className="block text-sm font-semibold text-[var(--ink-2)] mb-2">Vendor Name</label>
+                <input type="text" value={settingsForm.name} onChange={e => setSettingsForm({...settingsForm, name: e.target.value})} className="cirrel-input w-full rounded-[14px] px-4 py-3 text-sm font-medium" />
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">WhatsApp Number</label>
-                <input type="text" value={settingsForm.phone} onChange={e => setSettingsForm({...settingsForm, phone: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all" />
+              <div className="relative z-10">
+                <label className="block text-sm font-semibold text-[var(--ink-2)] mb-2">WhatsApp Number</label>
+                <input type="text" value={settingsForm.phone} onChange={e => setSettingsForm({...settingsForm, phone: e.target.value})} className="cirrel-input w-full rounded-[14px] px-4 py-3 text-sm font-medium" />
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Location / Address</label>
-                <textarea value={settingsForm.address} onChange={e => setSettingsForm({...settingsForm, address: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all min-h-[80px] mb-4"></textarea>
+              <div className="relative z-10">
+                <label className="block text-sm font-semibold text-[var(--ink-2)] mb-2">Location / Address</label>
+                <textarea value={settingsForm.address} onChange={e => setSettingsForm({...settingsForm, address: e.target.value})} className="cirrel-input w-full rounded-[16px] px-4 py-3 text-sm font-medium min-h-[80px] mb-4" />
                 
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Opening / Operating Hours</label>
+                <label className="block text-sm font-semibold text-[var(--ink-2)] mb-2">Opening / Operating Hours</label>
                 <input 
                   type="text" 
                   placeholder="e.g. 08:00 AM – 08:00 PM Daily" 
                   value={settingsForm.opening_hours} 
                   onChange={e => setSettingsForm({...settingsForm, opening_hours: e.target.value})} 
-                  className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all mb-1" 
+                  className="cirrel-input w-full rounded-[14px] px-4 py-3 text-sm font-medium mb-1" 
                 />
-                <p className="text-xs text-gray-400 mb-4">Displayed on your profile for customer drop-off & pickup schedule.</p>
+                <p className="text-xs text-[var(--muted-ink)] mb-4">Displayed on your profile for customer drop-off &amp; pickup schedule.</p>
 
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Delivery Coverage Areas</label>
+                <label className="block text-sm font-semibold text-[var(--ink-2)] mb-2">Delivery Coverage Areas</label>
                 <textarea 
                   placeholder="e.g. Ubud area only - Central Ubud, Mas, Sayan, Campuhan, Penestanan & Tegallalang (Leave blank to use auto-detected coverage based on your address)" 
                   value={settingsForm.delivery_area} 
                   onChange={e => setSettingsForm({...settingsForm, delivery_area: e.target.value})} 
-                  className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:ring-1 focus:ring-black transition-all min-h-[80px] mb-1"
-                ></textarea>
-                <p className="text-xs text-gray-400 mb-4">Specify custom covered zones and areas for hotel/villa delivery.</p>
+                  className="cirrel-input w-full rounded-[16px] px-4 py-3 text-sm font-medium min-h-[80px] mb-1"
+                />
+                <p className="text-xs text-[var(--muted-ink)] mb-4">Specify custom covered zones and areas for hotel/villa delivery.</p>
 
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Pin Location on Map</label>
-                <div className="h-[300px] w-full rounded-xl overflow-hidden border border-gray-100 shadow-sm relative z-0">
+                <label className="block text-sm font-semibold text-[var(--ink-2)] mb-2">Pin Location on Map</label>
+                <div className="h-[300px] w-full rounded-[20px] overflow-hidden border border-[var(--line)] shadow-sm relative z-0">
                   <MapPicker position={vendorLocation} onPositionChange={(lat, lng) => setVendorLocation([lat, lng])} className="w-full h-full" />
                 </div>
               </div>
-              <button onClick={handleSaveSettings} disabled={isSavingSettings} className="w-full bg-black text-white rounded-xl py-3.5 font-bold text-sm hover:scale-[1.02] transition-transform disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2">
+              <button onClick={handleSaveSettings} disabled={isSavingSettings} className="relative z-10 w-full cirrel-btn-primary py-3.5 font-bold text-sm hover:scale-[1.01] disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer">
                 {isSavingSettings ? <Loader2 className="w-5 h-5 animate-spin" /> : "Save Changes"}
               </button>
 
-              <div className="pt-3 border-t border-gray-100">
+              <div className="relative z-10 pt-3 border-t border-[var(--line)]">
                 <button
                   type="button"
                   onClick={handleDownloadApp}
-                  className="w-full bg-neutral-900 text-white hover:bg-black active:scale-[0.99] rounded-xl py-3.5 font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                  className="w-full cirrel-btn active:scale-[0.99] py-3.5 font-bold text-sm flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <Download className="w-4 h-4 text-white" />
+                  <Download className="w-4 h-4 text-[var(--accent-text)]" />
                   <span>{isAppInstalled ? "App Installed" : "Download App"}</span>
                 </button>
               </div>
@@ -1592,30 +1601,32 @@ export default function VendorDashboard() {
           </div>
         ) : (
           <div className="p-5 md:px-8 pb-12 flex flex-col items-center justify-center flex-1 min-h-[50vh] text-center animate-in fade-in slide-in-from-bottom-4">
-            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-              {activeTab === 'earnings' && <Wallet className="w-10 h-10 text-gray-400" />}
+            <div className="cirrel-glass rounded-[30px] p-10 max-w-sm">
+              <div className="relative z-10 w-16 h-16 cirrel-mark rounded-[20px] mx-auto mb-4">
+                {activeTab === 'earnings' && <Wallet className="w-8 h-8 text-white" />}
+              </div>
+              <h2 className="relative z-10 text-2xl font-bold text-[var(--ink)] mb-2 capitalize">{activeTab} Management</h2>
+              <p className="relative z-10 text-[var(--muted-ink)] text-sm">This section is currently under development. Check back soon for updates!</p>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2 capitalize">{activeTab} Management</h2>
-            <p className="text-gray-500 max-w-sm">This section is currently under development. Check back soon for updates!</p>
           </div>
         )}
 
         {/* Add Scooter Modal */}
         {isAddingScooter && (
-          <div className="fixed inset-0 bg-white z-50 overflow-y-auto animate-in slide-in-from-bottom-full duration-300">
-            <div className="max-w-3xl mx-auto px-4 py-6 md:py-10 pb-32">
-              <div className="flex justify-between items-center mb-8 sticky top-0 bg-white/80 backdrop-blur-md py-4 z-10">
-                <h3 className="text-3xl font-black tracking-tight">Add New Scooter</h3>
-                <button onClick={() => setIsAddingScooter(false)} className="bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition-colors"><X className="w-6 h-6 text-black" /></button>
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 overflow-y-auto animate-in slide-in-from-bottom-full duration-300 flex items-start justify-center p-0 sm:p-6">
+            <div className="cirrel-modal w-full max-w-3xl sm:rounded-[30px] mx-auto px-5 py-6 md:p-8 pb-24 sm:pb-8 text-[var(--ink)]">
+              <div className="relative z-10 flex justify-between items-center mb-6 pb-4 border-b border-[var(--line)]">
+                <h3 className="text-2xl sm:text-3xl font-bold tracking-tight">Add New Scooter</h3>
+                <button onClick={() => setIsAddingScooter(false)} className="cirrel-ibtn w-10 h-10 cursor-pointer"><X className="w-5 h-5" /></button>
               </div>
 
-              <div className="space-y-8">
+              <div className="relative z-10 space-y-8">
                 {/* Photo Upload Section */}
                 <div>
-                  <h4 className="text-lg font-bold text-gray-900 mb-3">Scooter Photos (Max 2)</h4>
+                  <h4 className="text-base font-bold text-[var(--ink)] mb-3">Scooter Photos (Max 2)</h4>
                   <div className="grid grid-cols-2 gap-4">
                     {[0, 1].map((index) => (
-                      <div key={index} className="border-2 border-dashed border-gray-200 rounded-2xl h-40 flex flex-col items-center justify-center text-gray-400 hover:text-black hover:border-black transition-colors cursor-pointer bg-gray-50 relative overflow-hidden group">
+                      <div key={index} className="border-2 border-dashed border-[var(--line-2)] rounded-[20px] h-40 flex flex-col items-center justify-center text-[var(--muted-ink)] hover:text-[var(--ink)] hover:border-[var(--accent-blue)] transition-colors cursor-pointer cirrel-well relative overflow-hidden group">
                         {newScooter.photos[index] ? (
                           /* eslint-disable-next-line @next/next/no-img-element */
                           <img src={newScooter.photos[index]} alt="Upload preview" className="w-full h-full object-cover" />
@@ -1648,36 +1659,36 @@ export default function VendorDashboard() {
 
                 {/* Details Section */}
                 <div className="space-y-5">
-                  <h4 className="text-lg font-bold text-gray-900 mb-3">Vehicle Details</h4>
+                  <h4 className="text-base font-bold text-[var(--ink)] mb-3">Vehicle Details</h4>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Model Name</label>
-                    <input type="text" placeholder="e.g. Yamaha NMAX" value={newScooter.name} onChange={e => setNewScooter({ ...newScooter, name: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    <label className="block text-xs font-bold text-[var(--muted-ink)] uppercase tracking-wide mb-1.5">Model Name</label>
+                    <input type="text" placeholder="e.g. Yamaha NMAX" value={newScooter.name} onChange={e => setNewScooter({ ...newScooter, name: e.target.value })} className="cirrel-input w-full rounded-[14px] px-4 py-3.5 text-sm font-bold" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Brand</label>
-                      <input type="text" placeholder="e.g. Yamaha" value={newScooter.brand} onChange={e => setNewScooter({ ...newScooter, brand: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                      <label className="block text-xs font-bold text-[var(--muted-ink)] uppercase tracking-wide mb-1.5">Brand</label>
+                      <input type="text" placeholder="e.g. Yamaha" value={newScooter.brand} onChange={e => setNewScooter({ ...newScooter, brand: e.target.value })} className="cirrel-input w-full rounded-[14px] px-4 py-3.5 text-sm font-bold" />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Engine (CC)</label>
-                      <input type="text" placeholder="e.g. 155cc" value={newScooter.cc} onChange={e => setNewScooter({ ...newScooter, cc: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                      <label className="block text-xs font-bold text-[var(--muted-ink)] uppercase tracking-wide mb-1.5">Engine (CC)</label>
+                      <input type="text" placeholder="e.g. 155cc" value={newScooter.cc} onChange={e => setNewScooter({ ...newScooter, cc: e.target.value })} className="cirrel-input w-full rounded-[14px] px-4 py-3.5 text-sm font-bold" />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Year</label>
-                    <input type="text" placeholder="2024" value={newScooter.year} onChange={e => setNewScooter({ ...newScooter, year: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    <label className="block text-xs font-bold text-[var(--muted-ink)] uppercase tracking-wide mb-1.5">Year</label>
+                    <input type="text" placeholder="2024" value={newScooter.year} onChange={e => setNewScooter({ ...newScooter, year: e.target.value })} className="cirrel-input w-full rounded-[14px] px-4 py-3.5 text-sm font-bold" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Fuel Capacity (L)</label>
-                      <input type="text" placeholder="e.g. 7.1L" value={newScooter.fuelCapacity} onChange={e => setNewScooter({ ...newScooter, fuelCapacity: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                      <label className="block text-xs font-bold text-[var(--muted-ink)] uppercase tracking-wide mb-1.5">Fuel Capacity (L)</label>
+                      <input type="text" placeholder="e.g. 7.1L" value={newScooter.fuelCapacity} onChange={e => setNewScooter({ ...newScooter, fuelCapacity: e.target.value })} className="cirrel-input w-full rounded-[14px] px-4 py-3.5 text-sm font-bold" />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Transmission</label>
-                      <select value={newScooter.transmission} onChange={e => setNewScooter({ ...newScooter, transmission: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5 appearance-none">
-                        <option value="">Select</option>
-                        <option value="Automatic">Automatic</option>
-                        <option value="Manual">Manual</option>
+                      <label className="block text-xs font-bold text-[var(--muted-ink)] uppercase tracking-wide mb-1.5">Transmission</label>
+                      <select value={newScooter.transmission} onChange={e => setNewScooter({ ...newScooter, transmission: e.target.value })} className="cirrel-input w-full rounded-[14px] px-4 py-3.5 text-sm font-bold appearance-none">
+                        <option value="" className="text-black">Select</option>
+                        <option value="Automatic" className="text-black">Automatic</option>
+                        <option value="Manual" className="text-black">Manual</option>
                       </select>
                     </div>
                   </div>
@@ -1685,23 +1696,23 @@ export default function VendorDashboard() {
 
                 {/* Pricing & Units Section */}
                 <div className="space-y-5">
-                  <h4 className="text-lg font-bold text-gray-900 mb-3">Pricing & Units</h4>
+                  <h4 className="text-base font-bold text-[var(--ink)] mb-3">Pricing &amp; Units</h4>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">Daily (Rp)</label>
-                      <input type="number" value={newScooter.price || ''} onChange={e => setNewScooter({ ...newScooter, price: parseInt(e.target.value) || 0 })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                      <label className="block text-[10px] font-bold text-[var(--muted-ink)] uppercase tracking-wide mb-1.5">Daily (Rp)</label>
+                      <input type="number" value={newScooter.price || ''} onChange={e => setNewScooter({ ...newScooter, price: parseInt(e.target.value) || 0 })} className="cirrel-input w-full rounded-[14px] px-4 py-3.5 text-sm font-bold" />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">Weekly (Rp)</label>
-                      <input type="number" value={newScooter.priceWeekly || ''} onChange={e => setNewScooter({ ...newScooter, priceWeekly: parseInt(e.target.value) || 0 })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                      <label className="block text-[10px] font-bold text-[var(--muted-ink)] uppercase tracking-wide mb-1.5">Weekly (Rp)</label>
+                      <input type="number" value={newScooter.priceWeekly || ''} onChange={e => setNewScooter({ ...newScooter, priceWeekly: parseInt(e.target.value) || 0 })} className="cirrel-input w-full rounded-[14px] px-4 py-3.5 text-sm font-bold" />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">Monthly (Rp)</label>
-                      <input type="number" value={newScooter.priceMonthly || ''} onChange={e => setNewScooter({ ...newScooter, priceMonthly: parseInt(e.target.value) || 0 })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                      <label className="block text-[10px] font-bold text-[var(--muted-ink)] uppercase tracking-wide mb-1.5">Monthly (Rp)</label>
+                      <input type="number" value={newScooter.priceMonthly || ''} onChange={e => setNewScooter({ ...newScooter, priceMonthly: parseInt(e.target.value) || 0 })} className="cirrel-input w-full rounded-[14px] px-4 py-3.5 text-sm font-bold" />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1.5">How Many Units In Your Fleet? (Total Units)</label>
+                    <label className="block text-xs font-bold text-[var(--ink-2)] uppercase tracking-wide mb-1.5">How Many Units In Your Fleet? (Total Units)</label>
                     <input 
                       type="number" 
                       min="1" 
@@ -1714,9 +1725,9 @@ export default function VendorDashboard() {
                           availableUnits: typeof val === 'number' ? val : 1
                         });
                       }} 
-                      className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" 
+                      className="cirrel-input w-full rounded-[14px] px-4 py-3.5 text-sm font-bold" 
                     />
-                    <p className="text-xs text-gray-400 mt-1.5">All {newScooter.totalUnits || 1} units will automatically be set as available for rent. You can adjust availability later using the Return & Rent Out buttons.</p>
+                    <p className="text-xs text-[var(--muted-ink)] mt-1.5">All {newScooter.totalUnits || 1} units will automatically be set as available for rent. You can adjust availability later using the Return &amp; Rent Out buttons.</p>
                   </div>
                 </div>
 
@@ -1724,7 +1735,7 @@ export default function VendorDashboard() {
                   <button
                     disabled={isPublishing}
                     onClick={handlePublishScooter}
-                    className="w-full bg-black text-white rounded-[20px] py-4 font-black text-lg hover:scale-[1.01] shadow-xl shadow-black/10 transition-transform flex items-center justify-center gap-2 disabled:opacity-50">
+                    className="w-full cirrel-btn-primary py-4 font-bold text-lg hover:scale-[1.01] transition-transform flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer">
                     {isPublishing ? <Loader2 className="w-6 h-6 animate-spin" /> : "Publish"}
                   </button>
                 </div>
@@ -1736,71 +1747,71 @@ export default function VendorDashboard() {
 
         {/* Edit Modal */}
         {editingScooter && (
-          <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
-            <div className="bg-white rounded-[32px] p-6 md:p-8 w-full max-w-md max-h-[85vh] flex flex-col animate-in zoom-in-95 duration-200">
-              <div className="flex justify-between items-center mb-6 shrink-0">
-                <h3 className="text-2xl font-black">Edit Scooter</h3>
-                <button onClick={() => setEditingScooter(null)}><X className="w-6 h-6 text-gray-400" /></button>
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+            <div className="cirrel-modal rounded-[30px] p-6 md:p-8 w-full max-w-md max-h-[85vh] flex flex-col animate-in zoom-in-95 duration-200 text-[var(--ink)]">
+              <div className="relative z-10 flex justify-between items-center mb-6 shrink-0">
+                <h3 className="text-2xl font-bold">Edit Scooter</h3>
+                <button onClick={() => setEditingScooter(null)} className="cirrel-ibtn w-9 h-9 cursor-pointer"><X className="w-4 h-4" /></button>
               </div>
-              <div className="space-y-4 overflow-y-auto px-1 -mx-1 flex-1">
+              <div className="relative z-10 space-y-4 overflow-y-auto px-1 -mx-1 flex-1">
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Name</label>
-                  <input type="text" value={editingScooter.name} onChange={e => setEditingScooter({ ...editingScooter, name: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                  <label className="block text-xs font-bold text-[var(--muted-ink)] uppercase tracking-wide mb-1.5">Name</label>
+                  <input type="text" value={editingScooter.name} onChange={e => setEditingScooter({ ...editingScooter, name: e.target.value })} className="cirrel-input w-full rounded-[14px] px-4 py-3.5 text-sm font-bold" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Brand</label>
-                    <input type="text" value={editingScooter.brand || ''} onChange={e => setEditingScooter({ ...editingScooter, brand: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    <label className="block text-xs font-bold text-[var(--muted-ink)] uppercase tracking-wide mb-1.5">Brand</label>
+                    <input type="text" value={editingScooter.brand || ''} onChange={e => setEditingScooter({ ...editingScooter, brand: e.target.value })} className="cirrel-input w-full rounded-[14px] px-4 py-3.5 text-sm font-bold" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Engine (CC)</label>
-                    <input type="text" value={editingScooter.cc || ''} onChange={e => setEditingScooter({ ...editingScooter, cc: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Year</label>
-                    <input type="text" value={editingScooter.year} onChange={e => setEditingScooter({ ...editingScooter, year: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Fuel Capacity (L)</label>
-                    <input type="text" value={editingScooter.fuelCapacity || ''} onChange={e => setEditingScooter({ ...editingScooter, fuelCapacity: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    <label className="block text-xs font-bold text-[var(--muted-ink)] uppercase tracking-wide mb-1.5">Engine (CC)</label>
+                    <input type="text" value={editingScooter.cc || ''} onChange={e => setEditingScooter({ ...editingScooter, cc: e.target.value })} className="cirrel-input w-full rounded-[14px] px-4 py-3.5 text-sm font-bold" />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Transmission</label>
-                    <select value={editingScooter.transmission || ''} onChange={e => setEditingScooter({ ...editingScooter, transmission: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5 appearance-none">
-                      <option value="">Select</option>
-                      <option value="Automatic">Automatic</option>
-                      <option value="Manual">Manual</option>
+                    <label className="block text-xs font-bold text-[var(--muted-ink)] uppercase tracking-wide mb-1.5">Year</label>
+                    <input type="text" value={editingScooter.year} onChange={e => setEditingScooter({ ...editingScooter, year: e.target.value })} className="cirrel-input w-full rounded-[14px] px-4 py-3.5 text-sm font-bold" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[var(--muted-ink)] uppercase tracking-wide mb-1.5">Fuel Capacity (L)</label>
+                    <input type="text" value={editingScooter.fuelCapacity || ''} onChange={e => setEditingScooter({ ...editingScooter, fuelCapacity: e.target.value })} className="cirrel-input w-full rounded-[14px] px-4 py-3.5 text-sm font-bold" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-[var(--muted-ink)] uppercase tracking-wide mb-1.5">Transmission</label>
+                    <select value={editingScooter.transmission || ''} onChange={e => setEditingScooter({ ...editingScooter, transmission: e.target.value })} className="cirrel-input w-full rounded-[14px] px-4 py-3.5 text-sm font-bold appearance-none">
+                      <option value="" className="text-black">Select</option>
+                      <option value="Automatic" className="text-black">Automatic</option>
+                      <option value="Manual" className="text-black">Manual</option>
                     </select>
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">Daily (Rp)</label>
-                    <input type="number" value={editingScooter.price} onChange={e => setEditingScooter({ ...editingScooter, price: parseInt(e.target.value) || 0 })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    <label className="block text-[10px] font-bold text-[var(--muted-ink)] uppercase tracking-wide mb-1.5">Daily (Rp)</label>
+                    <input type="number" value={editingScooter.price} onChange={e => setEditingScooter({ ...editingScooter, price: parseInt(e.target.value) || 0 })} className="cirrel-input w-full rounded-[14px] px-4 py-3.5 text-sm font-bold" />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">Weekly (Rp)</label>
-                    <input type="number" value={editingScooter.priceWeekly || ''} onChange={e => setEditingScooter({ ...editingScooter, priceWeekly: parseInt(e.target.value) || 0 })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    <label className="block text-[10px] font-bold text-[var(--muted-ink)] uppercase tracking-wide mb-1.5">Weekly (Rp)</label>
+                    <input type="number" value={editingScooter.priceWeekly || ''} onChange={e => setEditingScooter({ ...editingScooter, priceWeekly: parseInt(e.target.value) || 0 })} className="cirrel-input w-full rounded-[14px] px-4 py-3.5 text-sm font-bold" />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">Monthly (Rp)</label>
-                    <input type="number" value={editingScooter.priceMonthly || ''} onChange={e => setEditingScooter({ ...editingScooter, priceMonthly: parseInt(e.target.value) || 0 })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    <label className="block text-[10px] font-bold text-[var(--muted-ink)] uppercase tracking-wide mb-1.5">Monthly (Rp)</label>
+                    <input type="number" value={editingScooter.priceMonthly || ''} onChange={e => setEditingScooter({ ...editingScooter, priceMonthly: parseInt(e.target.value) || 0 })} className="cirrel-input w-full rounded-[14px] px-4 py-3.5 text-sm font-bold" />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Total Units</label>
-                  <input type="number" min="1" value={editingScooter.totalUnits} onChange={e => setEditingScooter({ ...editingScooter, totalUnits: e.target.value === '' ? ('' as any) : parseInt(e.target.value) })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                  <label className="block text-xs font-bold text-[var(--muted-ink)] uppercase tracking-wide mb-1.5">Total Units</label>
+                  <input type="number" min="1" value={editingScooter.totalUnits} onChange={e => setEditingScooter({ ...editingScooter, totalUnits: e.target.value === '' ? ('' as any) : parseInt(e.target.value) })} className="cirrel-input w-full rounded-[14px] px-4 py-3.5 text-sm font-bold" />
                 </div>
               </div>
-              <div className="shrink-0 pt-4">
+              <div className="relative z-10 shrink-0 pt-4">
                 <button
                   disabled={isPublishing}
                   onClick={handleUpdateScooter}
-                  className="w-full bg-black disabled:bg-gray-400 text-white rounded-[16px] py-4 font-black text-sm hover:scale-[1.02] shadow-xl shadow-black/10 transition-all">
+                  className="w-full cirrel-btn-primary disabled:opacity-50 py-4 font-bold text-sm hover:scale-[1.01] transition-all cursor-pointer">
                   {isPublishing ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
@@ -1810,20 +1821,20 @@ export default function VendorDashboard() {
 
         {/* Add Service Scooter Modal */}
         {isAddingServiceScooter && (
-          <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-[32px] p-6 md:p-8 w-full max-w-md animate-in zoom-in-95 duration-200">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-2xl font-black">Add Service Scooter</h3>
-                <button onClick={() => setIsAddingServiceScooter(false)}><X className="w-6 h-6 text-gray-400" /></button>
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+            <div className="cirrel-modal rounded-[30px] p-6 md:p-8 w-full max-w-md animate-in zoom-in-95 duration-200 text-[var(--ink)]">
+              <div className="relative z-10 flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-bold">Add Service Scooter</h3>
+                <button onClick={() => setIsAddingServiceScooter(false)} className="cirrel-ibtn w-9 h-9 cursor-pointer"><X className="w-4 h-4" /></button>
               </div>
-              <div className="space-y-4">
+              <div className="relative z-10 space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Scooter Name</label>
-                  <input type="text" placeholder="e.g. Yamaha NMAX" value={newServiceScooter.name} onChange={e => setNewServiceScooter({ ...newServiceScooter, name: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                  <label className="block text-xs font-bold text-[var(--muted-ink)] uppercase tracking-wide mb-1.5">Scooter Name</label>
+                  <input type="text" placeholder="e.g. Yamaha NMAX" value={newServiceScooter.name} onChange={e => setNewServiceScooter({ ...newServiceScooter, name: e.target.value })} className="cirrel-input w-full rounded-[14px] px-4 py-3.5 text-sm font-bold" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Plate Number</label>
-                  <input type="text" placeholder="e.g. DK 1823 XA" value={newServiceScooter.plate} onChange={e => setNewServiceScooter({ ...newServiceScooter, plate: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                  <label className="block text-xs font-bold text-[var(--muted-ink)] uppercase tracking-wide mb-1.5">Plate Number</label>
+                  <input type="text" placeholder="e.g. DK 1823 XA" value={newServiceScooter.plate} onChange={e => setNewServiceScooter({ ...newServiceScooter, plate: e.target.value })} className="cirrel-input w-full rounded-[14px] px-4 py-3.5 text-sm font-bold" />
                 </div>
               </div>
               <button
@@ -1833,7 +1844,7 @@ export default function VendorDashboard() {
                   setIsAddingServiceScooter(false);
                   setNewServiceScooter({ name: "", plate: "", odo: "", oil: "", service: "", nextOil: "", nextService: "" });
                 }}
-                className="w-full mt-8 bg-black text-white rounded-[16px] py-4 font-black text-sm hover:scale-[1.02] shadow-xl shadow-black/10 transition-all">
+                className="relative z-10 w-full mt-8 cirrel-btn-primary py-4 font-bold text-sm hover:scale-[1.01] transition-all cursor-pointer">
                 Add to Service Tracker
               </button>
             </div>
@@ -1842,38 +1853,38 @@ export default function VendorDashboard() {
 
         {/* Edit Service Log Modal */}
         {editingServiceLog && (
-          <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-[32px] p-6 md:p-8 w-full max-w-md animate-in zoom-in-95 duration-200">
-              <div className="flex justify-between items-center mb-6">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+            <div className="cirrel-modal rounded-[30px] p-6 md:p-8 w-full max-w-md animate-in zoom-in-95 duration-200 text-[var(--ink)]">
+              <div className="relative z-10 flex justify-between items-center mb-6">
                 <div>
-                  <h3 className="text-2xl font-black">Update Log</h3>
-                  <p className="text-sm font-bold text-gray-500 mt-1">{editingServiceLog.name} • {editingServiceLog.plate}</p>
+                  <h3 className="text-2xl font-bold">Update Log</h3>
+                  <p className="text-sm font-bold text-[var(--muted-ink)] mt-1">{editingServiceLog.name} • {editingServiceLog.plate}</p>
                 </div>
-                <button onClick={() => setEditingServiceLog(null)}><X className="w-6 h-6 text-gray-400" /></button>
+                <button onClick={() => setEditingServiceLog(null)} className="cirrel-ibtn w-9 h-9 cursor-pointer"><X className="w-4 h-4" /></button>
               </div>
-              <div className="space-y-4">
+              <div className="relative z-10 space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Odometer (km)</label>
-                  <input type="text" value={editingServiceLog.odo} onChange={e => setEditingServiceLog({ ...editingServiceLog, odo: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                  <label className="block text-xs font-bold text-[var(--muted-ink)] uppercase tracking-wide mb-1.5">Odometer (km)</label>
+                  <input type="text" value={editingServiceLog.odo} onChange={e => setEditingServiceLog({ ...editingServiceLog, odo: e.target.value })} className="cirrel-input w-full rounded-[14px] px-4 py-3.5 text-sm font-bold" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Last Oil</label>
-                    <input type="text" value={editingServiceLog.oil} onChange={e => setEditingServiceLog({ ...editingServiceLog, oil: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    <label className="block text-xs font-bold text-[var(--muted-ink)] uppercase tracking-wide mb-1.5">Last Oil</label>
+                    <input type="text" value={editingServiceLog.oil} onChange={e => setEditingServiceLog({ ...editingServiceLog, oil: e.target.value })} className="cirrel-input w-full rounded-[14px] px-4 py-3.5 text-sm font-bold" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-blue-500 uppercase tracking-wide mb-1.5">Next Oil</label>
-                    <input type="text" value={editingServiceLog.nextOil || ''} onChange={e => setEditingServiceLog({ ...editingServiceLog, nextOil: e.target.value })} className="w-full bg-blue-50 border border-blue-100 rounded-[16px] px-4 py-3.5 text-sm font-bold text-blue-700 outline-none focus:ring-2 focus:ring-blue-500/20" />
+                    <label className="block text-xs font-bold text-[var(--accent-text)] uppercase tracking-wide mb-1.5">Next Oil</label>
+                    <input type="text" value={editingServiceLog.nextOil || ''} onChange={e => setEditingServiceLog({ ...editingServiceLog, nextOil: e.target.value })} className="cirrel-input w-full rounded-[14px] px-4 py-3.5 text-sm font-bold text-[var(--accent-text)]" />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Last Service</label>
-                    <input type="text" value={editingServiceLog.service} onChange={e => setEditingServiceLog({ ...editingServiceLog, service: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-[16px] px-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5" />
+                    <label className="block text-xs font-bold text-[var(--muted-ink)] uppercase tracking-wide mb-1.5">Last Service</label>
+                    <input type="text" value={editingServiceLog.service} onChange={e => setEditingServiceLog({ ...editingServiceLog, service: e.target.value })} className="cirrel-input w-full rounded-[14px] px-4 py-3.5 text-sm font-bold" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-red-500 uppercase tracking-wide mb-1.5">Next Service</label>
-                    <input type="text" value={editingServiceLog.nextService || ''} onChange={e => setEditingServiceLog({ ...editingServiceLog, nextService: e.target.value })} className="w-full bg-red-50 border border-red-100 rounded-[16px] px-4 py-3.5 text-sm font-bold text-red-700 outline-none focus:ring-2 focus:ring-red-500/20" />
+                    <label className="block text-xs font-bold text-[var(--bad)] uppercase tracking-wide mb-1.5">Next Service</label>
+                    <input type="text" value={editingServiceLog.nextService || ''} onChange={e => setEditingServiceLog({ ...editingServiceLog, nextService: e.target.value })} className="cirrel-input w-full rounded-[14px] px-4 py-3.5 text-sm font-bold text-[var(--bad)]" />
                   </div>
                 </div>
               </div>
@@ -1882,7 +1893,7 @@ export default function VendorDashboard() {
                   setServiceLogs(logs => logs.map(l => l.id === editingServiceLog.id ? editingServiceLog : l));
                   setEditingServiceLog(null);
                 }}
-                className="w-full mt-8 bg-black text-white rounded-[16px] py-4 font-black text-sm hover:scale-[1.02] shadow-xl shadow-black/10 transition-all">
+                className="relative z-10 w-full mt-8 cirrel-btn-primary py-4 font-bold text-sm hover:scale-[1.01] transition-all cursor-pointer">
                 Save Updates
               </button>
             </div>
@@ -1894,44 +1905,36 @@ export default function VendorDashboard() {
 
       {/* 
         ========================================================================
-        MOBILE BOTTOM NAVBAR
+        CIRREL FLOATING MOBILE PILL TABBAR
         ========================================================================
       */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-50 rounded-t-[32px] shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
-        <div className="flex justify-between items-center pt-3 pb-8 px-4 sm:px-6">
-          <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors flex-1 group ${activeTab === 'home' ? 'text-black' : 'text-gray-400 hover:text-black'}`}>
-            <div className={`${activeTab === 'home' ? 'bg-black/5' : 'group-hover:bg-black/5'} p-1.5 rounded-full transition-colors`}>
-              <Home className="w-5 h-5" />
-            </div>
+      <nav className="md:hidden fixed bottom-3 left-3 right-3 cirrel-modal z-50 rounded-full p-1.5">
+        <div className="relative z-10 flex justify-between items-center gap-1">
+          <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center gap-1 py-2 px-1 rounded-full transition-all flex-1 cursor-pointer ${activeTab === 'home' ? 'cirrel-btn-primary text-white' : 'text-[var(--muted-ink)] hover:text-[var(--ink)]'}`}>
+            <Home className="w-4 h-4" />
             <span className="text-[10px] font-bold">Home</span>
           </button>
 
-          <button onClick={() => setActiveTab('fleet')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors flex-1 group ${activeTab === 'fleet' ? 'text-black' : 'text-gray-400 hover:text-black'}`}>
-            <div className={`${activeTab === 'fleet' ? 'bg-black/5' : 'group-hover:bg-black/5'} p-1.5 rounded-full transition-colors`}>
-              <Bike className="w-5 h-5" />
-            </div>
+          <button onClick={() => setActiveTab('fleet')} className={`flex flex-col items-center gap-1 py-2 px-1 rounded-full transition-all flex-1 cursor-pointer ${activeTab === 'fleet' ? 'cirrel-btn-primary text-white' : 'text-[var(--muted-ink)] hover:text-[var(--ink)]'}`}>
+            <Bike className="w-4 h-4" />
             <span className="text-[10px] font-bold">Fleet</span>
           </button>
 
-          <button onClick={() => setActiveTab('bookings')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors flex-1 group relative ${activeTab === 'bookings' ? 'text-black' : 'text-gray-400 hover:text-black'}`}>
-            <div className={`${activeTab === 'bookings' ? 'bg-black/5' : 'group-hover:bg-black/5'} p-1.5 rounded-full transition-colors relative`}>
-              {bookingsList.length > 0 && <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>}
-              <CalendarDays className="w-5 h-5" />
+          <button onClick={() => setActiveTab('bookings')} className={`flex flex-col items-center gap-1 py-2 px-1 rounded-full transition-all flex-1 relative cursor-pointer ${activeTab === 'bookings' ? 'cirrel-btn-primary text-white' : 'text-[var(--muted-ink)] hover:text-[var(--ink)]'}`}>
+            <div className="relative">
+              {bookingsList.length > 0 && <span className="absolute -top-1 -right-1.5 w-2 h-2 bg-[#ff6f66] rounded-full" />}
+              <CalendarDays className="w-4 h-4" />
             </div>
             <span className="text-[10px] font-bold">Bookings</span>
           </button>
 
-          <button onClick={() => setActiveTab('maintenance')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors flex-1 group ${activeTab === 'maintenance' ? 'text-black' : 'text-gray-400 hover:text-black'}`}>
-            <div className={`${activeTab === 'maintenance' ? 'bg-black/5' : 'group-hover:bg-black/5'} p-1.5 rounded-full transition-colors`}>
-              <Wrench className="w-5 h-5" />
-            </div>
+          <button onClick={() => setActiveTab('maintenance')} className={`flex flex-col items-center gap-1 py-2 px-1 rounded-full transition-all flex-1 cursor-pointer ${activeTab === 'maintenance' ? 'cirrel-btn-primary text-white' : 'text-[var(--muted-ink)] hover:text-[var(--ink)]'}`}>
+            <Wrench className="w-4 h-4" />
             <span className="text-[10px] font-bold truncate max-w-full">Service</span>
           </button>
 
-          <button onClick={() => setActiveTab('profile')} className={`flex flex-col items-center gap-1.5 p-2 transition-colors flex-1 group ${activeTab === 'profile' ? 'text-black' : 'text-gray-400 hover:text-black'}`}>
-            <div className={`${activeTab === 'profile' ? 'bg-black/5' : 'group-hover:bg-black/5'} p-1.5 rounded-full transition-colors`}>
-              <User className="w-5 h-5" />
-            </div>
+          <button onClick={() => setActiveTab('profile')} className={`flex flex-col items-center gap-1 py-2 px-1 rounded-full transition-all flex-1 cursor-pointer ${activeTab === 'profile' || activeTab === 'settings' ? 'cirrel-btn-primary text-white' : 'text-[var(--muted-ink)] hover:text-[var(--ink)]'}`}>
+            <User className="w-4 h-4" />
             <span className="text-[10px] font-bold">Profile</span>
           </button>
         </div>

@@ -57,7 +57,7 @@ function InstagramVerifiedBadge({ className = "w-4 h-4" }: { className?: string 
       <title>Verified Partner</title>
       <path
         d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.137V5.15h-6.162L25.358 0l-5.36 3.094Z"
-        fill="#000000"
+        fill="#0a84ff"
       />
       <path
         d="M16.5 28.5 9 21l2.85-2.85 4.65 4.65 11.65-11.65L31 14l-14.5 14.5Z"
@@ -209,13 +209,13 @@ export default function ScooterDetailClient({
 
   if (!scooter) {
     return (
-      <div className="min-h-screen bg-[#F4F5F7] text-black flex flex-col items-center justify-center gap-4 px-6 text-center">
-        <div className="w-16 h-16 rounded-full bg-white border border-black/10 flex items-center justify-center shadow-xs">
-          <Bike className="w-8 h-8 text-black" aria-hidden="true" />
+      <div className="min-h-screen text-[var(--ink)] flex flex-col items-center justify-center gap-4 px-6 text-center">
+        <div className="cirrel-glass w-16 h-16 rounded-full flex items-center justify-center">
+          <Bike className="w-8 h-8 text-[var(--accent-text)]" aria-hidden="true" />
         </div>
-        <h2 className="text-2xl font-black text-black tracking-tight uppercase">Scooter Not Found</h2>
-        <p className="text-sm text-neutral-600 max-w-sm">The vehicle listing you are looking for is unavailable or has been removed from our fleet.</p>
-        <Link href="/" prefetch={true} className="mt-2 px-6 py-3 bg-black text-white rounded-full text-xs font-bold hover:bg-neutral-800 transition-colors active-press uppercase tracking-wider">
+        <h2 className="text-2xl font-bold text-[var(--ink)] tracking-tight uppercase">Scooter Not Found</h2>
+        <p className="text-sm text-[var(--muted-ink)] max-w-sm">The vehicle listing you are looking for is unavailable or has been removed from our fleet.</p>
+        <Link href="/" prefetch={true} className="mt-2 cirrel-btn-primary px-6 py-3 text-xs font-bold active-press uppercase tracking-wider">
           Return to Catalog
         </Link>
       </div>
@@ -256,12 +256,12 @@ export default function ScooterDetailClient({
   }
 
   return (
-    <div className="min-h-screen bg-[#F4F5F7] text-black antialiased w-full max-w-full overflow-x-hidden pt-4 pb-36 sm:py-8">
+    <div className="min-h-screen text-[var(--ink)] antialiased w-full max-w-full overflow-x-hidden pt-4 pb-36 sm:py-8">
       
       {/* Toast Notification */}
       {copiedToast && (
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-black text-white text-xs font-bold px-4 py-2.5 rounded-full shadow-2xl animate-in fade-in slide-in-from-top-2 border border-neutral-800 flex items-center gap-2">
-          <Check className="w-3.5 h-3.5 text-white" />
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 cirrel-modal text-[var(--ink)] text-xs font-bold px-5 py-2.5 rounded-full animate-in fade-in slide-in-from-top-2 flex items-center gap-2">
+          <Check className="w-3.5 h-3.5 text-[var(--good)]" />
           <span>Link copied to clipboard!</span>
         </div>
       )}
@@ -271,15 +271,15 @@ export default function ScooterDetailClient({
         {/* ========================================================================= */}
         {/* 1. HERO SHOWCASE CARD                                                    */}
         {/* ========================================================================= */}
-        <article className="bg-white rounded-[32px] sm:rounded-[40px] p-6 sm:p-8 shadow-sm border border-black/5 flex flex-col justify-between transition-all">
+        <article className="cirrel-glass rounded-[30px] p-5 sm:p-8 flex flex-col justify-between transition-all">
           
           {/* Header */}
-          <div className="flex items-start justify-between gap-4 mb-2 sm:mb-4">
+          <div className="relative z-10 flex items-start justify-between gap-4 mb-2 sm:mb-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-black text-black tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold text-[var(--ink)] tracking-tight">
                 {formattedName}
               </h1>
-              <p className="text-xs font-extrabold text-neutral-400 mt-1 uppercase tracking-wider">
+              <p className="text-xs font-bold text-[var(--accent-text)] mt-1 uppercase tracking-wider">
                 {brandDisplay}
               </p>
             </div>
@@ -289,7 +289,7 @@ export default function ScooterDetailClient({
                 type="button"
                 onClick={handleShare}
                 aria-label="Share this scooter"
-                className="w-9 h-9 sm:w-10 sm:h-10 bg-neutral-100 rounded-full flex items-center justify-center text-black hover:bg-neutral-200 transition-all active-press cursor-pointer shrink-0"
+                className="cirrel-ibtn w-9 h-9 sm:w-10 sm:h-10 active-press cursor-pointer shrink-0"
               >
                 <Share2 className="w-4 h-4" aria-hidden="true" />
               </button>
@@ -297,23 +297,23 @@ export default function ScooterDetailClient({
                 type="button"
                 onClick={() => setIsLiked(!isLiked)}
                 aria-label={isLiked ? `Unsave ${formattedName}` : `Save ${formattedName}`}
-                className="w-9 h-9 sm:w-10 sm:h-10 bg-neutral-100 rounded-full flex items-center justify-center hover:bg-neutral-200 transition-all active-press cursor-pointer shrink-0"
+                className="cirrel-ibtn w-9 h-9 sm:w-10 sm:h-10 active-press cursor-pointer shrink-0"
               >
-                <Heart className={`w-4 h-4 transition-colors ${isLiked ? "fill-black text-black" : "text-black"}`} aria-hidden="true" />
+                <Heart className={`w-4 h-4 transition-colors ${isLiked ? "fill-[#ff6f66] text-[#ff6f66]" : "text-[var(--ink)]"}`} aria-hidden="true" />
               </button>
               <button 
                 type="button"
                 onClick={handleBack} 
                 aria-label="Close details"
-                className="w-9 h-9 sm:w-10 sm:h-10 bg-neutral-100 rounded-full flex items-center justify-center text-black hover:bg-neutral-200 transition-all active-press cursor-pointer shrink-0"
+                className="cirrel-ibtn w-9 h-9 sm:w-10 sm:h-10 active-press cursor-pointer shrink-0"
               >
                 <X className="w-5 h-5 stroke-[2.2]" aria-hidden="true" />
               </button>
             </div>
           </div>
 
-          {/* Vehicle Rounded Card Display (Never Zoomed & No Arrow Buttons) */}
-          <div className="relative w-full h-[230px] sm:h-[290px] bg-gradient-to-b from-[#F8F9FB] to-[#EEF1F5] rounded-[28px] sm:rounded-[36px] border border-gray-200/80 overflow-hidden my-3 sm:my-4 shadow-2xs">
+          {/* Vehicle Rounded Studio Pod */}
+          <div className="relative z-10 w-full h-[230px] sm:h-[290px] bg-gradient-to-b from-white/95 to-[#eaf0f8]/95 rounded-[24px] sm:rounded-[28px] overflow-hidden my-3 sm:my-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
             <style jsx>{`
               .hide-scrollbar::-webkit-scrollbar { display: none; }
               .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -344,7 +344,7 @@ export default function ScooterDetailClient({
                   <span
                     key={i}
                     className={`h-1.5 rounded-full transition-all duration-300 ${
-                      i === imageIndex ? "w-4 bg-black shadow-2xs" : "w-1.5 bg-black/20"
+                      i === imageIndex ? "w-4 bg-[#0a84ff] shadow-2xs" : "w-1.5 bg-black/20"
                     }`}
                   />
                 ))}
@@ -354,16 +354,16 @@ export default function ScooterDetailClient({
 
           {/* Rounded Vendor Card Below Image Display */}
           {vendor && (
-            <div className="w-full">
+            <div className="relative z-10 w-full">
               <Link 
                 href={`/vendor/${vendor.id}`} 
                 prefetch={true}
                 onPointerEnter={() => fetchVendorDetail(vendor.id)}
                 onTouchStart={() => fetchVendorDetail(vendor.id)}
-                className="group flex items-center justify-between p-3 sm:p-3.5 bg-neutral-50 hover:bg-neutral-100 rounded-2xl sm:rounded-3xl border border-black/5 transition-all cursor-pointer"
+                className="group flex items-center justify-between p-3 sm:p-3.5 cirrel-well hover:bg-[var(--card-3)] rounded-[20px] sm:rounded-[24px] transition-all cursor-pointer"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="relative w-10 h-10 rounded-full overflow-hidden bg-white border border-black/10 shrink-0 flex items-center justify-center font-black text-xs text-black">
+                  <div className="relative w-10 h-10 rounded-full overflow-hidden bg-white border border-[var(--line)] shrink-0 flex items-center justify-center font-bold text-xs text-[#0b1220]">
                     {(vendor.logo || vendor.logo_url) ? (
                       <Image 
                         src={vendor.logo || vendor.logo_url} 
@@ -378,28 +378,28 @@ export default function ScooterDetailClient({
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <span className="font-extrabold text-black text-sm tracking-tight truncate">
+                      <span className="font-bold text-[var(--ink)] text-sm tracking-tight truncate">
                         {vendor.name}
                       </span>
                       <InstagramVerifiedBadge className="w-3.5 h-3.5 shrink-0" />
                     </div>
                     {vendor.address && (
-                      <div className="flex items-center gap-1 text-[11px] text-neutral-500 font-medium mt-0.5">
-                        <MapPin className="w-3 h-3 text-black shrink-0" />
+                      <div className="flex items-center gap-1 text-[11px] text-[var(--muted-ink)] font-medium mt-0.5">
+                        <MapPin className="w-3 h-3 text-[var(--accent-text)] shrink-0" />
                         <span className="truncate max-w-[200px] sm:max-w-xs">{vendor.address}</span>
                       </div>
                     )}
                   </div>
                 </div>
-                <div className="w-7 h-7 rounded-full bg-white border border-black/10 flex items-center justify-center text-black shrink-0 group-hover:bg-black group-hover:text-white transition-all">
+                <div className="cirrel-ibtn w-8 h-8 shrink-0">
                   <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
                 </div>
               </Link>
             </div>
           )}
 
-          {/* Section Navigation Tabs (Swipe Left & Right, directly below vendor name) */}
-          <div className="w-full pt-3.5 mt-3.5 border-t border-black/5">
+          {/* Section Navigation Tabs */}
+          <div className="relative z-10 w-full pt-4 mt-4 border-t border-[var(--line)]">
             <style jsx>{`
               .hide-scrollbar::-webkit-scrollbar { display: none; }
               .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -417,11 +417,8 @@ export default function ScooterDetailClient({
                     key={tab.id}
                     type="button"
                     onClick={() => setActiveSection(tab.id)}
-                    className={`px-4 py-2 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer active-press snap-start ${
-                      isActive 
-                        ? "bg-black text-white shadow-xs" 
-                        : "bg-neutral-100 text-neutral-600 hover:text-black hover:bg-neutral-200 border border-black/5"
-                    }`}
+                    data-active={isActive}
+                    className="cirrel-chip px-4 py-2 text-xs shrink-0 cursor-pointer active-press snap-start"
                   >
                     {tab.label}
                   </button>
@@ -436,70 +433,62 @@ export default function ScooterDetailClient({
         {/* 2. VEHICLE SPECIFICATIONS                                                 */}
         {/* ========================================================================= */}
         {activeSection === "specs" && (
-          <section className="bg-white rounded-[28px] sm:rounded-3xl p-6 sm:p-7 shadow-xs border border-black/5 animate-in fade-in duration-200">
-            <div className="flex items-center gap-2 mb-4">
-              <Bike className="w-4 h-4 text-black stroke-[2.2]" />
-              <h2 className="text-xs font-black text-neutral-400 uppercase tracking-widest">
+          <section className="cirrel-glass rounded-[26px] p-6 sm:p-7 animate-in fade-in duration-200">
+            <div className="relative z-10 flex items-center gap-2 mb-4">
+              <Bike className="w-4 h-4 text-[var(--accent-text)] stroke-[2.2]" />
+              <h2 className="text-xs font-bold text-[var(--muted-ink)] uppercase tracking-widest">
                 Vehicle Specifications
               </h2>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              
-              {/* Engine */}
-              <div className="p-3.5 bg-neutral-50 rounded-2xl border border-black/5 flex flex-col justify-between">
-                <div className="flex items-center gap-1.5 text-neutral-400 mb-1">
-                  <Gauge className="w-3.5 h-3.5 text-black stroke-[2.2]" />
-                  <span className="text-[10px] font-black uppercase tracking-wider">Engine</span>
+            <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div className="p-3.5 cirrel-well rounded-[18px] flex flex-col justify-between">
+                <div className="flex items-center gap-1.5 text-[var(--muted-ink)] mb-1">
+                  <Gauge className="w-3.5 h-3.5 text-[var(--accent-text)] stroke-[2.2]" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">Engine</span>
                 </div>
-                <span className="text-sm font-black text-black">{engineDisplay}</span>
+                <span className="text-sm font-bold text-[var(--ink)]">{engineDisplay}</span>
               </div>
 
-              {/* Transmission */}
-              <div className="p-3.5 bg-neutral-50 rounded-2xl border border-black/5 flex flex-col justify-between">
-                <div className="flex items-center gap-1.5 text-neutral-400 mb-1">
-                  <Cog className="w-3.5 h-3.5 text-black stroke-[2.2]" />
-                  <span className="text-[10px] font-black uppercase tracking-wider">Transmission</span>
+              <div className="p-3.5 cirrel-well rounded-[18px] flex flex-col justify-between">
+                <div className="flex items-center gap-1.5 text-[var(--muted-ink)] mb-1">
+                  <Cog className="w-3.5 h-3.5 text-[var(--accent-text)] stroke-[2.2]" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">Transmission</span>
                 </div>
-                <span className="text-sm font-black text-black truncate">{transmissionDisplay}</span>
+                <span className="text-sm font-bold text-[var(--ink)] truncate">{transmissionDisplay}</span>
               </div>
 
-              {/* Fuel Capacity */}
-              <div className="p-3.5 bg-neutral-50 rounded-2xl border border-black/5 flex flex-col justify-between">
-                <div className="flex items-center gap-1.5 text-neutral-400 mb-1">
-                  <Fuel className="w-3.5 h-3.5 text-black stroke-[2.2]" />
-                  <span className="text-[10px] font-black uppercase tracking-wider">Fuel Tank</span>
+              <div className="p-3.5 cirrel-well rounded-[18px] flex flex-col justify-between">
+                <div className="flex items-center gap-1.5 text-[var(--muted-ink)] mb-1">
+                  <Fuel className="w-3.5 h-3.5 text-[var(--accent-text)] stroke-[2.2]" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">Fuel Tank</span>
                 </div>
-                <span className="text-sm font-black text-black">{fuelDisplay}</span>
+                <span className="text-sm font-bold text-[var(--ink)]">{fuelDisplay}</span>
               </div>
 
-              {/* Storage */}
-              <div className="p-3.5 bg-neutral-50 rounded-2xl border border-black/5 flex flex-col justify-between">
-                <div className="flex items-center gap-1.5 text-neutral-400 mb-1">
-                  <Package className="w-3.5 h-3.5 text-black stroke-[2.2]" />
-                  <span className="text-[10px] font-black uppercase tracking-wider">Storage</span>
+              <div className="p-3.5 cirrel-well rounded-[18px] flex flex-col justify-between">
+                <div className="flex items-center gap-1.5 text-[var(--muted-ink)] mb-1">
+                  <Package className="w-3.5 h-3.5 text-[var(--accent-text)] stroke-[2.2]" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">Storage</span>
                 </div>
-                <span className="text-sm font-black text-black">Underseat Trunk</span>
+                <span className="text-sm font-bold text-[var(--ink)]">Underseat Trunk</span>
               </div>
 
-              {/* Year */}
-              <div className="p-3.5 bg-neutral-50 rounded-2xl border border-black/5 flex flex-col justify-between">
-                <div className="flex items-center gap-1.5 text-neutral-400 mb-1">
-                  <Calendar className="w-3.5 h-3.5 text-black stroke-[2.2]" />
-                  <span className="text-[10px] font-black uppercase tracking-wider">Model Year</span>
+              <div className="p-3.5 cirrel-well rounded-[18px] flex flex-col justify-between">
+                <div className="flex items-center gap-1.5 text-[var(--muted-ink)] mb-1">
+                  <Calendar className="w-3.5 h-3.5 text-[var(--accent-text)] stroke-[2.2]" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">Model Year</span>
                 </div>
-                <span className="text-sm font-black text-black">{yearDisplay}</span>
+                <span className="text-sm font-bold text-[var(--ink)]">{yearDisplay}</span>
               </div>
 
-              {/* Availability */}
-              <div className="p-3.5 bg-neutral-50 rounded-2xl border border-black/5 flex flex-col justify-between">
-                <div className="flex items-center gap-1.5 text-neutral-400 mb-1">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-black stroke-[2.2]" />
-                  <span className="text-[10px] font-black uppercase tracking-wider">Availability</span>
+              <div className="p-3.5 cirrel-well rounded-[18px] flex flex-col justify-between">
+                <div className="flex items-center gap-1.5 text-[var(--muted-ink)] mb-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[var(--good)] stroke-[2.2]" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">Availability</span>
                 </div>
-                <span className="text-sm font-black text-black">{availableUnits} Available</span>
+                <span className="text-sm font-bold text-[var(--good)]">{availableUnits} Available</span>
               </div>
-
             </div>
           </section>
         )}
@@ -508,11 +497,11 @@ export default function ScooterDetailClient({
         {/* 3. ABOUT THIS SCOOTER                                                     */}
         {/* ========================================================================= */}
         {activeSection === "about" && (
-          <section className="bg-white rounded-[28px] sm:rounded-3xl p-6 sm:p-7 shadow-xs border border-black/5 animate-in fade-in duration-200">
-            <h2 className="text-xs font-black text-neutral-400 uppercase tracking-widest mb-3">
+          <section className="cirrel-glass rounded-[26px] p-6 sm:p-7 animate-in fade-in duration-200">
+            <h2 className="relative z-10 text-xs font-bold text-[var(--muted-ink)] uppercase tracking-widest mb-3">
               About the {formattedName}
             </h2>
-            <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed font-medium">
+            <p className="relative z-10 text-xs sm:text-sm text-[var(--ink-2)] leading-relaxed font-medium">
               {scooter.description && !scooter.description.includes("FAZZIO") 
                 ? scooter.description 
                 : `The ${formattedName} is engineered for agile maneuverability, effortless handling, and exceptional fuel economy across Bali. Equipped with a smooth automatic CVT transmission, comfortable dual seating, and convenient underseat storage, it delivers an easy and dependable ride whether you are navigating coastal roads in Canggu and Seminyak, touring Ubud's scenic routes, or exploring the beaches of Uluwatu. Thoroughly sanitized, fueled, and safety-inspected prior to handover.`
@@ -522,23 +511,23 @@ export default function ScooterDetailClient({
         )}
 
         {/* ========================================================================= */}
-        {/* 4. RENTAL INCLUSIONS & GUARANTEE (FAQ / CARD STYLE)                       */}
+        {/* 4. RENTAL INCLUSIONS & GUARANTEE                                          */}
         {/* ========================================================================= */}
         {activeSection === "inclusions" && (
-          <section className="bg-white rounded-[28px] sm:rounded-3xl p-6 sm:p-7 shadow-xs border border-black/5 animate-in fade-in duration-200">
-            <div className="flex items-center justify-between gap-2 mb-4">
+          <section className="cirrel-glass rounded-[26px] p-6 sm:p-7 animate-in fade-in duration-200">
+            <div className="relative z-10 flex items-center justify-between gap-2 mb-4">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-black stroke-[2.2]" />
-                <h2 className="text-xs font-black text-neutral-400 uppercase tracking-widest">
+                <ShieldCheck className="w-4 h-4 text-[var(--accent-text)] stroke-[2.2]" />
+                <h2 className="text-xs font-bold text-[var(--muted-ink)] uppercase tracking-widest">
                   Rental Inclusions & Guarantee
                 </h2>
               </div>
-              <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-neutral-100 text-black border border-black/10">
+              <span className="cirrel-pill cirrel-pill--good text-[10px] uppercase tracking-wider">
                 Included
               </span>
             </div>
 
-            <div className="space-y-3">
+            <div className="relative z-10 space-y-3">
               {[
                 {
                   id: "helmets",
@@ -578,10 +567,8 @@ export default function ScooterDetailClient({
                 return (
                   <div
                     key={item.id}
-                    className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
-                      isOpen 
-                        ? "bg-neutral-50/90 border-black/20 shadow-xs" 
-                        : "bg-neutral-50/50 hover:bg-neutral-50 border-black/5"
+                    className={`rounded-[20px] cirrel-well transition-all duration-200 overflow-hidden ${
+                      isOpen ? "ring-1 ring-[var(--accent-blue)]/40" : ""
                     }`}
                   >
                     <button
@@ -592,21 +579,21 @@ export default function ScooterDetailClient({
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-                          isOpen ? "bg-black text-white shadow-xs" : "bg-neutral-200/70 text-black group-hover:bg-black group-hover:text-white"
+                          isOpen ? "cirrel-mark text-white" : "cirrel-glass text-[var(--ink)]"
                         }`}>
                           <IconComponent className="w-4 h-4 stroke-[2.2]" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="font-extrabold text-xs sm:text-sm text-black tracking-tight leading-snug">
+                            <h3 className="font-bold text-xs sm:text-sm text-[var(--ink)] tracking-tight leading-snug">
                               {item.title}
                             </h3>
-                            <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white border border-black/10 text-neutral-700 shrink-0">
+                            <span className="cirrel-pill text-[10px] uppercase tracking-wider shrink-0">
                               {item.badge}
                             </span>
                           </div>
                           {!isOpen && (
-                            <p className="text-[11px] text-neutral-500 font-medium truncate mt-0.5">
+                            <p className="text-[11px] text-[var(--muted-ink)] font-medium truncate mt-0.5">
                               {item.summary}
                             </p>
                           )}
@@ -614,14 +601,14 @@ export default function ScooterDetailClient({
                       </div>
 
                       <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-all duration-200 ${
-                        isOpen ? "bg-black text-white rotate-180" : "bg-white border border-black/10 text-black group-hover:bg-black group-hover:text-white"
+                        isOpen ? "cirrel-mark text-white rotate-180" : "cirrel-ibtn text-[var(--ink)]"
                       }`}>
                         <ChevronDown className="w-3.5 h-3.5 stroke-[2.5]" />
                       </div>
                     </button>
 
                     {isOpen && (
-                      <div className="px-4 pb-4 pt-1 sm:px-4.5 sm:pb-4.5 text-xs sm:text-sm text-neutral-600 font-medium leading-relaxed border-t border-black/5 animate-in fade-in duration-200">
+                      <div className="px-4 pb-4 pt-2 text-xs sm:text-sm text-[var(--ink-2)] font-medium leading-relaxed border-t border-[var(--line)] animate-in fade-in duration-200">
                         <p>{item.description}</p>
                       </div>
                     )}
@@ -636,40 +623,38 @@ export default function ScooterDetailClient({
         {/* 5. RENTAL REQUIREMENTS                                                    */}
         {/* ========================================================================= */}
         {activeSection === "requirements" && (
-          <section className="bg-white rounded-[28px] sm:rounded-3xl p-6 sm:p-7 shadow-xs border border-black/5 animate-in fade-in duration-200">
-            <div className="flex items-center gap-2 mb-4">
-              <FileCheck className="w-4 h-4 text-black stroke-[2.2]" />
-              <h2 className="text-xs font-black text-neutral-400 uppercase tracking-widest">
+          <section className="cirrel-glass rounded-[26px] p-6 sm:p-7 animate-in fade-in duration-200">
+            <div className="relative z-10 flex items-center gap-2 mb-4">
+              <FileCheck className="w-4 h-4 text-[var(--accent-text)] stroke-[2.2]" />
+              <h2 className="text-xs font-bold text-[var(--muted-ink)] uppercase tracking-widest">
                 Rental Requirements
               </h2>
             </div>
 
-            <div className="space-y-2.5 text-xs sm:text-sm">
-              <div className="flex items-center gap-3 p-3 bg-neutral-50 rounded-2xl border border-black/5">
-                <span className="w-5 h-5 rounded-full bg-black text-white font-black text-[10px] flex items-center justify-center shrink-0">1</span>
-                <span className="font-bold text-black">Valid Passport or ID Photo</span>
+            <div className="relative z-10 space-y-2.5 text-xs sm:text-sm">
+              <div className="flex items-center gap-3 p-3.5 cirrel-well rounded-[18px]">
+                <span className="cirrel-mark w-6 h-6 rounded-full font-bold text-[11px] shrink-0">1</span>
+                <span className="font-bold text-[var(--ink)]">Valid Passport or ID Photo</span>
               </div>
-              <div className="flex items-center gap-3 p-3 bg-neutral-50 rounded-2xl border border-black/5">
-                <span className="w-5 h-5 rounded-full bg-black text-white font-black text-[10px] flex items-center justify-center shrink-0">2</span>
-                <span className="font-bold text-black">Driver License or International Permit</span>
+              <div className="flex items-center gap-3 p-3.5 cirrel-well rounded-[18px]">
+                <span className="cirrel-mark w-6 h-6 rounded-full font-bold text-[11px] shrink-0">2</span>
+                <span className="font-bold text-[var(--ink)]">Driver License or International Permit</span>
               </div>
-              <div className="flex items-center gap-3 p-3 bg-neutral-50 rounded-2xl border border-black/5">
-                <span className="w-5 h-5 rounded-full bg-black text-white font-black text-[10px] flex items-center justify-center shrink-0">3</span>
-                <span className="font-bold text-black">Online Checkout & Free Handover Delivery</span>
+              <div className="flex items-center gap-3 p-3.5 cirrel-well rounded-[18px]">
+                <span className="cirrel-mark w-6 h-6 rounded-full font-bold text-[11px] shrink-0">3</span>
+                <span className="font-bold text-[var(--ink)]">Online Checkout & Free Handover Delivery</span>
               </div>
             </div>
           </section>
         )}
 
         {/* ========================================================================= */}
-        {/* 6. ALWAYS DISPLAYED: SAME VENDOR GARAGE (ROUNDED CARD & MINIMAL TITLE)   */}
+        {/* 6. ALWAYS DISPLAYED: SAME VENDOR GARAGE                                   */}
         {/* ========================================================================= */}
         {vendor && (
-          <section className="bg-white rounded-[32px] sm:rounded-[36px] p-5 sm:p-6 shadow-xs border border-black/5">
-            
-            {/* Minimal Header */}
-            <div className="flex items-center justify-between gap-3 mb-4">
-              <h2 className="text-sm sm:text-base font-extrabold text-black tracking-tight truncate">
+          <section className="cirrel-glass rounded-[30px] p-5 sm:p-6">
+            <div className="relative z-10 flex items-center justify-between gap-3 mb-4">
+              <h2 className="text-sm sm:text-base font-bold text-[var(--ink)] tracking-tight truncate">
                 {vendor.name} Garage
               </h2>
 
@@ -677,7 +662,7 @@ export default function ScooterDetailClient({
                 <Link
                   href={`/vendor/${vendor.id}`}
                   prefetch={true}
-                  className="bg-neutral-100 hover:bg-black hover:text-white text-black px-3.5 py-1.5 rounded-full text-xs font-bold transition-all active-press shrink-0 flex items-center gap-1 border border-black/5"
+                  className="cirrel-btn px-3.5 py-1.5 text-xs font-bold active-press shrink-0 flex items-center gap-1"
                 >
                   <span>View All</span>
                   <ChevronRight className="w-3.5 h-3.5" />
@@ -685,9 +670,8 @@ export default function ScooterDetailClient({
               )}
             </div>
 
-            {/* Responsive Rounded Scooter Cards */}
             {otherScooters.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {otherScooters.map((item) => {
                   const itemPrice = Number(item.price_daily || item.price || 0)
                   const itemFormattedName = formatTitleCase(item.name)
@@ -696,11 +680,10 @@ export default function ScooterDetailClient({
                       key={item.id}
                       href={`/detail/${item.id}`}
                       prefetch={true}
-                      className="bg-neutral-50 hover:bg-neutral-100/90 rounded-[24px] p-3 sm:p-3.5 border border-black/5 transition-all flex items-center justify-between gap-3 group active-press"
+                      className="cirrel-well hover:bg-[var(--card-3)] rounded-[22px] p-3 sm:p-3.5 transition-all flex items-center justify-between gap-3 group active-press"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        {/* Image Pod */}
-                        <div className="relative w-16 h-16 sm:w-18 sm:h-18 bg-white rounded-2xl overflow-hidden shrink-0 flex items-center justify-center border border-black/5 shadow-2xs">
+                        <div className="relative w-16 h-16 sm:w-18 sm:h-18 bg-white/95 rounded-2xl overflow-hidden shrink-0 flex items-center justify-center shadow-2xs">
                           <Image
                             src={item.image_url || item.img || "/images/scooter.png"}
                             alt={itemFormattedName}
@@ -710,25 +693,23 @@ export default function ScooterDetailClient({
                           />
                         </div>
 
-                        {/* Details */}
                         <div className="min-w-0">
-                          <h3 className="font-bold text-xs sm:text-sm text-black truncate group-hover:text-black leading-snug">
+                          <h3 className="font-bold text-xs sm:text-sm text-[var(--ink)] truncate leading-snug">
                             {itemFormattedName}
                           </h3>
-                          <p className="text-[11px] text-neutral-500 font-medium mt-0.5">
+                          <p className="text-[11px] text-[var(--muted-ink)] font-medium mt-0.5">
                             {item.engine || "125 cc"} • {item.transmission || "Automatic"}
                           </p>
                           <div className="flex items-baseline gap-1 mt-1">
-                            <span className="text-xs sm:text-sm font-black text-black">
+                            <span className="text-xs sm:text-sm font-bold text-[var(--ink)]">
                               Rp {itemPrice.toLocaleString("id-ID")}
                             </span>
-                            <span className="text-[10px] text-neutral-400 font-medium">/ day</span>
+                            <span className="text-[10px] text-[var(--muted-ink)] font-medium">/ day</span>
                           </div>
                         </div>
                       </div>
 
-                      {/* Quick Arrow / Action */}
-                      <div className="w-8 h-8 rounded-full bg-white border border-black/10 flex items-center justify-center text-black shrink-0 group-hover:bg-black group-hover:text-white transition-all shadow-xs">
+                      <div className="cirrel-ibtn w-8 h-8 shrink-0">
                         <ChevronRight className="w-4 h-4" />
                       </div>
                     </Link>
@@ -736,22 +717,21 @@ export default function ScooterDetailClient({
                 })}
               </div>
             ) : (
-              <div className="bg-neutral-50 rounded-[24px] p-5 text-center border border-black/5">
-                <p className="text-xs text-neutral-500 font-medium">
+              <div className="relative z-10 cirrel-well rounded-[22px] p-5 text-center">
+                <p className="text-xs text-[var(--muted-ink)] font-medium">
                   Explore the full garage and customer reviews directly on the vendor profile.
                 </p>
                 {vendor.id && (
                   <Link
                     href={`/vendor/${vendor.id}`}
                     prefetch={true}
-                    className="inline-block mt-3 bg-black text-white text-xs font-bold px-4 py-2 rounded-full hover:bg-neutral-800 transition-all active-press"
+                    className="inline-block mt-3 cirrel-btn-primary text-xs font-bold px-5 py-2 active-press"
                   >
                     Visit {vendor.name} Profile
                   </Link>
                 )}
               </div>
             )}
-
           </section>
         )}
 
@@ -761,7 +741,7 @@ export default function ScooterDetailClient({
             type="button"
             disabled={isNavigatingToCheckout}
             onClick={handleRentNow}
-            className="w-full bg-black hover:bg-neutral-800 text-white py-4 px-8 rounded-2xl text-sm font-bold uppercase tracking-wider active-press transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-80"
+            className="w-full cirrel-btn-primary py-4 px-8 text-sm font-bold uppercase tracking-wider active-press flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70"
           >
             {isNavigatingToCheckout ? (
               <>
@@ -770,7 +750,7 @@ export default function ScooterDetailClient({
               </>
             ) : (
               <>
-                <span>Book This Scooter</span>
+                <span>Book This Scooter — Rp {priceDaily.toLocaleString("id-ID")} / day</span>
                 <ChevronRight className="w-4 h-4 text-white stroke-[2.5]" />
               </>
             )}
@@ -779,17 +759,17 @@ export default function ScooterDetailClient({
 
       </div>
 
-      {/* Floating Sticky Mobile Quick Rent Bar */}
-      <nav aria-label="Quick Booking Bar" className="sm:hidden fixed bottom-4 left-4 right-4 mx-auto bg-black text-white rounded-2xl px-5 py-3.5 flex items-center justify-between shadow-2xl z-40 border border-neutral-800">
-        <div className="flex flex-col min-w-0 pr-2">
-          <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
+      {/* Floating Sticky Mobile Quick Rent Bar (Cirrel Liquid Glass Pill) */}
+      <nav aria-label="Quick Booking Bar" className="sm:hidden fixed bottom-4 left-4 right-4 mx-auto cirrel-modal rounded-full px-5 py-3 flex items-center justify-between z-40">
+        <div className="relative z-10 flex flex-col min-w-0 pr-2">
+          <span className="text-[10px] font-bold text-[var(--muted-ink)] uppercase tracking-wider">
             Daily Rate
           </span>
           <div className="flex items-baseline gap-1">
-            <span className="text-base font-black text-white tracking-tight">
+            <span className="text-base font-bold text-[var(--ink)] tracking-tight">
               Rp {priceDaily.toLocaleString("id-ID")}
             </span>
-            <span className="text-[11px] text-neutral-400 font-medium">/ day</span>
+            <span className="text-[11px] text-[var(--muted-ink)] font-medium">/ day</span>
           </div>
         </div>
         
@@ -797,17 +777,17 @@ export default function ScooterDetailClient({
           type="button"
           disabled={isNavigatingToCheckout}
           onClick={handleRentNow}
-          className="bg-white text-black px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider shadow-md hover:bg-neutral-100 active-press transition-all flex items-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-80"
+          className="relative z-10 cirrel-btn-primary px-5 py-2.5 text-xs font-bold uppercase tracking-wider active-press flex items-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-70"
         >
           {isNavigatingToCheckout ? (
             <>
-              <Loader2 className="w-3.5 h-3.5 text-black animate-spin" />
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
               <span>Loading...</span>
             </>
           ) : (
             <>
               <span>Rent Now</span>
-              <ChevronRight className="w-3.5 h-3.5 text-black stroke-[2.5]" />
+              <ChevronRight className="w-3.5 h-3.5 stroke-[2.5]" />
             </>
           )}
         </button>

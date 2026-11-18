@@ -3,14 +3,14 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { Menu, X, Globe, ChevronDown } from "lucide-react"
+import { Menu, X, Globe, ChevronDown, Bike } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import ThemeToggle from "@/components/ThemeToggle"
 
 const navLinks = [
   { name: "Home", href: "/" },
-  { name: "Scooters", href: "/scooters" },
-  { name: "Pricing", href: "/pricing" },
   { name: "About", href: "/about" },
+  { name: "How it Works", href: "/how-it-works" },
   { name: "FAQ", href: "/faq" },
   { name: "Contact", href: "/contact" },
 ]
@@ -29,53 +29,63 @@ export function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? "glass py-4" : "bg-transparent py-6"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-4 md:px-8 ${
+        isScrolled ? "pt-3" : "pt-5"
       }`}
     >
-      <div className="container mx-auto px-4 md:px-8">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <span className="font-heading font-bold text-xl tracking-tight">
-              THE BIKE RENTAL
-              <span className="text-gray-500 font-medium text-sm ml-1">BALI</span>
-            </span>
-          </Link>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className="text-sm font-medium hover:text-gray-500 transition-colors"
-              >
-                {link.name}
-              </Link>
-            ))}
-          </nav>
-
-          {/* Actions */}
-          <div className="hidden md:flex items-center gap-4">
-            <div className="flex items-center gap-1 cursor-pointer hover:text-gray-500 transition-colors">
-              <Globe className="w-4 h-4" />
-              <span className="text-sm font-medium">EN / USD</span>
-              <ChevronDown className="w-3 h-3" />
-            </div>
-            <Link href="/#fleet">
-              <Button className="bg-black text-white hover:bg-neutral-800 font-bold rounded-full px-6 shadow-md hover:shadow-lg transition-all cursor-pointer">
-                Book Now
-              </Button>
-            </Link>
+      <div className="max-w-7xl mx-auto cirrel-glass-hi rounded-full px-4 sm:px-6 py-2.5 flex items-center justify-between">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-3">
+          <div className="cirrel-mark w-9 h-9 rounded-[12px]">
+            <Bike className="w-5 h-5" />
           </div>
+          <div className="flex flex-col">
+            <span className="font-bold text-base sm:text-lg tracking-tight text-[var(--ink)] leading-none">
+              THE BIKE RENTAL
+            </span>
+            <span className="text-[10px] font-bold text-[var(--muted-ink)] uppercase tracking-widest mt-0.5">
+              Bali Marketplace
+            </span>
+          </div>
+        </Link>
 
-          {/* Mobile Menu Toggle */}
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center gap-6">
+          {navLinks.map((link) => (
+            <Link
+              key={link.name}
+              href={link.href}
+              className="text-sm font-semibold text-[var(--ink-2)] hover:text-[var(--ink)] transition-colors"
+            >
+              {link.name}
+            </Link>
+          ))}
+        </nav>
+
+        {/* Actions */}
+        <div className="hidden md:flex items-center gap-3">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full cirrel-well text-xs font-semibold text-[var(--ink-2)]">
+            <Globe className="w-3.5 h-3.5 text-[var(--accent-text)]" />
+            <span>EN / IDR</span>
+            <ChevronDown className="w-3 h-3" />
+          </div>
+          <ThemeToggle className="w-9 h-9" />
+          <Link href="/#all-scooters">
+            <Button className="cirrel-btn-primary px-5 h-9 text-xs font-bold">
+              Book Now
+            </Button>
+          </Link>
+        </div>
+
+        {/* Mobile Actions */}
+        <div className="flex md:hidden items-center gap-2">
+          <ThemeToggle className="w-9 h-9" />
           <button
-            className="md:hidden p-2"
+            className="cirrel-ibtn w-9 h-9"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle Menu"
           >
-            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </button>
         </div>
       </div>
@@ -84,29 +94,23 @@ export function Navbar() {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -16 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="absolute top-full left-0 right-0 glass-card m-4 rounded-2xl p-6 md:hidden flex flex-col gap-4 shadow-2xl border border-gray-100"
+            exit={{ opacity: 0, y: -16 }}
+            className="max-w-7xl mx-auto mt-3 cirrel-modal rounded-[26px] p-5 md:hidden flex flex-col gap-2"
           >
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="text-lg font-medium py-2 border-b border-gray-100 last:border-0"
+                className="text-base font-semibold text-[var(--ink)] py-2.5 px-3 rounded-2xl hover:bg-[var(--card-2)] transition-colors"
               >
                 {link.name}
               </Link>
             ))}
-            <div className="flex items-center justify-between py-4 border-t border-gray-100 mt-2">
-              <div className="flex items-center gap-2">
-                <Globe className="w-5 h-5" />
-                <span className="font-medium">EN / USD</span>
-              </div>
-            </div>
-            <Link href="/#fleet" onClick={() => setIsMobileMenuOpen(false)}>
-              <Button className="w-full bg-black text-white hover:bg-neutral-800 font-bold rounded-xl py-6 text-lg mt-2 shadow-md cursor-pointer">
+            <Link href="/#all-scooters" onClick={() => setIsMobileMenuOpen(false)} className="mt-2">
+              <Button className="w-full cirrel-btn-primary py-5 text-sm font-bold">
                 Book Now
               </Button>
             </Link>
