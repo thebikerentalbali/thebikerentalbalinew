@@ -40,15 +40,44 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Fallback: If R2 is not connected yet, return local base64/placeholder response
-    return NextResponse.json({
-      success: true,
-      url: URL.createObjectURL(file),
-      key,
-      size: file.size,
-      type: file.type,
-      note: 'R2 bucket pending activation',
-    });
+    // Upload to Supabase Storage using service role key (bypasses browser anon RLS restrictions)
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, '');
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (supabaseUrl && serviceRoleKey) {
+      const storageRes = await fetch(`${supabaseUrl}/storage/v1/object/scooter-image/${key}`, {
+        method: 'POST',
+        headers: {
+          apikey: serviceRoleKey,
+          Authorization: `Bearer ${serviceRoleKey}`,
+          'Content-Type': file.type || 'image/jpeg',
+          'x-upsert': 'true',
+        },
+        body: arrayBuffer,
+      });
+
+      if (!storageRes.ok) {
+        const errText = await storageRes.text().catch(() => '');
+        return NextResponse.json(
+          { error: errText || `Storage upload failed (${storageRes.status})` },
+          { status: storageRes.status }
+        );
+      }
+
+      const publicUrl = `${supabaseUrl}/storage/v1/object/public/scooter-image/${key}`;
+      return NextResponse.json({
+        success: true,
+        url: publicUrl,
+        key,
+        size: file.size,
+        type: file.type,
+      });
+    }
+
+    return NextResponse.json(
+      { error: 'Image storage is not configured on the server.' },
+      { status: 500 }
+    );
   } catch (error: any) {
     console.error('Upload error:', error);
     return NextResponse.json(

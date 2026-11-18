@@ -226,41 +226,45 @@ export async function saveCampaign(campaign: Campaign): Promise<Campaign[]> {
     ? current.map(c => c.id === campaignToSave.id ? { ...c, ...campaignToSave } : c)
     : [campaignToSave, ...current];
 
-  // Save to local storage immediately
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedList));
+  // Save to local storage safely (never block publishing if storage quota is full)
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedList));
+  } catch (storageErr) {
+    console.warn('Skipping local campaign cache write due to storage limit:', storageErr);
+  }
   window.dispatchEvent(new Event('campaigns_updated'));
 
-  // Sync to Supabase in background
-  try {
-    const supabase = createClient();
-    await supabase
-      .from('campaigns')
-      .upsert({
-        id: campaignToSave.id,
-        title: campaignToSave.title,
-        subtitle: campaignToSave.subtitle,
-        category: campaignToSave.category || 'scooter',
-        partner_name: campaignToSave.partner_name || '',
-        partner_logo_url: campaignToSave.partner_logo_url || '',
-        video_url: campaignToSave.video_url || '',
-        youtube_id: campaignToSave.youtube_id || '',
-        hero_overlay_text: campaignToSave.hero_overlay_text || '',
-        badge: campaignToSave.badge || '',
-        discount_text: campaignToSave.discount_text || '',
-        voucher_code: campaignToSave.voucher_code || '',
-        partner_whatsapp: campaignToSave.partner_whatsapp || '',
-        partner_location: campaignToSave.partner_location || '',
-        voucher_terms: campaignToSave.voucher_terms || '',
-        cta_text: campaignToSave.cta_text || (campaignToSave.category === 'spa' ? 'Book Now' : 'Learn More'),
-        cta_link: campaignToSave.cta_link || '',
-        image_url: campaignToSave.image_url || '',
-        theme: campaignToSave.theme || 'dark',
-        is_active: campaignToSave.is_active,
-        order: campaignToSave.order || 0,
-        updated_at: new Date().toISOString(),
-      });
-  } catch (err) {
-    console.warn('Could not sync campaign to Supabase table:', err);
+  // Sync to Supabase
+  const supabase = createClient();
+  const { error } = await supabase
+    .from('campaigns')
+    .upsert({
+      id: campaignToSave.id,
+      title: campaignToSave.title,
+      subtitle: campaignToSave.subtitle,
+      category: campaignToSave.category || 'scooter',
+      partner_name: campaignToSave.partner_name || '',
+      partner_logo_url: campaignToSave.partner_logo_url || '',
+      video_url: campaignToSave.video_url || '',
+      youtube_id: campaignToSave.youtube_id || '',
+      hero_overlay_text: campaignToSave.hero_overlay_text || '',
+      badge: campaignToSave.badge || '',
+      discount_text: campaignToSave.discount_text || '',
+      voucher_code: campaignToSave.voucher_code || '',
+      partner_whatsapp: campaignToSave.partner_whatsapp || '',
+      partner_location: campaignToSave.partner_location || '',
+      voucher_terms: campaignToSave.voucher_terms || '',
+      cta_text: campaignToSave.cta_text || (campaignToSave.category === 'spa' ? 'Book Now' : 'Learn More'),
+      cta_link: campaignToSave.cta_link || '',
+      image_url: campaignToSave.image_url || '',
+      theme: campaignToSave.theme || 'dark',
+      is_active: campaignToSave.is_active,
+      order: campaignToSave.order || 0,
+      updated_at: new Date().toISOString(),
+    });
+
+  if (error) {
+    throw new Error(error.message || 'Failed to save campaign to database');
   }
 
   return updatedList;

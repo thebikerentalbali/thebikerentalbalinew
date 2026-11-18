@@ -87,6 +87,7 @@ export default function AdminDashboard() {
   const [isUploadingCampaignImg, setIsUploadingCampaignImg] = useState(false)
   const [isUploadingPartnerLogo, setIsUploadingPartnerLogo] = useState(false)
   const [campaignSaveSuccess, setCampaignSaveSuccess] = useState(false)
+  const [campaignSaveError, setCampaignSaveError] = useState<string | null>(null)
   const [isSavingCampaign, setIsSavingCampaign] = useState(false)
   const [showAdvancedSpaFields, setShowAdvancedSpaFields] = useState(false)
 
@@ -463,6 +464,7 @@ export default function AdminDashboard() {
   const handleOpenCreateCampaign = (category: CampaignCategory = 'spa') => {
     setEditingCampaignId(null)
     setShowAdvancedSpaFields(false)
+    setCampaignSaveError(null)
     
     if (category === 'spa') {
       setCampaignForm({
@@ -529,8 +531,64 @@ export default function AdminDashboard() {
   const handleOpenEditCampaign = (campaign: Campaign) => {
     setEditingCampaignId(campaign.id)
     setShowAdvancedSpaFields(false)
+    setCampaignSaveError(null)
     setCampaignForm({ ...campaign })
     setIsCampaignModalOpen(true)
+  }
+
+  /**
+   * Resizes an image in browser canvas so any fallback URL stays compact.
+   */
+  const compressImageToDataUrl = (file: File, maxDimension: number): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onerror = () => reject(new Error('Failed to read image file'))
+      reader.onload = () => {
+        const img = new window.Image()
+        img.onerror = () => resolve(String(reader.result || ''))
+        img.onload = () => {
+          const scale = Math.min(1, maxDimension / Math.max(img.width, img.height))
+          const width = Math.max(1, Math.round(img.width * scale))
+          const height = Math.max(1, Math.round(img.height * scale))
+          const canvas = document.createElement('canvas')
+          canvas.width = width
+          canvas.height = height
+          const ctx = canvas.getContext('2d')
+          if (!ctx) {
+            resolve(String(reader.result || ''))
+            return
+          }
+          ctx.drawImage(img, 0, 0, width, height)
+          const mimeType = file.type === 'image/png' ? 'image/png' : 'image/jpeg'
+          resolve(canvas.toDataURL(mimeType, 0.82))
+        }
+        img.src = String(reader.result || '')
+      }
+      reader.readAsDataURL(file)
+    })
+
+  /**
+   * Uploads campaign image/logo via server API first, falling back to compressed data URL.
+   */
+  const uploadCampaignAsset = async (file: File, maxDimension: number, prefix: string): Promise<string> => {
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('folder', 'campaigns')
+      formData.append('fileName', `${prefix}-${Date.now()}-${file.name}`)
+
+      const res = await fetch('/api/upload', { method: 'POST', body: formData })
+      if (res.ok) {
+        const payload = await res.json()
+        if (payload?.url && typeof payload.url === 'string' && !payload.url.startsWith('blob:')) {
+          return payload.url
+        }
+      }
+    } catch (err) {
+      console.warn('Server upload failed, compressing locally:', err)
+    }
+
+    return compressImageToDataUrl(file, maxDimension)
   }
 
   const handlePartnerLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -539,33 +597,11 @@ export default function AdminDashboard() {
 
     setIsUploadingPartnerLogo(true)
     try {
-      const fileExt = file.name.split('.').pop()
-      const fileName = `partner-logo-${Date.now()}.${fileExt}`
-      const filePath = `campaigns/${fileName}`
-
-      const { error: uploadError } = await supabase.storage
-        .from('scooter-image')
-        .upload(filePath, file, { cacheControl: '3600', upsert: true })
-
-      if (!uploadError) {
-        const { data: { publicUrl } } = supabase.storage
-          .from('scooter-image')
-          .getPublicUrl(filePath)
-        setCampaignForm(prev => ({ ...prev, partner_logo_url: publicUrl }))
-      } else {
-        const reader = new FileReader()
-        reader.onloadend = () => {
-          setCampaignForm(prev => ({ ...prev, partner_logo_url: reader.result as string }))
-        }
-        reader.readAsDataURL(file)
-      }
+      const url = await uploadCampaignAsset(file, 256, 'partner-logo')
+      setCampaignForm(prev => ({ ...prev, partner_logo_url: url }))
     } catch (err) {
-      console.warn("Partner logo fallback error:", err)
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setCampaignForm(prev => ({ ...prev, partner_logo_url: reader.result as string }))
-      }
-      reader.readAsDataURL(file)
+      console.error('Failed to process partner logo:', err)
+      setCampaignSaveError('Could not process the selected logo image.')
     } finally {
       setIsUploadingPartnerLogo(false)
     }
@@ -577,35 +613,11 @@ export default function AdminDashboard() {
 
     setIsUploadingCampaignImg(true)
     try {
-      const fileExt = file.name.split('.').pop()
-      const fileName = `campaign-${Date.now()}.${fileExt}`
-      const filePath = `campaigns/${fileName}`
-
-      // Attempt upload to Supabase storage bucket
-      const { error: uploadError } = await supabase.storage
-        .from('scooter-image')
-        .upload(filePath, file, { cacheControl: '3600', upsert: true })
-
-      if (!uploadError) {
-        const { data: { publicUrl } } = supabase.storage
-          .from('scooter-image')
-          .getPublicUrl(filePath)
-        setCampaignForm(prev => ({ ...prev, image_url: publicUrl }))
-      } else {
-        // Local base64 fallback
-        const reader = new FileReader()
-        reader.onloadend = () => {
-          setCampaignForm(prev => ({ ...prev, image_url: reader.result as string }))
-        }
-        reader.readAsDataURL(file)
-      }
+      const url = await uploadCampaignAsset(file, 900, 'campaign')
+      setCampaignForm(prev => ({ ...prev, image_url: url }))
     } catch (err) {
-      console.warn("Upload fallback error:", err)
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setCampaignForm(prev => ({ ...prev, image_url: reader.result as string }))
-      }
-      reader.readAsDataURL(file)
+      console.error('Failed to process campaign photo:', err)
+      setCampaignSaveError('Could not process the selected background photo.')
     } finally {
       setIsUploadingCampaignImg(false)
     }
@@ -613,20 +625,22 @@ export default function AdminDashboard() {
 
   const handleSaveCampaignSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setCampaignSaveError(null)
+
     if (!campaignForm.title.trim()) {
-      alert("Please provide a campaign title.")
+      setCampaignSaveError("Please provide a campaign title.")
       return
     }
 
     const rawLink = (campaignForm.cta_link || '').trim()
     const resolvedLink = rawLink ? resolveCampaignLink(rawLink) : null
     if (rawLink && !resolvedLink) {
-      alert("Please enter a valid website link (for example, https://yourspa.com).")
+      setCampaignSaveError("Please enter a valid website link (for example, https://yourspa.com).")
       return
     }
 
     if (campaignForm.category === 'spa' && !resolvedLink && !campaignForm.partner_whatsapp?.trim()) {
-      alert("Please enter the Spa booking website link so customers can book.")
+      setCampaignSaveError("Please enter the Spa booking website link so customers can book.")
       return
     }
 
@@ -642,8 +656,9 @@ export default function AdminDashboard() {
       setCampaignSaveSuccess(true)
       setIsCampaignModalOpen(false)
       setTimeout(() => setCampaignSaveSuccess(false), 3500)
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to save campaign:", err)
+      setCampaignSaveError(err?.message || "Could not publish campaign. Please check your connection and try again.")
     } finally {
       setIsSavingCampaign(false)
     }
@@ -2020,7 +2035,7 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* Form */}
-                  <form onSubmit={handleSaveCampaignSubmit} className="space-y-6">
+                  <form onSubmit={handleSaveCampaignSubmit} noValidate className="space-y-6">
                     
                     {/* Live Preview Card (Clean Black & White Design) */}
                     <div>
@@ -2658,29 +2673,37 @@ export default function AdminDashboard() {
                       </>
                     )}
 
-                    {/* Modal Submit Actions */}
-                    <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
-                      <button
-                        type="button"
-                        onClick={() => setIsCampaignModalOpen(false)}
-                        className="px-5 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={isSavingCampaign}
-                        className="px-6 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl text-xs font-bold uppercase tracking-wider active-press transition-all flex items-center gap-2 cursor-pointer shadow-md disabled:opacity-50"
-                      >
-                        {isSavingCampaign ? (
-                          <>
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            <span>Saving...</span>
-                          </>
-                        ) : (
-                          <span>{editingCampaignId ? 'Save Changes' : 'Publish Campaign'}</span>
-                        )}
-                      </button>
+                    {/* Error Alert & Sticky Modal Submit Actions */}
+                    <div className="sticky bottom-0 -mx-6 px-6 sm:-mx-8 sm:px-8 py-4 bg-white/95 backdrop-blur-sm border-t border-gray-100 z-20 space-y-3 rounded-b-3xl">
+                      {campaignSaveError && (
+                        <div className="flex items-start gap-2.5 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold">
+                          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                          <span>{campaignSaveError}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-end gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setIsCampaignModalOpen(false)}
+                          className="px-5 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={isSavingCampaign || isUploadingPartnerLogo || isUploadingCampaignImg}
+                          className="px-6 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl text-xs font-bold uppercase tracking-wider active-press transition-all flex items-center gap-2 cursor-pointer shadow-md disabled:opacity-50"
+                        >
+                          {isSavingCampaign ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              <span>Saving...</span>
+                            </>
+                          ) : (
+                            <span>{editingCampaignId ? 'Save Changes' : 'Publish Campaign'}</span>
+                          )}
+                        </button>
+                      </div>
                     </div>
 
                   </form>
