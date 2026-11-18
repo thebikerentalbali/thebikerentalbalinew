@@ -256,7 +256,7 @@ export default function ScooterDetailClient({
   }
 
   return (
-    <div className="min-h-screen text-[var(--ink)] antialiased w-full max-w-full overflow-x-hidden pt-4 pb-36 sm:py-8">
+    <div className="min-h-screen text-[var(--ink)] antialiased w-full max-w-full overflow-x-hidden pt-3.5 pb-28 sm:py-8">
       
       {/* Toast Notification */}
       {copiedToast && (
@@ -266,12 +266,12 @@ export default function ScooterDetailClient({
         </div>
       )}
 
-      <div className="w-full max-w-2xl mx-auto px-4 sm:px-6 space-y-6">
+      <div className="w-full max-w-2xl mx-auto px-3.5 sm:px-6 space-y-4 sm:space-y-6">
         
         {/* ========================================================================= */}
         {/* 1. HERO SHOWCASE CARD                                                    */}
         {/* ========================================================================= */}
-        <article className="cirrel-glass rounded-[30px] p-5 sm:p-8 flex flex-col justify-between transition-all">
+        <article className="cirrel-glass rounded-[24px] sm:rounded-[30px] p-4 sm:p-8 flex flex-col justify-between transition-all">
           
           {/* Header */}
           <div className="relative z-10 flex items-start justify-between gap-4 mb-2 sm:mb-4">
@@ -759,38 +759,43 @@ export default function ScooterDetailClient({
 
       </div>
 
-      {/* Floating Sticky Mobile Quick Rent Bar (Cirrel Liquid Glass Pill) */}
-      <nav aria-label="Quick Booking Bar" className="sm:hidden fixed bottom-4 left-4 right-4 mx-auto cirrel-modal rounded-full px-5 py-3 flex items-center justify-between z-40">
-        <div className="relative z-10 flex flex-col min-w-0 pr-2">
-          <span className="text-[10px] font-bold text-[var(--muted-ink)] uppercase tracking-wider">
-            Daily Rate
-          </span>
-          <div className="flex items-baseline gap-1">
-            <span className="text-base font-bold text-[var(--ink)] tracking-tight">
-              Rp {priceDaily.toLocaleString("id-ID")}
+      {/* Docked Mobile Quick Rent Bar (Clean Full-Width Responsive Footer) */}
+      <nav
+        aria-label="Quick Booking Bar"
+        className="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-[var(--bg)]/95 backdrop-blur-xl border-t border-[var(--line)] px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] shadow-[0_-10px_28px_rgba(15,30,60,0.08)]"
+      >
+        <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
+          <div className="flex flex-col min-w-0">
+            <span className="text-[10px] font-bold text-[var(--muted-ink)] uppercase tracking-wider leading-none">
+              Daily Rate
             </span>
-            <span className="text-[11px] text-[var(--muted-ink)] font-medium">/ day</span>
+            <div className="flex items-baseline gap-1 mt-1 truncate">
+              <span className="text-[17px] font-bold text-[var(--ink)] tracking-tight tabular-nums">
+                Rp {priceDaily.toLocaleString("id-ID")}
+              </span>
+              <span className="text-[11px] text-[var(--muted-ink)] font-medium">/ day</span>
+            </div>
           </div>
+
+          <button
+            type="button"
+            disabled={isNavigatingToCheckout}
+            onClick={handleRentNow}
+            className="cirrel-btn-primary px-5 py-3 text-xs font-bold uppercase tracking-wider active-press flex items-center justify-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-70 whitespace-nowrap"
+          >
+            {isNavigatingToCheckout ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <span>Loading...</span>
+              </>
+            ) : (
+              <>
+                <span>Rent Now</span>
+                <ChevronRight className="w-3.5 h-3.5 stroke-[2.5]" />
+              </>
+            )}
+          </button>
         </div>
-        
-        <button 
-          type="button"
-          disabled={isNavigatingToCheckout}
-          onClick={handleRentNow}
-          className="relative z-10 cirrel-btn-primary px-5 py-2.5 text-xs font-bold uppercase tracking-wider active-press flex items-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-70"
-        >
-          {isNavigatingToCheckout ? (
-            <>
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              <span>Loading...</span>
-            </>
-          ) : (
-            <>
-              <span>Rent Now</span>
-              <ChevronRight className="w-3.5 h-3.5 stroke-[2.5]" />
-            </>
-          )}
-        </button>
       </nav>
 
     </div>

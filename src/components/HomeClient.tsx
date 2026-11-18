@@ -65,6 +65,16 @@ export default function HomeClient({
   const [isSavedModalOpen, setIsSavedModalOpen] = useState(false)
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false)
   const [isNavOpen, setIsNavOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 28)
+    }
+    handleScroll()
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   // Filters state
   const [maxPrice, setMaxPrice] = useState(500000)
@@ -199,14 +209,23 @@ export default function HomeClient({
 
   return (
     <div className="flex flex-col min-h-screen px-4 sm:px-6 pb-24 md:px-10 md:pb-28 text-[var(--ink)]">
-      {/* Floating Cirrel Liquid Glass Navbar */}
-      <nav aria-label="Main Navigation" className="fixed top-4 left-4 right-4 md:left-10 md:right-10 z-50 pointer-events-none">
-        <div className="w-full max-w-7xl mx-auto relative pointer-events-auto">
-          <div className="cirrel-glass-hi rounded-full p-2 px-3 sm:px-4 flex justify-between items-center gap-3 transition-all duration-300">
+      {/* Animated Floating Cirrel Liquid Glass Navbar (smoothly appears on scroll, disappears at top) */}
+      <nav
+        aria-label="Main Navigation"
+        aria-hidden={!isScrolled}
+        className={`fixed top-3 sm:top-4 left-4 right-4 md:left-10 md:right-10 z-50 transition-all duration-300 ease-out ${
+          isScrolled
+            ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
+            : "opacity-0 -translate-y-4 scale-[0.98] pointer-events-none"
+        }`}
+      >
+        <div className="w-full max-w-7xl mx-auto relative">
+          <div className="cirrel-glass-hi rounded-full p-2 px-3 sm:px-4 flex justify-between items-center gap-3">
             {/* Location Selector (Street level) */}
             <button
               onClick={openLocationPicker}
               type="button"
+              tabIndex={isScrolled ? 0 : -1}
               aria-label="Open Vendor Location Map"
               className="flex items-center gap-2.5 text-left hover:bg-[var(--card-2)] p-1 pr-3 rounded-full transition-colors active-press cursor-pointer"
             >
@@ -230,6 +249,7 @@ export default function HomeClient({
               <button
                 onClick={() => setIsSavedModalOpen(true)}
                 type="button"
+                tabIndex={isScrolled ? 0 : -1}
                 aria-label="View saved scooters"
                 className="cirrel-ibtn w-9 h-9 relative active-press cursor-pointer"
               >
@@ -241,6 +261,7 @@ export default function HomeClient({
               <button
                 onClick={() => setIsNavOpen(!isNavOpen)}
                 type="button"
+                tabIndex={isScrolled ? 0 : -1}
                 aria-label={isNavOpen ? "Close Menu" : "Open Menu"}
                 className="cirrel-ibtn w-9 h-9 active-press cursor-pointer"
               >
@@ -248,10 +269,14 @@ export default function HomeClient({
               </button>
             </div>
           </div>
+        </div>
+      </nav>
 
-          {/* Dropdown Menu */}
-          {isNavOpen && (
-            <div className="absolute top-[66px] left-0 right-0 cirrel-modal rounded-[26px] p-5 sm:p-6 flex flex-col gap-2 animate-in slide-in-from-top-4 fade-in text-[var(--ink)]">
+      {/* Dropdown Menu (works cleanly from both top flat bar and scrolled navbar) */}
+      {isNavOpen && (
+        <div className="fixed top-[68px] sm:top-[76px] left-4 right-4 md:left-10 md:right-10 z-50 pointer-events-none">
+          <div className="w-full max-w-7xl mx-auto pointer-events-auto">
+            <div className="cirrel-modal rounded-[26px] p-5 sm:p-6 flex flex-col gap-2 animate-in slide-in-from-top-4 fade-in text-[var(--ink)]">
               <div className="relative z-10 flex flex-col gap-1">
                 <Link href="/about" onClick={() => setIsNavOpen(false)} prefetch={true} className="text-[15px] font-semibold text-[var(--ink)] px-3 py-2.5 rounded-2xl hover:bg-[var(--card-2)] transition-colors">About Us</Link>
                 <Link href="/how-it-works" onClick={() => setIsNavOpen(false)} prefetch={true} className="text-[15px] font-semibold text-[var(--ink)] px-3 py-2.5 rounded-2xl hover:bg-[var(--card-2)] transition-colors">How it Works</Link>
@@ -269,18 +294,65 @@ export default function HomeClient({
                 </div>
               </div>
             </div>
-          )}
+          </div>
         </div>
-      </nav>
+      )}
 
-      <main className="w-full max-w-7xl mx-auto pt-24 sm:pt-28 md:pt-32">
-        {/* Hero Header */}
-        <header className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-7 sm:mb-9">
-          <div>
-            <div className="cirrel-pill cirrel-pill--info mb-3">
-              <span className="w-1.5 h-1.5 rounded-full bg-current" />
-              <span>Verified Bali Scooter Marketplace</span>
+      <main className="w-full max-w-7xl mx-auto pt-4 sm:pt-6">
+        {/* Flat unboxed Top Controls at Homepage Top (disappears gracefully as floating rounded card fades in on scroll) */}
+        <div
+          className={`flex justify-between items-center gap-3 mb-5 sm:mb-7 transition-opacity duration-300 ${
+            isScrolled ? "opacity-0 pointer-events-none" : "opacity-100"
+          }`}
+        >
+          <button
+            onClick={openLocationPicker}
+            type="button"
+            aria-label="Open Vendor Location Map"
+            className="flex items-center gap-2.5 text-left py-1 pr-2 rounded-full transition-colors active-press cursor-pointer"
+          >
+            <div className="cirrel-mark w-9 h-9 rounded-full shrink-0 relative">
+              <MapPin className="w-4 h-4 text-white" aria-hidden="true" />
+              <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#30d158] rounded-full border-2 border-[var(--bg)] animate-pulse" />
             </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] font-bold text-[var(--muted-ink)] uppercase tracking-wider">Nearby</span>
+              <div className="flex items-center gap-1">
+                <span className="text-[13px] font-bold text-[var(--ink)] leading-tight">
+                  Vendor Locations
+                </span>
+                <ChevronDown className="w-3.5 h-3.5 text-[var(--muted-ink)]" aria-hidden="true" />
+              </div>
+            </div>
+          </button>
+
+          <div className="flex items-center gap-2">
+            <ThemeToggle className="w-9 h-9" />
+            <button
+              onClick={() => setIsSavedModalOpen(true)}
+              type="button"
+              aria-label="View saved scooters"
+              className="cirrel-ibtn w-9 h-9 relative active-press cursor-pointer"
+            >
+              <Heart className="w-4 h-4 text-[var(--ink)]" aria-hidden="true" />
+              {savedScooters.length > 0 && (
+                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-[var(--accent-blue)] rounded-full border-2 border-[var(--bg)]" />
+              )}
+            </button>
+            <button
+              onClick={() => setIsNavOpen(!isNavOpen)}
+              type="button"
+              aria-label={isNavOpen ? "Close Menu" : "Open Menu"}
+              className="cirrel-ibtn w-9 h-9 active-press cursor-pointer"
+            >
+              {isNavOpen ? <X className="w-4 h-4" aria-hidden="true" /> : <Menu className="w-4 h-4" aria-hidden="true" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Hero Header */}
+        <header className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
+          <div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[52px] font-bold leading-[1.06] text-[var(--ink)] tracking-tight">
               Find Your <br className="md:hidden" /> Perfect Ride
             </h1>
@@ -321,40 +393,36 @@ export default function HomeClient({
         {/* Promotional Campaign Card */}
         <CampaignCard />
 
-        {/* Filter and Brands */}
+        {/* Filter and Brands - Single Row with Duration Dropdown + Brand Chips */}
         <section aria-labelledby="brands-heading" className="mb-10 md:mb-12">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 md:mb-6">
-            <h2 id="brands-heading" className="text-xl md:text-2xl font-bold text-[var(--ink)]">Brand & Plan</h2>
+          <h2 id="brands-heading" className="text-xl md:text-2xl font-bold text-[var(--ink)] mb-3.5 md:mb-4">
+            Brand & Plan
+          </h2>
 
-            {/* Cirrel Segmented Duration Switcher */}
-            <div className="cirrel-seg inline-flex items-center self-start sm:self-auto" role="group" aria-label="Filter rental duration plan">
-              {["Daily", "Weekly", "Monthly"].map((plan) => {
-                const isSelected = durationFilter === plan
-                return (
-                  <button
-                    key={plan}
-                    type="button"
-                    onClick={() => setDurationFilter(plan)}
-                    aria-pressed={isSelected}
-                    className={`px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-                      isSelected
-                        ? "cirrel-btn-primary text-white"
-                        : "text-[var(--muted-ink)] hover:text-[var(--ink)]"
-                    }`}
-                  >
-                    {plan}
-                  </button>
-                )
-              })}
+          <div className="flex flex-nowrap items-center gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+            {/* Duration Dropdown */}
+            <div className="relative shrink-0">
+              <select
+                aria-label="Filter rental duration plan"
+                value={durationFilter}
+                onChange={(e) => setDurationFilter(e.target.value)}
+                className="cirrel-chip appearance-none pl-4 pr-8 h-10 md:h-11 text-xs sm:text-sm font-semibold text-[var(--ink)] cursor-pointer outline-none focus:ring-2 focus:ring-[var(--accent-blue)]"
+              >
+                <option value="Daily">Daily</option>
+                <option value="Weekly">Weekly</option>
+                <option value="Monthly">Monthly</option>
+              </select>
+              <ChevronDown
+                className="w-3.5 h-3.5 text-[var(--muted-ink)] pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
+                aria-hidden="true"
+              />
             </div>
-          </div>
 
-          <div className="flex gap-2.5 overflow-x-auto md:flex-wrap md:overflow-visible pb-2 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0 items-center">
             <button
               type="button"
               onClick={() => setActiveBrand("")}
               data-active={activeBrand === ""}
-              className="cirrel-chip px-5 h-11 md:h-12 text-sm whitespace-nowrap active-press cursor-pointer shrink-0"
+              className="cirrel-chip px-4 h-10 md:h-11 text-xs sm:text-sm whitespace-nowrap active-press cursor-pointer shrink-0"
             >
               All Brands
             </button>
@@ -369,12 +437,12 @@ export default function HomeClient({
                   onClick={() => setActiveBrand(isActive ? "" : brand.name)}
                   aria-pressed={isActive}
                   data-active={isActive}
-                  className="cirrel-chip flex items-center gap-2 px-5 h-11 md:h-12 whitespace-nowrap active-press cursor-pointer shrink-0"
+                  className="cirrel-chip flex items-center gap-1.5 px-3.5 sm:px-4 h-10 md:h-11 whitespace-nowrap active-press cursor-pointer shrink-0"
                 >
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center ${isActive ? "bg-white/20 text-white" : "cirrel-well text-[var(--ink)]"}`}>
-                    <brand.icon className="w-3.5 h-3.5" aria-hidden="true" />
+                  <div className={`w-5 h-5 rounded-full flex items-center justify-center ${isActive ? "bg-white/20 text-white" : "cirrel-well text-[var(--ink)]"}`}>
+                    <brand.icon className="w-3 h-3" aria-hidden="true" />
                   </div>
-                  <span className="font-semibold text-sm">{brand.name}</span>
+                  <span className="font-semibold text-xs sm:text-sm">{brand.name}</span>
                 </button>
               )
             })}

@@ -105,7 +105,7 @@ export default function CampaignCard({ initialCampaigns }: CampaignCardProps) {
       >
         {/* Media Pane (Compact top banner on mobile, sleek left split on desktop) */}
         {activeCampaign.image_url && (
-          <div className="relative w-full h-40 sm:h-44 md:h-auto md:w-[38%] lg:w-[36%] md:min-h-[200px] shrink-0 overflow-hidden bg-[#0b1220]">
+          <div className="relative w-full h-44 sm:h-48 md:h-auto md:w-[38%] lg:w-[36%] md:min-h-[200px] shrink-0 overflow-hidden bg-[#f4f6f9] dark:bg-[#141a24]">
             <Image
               src={activeCampaign.image_url}
               alt={activeCampaign.title || "Campaign"}
@@ -114,7 +114,7 @@ export default function CampaignCard({ initialCampaigns }: CampaignCardProps) {
               className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
               priority={true}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:to-black/15" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent md:bg-none" />
 
             {activeCampaign.badge && (
               <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/20 text-white text-[10px] font-bold uppercase tracking-wider">
