@@ -35,18 +35,14 @@ export default function CampaignCard({ initialCampaigns }: CampaignCardProps) {
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null)
   const [hasCopiedCode, setHasCopiedCode] = useState(false)
 
-  // Fetch Supabase campaigns in background
+  // Fetch Supabase campaigns in background (supports 0 campaigns when empty/deleted)
   useEffect(() => {
     fetchCampaigns(false).then((data) => {
-      if (data && data.length > 0) {
-        setCampaigns(data)
-      }
+      setCampaigns(Array.isArray(data) ? data : [])
     }).catch(() => {})
 
     const unsubscribe = subscribeToCampaigns((updated) => {
-      if (updated && updated.length > 0) {
-        setCampaigns(updated)
-      }
+      setCampaigns(Array.isArray(updated) ? updated : [])
     })
 
     return () => {

@@ -448,9 +448,9 @@ export default function AdminDashboard() {
       )
       .subscribe()
 
-    // Fetch campaigns
+    // Fetch campaigns (including empty DB state)
     fetchCampaigns(true).then((data) => {
-      if (data && data.length > 0) setCampaigns(data)
+      setCampaigns(Array.isArray(data) ? data : [])
     }).catch(() => {})
 
     const unsubscribeCampaigns = subscribeToCampaigns(() => {

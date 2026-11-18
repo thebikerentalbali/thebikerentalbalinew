@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 import { fetchCatalogData, fetchScooterDetail } from '@/lib/api/catalogService'
 import { clientCache } from '@/lib/cache/clientCache'
 import { subscribeToPlatformSettings } from '@/utils/pricing'
+import { addSavedBookings } from '@/utils/myBookings'
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -482,6 +483,40 @@ export default function CheckoutPage() {
     } finally {
       setIsSubmitting(false)
       const waUrl = getWhatsAppLink()
+
+      const finalStart = startDate || new Date().toISOString().split('T')[0]
+      const finalEnd = endDate || new Date().toISOString().split('T')[0]
+      const nowIso = new Date().toISOString()
+
+      addSavedBookings(
+        cart.map((item, idx) => {
+          let base = item.daily
+          if (item.durationMode === "weekly") base = item.weekly
+          if (item.durationMode === "monthly") base = item.monthly
+          const itemTotal = base * item.quantity * item.durationCount
+
+          return {
+            id: `booking-${Date.now()}-${idx}-${item.id}`,
+            scooterId: item.id,
+            scooterName: item.name,
+            scooterImg: item.img || item.image_url || "/images/scooter.png",
+            vendorName: item.vendors?.name || "The Bike Rental Bali",
+            vendorPhone: item.vendors?.phone || "",
+            customerName: `${firstName} ${lastName}`.trim() || "Guest Customer",
+            startDate: finalStart,
+            endDate: finalEnd,
+            quantity: item.quantity || 1,
+            durationMode: item.durationMode,
+            durationCount: item.durationCount || 1,
+            totalPrice: itemTotal,
+            deliveryMethod,
+            deliveryAddress,
+            whatsappUrl: waUrl,
+            createdAt: nowIso,
+          }
+        })
+      )
+
       window.location.href = waUrl
     }
   }

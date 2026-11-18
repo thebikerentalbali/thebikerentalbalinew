@@ -10,7 +10,7 @@ import {
   Menu,
   X,
   Heart,
-  MapPin,
+  ShoppingCart,
   Bike,
 } from "lucide-react"
 
@@ -20,6 +20,13 @@ import ThemeToggle from "@/components/ThemeToggle"
 import { fetchCatalogData } from "@/lib/api/catalogService"
 import { createClient as createBrowserClient } from "@/lib/supabase/client"
 import { subscribeToPlatformSettings } from "@/utils/pricing"
+import {
+  SavedBooking,
+  getSavedBookings,
+  removeSavedBooking,
+  clearSavedBookings,
+  subscribeToSavedBookings,
+} from "@/utils/myBookings"
 
 // Dynamic code-split imports for heavy modals - zero JS cost until user clicks
 const HomeFilterModal = dynamic(() => import("@/components/HomeFilterModal"), {
@@ -27,6 +34,10 @@ const HomeFilterModal = dynamic(() => import("@/components/HomeFilterModal"), {
   loading: () => null,
 })
 const HomeSavedModal = dynamic(() => import("@/components/HomeSavedModal"), {
+  ssr: false,
+  loading: () => null,
+})
+const HomeBookingsModal = dynamic(() => import("@/components/HomeBookingsModal"), {
   ssr: false,
   loading: () => null,
 })
@@ -63,9 +74,16 @@ export default function HomeClient({
 
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [isSavedModalOpen, setIsSavedModalOpen] = useState(false)
+  const [isBookingsModalOpen, setIsBookingsModalOpen] = useState(false)
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false)
   const [isNavOpen, setIsNavOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const [savedBookings, setSavedBookings] = useState<SavedBooking[]>([])
+
+  useEffect(() => {
+    setSavedBookings(getSavedBookings())
+    return subscribeToSavedBookings((updated) => setSavedBookings(updated))
+  }, [])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -220,31 +238,17 @@ export default function HomeClient({
         }`}
       >
         <div className="w-full max-w-7xl mx-auto relative">
-          <div className="cirrel-glass-hi rounded-full p-2 px-3 sm:px-4 flex justify-between items-center gap-3">
-            {/* Location Selector (Street level) */}
-            <button
-              onClick={openLocationPicker}
-              type="button"
+          <div className="cirrel-glass-hi rounded-full p-2 px-4 sm:px-5 flex justify-between items-center gap-3">
+            {/* Title Only */}
+            <Link
+              href="/"
               tabIndex={isScrolled ? 0 : -1}
-              aria-label="Open Vendor Location Map"
-              className="flex items-center gap-2.5 text-left hover:bg-[var(--card-2)] p-1 pr-3 rounded-full transition-colors active-press cursor-pointer"
+              className="text-sm sm:text-base font-bold tracking-tight text-[var(--ink)] hover:opacity-80 transition-opacity py-1 pr-2 truncate"
             >
-              <div className="cirrel-mark w-9 h-9 rounded-full shrink-0 relative">
-                <MapPin className="w-4 h-4 text-white" aria-hidden="true" />
-                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#30d158] rounded-full border-2 border-[var(--bg)] animate-pulse" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[10px] font-bold text-[var(--muted-ink)] uppercase tracking-wider">Nearby</span>
-                <div className="flex items-center gap-1">
-                  <span className="text-[13px] font-bold text-[var(--ink)] leading-tight">
-                    Vendor Locations
-                  </span>
-                  <ChevronDown className="w-3.5 h-3.5 text-[var(--muted-ink)]" aria-hidden="true" />
-                </div>
-              </div>
-            </button>
+              THE BIKE RENTAL BALI
+            </Link>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <ThemeToggle className="w-9 h-9" />
               <button
                 onClick={() => setIsSavedModalOpen(true)}
@@ -256,6 +260,20 @@ export default function HomeClient({
                 <Heart className="w-4 h-4 text-[var(--ink)]" aria-hidden="true" />
                 {savedScooters.length > 0 && (
                   <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-[var(--accent-blue)] rounded-full border-2 border-[var(--bg)]" />
+                )}
+              </button>
+              <button
+                onClick={() => setIsBookingsModalOpen(true)}
+                type="button"
+                tabIndex={isScrolled ? 0 : -1}
+                aria-label="View completed bookings"
+                className="cirrel-ibtn w-9 h-9 relative active-press cursor-pointer"
+              >
+                <ShoppingCart className="w-4 h-4 text-[var(--ink)]" aria-hidden="true" />
+                {savedBookings.length > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-[var(--accent-blue)] text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-[var(--bg)]">
+                    {savedBookings.length}
+                  </span>
                 )}
               </button>
               <button
@@ -305,28 +323,14 @@ export default function HomeClient({
             isScrolled ? "opacity-0 pointer-events-none" : "opacity-100"
           }`}
         >
-          <button
-            onClick={openLocationPicker}
-            type="button"
-            aria-label="Open Vendor Location Map"
-            className="flex items-center gap-2.5 text-left py-1 pr-2 rounded-full transition-colors active-press cursor-pointer"
+          <Link
+            href="/"
+            className="text-sm sm:text-base font-bold tracking-tight text-[var(--ink)] hover:opacity-80 transition-opacity py-1 pr-2 truncate"
           >
-            <div className="cirrel-mark w-9 h-9 rounded-full shrink-0 relative">
-              <MapPin className="w-4 h-4 text-white" aria-hidden="true" />
-              <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#30d158] rounded-full border-2 border-[var(--bg)] animate-pulse" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] font-bold text-[var(--muted-ink)] uppercase tracking-wider">Nearby</span>
-              <div className="flex items-center gap-1">
-                <span className="text-[13px] font-bold text-[var(--ink)] leading-tight">
-                  Vendor Locations
-                </span>
-                <ChevronDown className="w-3.5 h-3.5 text-[var(--muted-ink)]" aria-hidden="true" />
-              </div>
-            </div>
-          </button>
+            THE BIKE RENTAL BALI
+          </Link>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <ThemeToggle className="w-9 h-9" />
             <button
               onClick={() => setIsSavedModalOpen(true)}
@@ -337,6 +341,19 @@ export default function HomeClient({
               <Heart className="w-4 h-4 text-[var(--ink)]" aria-hidden="true" />
               {savedScooters.length > 0 && (
                 <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-[var(--accent-blue)] rounded-full border-2 border-[var(--bg)]" />
+              )}
+            </button>
+            <button
+              onClick={() => setIsBookingsModalOpen(true)}
+              type="button"
+              aria-label="View completed bookings"
+              className="cirrel-ibtn w-9 h-9 relative active-press cursor-pointer"
+            >
+              <ShoppingCart className="w-4 h-4 text-[var(--ink)]" aria-hidden="true" />
+              {savedBookings.length > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-[var(--accent-blue)] text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-[var(--bg)]">
+                  {savedBookings.length}
+                </span>
               )}
             </button>
             <button
@@ -512,6 +529,7 @@ export default function HomeClient({
             </div>
           </div>
           <div className="relative z-10 flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-[var(--ink-2)]">
+            <button type="button" onClick={openLocationPicker} className="hover:text-[var(--accent-text)] transition-colors cursor-pointer">Vendor Map</button>
             <Link href="/about" className="hover:text-[var(--accent-text)] transition-colors">About</Link>
             <Link href="/how-it-works" className="hover:text-[var(--accent-text)] transition-colors">How it Works</Link>
             <Link href="/faq" className="hover:text-[var(--accent-text)] transition-colors">FAQ</Link>
@@ -541,6 +559,17 @@ export default function HomeClient({
             allScooters={allScooters}
             durationFilter={durationFilter}
             onToggleSave={toggleSaveScooter}
+          />
+        )}
+
+        {/* Saved Completed Bookings (Cart) Modal */}
+        {isBookingsModalOpen && (
+          <HomeBookingsModal
+            isOpen={isBookingsModalOpen}
+            onClose={() => setIsBookingsModalOpen(false)}
+            bookings={savedBookings}
+            onRemoveBooking={(id) => setSavedBookings(removeSavedBooking(id))}
+            onClearBookings={() => setSavedBookings(clearSavedBookings())}
           />
         )}
 

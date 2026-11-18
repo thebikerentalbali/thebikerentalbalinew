@@ -110,26 +110,26 @@ export const DEFAULT_CAMPAIGNS: Campaign[] = [
 const STORAGE_KEY = 'tbrb_active_campaigns_v2';
 
 /**
- * Returns locally cached active campaigns or default campaign presets.
+ * Returns locally cached campaigns without reviving removed/mock presets.
  */
 export function getCampaigns(includeInactive = false): Campaign[] {
-  if (typeof window === 'undefined') return DEFAULT_CAMPAIGNS;
+  if (typeof window === 'undefined') return [];
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
+    if (saved !== null) {
       const parsed: Campaign[] = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length > 0) {
+      if (Array.isArray(parsed)) {
         return includeInactive ? parsed : parsed.filter(c => c.is_active !== false);
       }
     }
   } catch (e) {
     console.error('Failed to parse cached campaigns:', e);
   }
-  return includeInactive ? DEFAULT_CAMPAIGNS : DEFAULT_CAMPAIGNS.filter(c => c.is_active);
+  return [];
 }
 
 /**
- * Fetches campaigns from Supabase database with automatic fallback to localStorage/defaults.
+ * Fetches campaigns from Supabase database (authoritative even when empty).
  */
 export async function fetchCampaigns(includeInactive = false): Promise<Campaign[]> {
   const local = getCampaigns(includeInactive);
@@ -143,7 +143,7 @@ export async function fetchCampaigns(includeInactive = false): Promise<Campaign[
       .order('order', { ascending: true })
       .order('created_at', { ascending: false });
 
-    if (!error && data && data.length > 0) {
+    if (!error && Array.isArray(data)) {
       const remoteCampaigns: Campaign[] = data.map((item: any) => ({
         id: String(item.id),
         title: item.title || 'Special Campaign',
