@@ -69,8 +69,6 @@ export default async function VendorPage({ params }: PageProps) {
         url: `${SITE_URL}/vendor/${id}`,
         image: vendor.logo || vendor.image_url || `${SITE_URL}/icons/icon-512x512.png`,
         addressLocality: vendor.address || 'Bali',
-        ratingValue: 5.0,
-        reviewCount: reviews.length > 0 ? reviews.length : 45,
       })
     : null;
 

@@ -719,7 +719,7 @@ export default function ScooterDetailClient({
             ) : (
               <div className="relative z-10 cirrel-well rounded-[22px] p-5 text-center">
                 <p className="text-xs text-[var(--muted-ink)] font-medium">
-                  Explore the full garage and customer reviews directly on the vendor profile.
+                  Explore the full garage, available fleet, and Google Maps details directly on the vendor profile.
                 </p>
                 {vendor.id && (
                   <Link

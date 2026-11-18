@@ -71,8 +71,6 @@ export default async function DetailPage({ params }: PageProps) {
         currency: 'IDR',
         url: `/detail/${id}`,
         brand: scooter.brand || 'Motorcycle',
-        ratingValue: 5.0,
-        reviewCount: 38,
       })
     : null;
 

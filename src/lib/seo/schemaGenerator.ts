@@ -92,13 +92,17 @@ export function getLocalBusinessSchema(options?: {
       latitude: -8.5069,
       longitude: 115.2625
     },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: options?.ratingValue || 5.0,
-      reviewCount: options?.reviewCount || 148,
-      bestRating: 5,
-      worstRating: 1
-    }
+    ...(options?.ratingValue && options?.reviewCount
+      ? {
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: options.ratingValue,
+            reviewCount: options.reviewCount,
+            bestRating: 5,
+            worstRating: 1
+          }
+        }
+      : {})
   };
 }
 
@@ -160,13 +164,17 @@ export function getProductSchema(product: {
       availability: 'https://schema.org/InStock',
       itemCondition: 'https://schema.org/NewCondition'
     },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: product.ratingValue || 5.0,
-      reviewCount: product.reviewCount || 38,
-      bestRating: 5,
-      worstRating: 1
-    }
+    ...(product.ratingValue && product.reviewCount
+      ? {
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: product.ratingValue,
+            reviewCount: product.reviewCount,
+            bestRating: 5,
+            worstRating: 1
+          }
+        }
+      : {})
   };
 }
 

@@ -2,9 +2,10 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { ChevronRight, Store, User, Mail, Phone, Lock, Bike, MapPin, CheckCircle2, Loader2, Camera } from "lucide-react"
+import { ChevronRight, Store, User, Mail, Phone, Lock, Bike, MapPin, CheckCircle2, Loader2, Camera, Link2 } from "lucide-react"
 import dynamic from "next/dynamic"
 import { createClient } from "@/lib/supabase/client"
+import { normalizeGoogleMapsUrl, saveVendorGoogleMapsFallback } from "@/utils/vendorMaps"
 
 // Dynamically import MapPicker to prevent SSR issues with Leaflet
 const MapPicker = dynamic(() => import('@/components/MapPicker'), { ssr: false })
@@ -19,6 +20,7 @@ export default function PartnerSignUp() {
     fleetIntent: "",
     password: "",
     streetAddress: "",
+    googleMapsUrl: "",
     lat: 0,
     lng: 0
   })
@@ -90,7 +92,8 @@ export default function PartnerSignUp() {
       }
 
       // 2. Insert vendor profile
-      const { error: insertError } = await supabase.from('vendors').insert({
+      const normalizedMapsUrl = normalizeGoogleMapsUrl(formData.googleMapsUrl)
+      const baseVendorInsert = {
         auth_id: authData.user.id,
         name: formData.companyName,
         email: formData.email,
@@ -101,10 +104,30 @@ export default function PartnerSignUp() {
         logo: logoUrl || null,
         image_url: coverUrl || null,
         status: 'pending'
-      })
+      }
 
-      if (insertError) {
-        setErrorMsg("Error creating profile: " + insertError.message)
+      let insertResult = await supabase
+        .from('vendors')
+        .insert({
+          ...baseVendorInsert,
+          ...(normalizedMapsUrl ? { google_maps_url: normalizedMapsUrl } : {})
+        })
+        .select('id')
+        .maybeSingle()
+
+      if (insertResult.error && insertResult.error.message?.toLowerCase().includes('google_maps_url')) {
+        insertResult = await supabase
+          .from('vendors')
+          .insert(baseVendorInsert)
+          .select('id')
+          .maybeSingle()
+        if (!insertResult.error && insertResult.data?.id && normalizedMapsUrl) {
+          await saveVendorGoogleMapsFallback(insertResult.data.id, normalizedMapsUrl)
+        }
+      }
+
+      if (insertResult.error) {
+        setErrorMsg("Error creating profile: " + insertResult.error.message)
         setIsSubmitting(false)
         return
       }
@@ -414,6 +437,25 @@ export default function PartnerSignUp() {
                       onChange={(e) => setFormData({...formData, streetAddress: e.target.value})}
                       className="cirrel-input w-full pl-11 pr-4 py-3.5 rounded-[16px] text-sm font-medium h-24 resize-none"
                       placeholder="Enter full street address for delivery drivers..." 
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-sm font-bold text-[var(--ink-2)]">
+                    Google Maps Link <span className="text-xs font-normal text-[var(--muted-ink)]">(Optional — shows Google Reviews on profile)</span>
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Link2 className="h-5 w-5 text-[var(--muted-ink)]" />
+                    </div>
+                    <input
+                      type="url"
+                      name="googleMapsUrl"
+                      value={formData.googleMapsUrl}
+                      onChange={handleInputChange}
+                      className="cirrel-input w-full pl-11 pr-4 py-3.5 rounded-[14px] text-sm font-medium"
+                      placeholder="https://maps.app.goo.gl/..."
                     />
                   </div>
                 </div>

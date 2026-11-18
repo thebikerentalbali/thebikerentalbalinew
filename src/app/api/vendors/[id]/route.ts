@@ -3,8 +3,6 @@ import { createClient } from '@supabase/supabase-js';
 import { serverCache } from '@/lib/cache/serverCache';
 import { DEFAULT_PLATFORM_SETTINGS, getCustomerPrice, PlatformSettings } from '@/utils/pricing';
 
-import { getVendorDeterministicReviews } from '@/lib/api/catalogService';
-
 export const dynamic = 'force-dynamic';
 
 function getSupabaseClient() {
@@ -35,11 +33,10 @@ export async function GET(
       async () => {
         const supabase = getSupabaseClient();
 
-        // 1 parallel batch for vendor, scooters, reviews, and settings
+        // 1 parallel batch for vendor, scooters, and settings
         const [
           { data: vendor, error: vErr },
           { data: scooters, error: sErr },
-          { data: reviews, error: rErr },
           { data: settingsData }
         ] = await Promise.all([
           supabase
@@ -53,11 +50,6 @@ export async function GET(
             .select('*')
             .eq('vendor_id', id)
             .order('name', { ascending: true }),
-          supabase
-            .from('reviews')
-            .select('*')
-            .eq('vendor_id', id)
-            .order('created_at', { ascending: false }),
           supabase
             .from('platform_settings')
             .select('*')
@@ -88,16 +80,12 @@ export async function GET(
           };
         });
 
-        const allReviews = getVendorDeterministicReviews(id, reviews || []);
+        const { auth_id: _authId, email: _email, ...safeVendor } = vendor;
 
         return {
-          vendor: {
-            ...vendor,
-            rating: Number(vendor.rating) || 5.0,
-            reviewCount: allReviews.length,
-          },
+          vendor: safeVendor,
           scooters: formattedScooters,
-          reviews: allReviews,
+          reviews: [],
           settings,
         };
       },

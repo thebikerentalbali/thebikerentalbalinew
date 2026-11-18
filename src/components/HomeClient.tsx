@@ -298,10 +298,10 @@ export default function HomeClient({
         </div>
       )}
 
-      <main className="w-full max-w-7xl mx-auto pt-4 sm:pt-6">
+      <main className="w-full max-w-7xl mx-auto pt-5 sm:pt-7">
         {/* Flat unboxed Top Controls at Homepage Top (disappears gracefully as floating rounded card fades in on scroll) */}
         <div
-          className={`flex justify-between items-center gap-3 mb-5 sm:mb-7 transition-opacity duration-300 ${
+          className={`flex justify-between items-center gap-3 mb-10 sm:mb-12 md:mb-14 transition-opacity duration-300 ${
             isScrolled ? "opacity-0 pointer-events-none" : "opacity-100"
           }`}
         >

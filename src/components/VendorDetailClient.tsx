@@ -5,28 +5,38 @@ import {
   ChevronLeft, 
   ChevronRight,
   MapPin, 
-  Star, 
   Share, 
-  X, 
-  BadgeCheck, 
   Check, 
-  Bike
+  Bike,
+  Clock,
+  ShieldCheck,
+  ExternalLink
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
-import { createClient } from "@/lib/supabase/client"
-import { fetchVendorDetail, fetchScooterDetail, getVendorDeterministicReviews, invalidateAllCatalogCaches } from "@/lib/api/catalogService"
-import { clientCache } from "@/lib/cache/clientCache"
+import { fetchVendorDetail, fetchScooterDetail } from "@/lib/api/catalogService"
 import { subscribeToPlatformSettings } from "@/utils/pricing"
+import { normalizeGoogleMapsUrl, fetchVendorGoogleMapsFallback } from "@/utils/vendorMaps"
 import TransparentLoader from "@/components/TransparentLoader"
 
 interface VendorDetailClientProps {
   id: string
   initialVendor: any
   initialScooters: any[]
-  initialReviews: any[]
+  initialReviews?: any[]
   initialSettings?: any
+}
+
+function GoogleMarkIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={className}>
+      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+    </svg>
+  )
 }
 
 function formatTitleCase(str?: string) {
@@ -62,19 +72,13 @@ export default function VendorDetailClient({
   id,
   initialVendor,
   initialScooters = [],
-  initialReviews = [],
 }: VendorDetailClientProps) {
   const router = useRouter()
-  const supabase = createClient()
 
   const [vendor, setVendor] = useState<any>(initialVendor)
   const [scooters, setScooters] = useState<any[]>(initialScooters)
-  const [reviews, setReviews] = useState<any[]>(() => getVendorDeterministicReviews(id, initialReviews))
   const [loading, setLoading] = useState<boolean>(!initialVendor)
-  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false)
-  const [isWriteReviewModalOpen, setIsWriteReviewModalOpen] = useState(false)
-  const [newReview, setNewReview] = useState({ name: "", rating: 5, comment: "" })
-  const [isSubmittingReview, setIsSubmittingReview] = useState(false)
+  const [fallbackMapsUrl, setFallbackMapsUrl] = useState<string>("")
   const [selectedBrand, setSelectedBrand] = useState<string>("All")
   const [copiedLink, setCopiedLink] = useState(false)
 
@@ -152,45 +156,6 @@ export default function VendorDetailClient({
     }
   }
 
-  const handleSubmitReview = async () => {
-    if (!newReview.name || !newReview.comment) {
-      alert("Please enter your name and review.")
-    }
-    setIsSubmittingReview(true)
-    try {
-      const { error, data } = await supabase.from("reviews").insert({
-        vendor_id: id,
-        user_name: newReview.name,
-        rating: newReview.rating,
-        comment: newReview.comment
-      }).select().single()
-
-      if (!error && data) {
-        setReviews(prev => [data, ...prev])
-        invalidateAllCatalogCaches()
-        setIsWriteReviewModalOpen(false)
-        setNewReview({ name: "", rating: 5, comment: "" })
-      } else {
-        // Fallback / optimistic submission
-        const localReview = {
-          id: `review-${Date.now()}`,
-          vendor_id: id,
-          user_name: newReview.name,
-          rating: newReview.rating,
-          comment: newReview.comment,
-          created_at: new Date().toISOString()
-        }
-        setReviews(prev => [localReview, ...prev])
-        setIsWriteReviewModalOpen(false)
-        setNewReview({ name: "", rating: 5, comment: "" })
-      }
-    } catch (e) {
-      console.error("Submit review error:", e)
-    } finally {
-      setIsSubmittingReview(false)
-    }
-  }
-
   useEffect(() => {
     if (!initialVendor && id) {
       async function loadData() {
@@ -199,7 +164,6 @@ export default function VendorDetailClient({
           if (data?.vendor) {
             setVendor(data.vendor)
             setScooters(data.scooters || [])
-            setReviews(getVendorDeterministicReviews(id, data.reviews || []))
           }
         } catch (err) {
           console.error("Failed to load vendor details:", err)
@@ -208,6 +172,12 @@ export default function VendorDetailClient({
         }
       }
       loadData()
+    }
+
+    if (id && !normalizeGoogleMapsUrl(initialVendor?.google_maps_url)) {
+      fetchVendorGoogleMapsFallback(id).then((url) => {
+        if (url) setFallbackMapsUrl(url)
+      })
     }
 
     let unsubscribe: (() => void) | null = null;
@@ -226,7 +196,6 @@ export default function VendorDetailClient({
           if (data?.vendor) {
             setVendor(data.vendor);
             setScooters(data.scooters || []);
-            setReviews(getVendorDeterministicReviews(id, data.reviews || []));
           }
         }
       });
@@ -287,6 +256,7 @@ export default function VendorDetailClient({
     : scooters.filter((s) => s.brand === selectedBrand)
 
   const totalFleetCount = scooters.reduce((sum, s) => sum + (s.total_units || 1), 0)
+  const googleMapsUrl = normalizeGoogleMapsUrl(vendor?.google_maps_url) || fallbackMapsUrl
 
   return (
     <div className="min-h-screen text-[var(--ink)] antialiased w-full max-w-full overflow-x-hidden pb-16">
@@ -427,67 +397,56 @@ export default function VendorDetailClient({
               </div>
 
               {/* Stats Row */}
-              <div className="flex items-center justify-between border-t border-b border-[var(--line)] py-3 my-3.5">
-                <div className="flex flex-col items-center justify-center flex-1 cursor-pointer" onClick={() => setIsReviewModalOpen(true)}>
-                  <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 fill-[#ffb340] text-[#ffb340]" />
-                    <span className="font-bold text-base text-[var(--ink)]">{vendor.rating ? Number(vendor.rating).toFixed(1) : "5.0"}</span>
-                  </div>
-                  <span className="text-[10px] text-[var(--muted-ink)] font-bold mt-0.5 uppercase tracking-wider">rating</span>
+              <div className="flex items-center justify-between border-t border-[var(--line)] pt-3.5 mt-3.5 gap-2">
+                <div className="flex flex-col items-center justify-center flex-1">
+                  <span className="font-bold text-base text-[var(--ink)]">{totalFleetCount}</span>
+                  <span className="text-[10px] text-[var(--muted-ink)] font-bold mt-0.5 uppercase tracking-wider">scooters</span>
                 </div>
 
                 <div className="w-px h-6 bg-[var(--line)]" />
 
-                <div className="flex flex-col items-center justify-center flex-1 cursor-pointer" onClick={() => setIsReviewModalOpen(true)}>
-                  <span className="font-bold text-base text-[var(--ink)]">{reviews.length}+</span>
-                  <span className="text-[10px] text-[var(--muted-ink)] font-bold mt-0.5 uppercase tracking-wider">reviews</span>
+                <div className="flex flex-col items-center justify-center flex-1 min-w-0 px-1">
+                  <span className="font-bold text-xs text-[var(--ink)] truncate max-w-full">
+                    {vendor.opening_hours || "08:00 – 20:00"}
+                  </span>
+                  <span className="text-[10px] text-[var(--muted-ink)] font-bold mt-0.5 uppercase tracking-wider">hours</span>
                 </div>
 
                 <div className="w-px h-6 bg-[var(--line)]" />
 
                 <div className="flex flex-col items-center justify-center flex-1">
-                  <span className="font-bold text-base text-[var(--ink)]">{totalFleetCount}</span>
-                  <span className="text-[10px] text-[var(--muted-ink)] font-bold mt-0.5 uppercase tracking-wider">scooters</span>
+                  <div className="flex items-center gap-1 text-[var(--good)]">
+                    <ShieldCheck className="w-4 h-4" />
+                    <span className="font-bold text-xs">Verified</span>
+                  </div>
+                  <span className="text-[10px] text-[var(--muted-ink)] font-bold mt-0.5 uppercase tracking-wider">partner</span>
                 </div>
               </div>
 
-              {/* Swipeable Reviews */}
-              <div>
-                <div className="flex overflow-x-auto gap-3 pb-2 snap-x hide-scrollbar">
-                  {reviews.slice(0, 5).map((review) => (
-                    <div key={review.id} className="snap-start shrink-0 w-[260px] cirrel-well rounded-[20px] p-3.5 flex flex-col justify-between">
-                      <div>
-                        <div className="flex gap-0.5 mb-2">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className={`w-3.5 h-3.5 ${i < (review.rating || 5) ? "fill-[#ffb340] text-[#ffb340]" : "fill-[var(--line-2)] text-[var(--line-2)]"}`} />
-                          ))}
-                        </div>
-                        <p className="text-xs text-[var(--ink-2)] line-clamp-3 mb-2 font-medium">&ldquo;{review.comment}&rdquo;</p>
-                      </div>
-                      <p className="font-bold text-xs text-[var(--ink)]">- {review.user_name || "Guest"}</p>
-                    </div>
-                  ))}
-                  {reviews.length === 0 && (
-                    <div className="w-full text-center py-4 text-xs text-[var(--muted-ink)]">No reviews yet. Be the first!</div>
-                  )}
-                </div>
-                <div className="flex items-center gap-2.5 mt-3">
-                  <button 
-                    onClick={() => setIsWriteReviewModalOpen(true)}
-                    className="flex-1 cirrel-btn-primary font-bold py-2.5 text-xs active-press cursor-pointer"
+              {/* Google Reviews Button (when vendor configured their Google Maps link) */}
+              {googleMapsUrl && (
+                <div className="mt-4 pt-3.5 border-t border-[var(--line)]">
+                  <a
+                    href={googleMapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full cirrel-btn py-3 px-4 text-xs font-bold flex items-center justify-between gap-3 active-press cursor-pointer"
                   >
-                    Write a Review
-                  </button>
-                  {reviews.length > 0 && (
-                    <button 
-                      onClick={() => setIsReviewModalOpen(true)}
-                      className="flex-1 cirrel-btn font-bold py-2.5 text-xs active-press cursor-pointer"
-                    >
-                      See More
-                    </button>
-                  )}
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="w-7 h-7 rounded-full bg-white flex items-center justify-center shadow-xs shrink-0">
+                        <GoogleMarkIcon className="w-4 h-4" />
+                      </span>
+                      <div className="text-left min-w-0">
+                        <span className="block text-[var(--ink)] font-bold text-xs leading-tight">Google Reviews</span>
+                        <span className="block text-[10px] text-[var(--muted-ink)] font-medium truncate">
+                          View authentic reviews on Google Maps
+                        </span>
+                      </div>
+                    </div>
+                    <ExternalLink className="w-4 h-4 text-[var(--accent-text)] shrink-0" />
+                  </a>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </header>
@@ -705,38 +664,42 @@ export default function VendorDetailClient({
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <button 
-                  onClick={() => setIsWriteReviewModalOpen(true)}
-                  className="cirrel-btn-primary font-bold px-6 py-3 text-xs cursor-pointer active-press"
-                >
-                  Write a Review
-                </button>
-              </div>
+              {googleMapsUrl && (
+                <div className="flex items-center gap-3">
+                  <a
+                    href={googleMapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="cirrel-btn font-bold px-5 py-3 text-xs cursor-pointer active-press flex items-center gap-2.5"
+                  >
+                    <GoogleMarkIcon className="w-4 h-4 shrink-0" />
+                    <span>Google Reviews</span>
+                    <ExternalLink className="w-3.5 h-3.5 text-[var(--accent-text)]" />
+                  </a>
+                </div>
+              )}
             </div>
 
-            {/* 3 Column Stats Bar */}
-            <div className="flex items-center gap-8 py-4 border-t border-[var(--line)] max-w-md">
-              <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setIsReviewModalOpen(true)}>
-                <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 fill-[#ffb340] text-[#ffb340]" />
-                  <span className="font-bold text-base text-[var(--ink)]">{vendor.rating ? Number(vendor.rating).toFixed(1) : "5.0"}</span>
-                </div>
-                <span className="text-xs text-[var(--muted-ink)] font-bold uppercase tracking-wider">rating</span>
-              </div>
-              
-              <div className="w-px h-6 bg-[var(--line)]" />
-
-              <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setIsReviewModalOpen(true)}>
-                <span className="font-bold text-base text-[var(--ink)]">{reviews.length}+</span>
-                <span className="text-xs text-[var(--muted-ink)] font-bold uppercase tracking-wider">reviews</span>
-              </div>
-
-              <div className="w-px h-6 bg-[var(--line)]" />
-
-              <div className="flex items-center gap-2.5">
+            {/* 3 Column Real Info Bar */}
+            <div className="flex items-center gap-8 py-4 border-t border-[var(--line)] flex-wrap">
+              <div className="flex items-center gap-2">
+                <Bike className="w-4 h-4 text-[var(--accent-text)]" />
                 <span className="font-bold text-base text-[var(--ink)]">{totalFleetCount}</span>
                 <span className="text-xs text-[var(--muted-ink)] font-bold uppercase tracking-wider">scooters</span>
+              </div>
+
+              <div className="w-px h-6 bg-[var(--line)]" />
+
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-[var(--accent-text)]" />
+                <span className="font-bold text-sm text-[var(--ink)]">{vendor.opening_hours || "08:00 AM – 08:00 PM Daily"}</span>
+              </div>
+
+              <div className="w-px h-6 bg-[var(--line)]" />
+
+              <div className="flex items-center gap-1.5 text-[var(--good)]">
+                <ShieldCheck className="w-4 h-4" />
+                <span className="text-xs font-bold uppercase tracking-wider">Verified Partner</span>
               </div>
             </div>
           </div>
@@ -843,59 +806,32 @@ export default function VendorDetailClient({
               )}
             </div>
 
-            {/* Verified Reviews Section (Desktop) */}
-            <div className="cirrel-glass rounded-[30px] p-6 lg:p-8">
-              <div className="relative z-10 flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-xl font-bold text-[var(--ink)] tracking-tight">Customer Reviews</h2>
-                  <div className="flex items-center gap-2 mt-1">
-                    <div className="flex items-center gap-1 bg-[var(--warn-soft)] text-[var(--warn)] px-2.5 py-0.5 rounded-full">
-                      <Star className="w-3.5 h-3.5 fill-current" />
-                      <span className="font-bold text-xs">{vendor.rating ? Number(vendor.rating).toFixed(1) : "5.0"}</span>
-                    </div>
-                    <span className="text-xs text-[var(--muted-ink)] font-medium">•</span>
-                    <span className="text-xs text-[var(--muted-ink)] font-medium">{reviews.length} authenticated reviews</span>
+            {/* Google Maps & Reviews Section (Desktop) */}
+            {googleMapsUrl && (
+              <div className="cirrel-glass rounded-[30px] p-6 lg:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+                <div className="relative z-10 flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-white shadow-xs border border-[var(--line)] flex items-center justify-center shrink-0">
+                    <GoogleMarkIcon className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-[var(--ink)] tracking-tight">Google Reviews</h2>
+                    <p className="text-xs sm:text-sm text-[var(--muted-ink)] font-medium mt-1">
+                      Read verified customer ratings and check {vendor.name}&apos;s exact location directly on Google Maps.
+                    </p>
                   </div>
                 </div>
 
-                <button 
-                  onClick={() => setIsWriteReviewModalOpen(true)}
-                  className="cirrel-btn-primary font-bold px-5 py-2.5 text-xs cursor-pointer"
+                <a
+                  href={googleMapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="relative z-10 cirrel-btn-primary font-bold px-6 py-3 text-xs shrink-0 flex items-center justify-center gap-2 active-press"
                 >
-                  Write Review
-                </button>
+                  <span>View Google Reviews</span>
+                  <ExternalLink className="w-4 h-4" />
+                </a>
               </div>
-
-              <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-4">
-                {reviews.slice(0, 6).map((review) => (
-                  <div key={review.id} className="cirrel-well rounded-[20px] p-4 flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center gap-1 mb-2">
-                        {[...Array(review.rating || 5)].map((_, i) => (
-                          <Star key={i} className={`w-3.5 h-3.5 ${i < (review.rating || 5) ? "fill-[#ffb340] text-[#ffb340]" : "fill-[var(--line-2)] text-[var(--line-2)]"}`} />
-                        ))}
-                      </div>
-                      <p className="text-xs text-[var(--ink-2)] font-medium mb-3">&ldquo;{review.comment || "Smooth rental process and well-maintained bike."}&rdquo;</p>
-                    </div>
-                    <p className="font-bold text-xs text-[var(--ink)]">- {review.user_name || "Guest"}</p>
-                  </div>
-                ))}
-                {reviews.length === 0 && (
-                  <div className="col-span-2 text-center py-8 text-xs text-[var(--muted-ink)] font-medium">No reviews yet. Be the first!</div>
-                )}
-              </div>
-
-              {reviews.length > 6 && (
-                <div className="relative z-10 mt-6 text-center">
-                  <button 
-                    onClick={() => setIsReviewModalOpen(true)}
-                    className="cirrel-btn px-6 py-2 text-xs font-bold cursor-pointer"
-                  >
-                    See All Reviews
-                  </button>
-                </div>
-              )}
-            </div>
+            )}
 
           </div>
 
@@ -919,6 +855,19 @@ export default function VendorDetailClient({
                     <span>{vendor.address || "Bali, Indonesia"}</span>
                   </p>
                 </div>
+
+                {googleMapsUrl && (
+                  <a
+                    href={googleMapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full cirrel-btn py-3 px-4 text-xs font-bold flex items-center justify-center gap-2 active-press"
+                  >
+                    <GoogleMarkIcon className="w-4 h-4" />
+                    <span>Google Reviews &amp; Maps</span>
+                    <ExternalLink className="w-3.5 h-3.5 text-[var(--accent-text)]" />
+                  </a>
+                )}
               </div>
             </div>
           </div>
@@ -926,143 +875,6 @@ export default function VendorDetailClient({
         </div>
 
       </div>
-
-      {/* Reviews Modal for Mobile & Desktop */}
-      {isReviewModalOpen && (
-        <div 
-          onClick={() => setIsReviewModalOpen(false)}
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4"
-        >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            className="cirrel-modal rounded-[30px] w-full max-w-lg max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200 text-[var(--ink)]"
-          >
-            <div className="relative z-10 p-5 border-b border-[var(--line)] flex items-center justify-between">
-              <div>
-                <h3 className="font-bold text-lg text-[var(--ink)]">Reviews</h3>
-                <div className="flex items-center gap-1.5">
-                  <Star className="w-3.5 h-3.5 fill-[#ffb340] text-[#ffb340]" />
-                  <span className="text-xs font-bold">{vendor.rating ? Number(vendor.rating).toFixed(1) : "5.0"}</span>
-                  <span className="text-xs text-[var(--muted-ink)]">({reviews.length} reviews)</span>
-                </div>
-              </div>
-              <button 
-                onClick={() => setIsReviewModalOpen(false)}
-                className="cirrel-ibtn w-8 h-8 cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="relative z-10 p-5 overflow-y-auto space-y-3 flex-1">
-              {reviews.map((review) => (
-                <div key={review.id} className="cirrel-well rounded-[20px] p-3.5">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="font-bold text-xs text-[var(--ink)]">{review.user_name || "Customer"}</span>
-                    <div className="flex items-center gap-0.5">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className={`w-3.5 h-3.5 ${i < (review.rating || 5) ? "fill-[#ffb340] text-[#ffb340]" : "fill-[var(--line-2)] text-[var(--line-2)]"}`} />
-                      ))}
-                    </div>
-                  </div>
-                  <p className="text-xs text-[var(--ink-2)] font-medium">&ldquo;{review.comment}&rdquo;</p>
-                  {review.created_at && (
-                    <span className="text-[10px] text-[var(--muted-ink)] mt-1 block">
-                      {new Date(review.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
-                    </span>
-                  )}
-                </div>
-              ))}
-              {reviews.length === 0 && (
-                <p className="text-center py-8 text-xs text-[var(--muted-ink)]">No reviews found.</p>
-              )}
-            </div>
-
-            <div className="relative z-10 p-5 border-t border-[var(--line)]">
-              <button 
-                onClick={() => {
-                  setIsReviewModalOpen(false)
-                  setIsWriteReviewModalOpen(true)
-                }}
-                className="w-full cirrel-btn-primary font-bold py-3 text-xs cursor-pointer"
-              >
-                Write a Review
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Write Review Modal */}
-      {isWriteReviewModalOpen && (
-        <div 
-          onClick={() => setIsWriteReviewModalOpen(false)}
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4"
-        >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            className="cirrel-modal rounded-[30px] w-full max-w-md flex flex-col animate-in zoom-in-95 duration-200 text-[var(--ink)]"
-          >
-            <div className="relative z-10 p-5 border-b border-[var(--line)] flex items-center justify-between">
-              <h3 className="font-bold text-base text-[var(--ink)]">Write a Review</h3>
-              <button 
-                onClick={() => setIsWriteReviewModalOpen(false)}
-                className="cirrel-ibtn w-8 h-8 cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="relative z-10 p-5 space-y-4">
-              <div>
-                <label className="text-xs font-bold text-[var(--ink-2)] block mb-1.5">Rating</label>
-                <div className="flex items-center gap-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      onClick={() => setNewReview({ ...newReview, rating: star })}
-                      className="p-1 cursor-pointer transition-transform hover:scale-110"
-                    >
-                      <Star className={`w-6 h-6 ${star <= newReview.rating ? "fill-[#ffb340] text-[#ffb340]" : "fill-[var(--line-2)] text-[var(--line-2)]"}`} />
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-[var(--ink-2)] block mb-1.5">Your Name</label>
-                <input 
-                  type="text"
-                  placeholder="e.g. Alex M."
-                  value={newReview.name}
-                  onChange={(e) => setNewReview({ ...newReview, name: e.target.value })}
-                  className="cirrel-input w-full rounded-[14px] px-3.5 py-2.5 text-xs"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-[var(--ink-2)] block mb-1.5">Your Feedback</label>
-                <textarea 
-                  rows={4}
-                  placeholder="Share your experience renting with this partner..."
-                  value={newReview.comment}
-                  onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
-                  className="cirrel-input w-full rounded-[16px] p-3.5 text-xs resize-none"
-                />
-              </div>
-
-              <button 
-                onClick={handleSubmitReview}
-                disabled={isSubmittingReview}
-                className="w-full cirrel-btn-primary font-bold py-3 text-xs flex items-center justify-center gap-2 cursor-pointer"
-              >
-                {isSubmittingReview ? "Submitting..." : "Submit Review"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
     </div>
   )

@@ -1,6 +1,7 @@
--- 1. Add Operating Hours and Delivery Areas to the vendors table
+-- 1. Add Operating Hours, Delivery Areas, and Google Maps link to the vendors table
 ALTER TABLE vendors ADD COLUMN IF NOT EXISTS opening_hours text DEFAULT '08:00 AM – 08:00 PM Daily';
 ALTER TABLE vendors ADD COLUMN IF NOT EXISTS delivery_area text;
+ALTER TABLE vendors ADD COLUMN IF NOT EXISTS google_maps_url text;
 
 -- 2. Create Bookings Table if not exists
 CREATE TABLE IF NOT EXISTS bookings (

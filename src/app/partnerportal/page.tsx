@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Bike, DollarSign, CalendarDays, Settings, Bell, Search, Star, Plus, QrCode, Home, Wallet, User, ChevronRight, ChevronLeft, TrendingUp, Wrench, MoreVertical, CheckCircle2, Clock, X, ChevronDown, List, Calendar as CalendarIcon, Camera, Loader2, LogOut, RotateCcw, Check, XCircle, Store, Calendar, ArrowUpRight, Download } from "lucide-react"
+import { Bike, DollarSign, CalendarDays, Settings, Bell, Search, Plus, QrCode, Home, Wallet, User, ChevronRight, ChevronLeft, TrendingUp, Wrench, MoreVertical, CheckCircle2, Clock, X, ChevronDown, List, Calendar as CalendarIcon, Camera, Loader2, LogOut, RotateCcw, Check, XCircle, Store, Calendar, ArrowUpRight, Download, MapPin, ExternalLink } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import dynamic from "next/dynamic"
@@ -15,6 +15,7 @@ import {
   calculateRentalDays 
 } from "@/utils/pricing"
 import { invalidateAllCatalogCaches } from "@/lib/api/catalogService"
+import { normalizeGoogleMapsUrl, saveVendorGoogleMapsFallback, fetchVendorGoogleMapsFallback } from "@/utils/vendorMaps"
 import ThemeToggle from "@/components/ThemeToggle"
 
 const MapPicker = dynamic(() => import('@/components/MapPicker'), { ssr: false })
@@ -431,7 +432,8 @@ export default function VendorDashboard() {
     phone: "", 
     address: "",
     opening_hours: "",
-    delivery_area: ""
+    delivery_area: "",
+    google_maps_url: ""
   })
   const [vendorLogo, setVendorLogo] = useState<string | null>(null)
   const [vendorCover, setVendorCover] = useState<string | null>(null)
@@ -440,13 +442,22 @@ export default function VendorDashboard() {
   // Initialize settings when vendorData loads
   useEffect(() => {
     if (vendorData) {
+      const dbMapsUrl = vendorData.google_maps_url || ""
       setSettingsForm({
         name: vendorData.name || "",
         phone: vendorData.phone || "",
         address: vendorData.address || "",
         opening_hours: vendorData.opening_hours || "08:00 AM – 08:00 PM Daily",
-        delivery_area: vendorData.delivery_area || ""
+        delivery_area: vendorData.delivery_area || "",
+        google_maps_url: dbMapsUrl
       })
+      if (!dbMapsUrl && vendorData.id) {
+        fetchVendorGoogleMapsFallback(vendorData.id).then((fallbackUrl) => {
+          if (fallbackUrl) {
+            setSettingsForm((prev) => prev.google_maps_url ? prev : { ...prev, google_maps_url: fallbackUrl })
+          }
+        })
+      }
       if (vendorData.lat && vendorData.lng && Number(vendorData.lat) !== 0 && !isNaN(Number(vendorData.lat)) && !isNaN(Number(vendorData.lng))) {
         setVendorLocation([Number(vendorData.lat), Number(vendorData.lng)])
       }
@@ -460,24 +471,51 @@ export default function VendorDashboard() {
   }, [vendorData])
 
   const handleSaveSettings = async () => {
+    const rawMaps = settingsForm.google_maps_url.trim()
+    const normalizedMapsUrl = normalizeGoogleMapsUrl(rawMaps)
+    if (rawMaps && !normalizedMapsUrl) {
+      alert("Please enter a valid Google Maps link (e.g. https://maps.app.goo.gl/...).")
+      return
+    }
+
     setIsSavingSettings(true)
-    const { error } = await supabase
+    const basePayload = {
+      name: settingsForm.name,
+      phone: settingsForm.phone,
+      address: settingsForm.address,
+      opening_hours: settingsForm.opening_hours,
+      delivery_area: settingsForm.delivery_area,
+      lat: vendorLocation[0],
+      lng: vendorLocation[1],
+      logo: vendorLogo,
+      image_url: vendorCover
+    }
+
+    let { error } = await supabase
       .from('vendors')
       .update({
-        name: settingsForm.name,
-        phone: settingsForm.phone,
-        address: settingsForm.address,
-        opening_hours: settingsForm.opening_hours,
-        delivery_area: settingsForm.delivery_area,
-        lat: vendorLocation[0],
-        lng: vendorLocation[1],
-        logo: vendorLogo,
-        image_url: vendorCover
+        ...basePayload,
+        google_maps_url: normalizedMapsUrl || null,
       })
       .eq('id', vendorData.id)
+
+    if (error && error.message?.toLowerCase().includes('google_maps_url')) {
+      const retry = await supabase
+        .from('vendors')
+        .update(basePayload)
+        .eq('id', vendorData.id)
+      error = retry.error
+      if (!error) {
+        await saveVendorGoogleMapsFallback(vendorData.id, normalizedMapsUrl)
+      }
+    } else if (!error) {
+      // Keep fallback in sync when column exists too
+      setSettingsForm((prev) => ({ ...prev, google_maps_url: normalizedMapsUrl }))
+    }
       
     setIsSavingSettings(false)
     if (!error) {
+      setVendorData((prev: any) => prev ? { ...prev, ...basePayload, google_maps_url: normalizedMapsUrl || null } : prev)
       invalidateAllCatalogCaches()
       alert("Settings saved successfully!")
     } else {
@@ -772,16 +810,36 @@ export default function VendorDashboard() {
                   <div className="cirrel-kpi cirrel-kpi--2 p-5 md:p-6 sm:col-span-2 lg:col-span-1">
                     <div className="relative z-10 flex items-center gap-3 mb-3">
                       <div className="w-10 h-10 rounded-full bg-[var(--warn-soft)] text-[var(--warn)] flex items-center justify-center">
-                        <Star className="w-5 h-5 fill-current" />
+                        <MapPin className="w-5 h-5" />
                       </div>
-                      <h3 className="text-xs font-bold text-[var(--tile-muted)] uppercase tracking-wider">Avg Rating</h3>
+                      <h3 className="text-xs font-bold text-[var(--tile-muted)] uppercase tracking-wider">Google Reviews</h3>
                     </div>
                     <div className="relative z-10 flex items-baseline gap-2">
-                      <p className="text-2xl md:text-3xl font-bold text-[var(--tile-ink)] tracking-tight">5.0</p>
+                      <p className="text-2xl md:text-3xl font-bold text-[var(--tile-ink)] tracking-tight">
+                        {normalizeGoogleMapsUrl(settingsForm.google_maps_url || vendorData?.google_maps_url) ? "Connected" : "Not Set"}
+                      </p>
                     </div>
-                    <p className="relative z-10 text-xs font-semibold text-[var(--tile-muted)] mt-3">
-                      Based on <span className="text-[var(--tile-ink)]">Verified partner reviews</span>
-                    </p>
+                    <div className="relative z-10 text-xs font-semibold text-[var(--tile-muted)] mt-3">
+                      {normalizeGoogleMapsUrl(settingsForm.google_maps_url || vendorData?.google_maps_url) ? (
+                        <a
+                          href={normalizeGoogleMapsUrl(settingsForm.google_maps_url || vendorData?.google_maps_url)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[var(--accent-text)] font-bold hover:underline"
+                        >
+                          <span>View Google Reviews</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab('profile')}
+                          className="text-[var(--accent-text)] font-bold hover:underline cursor-pointer"
+                        >
+                          Add your Google Maps link →
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               )
@@ -1577,6 +1635,33 @@ export default function VendorDashboard() {
                   className="cirrel-input w-full rounded-[16px] px-4 py-3 text-sm font-medium min-h-[80px] mb-1"
                 />
                 <p className="text-xs text-[var(--muted-ink)] mb-4">Specify custom covered zones and areas for hotel/villa delivery.</p>
+
+                <label className="block text-sm font-semibold text-[var(--ink-2)] mb-2">
+                  Google Maps Link (Google Reviews)
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://maps.app.goo.gl/... or https://www.google.com/maps/place/..."
+                  value={settingsForm.google_maps_url}
+                  onChange={(e) => setSettingsForm({ ...settingsForm, google_maps_url: e.target.value })}
+                  className="cirrel-input w-full rounded-[14px] px-4 py-3 text-sm font-medium mb-1.5"
+                />
+                <div className="flex items-center justify-between gap-2 flex-wrap mb-4">
+                  <p className="text-xs text-[var(--muted-ink)]">
+                    Paste your Google Maps share URL. A Google Reviews button will appear on your public profile.
+                  </p>
+                  {normalizeGoogleMapsUrl(settingsForm.google_maps_url) && (
+                    <a
+                      href={normalizeGoogleMapsUrl(settingsForm.google_maps_url)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-bold text-[var(--accent-text)] hover:underline inline-flex items-center gap-1 shrink-0"
+                    >
+                      <span>Test Link</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  )}
+                </div>
 
                 <label className="block text-sm font-semibold text-[var(--ink-2)] mb-2">Pin Location on Map</label>
                 <div className="h-[300px] w-full rounded-[20px] overflow-hidden border border-[var(--line)] shadow-sm relative z-0">
