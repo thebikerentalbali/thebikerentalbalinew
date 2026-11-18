@@ -1,20 +1,9 @@
 "use client"
 
-import React, { useEffect, useMemo } from 'react'
-import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet'
-import 'leaflet/dist/leaflet.css'
-import L from 'leaflet'
-import { getNormalizedVendorCoordinates } from '@/lib/api/catalogService'
-
-// Fix for default marker icons in React-Leaflet
-const defaultIcon = L.icon({
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-})
+import React, { useEffect, useMemo, useRef } from "react"
+import { Map as MapLibreMap, Marker, type StyleSpecification, type MapMouseEvent } from "maplibre-gl"
+import "maplibre-gl/dist/maplibre-gl.css"
+import { getNormalizedVendorCoordinates } from "@/lib/api/catalogService"
 
 export interface MapVendorItem {
   id: number | string
@@ -22,8 +11,6 @@ export interface MapVendorItem {
   lat?: number | string
   lng?: number | string
   initials?: string
-  rating?: number | string
-  review_count?: number | string
   logo?: string
   logo_url?: string
   image_url?: string
@@ -44,114 +31,211 @@ interface MapPickerProps {
   interactive?: boolean
 }
 
-const extractLocationTitle = (vendor: MapVendorItem): string => {
-  const addr = (vendor.location || vendor.address || '').toLowerCase()
-  if (addr.includes('canggu') || addr.includes('berawa') || addr.includes('pererenan') || addr.includes('batu bolong')) return 'Canggu'
-  if (addr.includes('seminyak') || addr.includes('petitenget') || addr.includes('kerobokan') || addr.includes('umalas')) return 'Seminyak'
-  if (addr.includes('ubud') || addr.includes('sayan') || addr.includes('mas') || addr.includes('tegallalang')) return 'Ubud'
-  if (addr.includes('sanur')) return 'Sanur'
-  if (addr.includes('kuta') || addr.includes('legian') || addr.includes('tuban')) return 'Kuta'
-  if (addr.includes('uluwatu') || addr.includes('pecatu') || addr.includes('bingin')) return 'Uluwatu'
-  if (addr.includes('nusa dua') || addr.includes('benoa')) return 'Nusa Dua'
-  if (addr.includes('jimbaran')) return 'Jimbaran'
-  if (addr.includes('denpasar')) return 'Denpasar'
-  return vendor.address ? vendor.address.split(',')[0].slice(0, 14) : 'Bali'
+const OPENFREEMAP_STYLE = "https://tiles.openfreemap.org/styles/positron"
+
+const OSM_FALLBACK_STYLE: StyleSpecification = {
+  version: 8,
+  sources: {
+    osm: {
+      type: "raster",
+      tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+      tileSize: 256,
+      attribution: "&copy; OpenStreetMap contributors",
+    },
+  },
+  layers: [
+    {
+      id: "osm-tiles",
+      type: "raster",
+      source: "osm",
+      minzoom: 0,
+      maxzoom: 19,
+    },
+  ],
 }
 
-const getVendorIcon = (
-  vendor: MapVendorItem,
-  isSelected: boolean = false
-) => {
-  const name = vendor.name || 'Vendor'
+const extractLocationTitle = (vendor: MapVendorItem): string => {
+  const addr = (vendor.location || vendor.address || "").toLowerCase()
+  if (addr.includes("canggu") || addr.includes("berawa") || addr.includes("pererenan") || addr.includes("batu bolong")) return "Canggu"
+  if (addr.includes("seminyak") || addr.includes("petitenget") || addr.includes("kerobokan") || addr.includes("umalas")) return "Seminyak"
+  if (addr.includes("ubud") || addr.includes("sayan") || addr.includes("mas") || addr.includes("tegallalang")) return "Ubud"
+  if (addr.includes("sanur")) return "Sanur"
+  if (addr.includes("kuta") || addr.includes("legian") || addr.includes("tuban")) return "Kuta"
+  if (addr.includes("uluwatu") || addr.includes("pecatu") || addr.includes("bingin")) return "Uluwatu"
+  if (addr.includes("nusa dua") || addr.includes("benoa")) return "Nusa Dua"
+  if (addr.includes("jimbaran")) return "Jimbaran"
+  if (addr.includes("denpasar")) return "Denpasar"
+  return vendor.address ? vendor.address.split(",")[0].slice(0, 14) : "Bali"
+}
+
+function createVendorMarkerElement(vendor: MapVendorItem, isSelected: boolean): HTMLDivElement {
+  const name = vendor.name || "Vendor"
   const initials = vendor.initials || name.substring(0, 2).toUpperCase()
   const logo = vendor.logo || vendor.logo_url || vendor.image_url
-  const rating = vendor.rating ? Number(vendor.rating).toFixed(1) : '5.0'
   const locTitle = extractLocationTitle(vendor)
 
-  const logoHtml = logo
-    ? `<img src="${logo}" alt="${name}" style="width:100%;height:100%;object-fit:cover;border-radius:9999px;" onerror="this.style.display='none'" />`
-    : `<span style="font-weight:900;color:${isSelected ? '#000000' : '#ffffff'};font-size:10px;">${initials}</span>`
+  const wrapper = document.createElement("div")
+  wrapper.style.position = "relative"
+  wrapper.style.transform = "translateY(-10px)"
+  wrapper.style.cursor = "pointer"
+  wrapper.style.userSelect = "none"
 
-  const bgStyle = isSelected 
-    ? 'background:#000000;color:#ffffff;border:2px solid #000000;box-shadow:0 12px 28px -4px rgba(0,0,0,0.5);transform:scale(1.08);' 
-    : 'background:#ffffff;color:#000000;border:1.5px solid #000000;box-shadow:0 6px 18px -3px rgba(0,0,0,0.18);'
+  const pill = document.createElement("div")
+  pill.style.display = "inline-flex"
+  pill.style.alignItems = "center"
+  pill.style.gap = "8px"
+  pill.style.padding = "5px 12px 5px 5px"
+  pill.style.borderRadius = "9999px"
+  pill.style.whiteSpace = "nowrap"
+  pill.style.transition = "all 0.2s cubic-bezier(0.22, 1, 0.36, 1)"
+  pill.style.fontFamily = "var(--font-sans), system-ui, sans-serif"
 
-  const nameColor = isSelected ? '#ffffff' : '#000000'
-  const subtitleColor = isSelected ? '#d4d4d8' : '#52525b'
-  const starColor = isSelected ? '#fbbf24' : '#eab308'
-  const arrowBg = isSelected ? '#000000' : '#ffffff'
-  const arrowBorder = isSelected ? 'none' : '1.5px solid #000000'
-  const logoBg = isSelected ? '#ffffff' : '#000000'
+  if (isSelected) {
+    pill.style.background = "linear-gradient(180deg, #1c87ff, #0062d6)"
+    pill.style.color = "#ffffff"
+    pill.style.border = "1.5px solid rgba(255,255,255,0.45)"
+    pill.style.boxShadow = "0 14px 28px -6px rgba(0, 122, 255, 0.45)"
+    pill.style.transform = "scale(1.06)"
+  } else {
+    pill.style.background = "rgba(255, 255, 255, 0.96)"
+    pill.style.color = "#0b1220"
+    pill.style.border = "1px solid rgba(15, 25, 45, 0.14)"
+    pill.style.boxShadow = "0 8px 20px -6px rgba(15, 30, 60, 0.25)"
+  }
 
-  const html = `
-    <div style="position:absolute;bottom:0;left:50%;transform:translate(-50%, -10px);pointer-events:auto;">
-      <div style="position:relative;display:inline-flex;align-items:center;gap:7px;padding:5px 12px 5px 5px;border-radius:9999px;cursor:pointer;white-space:nowrap;transition:all 0.2s cubic-bezier(0.16, 1, 0.3, 1);${bgStyle}">
-        <div style="width:28px;height:28px;border-radius:9999px;background:${logoBg};flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:1px;box-shadow:0 1px 3px rgba(0,0,0,0.2);">
-          <div style="width:100%;height:100%;border-radius:9999px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
-            ${logoHtml}
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;line-height:1.2;padding-right:2px;">
-          <span style="font-size:12px;font-weight:800;letter-spacing:-0.01em;color:${nameColor};white-space:nowrap;">${name}</span>
-          <div style="display:flex;align-items:center;gap:4px;margin-top:1px;">
-            <span style="font-size:9.5px;font-weight:700;color:${subtitleColor};">${locTitle}</span>
-            <span style="font-size:8px;opacity:0.6;">•</span>
-            <div style="display:inline-flex;align-items:center;gap:2px;">
-              <svg style="width:9px;height:9px;fill:${starColor};color:${starColor};" viewBox="0 0 24 24">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-              </svg>
-              <span style="font-size:9.5px;font-weight:800;color:${nameColor};">${rating}</span>
-            </div>
-          </div>
-        </div>
-        <div style="position:absolute;bottom:-4px;left:50%;margin-left:-4px;width:8px;height:8px;background:${arrowBg};border-right:${arrowBorder};border-bottom:${arrowBorder};transform:rotate(45deg);z-index:0;"></div>
-      </div>
-    </div>
-  `
+  const avatar = document.createElement("div")
+  avatar.style.width = "28px"
+  avatar.style.height = "28px"
+  avatar.style.borderRadius = "9999px"
+  avatar.style.flexShrink = "0"
+  avatar.style.display = "flex"
+  avatar.style.alignItems = "center"
+  avatar.style.justifyContent = "center"
+  avatar.style.overflow = "hidden"
+  avatar.style.background = isSelected ? "rgba(255,255,255,0.95)" : "#0b1220"
 
-  return L.divIcon({
-    html,
-    className: 'leaflet-vendor-custom-pin',
-    iconSize: [0, 0],
-    iconAnchor: [0, 0],
-    popupAnchor: [0, -45],
-  })
+  if (logo) {
+    const img = document.createElement("img")
+    img.src = logo
+    img.alt = name
+    img.style.width = "100%"
+    img.style.height = "100%"
+    img.style.objectFit = "cover"
+    img.onerror = () => {
+      img.style.display = "none"
+      const fallback = document.createElement("span")
+      fallback.textContent = initials
+      fallback.style.fontWeight = "800"
+      fallback.style.fontSize = "10px"
+      fallback.style.color = isSelected ? "#0062d6" : "#ffffff"
+      avatar.appendChild(fallback)
+    }
+    avatar.appendChild(img)
+  } else {
+    const span = document.createElement("span")
+    span.textContent = initials
+    span.style.fontWeight = "800"
+    span.style.fontSize = "10px"
+    span.style.color = isSelected ? "#0062d6" : "#ffffff"
+    avatar.appendChild(span)
+  }
+
+  const textCol = document.createElement("div")
+  textCol.style.display = "flex"
+  textCol.style.flexDirection = "column"
+  textCol.style.lineHeight = "1.2"
+  textCol.style.paddingRight = "2px"
+
+  const titleEl = document.createElement("span")
+  titleEl.textContent = name
+  titleEl.style.fontSize = "12px"
+  titleEl.style.fontWeight = "700"
+  titleEl.style.letterSpacing = "-0.01em"
+  titleEl.style.color = isSelected ? "#ffffff" : "#0b1220"
+
+  const locEl = document.createElement("span")
+  locEl.textContent = locTitle
+  locEl.style.fontSize = "10px"
+  locEl.style.fontWeight = "600"
+  locEl.style.color = isSelected ? "rgba(255,255,255,0.85)" : "#4c5566"
+
+  textCol.appendChild(titleEl)
+  textCol.appendChild(locEl)
+
+  const arrow = document.createElement("div")
+  arrow.style.position = "absolute"
+  arrow.style.bottom = "-4px"
+  arrow.style.left = "50%"
+  arrow.style.marginLeft = "-4px"
+  arrow.style.width = "8px"
+  arrow.style.height = "8px"
+  arrow.style.transform = "rotate(45deg)"
+  arrow.style.background = isSelected ? "#0062d6" : "#ffffff"
+  if (!isSelected) {
+    arrow.style.borderRight = "1px solid rgba(15, 25, 45, 0.14)"
+    arrow.style.borderBottom = "1px solid rgba(15, 25, 45, 0.14)"
+  }
+
+  pill.appendChild(avatar)
+  pill.appendChild(textCol)
+  pill.appendChild(arrow)
+  wrapper.appendChild(pill)
+
+  return wrapper
 }
 
-function LocationMarker({ position, onPositionChange }: { position: [number, number], onPositionChange: (lat: number, lng: number) => void }) {
-  useMapEvents({
-    click(e) {
-      onPositionChange(e.latlng.lat, e.latlng.lng)
-    },
-  })
+function createPinMarkerElement(): HTMLDivElement {
+  const el = document.createElement("div")
+  el.style.width = "32px"
+  el.style.height = "32px"
+  el.style.borderRadius = "9999px"
+  el.style.background = "linear-gradient(180deg, #1c87ff, #0062d6)"
+  el.style.border = "3px solid #ffffff"
+  el.style.boxShadow = "0 8px 20px rgba(0, 122, 255, 0.45)"
+  el.style.display = "flex"
+  el.style.alignItems = "center"
+  el.style.justifyContent = "center"
+  el.style.cursor = "grab"
 
-  return position[0] === 0 ? null : (
-    <Marker position={position} icon={defaultIcon}></Marker>
-  )
+  const innerDot = document.createElement("div")
+  innerDot.style.width = "10px"
+  innerDot.style.height = "10px"
+  innerDot.style.borderRadius = "9999px"
+  innerDot.style.background = "#ffffff"
+  el.appendChild(innerDot)
+  return el
 }
 
-function MapViewController({ center, zoom }: { center: [number, number]; zoom?: number }) {
-  const map = useMap()
-  useEffect(() => {
-    map.setView(center, zoom || map.getZoom(), { animate: true })
-  }, [center, zoom, map])
-  return null
-}
-
-export default function MapPicker({ 
-  position, 
-  onPositionChange, 
-  vendors, 
+export default function MapPicker({
+  position,
+  onPositionChange,
+  vendors,
   selectedVendorId,
-  onVendorClick, 
+  onVendorClick,
   className,
   zoom = 11,
   interactive = true,
 }: MapPickerProps) {
-  // Center map on Bali central coordinates
-  const defaultCenter: [number, number] = useMemo(() => [-8.5069, 115.2625], []) 
-  
-  // Validated & normalized vendor coordinates based on vendor location title
+  const containerRef = useRef<HTMLDivElement>(null)
+  const mapRef = useRef<MapLibreMap | null>(null)
+  const vendorMarkersRef = useRef<Marker[]>([])
+  const pinMarkerRef = useRef<Marker | null>(null)
+  const usedFallbackRef = useRef(false)
+  const lastCenterKeyRef = useRef<string>("")
+
+  const onPositionChangeRef = useRef(onPositionChange)
+  const onVendorClickRef = useRef(onVendorClick)
+
+  useEffect(() => {
+    onPositionChangeRef.current = onPositionChange
+  }, [onPositionChange])
+
+  useEffect(() => {
+    onVendorClickRef.current = onVendorClick
+  }, [onVendorClick])
+
+  const defaultCenter: [number, number] = useMemo(() => [-8.5069, 115.2625], [])
+
   const validVendors = useMemo(() => {
     if (!vendors || !Array.isArray(vendors)) return []
     return vendors.map((v) => {
@@ -169,7 +253,7 @@ export default function MapPicker({
       return [Number(position[0]), Number(position[1])]
     }
     if (selectedVendorId && validVendors.length > 0) {
-      const selected = validVendors.find(v => String(v.id) === String(selectedVendorId))
+      const selected = validVendors.find((v) => String(v.id) === String(selectedVendorId))
       if (selected) return [selected.lat, selected.lng]
     }
     if (validVendors.length === 1) {
@@ -178,49 +262,145 @@ export default function MapPicker({
     return defaultCenter
   }, [position, selectedVendorId, validVendors, defaultCenter])
 
+  // Initialize MapLibre GL map once
+  useEffect(() => {
+    if (!containerRef.current || mapRef.current) return
+
+    const initialZoom = validVendors.length === 1 ? 14 : zoom
+    const map = new MapLibreMap({
+      container: containerRef.current,
+      style: OPENFREEMAP_STYLE,
+      center: [mapCenter[1], mapCenter[0]],
+      zoom: initialZoom,
+      interactive,
+      attributionControl: { compact: true },
+    })
+
+    mapRef.current = map
+
+    map.on("error", () => {
+      if (!usedFallbackRef.current && !map.isStyleLoaded()) {
+        usedFallbackRef.current = true
+        try {
+          map.setStyle(OSM_FALLBACK_STYLE)
+        } catch {}
+      }
+    })
+
+    map.on("click", (e: MapMouseEvent) => {
+      if (onPositionChangeRef.current) {
+        onPositionChangeRef.current(e.lngLat.lat, e.lngLat.lng)
+      }
+    })
+
+    const ro = new ResizeObserver(() => {
+      map.resize()
+    })
+    ro.observe(containerRef.current)
+
+    return () => {
+      ro.disconnect()
+      vendorMarkersRef.current.forEach((m) => m.remove())
+      vendorMarkersRef.current = []
+      if (pinMarkerRef.current) {
+        pinMarkerRef.current.remove()
+        pinMarkerRef.current = null
+      }
+      map.remove()
+      mapRef.current = null
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Smoothly pan/zoom only when target coordinates genuinely change
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+    const key = `${mapCenter[0].toFixed(5)},${mapCenter[1].toFixed(5)},${validVendors.length === 1 ? 14 : zoom}`
+    if (lastCenterKeyRef.current === key) return
+    const isInitial = lastCenterKeyRef.current === ""
+    lastCenterKeyRef.current = key
+    if (isInitial) return
+
+    const targetZoom = validVendors.length === 1 ? 14 : zoom
+    map.easeTo({
+      center: [mapCenter[1], mapCenter[0]],
+      zoom: Math.max(map.getZoom(), targetZoom),
+      duration: 500,
+    })
+  }, [mapCenter, zoom, validVendors.length])
+
+  // Sync single-pin location picker marker
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+
+    if (pinMarkerRef.current) {
+      pinMarkerRef.current.remove()
+      pinMarkerRef.current = null
+    }
+
+    if (position && position[0] !== 0 && position[1] !== 0 && !isNaN(position[0]) && !isNaN(position[1])) {
+      const el = createPinMarkerElement()
+      const marker = new Marker({
+        element: el,
+        draggable: Boolean(onPositionChange),
+      })
+        .setLngLat([Number(position[1]), Number(position[0])])
+        .addTo(map)
+
+      if (onPositionChange) {
+        marker.on("dragend", () => {
+          const lngLat = marker.getLngLat()
+          onPositionChangeRef.current?.(lngLat.lat, lngLat.lng)
+        })
+      }
+
+      pinMarkerRef.current = marker
+    }
+  }, [position, onPositionChange])
+
+  // Sync vendor markers
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+
+    vendorMarkersRef.current.forEach((m) => m.remove())
+    vendorMarkersRef.current = []
+
+    validVendors.forEach((v) => {
+      const isSelected = selectedVendorId != null && String(selectedVendorId) === String(v.id)
+      const el = createVendorMarkerElement(v, isSelected)
+      el.style.zIndex = isSelected ? "20" : "10"
+
+      el.addEventListener("click", (evt) => {
+        evt.stopPropagation()
+        onVendorClickRef.current?.(v.id)
+      })
+
+      const marker = new Marker({
+        element: el,
+        anchor: "bottom",
+      })
+        .setLngLat([v.lng, v.lat])
+        .addTo(map)
+
+      if (isSelected) {
+        marker.getElement().style.zIndex = "30"
+      }
+
+      vendorMarkersRef.current.push(marker)
+    })
+  }, [validVendors, selectedVendorId])
+
   return (
-    <div className={className || "h-[300px] w-full rounded-2xl overflow-hidden border border-gray-200 shadow-sm relative z-0"}>
-      <MapContainer 
-        center={mapCenter} 
-        zoom={zoom} 
-        scrollWheelZoom={interactive} 
-        dragging={interactive}
-        touchZoom={interactive}
-        attributionControl={false} 
-        className="h-full w-full"
-      >
-        <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-          subdomains="abcd"
-          maxZoom={19}
-        />
-
-        <MapViewController center={mapCenter} zoom={validVendors.length === 1 ? 14 : zoom} />
-
-        {position && onPositionChange && (
-          <LocationMarker position={position} onPositionChange={onPositionChange} />
-        )}
-
-        {validVendors.map((v) => {
-          const isSelected = selectedVendorId != null && String(selectedVendorId) === String(v.id)
-
-          return (
-            <Marker 
-              key={v.id} 
-              position={[v.lat, v.lng]} 
-              icon={getVendorIcon(v, isSelected)} 
-              eventHandlers={{ 
-                click: (e) => {
-                  L.DomEvent.stopPropagation(e as any)
-                  if (onVendorClick) {
-                    onVendorClick(v.id)
-                  }
-                },
-              }}
-            />
-          )
-        })}
-      </MapContainer>
+    <div
+      className={
+        className ||
+        "h-[300px] w-full rounded-2xl overflow-hidden border border-[var(--line)] shadow-sm relative z-0 bg-[#eef3f8]"
+      }
+    >
+      <div ref={containerRef} className="w-full h-full" />
     </div>
   )
 }

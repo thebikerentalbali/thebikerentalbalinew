@@ -1,7 +1,7 @@
 "use client"
 
 import React, { memo } from "react"
-import { Search, MapPin, Star, X, ShieldCheck, Truck, ChevronRight } from "lucide-react"
+import { Search, MapPin, X, ShieldCheck, Truck, ChevronRight } from "lucide-react"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 
@@ -169,9 +169,9 @@ function HomeMapModalComponent({
                       <h4 className="font-bold text-sm md:text-base text-[var(--ink)] leading-tight">
                         {selectedVendor.name}
                       </h4>
-                      <span className="flex items-center gap-1 bg-[var(--warn-soft)] text-[var(--warn)] text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0">
-                        <Star className="w-3 h-3 fill-current" aria-hidden="true" />
-                        <span>{selectedVendor.rating ? Number(selectedVendor.rating).toFixed(1) : "5.0"}</span>
+                      <span className="cirrel-pill cirrel-pill--good text-[10px] shrink-0">
+                        <ShieldCheck className="w-3 h-3" aria-hidden="true" />
+                        <span>Verified</span>
                       </span>
                     </div>
                     <p className="text-xs text-[var(--muted-ink)] font-semibold truncate mt-1 flex items-center gap-1.5">
