@@ -660,7 +660,7 @@ export default function VendorDashboard() {
   }
 
   return (
-    <div className="min-h-screen text-[var(--ink)] md:flex md:pl-[288px] pb-28 md:pb-8">
+    <div className="min-h-screen w-full text-[var(--ink)] md:flex md:pl-[284px] pb-28 md:pb-8">
       {/* 
         ========================================================================
         CIRREL FLOATING LIQUID GLASS SIDEBAR
@@ -727,10 +727,10 @@ export default function VendorDashboard() {
 
       {/* 
         ========================================================================
-        MAIN CONTENT
+        MAIN CONTENT (Full Width on Desktop & Responsive Mobile)
         ========================================================================
       */}
-      <main className="flex-1 w-full max-w-full md:max-w-5xl mx-auto flex flex-col min-h-screen pt-4 md:pt-6">
+      <main className="flex-1 w-full min-w-0 flex flex-col min-h-screen pt-4 md:pt-5 md:pr-4">
 
         {/* Dashboard Content */}
         {activeTab === 'home' ? (
@@ -935,7 +935,7 @@ export default function VendorDashboard() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
               {fleet.filter(s => {
                 const avail = s.available_units ?? 1;
                 const tot = s.total_units ?? 1;
@@ -1530,7 +1530,7 @@ export default function VendorDashboard() {
             </div>
           </div>
         ) : activeTab === 'profile' || activeTab === 'settings' ? (
-          <div className="p-4 sm:p-5 md:px-6 pb-12 animate-in fade-in max-w-2xl">
+          <div className="p-4 sm:p-5 md:px-6 pb-12 animate-in fade-in w-full">
             <h2 className="text-2xl font-bold text-[var(--ink)] mb-6">Profile Settings</h2>
             <div className="cirrel-glass rounded-[28px] p-6 space-y-5">
               {/* Cover Image Upload Section */}
@@ -1993,7 +1993,7 @@ export default function VendorDashboard() {
         CIRREL FLOATING MOBILE PILL TABBAR
         ========================================================================
       */}
-      <nav className="md:hidden fixed bottom-3 left-3 right-3 cirrel-modal z-50 rounded-full p-1.5">
+      <nav className="md:hidden fixed bottom-[max(12px,env(safe-area-inset-bottom))] left-3 right-3 cirrel-modal z-50 rounded-full p-1.5 shadow-lg">
         <div className="relative z-10 flex justify-between items-center gap-1">
           <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center gap-1 py-2 px-1 rounded-full transition-all flex-1 cursor-pointer ${activeTab === 'home' ? 'cirrel-btn-primary text-white' : 'text-[var(--muted-ink)] hover:text-[var(--ink)]'}`}>
             <Home className="w-4 h-4" />

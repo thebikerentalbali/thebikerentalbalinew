@@ -231,6 +231,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   html,
   body {
     max-width: 100%;
@@ -238,6 +239,7 @@
     touch-action: pan-y;
     -webkit-tap-highlight-color: transparent;
   }
+
   button,
   a,
   input,
@@ -246,22 +248,26 @@
   [role="button"] {
     touch-action: manipulation;
   }
+
   button,
   [role="button"],
   a {
     -webkit-touch-callout: none;
     user-select: none;
   }
+
   button:not(:disabled),
   a:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;
   }
+
   input,
   select,
   textarea {
     font-size: 16px;
   }
+
   body {
     background-color: var(--bg);
     color: var(--ink);
@@ -269,6 +275,7 @@
     font-variant-numeric: tabular-nums;
     -webkit-font-smoothing: antialiased;
   }
+
   h1,
   h2,
   h3,
@@ -279,6 +286,7 @@
     font-weight: 700;
     letter-spacing: -0.02em;
   }
+
   ::selection {
     background: var(--accent-soft);
   }
@@ -286,7 +294,10 @@
 
 /* ============================================================================
    CIRREL LIQUID GLASS SURFACES & SPECULAR RIMS
+   Wrapped in @layer components so Tailwind @layer utilities (fixed, absolute,
+   sticky, flex, hidden, etc.) always win cleanly over component defaults.
    ============================================================================ */
+@layer components {
 .cirrel-glass,
 .cirrel-glass-hi,
 .cirrel-modal {
@@ -345,14 +356,12 @@
   padding: 1px;
   pointer-events: none;
   z-index: 2;
-  background: linear-gradient(
-    140deg,
-    var(--edge) 0%,
-    var(--edge-2) 32%,
-    transparent 52%,
-    var(--edge-2) 74%,
-    color-mix(in oklab, var(--edge) 70%, transparent) 100%
-  );
+  background: linear-gradient(140deg,
+      var(--edge) 0%,
+      var(--edge-2) 32%,
+      transparent 52%,
+      var(--edge-2) 74%,
+      color-mix(in oklab, var(--edge) 70%, transparent) 100%);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
@@ -381,6 +390,7 @@
   font-weight: 600;
   transition: all 0.2s var(--ease);
 }
+
 .cirrel-btn:hover {
   background: var(--glass-hi);
 }
@@ -393,6 +403,7 @@
   font-weight: 600;
   transition: all 0.2s var(--ease);
 }
+
 .cirrel-btn-primary:hover {
   background: var(--accent-hi);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 14px 26px -10px var(--accent-glow);
@@ -409,6 +420,7 @@
   place-items: center;
   transition: all 0.2s var(--ease);
 }
+
 .cirrel-ibtn:hover {
   background: var(--glass-hi);
 }
@@ -422,10 +434,12 @@
   font-weight: 600;
   transition: all 0.2s var(--ease);
 }
+
 .cirrel-chip:hover {
   color: var(--ink);
   background: var(--glass-hi);
 }
+
 .cirrel-chip[data-active="true"] {
   background: var(--accent-grad);
   color: #ffffff;
@@ -438,6 +452,7 @@
   border-radius: 9999px;
   padding: 3px;
 }
+
 [data-theme="dark"] .cirrel-seg,
 .dark .cirrel-seg {
   background: rgba(255, 255, 255, 0.08);
@@ -457,18 +472,22 @@
   font-weight: 600;
   display: inline-flex;
 }
+
 .cirrel-pill--good {
   background: var(--good-soft);
   color: var(--good);
 }
+
 .cirrel-pill--warn {
   background: var(--warn-soft);
   color: var(--warn);
 }
+
 .cirrel-pill--bad {
   background: var(--bad-soft);
   color: var(--bad);
 }
+
 .cirrel-pill--info {
   background: var(--info-soft);
   color: var(--info);
@@ -487,10 +506,22 @@
   box-shadow: var(--glow), var(--shadow);
   overflow: hidden;
 }
-.cirrel-kpi--1 { background-color: var(--tile-1); }
-.cirrel-kpi--2 { background-color: var(--tile-2); }
-.cirrel-kpi--3 { background-color: var(--tile-3); }
-.cirrel-kpi--4 { background-color: var(--tile-4); }
+
+.cirrel-kpi--1 {
+  background-color: var(--tile-1);
+}
+
+.cirrel-kpi--2 {
+  background-color: var(--tile-2);
+}
+
+.cirrel-kpi--3 {
+  background-color: var(--tile-3);
+}
+
+.cirrel-kpi--4 {
+  background-color: var(--tile-4);
+}
 
 /* Cirrel Inputs */
 .cirrel-input {
@@ -499,17 +530,21 @@
   box-shadow: inset 0 0 0 1px var(--line-2);
   transition: box-shadow 0.2s var(--ease), background 0.2s var(--ease);
 }
+
 [data-theme="dark"] .cirrel-input,
 .dark .cirrel-input {
   background: rgba(0, 0, 0, 0.24);
 }
+
 .cirrel-input::placeholder {
   color: var(--muted-ink);
   opacity: 0.7;
 }
+
 .cirrel-input:focus {
   outline: none;
   box-shadow: inset 0 0 0 1.5px var(--accent-blue), 0 0 0 4px var(--accent-soft);
+}
 }
 
 @layer utilities {
@@ -520,6 +555,7 @@
     box-shadow: var(--glow), var(--shadow);
     border: 1px solid var(--rim);
   }
+
   .glass-card {
     background-color: var(--glass-hi);
     -webkit-backdrop-filter: var(--blur);
@@ -527,16 +563,20 @@
     box-shadow: var(--glow), var(--shadow);
     border: 1px solid var(--rim);
   }
+
   .premium-shadow {
     box-shadow: var(--shadow);
     transition: box-shadow 0.4s var(--ease), transform 0.2s var(--ease);
   }
+
   .premium-shadow:hover {
     box-shadow: var(--shadow-lg);
   }
+
   .active-press {
     @apply active:scale-[0.98] transition-transform duration-75;
   }
+
   .scrollbar-hide::-webkit-scrollbar,
   .hide-scrollbar::-webkit-scrollbar {
     display: none !important;
@@ -545,6 +585,7 @@
     -webkit-appearance: none !important;
     background: transparent !important;
   }
+
   .scrollbar-hide,
   .hide-scrollbar {
     -ms-overflow-style: none !important;
@@ -560,6 +601,11 @@
 }
 
 @keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(350%); }
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(350%);
+  }
 }

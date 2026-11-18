@@ -912,7 +912,7 @@ export default function AdminDashboard() {
   const mockBookings: any[] = []
 
   return (
-    <div className="min-h-screen text-[var(--ink)] md:flex md:pl-[288px] pb-28 md:pb-8">
+    <div className="min-h-screen w-full text-[var(--ink)] md:flex md:pl-[284px] pb-28 md:pb-8">
       {/* 
         ========================================================================
         CIRREL FLOATING LIQUID GLASS SIDEBAR
@@ -989,10 +989,10 @@ export default function AdminDashboard() {
 
       {/* 
         ========================================================================
-        MAIN CONTENT
+        MAIN CONTENT (Full Width on Desktop & Responsive Mobile)
         ========================================================================
       */}
-      <main className="flex-1 w-full max-w-full md:max-w-5xl mx-auto flex flex-col min-h-screen">
+      <main className="flex-1 w-full min-w-0 flex flex-col min-h-screen md:pr-4">
 
         {/* Top Header */}
         <header className="flex sticky top-0 z-30 px-4 sm:px-5 py-4 items-center justify-between md:py-6 md:px-6">
@@ -2057,7 +2057,7 @@ export default function AdminDashboard() {
                   </div>
           </div>
         ) : activeTab === 'campaigns' ? (
-          <div className="p-4 sm:p-6 md:p-8 animate-in fade-in max-w-5xl mx-auto space-y-8">
+          <div className="p-4 sm:p-6 md:p-8 animate-in fade-in w-full space-y-8">
             
             {/* Header & Quick Action */}
             <div className="bg-white rounded-3xl p-6 sm:p-8 border border-black/10 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -2691,7 +2691,7 @@ export default function AdminDashboard() {
             </div>
           </div>
         ) : activeTab === 'settings' ? (
-          <div className="p-4 sm:p-6 md:p-8 animate-in fade-in max-w-3xl mx-auto">
+          <div className="p-4 sm:p-6 md:p-8 animate-in fade-in w-full">
             <div className="space-y-6">
               
               {/* Header */}
@@ -3083,7 +3083,7 @@ export default function AdminDashboard() {
         MOBILE BOTTOM NAVBAR
         ========================================================================
       */}
-      <nav className="md:hidden fixed bottom-3 left-3 right-3 cirrel-modal z-50 rounded-full p-1.5">
+      <nav className="md:hidden fixed bottom-[max(12px,env(safe-area-inset-bottom))] left-3 right-3 cirrel-modal z-50 rounded-full p-1.5 shadow-lg">
         <div className="relative z-10 flex justify-around items-center gap-1">
           <button onClick={() => { setActiveTab('home'); setIsMobileMenuOpen(false); }} className={`flex flex-col items-center gap-1 py-2 px-1 rounded-full transition-all flex-1 cursor-pointer ${activeTab === 'home' ? 'cirrel-btn-primary text-white' : 'text-[var(--muted-ink)] hover:text-[var(--ink)]'}`}>
             <Home className="w-4 h-4" />
