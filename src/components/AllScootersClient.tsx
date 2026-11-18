@@ -8,7 +8,6 @@ import {
   SlidersHorizontal,
   ChevronDown,
   ChevronLeft,
-  MapPin,
   Bike,
   X,
 } from "lucide-react"
@@ -23,19 +22,6 @@ const HomeFilterModal = dynamic(() => import("@/components/HomeFilterModal"), {
   ssr: false,
   loading: () => null,
 })
-
-const BALI_LOCATIONS = [
-  "All Locations",
-  "Canggu",
-  "Seminyak",
-  "Ubud",
-  "Sanur",
-  "Kuta",
-  "Uluwatu",
-  "Nusa Dua",
-  "Jimbaran",
-  "Denpasar",
-]
 
 const DEFAULT_BRANDS = ["Honda", "Vespa", "Yamaha", "Kawasaki"]
 
@@ -56,7 +42,6 @@ export default function AllScootersClient({
   const [searchQuery, setSearchQuery] = useState("")
   const [durationFilter, setDurationFilter] = useState("Daily")
   const [activeBrand, setActiveBrand] = useState("")
-  const [selectedLocation, setSelectedLocation] = useState("All Locations")
   const [maxPrice, setMaxPrice] = useState(500000)
   const [selectedYear, setSelectedYear] = useState("All")
   const [sortBy, setSortBy] = useState<"featured" | "price_asc" | "price_desc" | "year_desc">("featured")
@@ -111,19 +96,6 @@ export default function AllScootersClient({
     return [...DEFAULT_BRANDS, ...extras]
   }, [scooters])
 
-  const locationOptions = useMemo(() => {
-    const known = new Set(BALI_LOCATIONS.map((l) => l.toLowerCase()))
-    const dynamicAreas: string[] = []
-    vendors.forEach((v) => {
-      const area = String(v?.location || v?.address || "").trim()
-      if (area && !area.includes(",") && area.length <= 24 && !known.has(area.toLowerCase())) {
-        known.add(area.toLowerCase())
-        dynamicAreas.push(area)
-      }
-    })
-    return [...BALI_LOCATIONS, ...dynamicAreas]
-  }, [vendors])
-
   const getScooterPlanPrice = useCallback(
     (s: any) => {
       if (durationFilter === "Weekly") return Number(s.price_weekly || 0)
@@ -136,10 +108,6 @@ export default function AllScootersClient({
   const filteredScooters = useMemo(() => {
     const brandLower = activeBrand.trim().toLowerCase()
     const qLower = searchQuery.trim().toLowerCase()
-    const locLower =
-      selectedLocation && selectedLocation !== "All Locations"
-        ? selectedLocation.toLowerCase()
-        : ""
 
     const matched = scooters.filter((scooter) => {
       const vendor = vendorMap.get(String(scooter.vendor_id))
@@ -163,11 +131,6 @@ export default function AllScootersClient({
       if (selectedYear && selectedYear !== "All") {
         const sYear = scooter.year ? String(scooter.year) : "2025"
         if (sYear !== selectedYear) return false
-      }
-
-      // Location filter
-      if (locLower) {
-        if (!vendorText.includes(locLower)) return false
       }
 
       // Search query (matches scooter name, brand, year, or garage/location)
@@ -197,7 +160,6 @@ export default function AllScootersClient({
     vendorMap,
     activeBrand,
     searchQuery,
-    selectedLocation,
     maxPrice,
     selectedYear,
     sortBy,
@@ -207,14 +169,12 @@ export default function AllScootersClient({
   const hasAnyFilter =
     Boolean(searchQuery.trim()) ||
     Boolean(activeBrand) ||
-    selectedLocation !== "All Locations" ||
     maxPrice < 500000 ||
     selectedYear !== "All"
 
   const resetAllFilters = () => {
     setSearchQuery("")
     setActiveBrand("")
-    setSelectedLocation("All Locations")
     setMaxPrice(500000)
     setSelectedYear("All")
     setSortBy("featured")
@@ -248,7 +208,7 @@ export default function AllScootersClient({
                 All Scooters
               </h1>
               <p className="text-xs sm:text-sm text-[var(--muted-ink)] font-medium">
-                Filter by location, brand, price, and rental plan
+                Search by scooter, brand, or Bali location
               </p>
             </div>
           </div>
@@ -268,8 +228,8 @@ export default function AllScootersClient({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search scooter, brand, or area..."
-              aria-label="Search scooter name, brand, or area"
+              placeholder="Search scooter, brand, or location (e.g. Ubud, Canggu)..."
+              aria-label="Search scooter name, brand, or location"
               className="cirrel-glass w-full pl-11 pr-9 h-12 sm:h-13 rounded-full outline-none text-sm sm:text-[15px] placeholder:text-[var(--muted-ink)] text-[var(--ink)] font-medium focus:ring-2 focus:ring-[var(--accent-blue)] transition-all"
             />
             {searchQuery && (
@@ -297,10 +257,10 @@ export default function AllScootersClient({
           </button>
         </div>
 
-        {/* Filter Controls */}
-        <div className="space-y-3">
-          {/* Row 1: Duration Plan Dropdown + Brand Chips (single line) */}
-          <div className="flex flex-nowrap items-center gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-3.5 px-3.5 sm:mx-0 sm:px-0">
+        {/* Filter & Sort Controls */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          {/* Duration Plan Dropdown + Brand Chips (single line) */}
+          <div className="flex flex-nowrap items-center gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-3.5 px-3.5 sm:mx-0 sm:px-0 flex-1 min-w-0">
             <div className="relative shrink-0">
               <select
                 aria-label="Filter rental duration plan"
@@ -343,56 +303,32 @@ export default function AllScootersClient({
             })}
           </div>
 
-          {/* Row 2: Location Filter + Sort */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-            <div className="flex flex-nowrap items-center gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-3.5 px-3.5 sm:mx-0 sm:px-0 flex-1 min-w-0">
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-[var(--muted-ink)] shrink-0 pr-0.5">
-                <MapPin className="w-3.5 h-3.5 text-[var(--accent-text)]" />
-                <span>Location</span>
-              </span>
-              {locationOptions.map((loc) => {
-                const isSelected = selectedLocation === loc
-                return (
-                  <button
-                    key={loc}
-                    type="button"
-                    onClick={() => setSelectedLocation(isSelected && loc !== "All Locations" ? "All Locations" : loc)}
-                    data-active={isSelected}
-                    className="cirrel-chip px-3.5 h-8 sm:h-9 text-[11px] sm:text-xs font-semibold whitespace-nowrap active-press cursor-pointer shrink-0"
-                  >
-                    {loc}
-                  </button>
-                )
-              })}
-            </div>
-
-            <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0">
-              {hasAnyFilter && (
-                <button
-                  type="button"
-                  onClick={resetAllFilters}
-                  className="text-xs font-bold text-[var(--accent-text)] hover:underline cursor-pointer px-2"
-                >
-                  Reset
-                </button>
-              )}
-              <div className="relative">
-                <select
-                  aria-label="Sort scooters"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as any)}
-                  className="cirrel-chip appearance-none pl-3.5 pr-8 h-8 sm:h-9 text-xs font-semibold text-[var(--ink)] cursor-pointer outline-none"
-                >
-                  <option value="featured">Sort: Featured</option>
-                  <option value="price_asc">Price: Low to High</option>
-                  <option value="price_desc">Price: High to Low</option>
-                  <option value="year_desc">Newest Year</option>
-                </select>
-                <ChevronDown
-                  className="w-3.5 h-3.5 text-[var(--muted-ink)] pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2"
-                  aria-hidden="true"
-                />
-              </div>
+          <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0">
+            {hasAnyFilter && (
+              <button
+                type="button"
+                onClick={resetAllFilters}
+                className="text-xs font-bold text-[var(--accent-text)] hover:underline cursor-pointer px-2"
+              >
+                Reset
+              </button>
+            )}
+            <div className="relative">
+              <select
+                aria-label="Sort scooters"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="cirrel-chip appearance-none pl-3.5 pr-8 h-8 sm:h-9 text-xs font-semibold text-[var(--ink)] cursor-pointer outline-none"
+              >
+                <option value="featured">Sort: Featured</option>
+                <option value="price_asc">Price: Low to High</option>
+                <option value="price_desc">Price: High to Low</option>
+                <option value="year_desc">Newest Year</option>
+              </select>
+              <ChevronDown
+                className="w-3.5 h-3.5 text-[var(--muted-ink)] pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2"
+                aria-hidden="true"
+              />
             </div>
           </div>
         </div>
