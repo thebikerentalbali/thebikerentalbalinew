@@ -238,15 +238,25 @@ export default function HomeClient({
         }`}
       >
         <div className="w-full max-w-7xl mx-auto relative">
-          <div className="cirrel-glass-hi rounded-full p-2 px-4 sm:px-5 flex justify-between items-center gap-3">
-            {/* Title Only */}
-            <Link
-              href="/"
+          <div className="cirrel-glass-hi rounded-full p-2 px-3 sm:px-4 flex justify-between items-center gap-3">
+            {/* Location Selector Title (Maps Integration without Map Icon) */}
+            <button
+              onClick={openLocationPicker}
+              type="button"
               tabIndex={isScrolled ? 0 : -1}
-              className="text-sm sm:text-base font-bold tracking-tight text-[var(--ink)] hover:opacity-80 transition-opacity py-1 pr-2 truncate"
+              aria-label="Open Vendor Location Map"
+              className="flex flex-col text-left hover:bg-[var(--card-2)] py-1 px-2.5 rounded-full transition-colors active-press cursor-pointer min-w-0"
             >
-              THE BIKE RENTAL BALI
-            </Link>
+              <span className="text-[10px] font-bold text-[var(--muted-ink)] uppercase tracking-wider leading-tight">
+                Nearby
+              </span>
+              <div className="flex items-center gap-1">
+                <span className="text-[13px] sm:text-sm font-bold text-[var(--ink)] leading-tight truncate">
+                  Vendor Locations
+                </span>
+                <ChevronDown className="w-3.5 h-3.5 text-[var(--muted-ink)] shrink-0" aria-hidden="true" />
+              </div>
+            </button>
 
             <div className="flex items-center gap-2 shrink-0">
               <ThemeToggle className="w-9 h-9" />
@@ -323,12 +333,22 @@ export default function HomeClient({
             isScrolled ? "opacity-0 pointer-events-none" : "opacity-100"
           }`}
         >
-          <Link
-            href="/"
-            className="text-sm sm:text-base font-bold tracking-tight text-[var(--ink)] hover:opacity-80 transition-opacity py-1 pr-2 truncate"
+          <button
+            onClick={openLocationPicker}
+            type="button"
+            aria-label="Open Vendor Location Map"
+            className="flex flex-col text-left py-1 pr-2 rounded-full transition-colors active-press cursor-pointer min-w-0"
           >
-            THE BIKE RENTAL BALI
-          </Link>
+            <span className="text-[10px] font-bold text-[var(--muted-ink)] uppercase tracking-wider leading-tight">
+              Nearby
+            </span>
+            <div className="flex items-center gap-1">
+              <span className="text-[13px] sm:text-sm font-bold text-[var(--ink)] leading-tight truncate">
+                Vendor Locations
+              </span>
+              <ChevronDown className="w-3.5 h-3.5 text-[var(--muted-ink)] shrink-0" aria-hidden="true" />
+            </div>
+          </button>
 
           <div className="flex items-center gap-2 shrink-0">
             <ThemeToggle className="w-9 h-9" />
